@@ -1,0 +1,8 @@
+<h1>Immage Tagger</h1>
+<p>Please Choose an Imageset to tag</p>
+
+<ul>
+{% for imageset in imagesets %}
+    <li><a href="{% url 'images_overview' imageset.id %}"> imageset.name</a></li>
+{% endfor %}
+</ul>

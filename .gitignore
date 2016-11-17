@@ -60,3 +60,4 @@ target/
 
 .pyenv
 .idea
+db.sqlite3
