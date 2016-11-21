@@ -1,0 +1,51 @@
+.checkbox{
+	border-radius: 3px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	text-align: left;
+	font-size: 15px;
+	width: auto;
+}
+div.toolbox{
+	right: 0px;
+	width: 30%;
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	position: fixed;
+	margin-right: 2px;
+
+}
+div.imageview{
+	left: 25%;
+	width: 40%;
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	position: fixed;
+}
+
+div.filelist{
+	left: 0px;
+	width: 20%;
+	max-height: 90%;
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	position: fixed;
+	margin-left: 2px;
+	overflow: auto;
+
+}
+
+#additional_feature_table{
+	width: 90%;
+
+}

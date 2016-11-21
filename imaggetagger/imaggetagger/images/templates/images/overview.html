@@ -1,0 +1,8 @@
+<h1>Image Tagger</h1>
+<p>Please Choose an Image to tag</p>
+
+<ul>
+{% for image in images %}
+    <li><a href="{% url 'images_tagview' image.id %}"> {{image.get_path}}</a></li>
+{% endfor %}
+</ul>

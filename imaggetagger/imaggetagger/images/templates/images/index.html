@@ -1,8 +1,8 @@
-<h1>Immage Tagger</h1>
+<h1>Image Tagger</h1>
 <p>Please Choose an Imageset to tag</p>
 
 <ul>
-{% for imageset in imagesets %}
-    <li><a href="{% url 'images_overview' imageset.id %}"> imageset.name</a></li>
+{% for imageset in image_sets %}
+    <li><a href="{% url 'images_overview' imageset.id %}">{{imageset.name}}</a></li>
 {% endfor %}
 </ul>

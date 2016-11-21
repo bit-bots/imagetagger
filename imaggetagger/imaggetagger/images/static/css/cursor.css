@@ -1,0 +1,32 @@
+
+#crosshair-h {
+  width: 100%;
+}
+
+#crosshair-v {
+  height: 100%;
+}
+
+.hair {
+  position: fixed;
+  top:0; left:0;
+  margin-top: -3px;
+  margin-left: -2px;
+  background: transparent;
+  border-top: 1px solid #F00;
+  border-left: 1px solid #F00;
+  pointer-events: none;
+  z-index: 2;
+}
+
+#mousepos {
+  position: absolute;
+  top:0; left:0;
+  padding: 10px;
+  margin: 10px;
+  font: 14px arial;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  border-radius: 24px;
+  z-index: 1;
+}

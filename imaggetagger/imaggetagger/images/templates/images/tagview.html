@@ -1,0 +1,152 @@
+<head>
+	<meta charset="utf-8" />
+    {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static "css/imgareaselect-default.css" %}" />
+  <link rel="stylesheet" type="text/css" href="{% static "css/cursor.css" %}" />
+  <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
+  <script type="text/javascript" src="{% static "scripts/jquery.min.js" %}"></script>
+  <script type="text/javascript" src="{% static "scripts/jquery.imgareaselect.pack.js" %}"></script>
+	<title>Labeldings 0.1 </title>
+
+</head>
+<body>
+
+<script type="text/javascript">
+var selection;
+$(document).ready(function () {
+    		selection = $('img#picture').imgAreaSelect({
+    	  instance: true,
+  		  handles: true,
+        //minHeight: 15,
+        //minWidth: 15,
+        onSelectChange: function (img, selection) {
+
+        document.getElementById('x1Field').value = selection.x1;
+        document.getElementById('y1Field').value = selection.y1;
+        document.getElementById('x2Field').value = selection.x2;
+        document.getElementById('y2Field').value = selection.y2;
+			/*
+        document.getElementById('x1Cell').innerHTML = selection.x1;
+        document.getElementById('y1Cell').innerHTML = selection.y1;
+        document.getElementById('x2Cell').innerHTML = selection.x2;
+        document.getElementById('y2Cell').innerHTML = selection.y2;
+        //alert('width: ' + selection.width + '; height: ' + selection.height);
+        if (selection.width < 5) {
+        		selection.hide        }
+        */
+    	}
+    });
+    document.getElementById('x1Field').oninput = function () {
+    		reload_selection();
+    };
+    document.getElementById('y1Field').oninput = function () {
+    		reload_selection();
+    };
+    document.getElementById('x2Field').oninput = function () {
+    		reload_selection();
+    };
+    document.getElementById('y2Field').oninput = function () {
+    		reload_selection();
+	    };
+
+
+  var cH = $('#crosshair-h'),
+      cV = $('#crosshair-v');
+
+  $(this).on('mousemove touchmove', function(e) {
+    var x = e.pageX - 1;
+    var y = e.pageY - 1;
+    cH.css('top', e.pageY +1);
+    cV.css('left', e.pageX +1);
+
+    $('#mousepos').css({
+      top: e.pageY + 'px',
+      left: e.pageX  + 'px'
+    }, 800);
+    $('#mousepos').text( "X: " + x + "px, Y: " + y + "px");
+    e.stopPropagation();
+  });
+});
+
+function reload_selection() {
+    		selection.setSelection(document.getElementById('x1Field').value, document.getElementById('y1Field').value, document.getElementById('x2Field').value, document.getElementById('y2Field').value);
+    		selection.update();
+}
+
+function add_row() {
+	//alert('Somebody wants a new row in the custom feature table! >:(');
+	document.getElementById("additional_feature_table").insertRow(-1).innerHTML =
+	'<tr><td><input type="text" name ="key" placeholder="" id="key" ></input></td><td><input name="value" id="value"></input></td ><button id = "X">X</button></tr>';;
+}
+</script>
+
+  <div id="crosshair-h" class="hair"></div>
+  <div id="crosshair-v" class="hair"></div>
+
+<div class="main">
+	<div class="head">
+	</div>
+	<div class="filelist">
+    {{selected_image.image_set.name}}
+        {% for set_image in set_images %}
+            <li><a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a></li>
+        {% endfor %}
+	</div>
+
+	<div class="imageview">
+	<img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
+	<button id="last">Last</button> <button id="reset">Reset</button>	<button id="next">Next</button>
+	</div>
+
+	<div class="toolbox">
+	{{selected_image.name}}
+<form action="{% url 'images:tagview' image.id }" enctype="text/plain" method="post">
+	<select name="labeltype">
+		{% for annotation_type in annotation_types %}
+			<option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
+		{% endfor %}
+	</select>
+	<div class="checkbox"><input type="checkbox" name="timestamp_checkbox" checked> add timestamp</div>
+	<table border="1">
+<tr>
+	<td>Key</td>
+	<td>Value</td>
+</tr>
+<tr>
+	<td>X1</td>
+	<td><input id="x1Field" class="Coordinates" type="number" name="x1Field"></td>
+</tr>
+<tr>
+	<td>Y1</td>
+	<td><input id="y1Field" class="Coordinates" type="number" name="y1Field"></td>
+</tr>
+<tr>
+	<td>X2</td>
+	<td><input id="x2Field" class="Coordinates" type="number" name="x2Field"></td>
+</tr>
+<tr>
+	<td>Y2</td>
+	<td><input id="y2Field" class="Coordinates" type="number" name="y2Field"></td>
+</tr>
+</table>
+</form>
+
+<table id="additional_feature_table" border="1">
+    <tr>
+        <td>
+            Key
+        </td>
+        <td>
+            Value
+        </td>
+        <td>
+            <!--stuff to delete custom features-->
+        </td>
+    </tr>
+</table>
+<button onclick="add_row();">Add row</button>
+
+</div>
+</div>
+
+</body>
