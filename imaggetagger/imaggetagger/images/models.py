@@ -40,7 +40,7 @@ class AnnotationType(models.Model):
 class Annotation(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     vector = models.CharField(max_length=1000)
-    closed = models.BooleanField()
+    closed = models.BooleanField(default=False)
     time = models.DateTimeField(default=datetime.now)
     type = models.ForeignKey(AnnotationType, on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
