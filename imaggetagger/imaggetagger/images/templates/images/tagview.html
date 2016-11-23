@@ -44,7 +44,7 @@
             reload_selection();
         };
 
-        $('#reset').click(function(){
+        $('#reset_button').click(function(){
             $('#x1Field').val(0);
             $('#y1Field').val(0);
             $('#x2Field').val(0);
@@ -93,6 +93,15 @@
 
     <div class="imageview">
         <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
+        <hr color="silver" width="100%">
+        {% if image_annotations.all %}
+        Annotations:
+        {% for annotation in image_annotations %}
+        <li> {{annotation.type.name}}: <br>{{annotation.vector}}</li>
+        {% endfor %}
+        {% else %}
+        No annotations found.
+        {% endif %}
     </div>
 
     <div class="toolbox">
@@ -128,7 +137,7 @@
                 </tr>
             </table>
             <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset"><br>
-            <input type="button" value="Last"><input type="button" value="Skip"><input id="next_button" type="button" value="Next">
+            <input id="last_button" type="button" value="Last"><input id="skip_button" type="button" value="Skip"><input id="next_button" type="button" value="Next">
         </form>
     </div>
 </div>

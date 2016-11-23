@@ -27,7 +27,7 @@ div.imageview{
 	border-style: solid;
 	border-width: thin;
 	padding: 5px;
-	position: fixed;
+  position:absolute;
 }
 
 div.filelist{
