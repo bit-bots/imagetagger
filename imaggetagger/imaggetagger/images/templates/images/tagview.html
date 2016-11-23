@@ -10,10 +10,14 @@
 
 </head>
 <body>
-
 <script type="text/javascript">
     var selection;
+    var image_scale = 0;
+
     $(document).ready(function () {
+
+        var image = $('img#picture');
+        image_scale =  image.get(0).naturalWidth / image.width();
         selection = $('img#picture').imgAreaSelect({
             instance: true,
             handles: true,
@@ -21,24 +25,32 @@
             minWidth: 10,
             onSelectChange: function (img, selection) {
 
-                document.getElementById('x1Field').value = selection.x1;
-                document.getElementById('y1Field').value = selection.y1;
-                document.getElementById('x2Field').value = selection.x2;
-                document.getElementById('y2Field').value = selection.y2;
+                $('#x1Field').val(Math.ceil(selection.x1 * image_scale));
+                $('#y1Field').val(Math.ceil(selection.y1 * image_scale));
+                $('#x2Field').val(Math.floor(selection.x2 * image_scale));
+                $('#y2Field').val(Math.floor(selection.y2 * image_scale));
             }
         });
-        document.getElementById('x1Field').oninput = function () {
+        $('#x1Field')[0].oninput = function () {
             reload_selection();
         };
-        document.getElementById('y1Field').oninput = function () {
+        $('#y1Field')[0].oninput = function () {
             reload_selection();
         };
-        document.getElementById('x2Field').oninput = function () {
+        $('#x2Field')[0].oninput = function () {
             reload_selection();
         };
-        document.getElementById('y2Field').oninput = function () {
+        $('#y2Field')[0].oninput = function () {
             reload_selection();
         };
+
+        $('#reset').click(function(){
+            $('#x1Field').val(0);
+            $('#y1Field').val(0);
+            $('#x2Field').val(0);
+            $('#y2Field').val(0);
+            selection.cancelSelection();
+        });
 
 
         var cH = $('#crosshair-h'),
@@ -57,13 +69,13 @@
             $('#mousepos').text( "X: " + x + "px, Y: " + y + "px");
             e.stopPropagation();
         });
+
     });
 
     function reload_selection() {
-        selection.setSelection(document.getElementById('x1Field').value, document.getElementById('y1Field').value, document.getElementById('x2Field').value, document.getElementById('y2Field').value);
+        selection.setSelection(($('#x1Field').val() / image_scale), ($('#y1Field').val() / image_scale), ($('#x2Field').val() / image_scale), ($('#y2Field').val() / image_scale));
         selection.update();
     }
-
 </script>
 
 <div id="crosshair-h" class="hair"></div>
@@ -81,7 +93,6 @@
 
     <div class="imageview">
         <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
-        <button id="last">Last</button> <button id="reset">Reset</button>	<button id="next">Next</button>
     </div>
 
     <div class="toolbox">
@@ -91,7 +102,7 @@
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
             <select name="selected_annotation_type">
                 {% for annotation_type in annotation_types %}
-                <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
+                    <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
                 {% endfor %}
             </select>
             <table border="1">
@@ -101,22 +112,23 @@
                 </tr>
                 <tr>
                     <td>X1</td>
-                    <td><input id="x1Field" class="Coordinates" type="number" name="x1Field"></td>
+                    <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="0"></td>
                 </tr>
                 <tr>
                     <td>Y1</td>
-                    <td><input id="y1Field" class="Coordinates" type="number" name="y1Field"></td>
+                    <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="0"></td>
                 </tr>
                 <tr>
                     <td>X2</td>
-                    <td><input id="x2Field" class="Coordinates" type="number" name="x2Field"></td>
+                    <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="0"></td>
                 </tr>
                 <tr>
                     <td>Y2</td>
-                    <td><input id="y2Field" class="Coordinates" type="number" name="y2Field"></td>
+                    <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0"></td>
                 </tr>
             </table>
-            <input type="submit" value="Save" />
+            <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset"><br>
+            <input type="button" value="Last"><input type="button" value="Skip"><input id="next_button" type="button" value="Next">
         </form>
     </div>
 </div>
