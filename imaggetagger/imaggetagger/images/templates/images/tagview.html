@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
     <script type="text/javascript" src="{% static "scripts/jquery.min.js" %}"></script>
     <script type="text/javascript" src="{% static "scripts/jquery.imgareaselect.pack.js" %}"></script>
-    <title>Labeldings 0.1 </title>
+    <title>Labeldings 0.4</title>
 
 </head>
 <body>
@@ -52,6 +52,31 @@
             selection.cancelSelection();
         });
 
+        {% if next_image %}
+        $('#next_button').click(function(){
+            $('#annotation_form').attr('action', '{% url 'images_tagview' next_image.id %}');
+            $('#annotation_form').submit();
+            $('#skip_button').click(function(){window.location.href="{% url 'images_tagview' next_image.id %}"});
+        });
+        $('#skip_button').click(function(){window.location.href="{% url 'images_tagview' next_image.id %}"});
+        {% else %}
+        $('#next_button').attr('disabled', 'true');
+        $('#skip_button').attr('disabled', 'true');
+        {% endif %}
+            
+        {% if last_image %}  
+        $('#last_button').click(function(){
+            $('#annotation_form').attr('action', '{% url 'images_tagview' last_image.id %}');
+            $('#annotation_form').submit();
+        });  
+        $('#back_button').click(function(){window.location.href="{% url 'images_tagview' last_image.id %}"});
+        {% else %}
+        $('#last_button').attr('disabled', 'true');
+        $('#back_button').attr('disabled', 'true');
+        {% endif %}
+
+
+        
 
         var cH = $('#crosshair-h'),
                 cV = $('#crosshair-v');
@@ -106,7 +131,7 @@
 
     <div class="toolbox">
         {{selected_image.name}}
-        <form action="{% url 'images_tagview' selected_image.id %}" enctype="multipart/form-data" method="post">
+        <form id="annotation_form" action="{% url 'images_tagview' selected_image.id %}" enctype="multipart/form-data" method="post">
             {% csrf_token %}
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
             <select name="selected_annotation_type">
@@ -137,7 +162,10 @@
                 </tr>
             </table>
             <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset"><br>
-            <input id="last_button" type="button" value="Last"><input id="skip_button" type="button" value="Skip"><input id="next_button" type="button" value="Next">
+            <input id="last_button" type="button" value="Last">
+            <input id="back_button" type="button" value="Back">
+            <input id="skip_button" type="button" value="Skip">
+            <input id="next_button" type="button" value="Next">
         </form>
     </div>
 </div>
