@@ -14,11 +14,12 @@
     var selection;
     var image_scale = 0;
 
+
     $(document).ready(function () {
 
         var image = $('img#picture');
         image_scale =  image.get(0).naturalWidth / image.width();
-        selection = $('img#picture').imgAreaSelect({
+        selection = image.imgAreaSelect({
             instance: true,
             handles: true,
             minHeight: 10,
@@ -78,8 +79,7 @@
 
         
 
-        var cH = $('#crosshair-h'),
-                cV = $('#crosshair-v');
+        var cH = $('#crosshair-h'), cV = $('#crosshair-v');
 
         $(this).on('mousemove touchmove', function(e) {
             var x = e.pageX - 1;
@@ -95,6 +95,12 @@
             e.stopPropagation();
         });
 
+    });
+
+    $(window).resize(function() {
+        selection.cancelSelection();
+        image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
+        console.log(image_scale);
     });
 
     function reload_selection() {
