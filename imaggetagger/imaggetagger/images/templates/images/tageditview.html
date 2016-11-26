@@ -38,7 +38,7 @@
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
             <select name="selected_annotation_type">
                 {% for annotation_type in annotation_types %}
-                <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
+                <option value="{{annotation_type.id}}" {% if annotation_type.id == current_annotation_type_id %} selected {% endif %} >{{annotation_type.name}}</option>
                 {% endfor %}
             </select>
             <table border="1">

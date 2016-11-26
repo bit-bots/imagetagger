@@ -45,9 +45,9 @@
     <div class="head">
     </div>
     <div class="filelist">
-        {{selected_image.image_set.name}}<br>
+        {{selected_image.image_set.name}}
         {% for set_image in set_images %}
-        <a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a>
+        <br><a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a>
         {% endfor %}
     </div>
 
@@ -59,8 +59,8 @@
         {% for annotation in image_annotations %}
         <div class="annotation">
             {{annotation.type.name}}:
-            <a href="{% url 'images_tageditview' selected_image.id annotation.id%}">edit</a>
-            <a href="{% url 'images_tagdeleteview' selected_image.id annotation.id%}">delete</a>
+            <div style="float: right;"><a href="{% url 'images_tageditview' selected_image.id annotation.id%}">edit</a>
+            <a href="{% url 'images_tagdeleteview' selected_image.id annotation.id%}">delete</a></div>
             <br>{{annotation.vector}}
         </div>
         {% endfor %}
@@ -76,7 +76,7 @@
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
             <select name="selected_annotation_type">
                 {% for annotation_type in annotation_types %}
-                <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
+                <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >{{annotation_type.name}}</option>
                 {% endfor %}
             </select>
             <table border="1">
@@ -101,7 +101,7 @@
                     <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0"></td>
                 </tr>
             </table>
-            <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><br>
+            <input type="submit" value="Save"> <input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><br>
             <input id="last_button" type="button" value="Last">
             <input id="back_button" type="button" value="Back">
             <input id="skip_button" type="button" value="Skip">

@@ -23,14 +23,16 @@ def overview(request, image_set_id):
 
 def tagview(request, image_id):
     # here the stuff we got via POST gets put in the DB
+    last_annotation_type_id = -1
     if request.method == 'POST':
         vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
+        last_annotation_type_id = request.POST['selected_annotation_type']
         Annotation(vector=vector_text, image=get_object_or_404(Image, id=request.POST['image_id']),\
                    user=(request.user if request.user.is_authenticated() else None), type=get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])).save()
 
     annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
     selected_image = get_object_or_404(Image, id=image_id)
-    set_images = Image.objects.filter(image_set=selected_image.image_set)
+    set_images = Image.objects.filter(image_set=selected_image.image_set).order_by('name')
 
     # detecting next and last image in the set
     next_image = Image.objects.filter(image_set=selected_image.image_set).filter(id__gt=selected_image.id).order_by('id')
@@ -50,7 +52,8 @@ def tagview(request, image_id):
                                 'last_image': last_image,
                                 'set_images': set_images,
                                 'annotation_types': annotation_types,
-                                'image_annotations': Annotation.objects.filter(image=selected_image)
+                                'image_annotations': Annotation.objects.filter(image=selected_image),
+                                'last_annotation_type_id': int(last_annotation_type_id),
                             })
 
 
@@ -59,12 +62,14 @@ def tageditview(request, image_id, annotation_id):
     selected_image = get_object_or_404(Image, id=image_id)
     set_images = Image.objects.filter(image_set=selected_image.image_set)
     vector = json.loads(get_object_or_404(Annotation, id=annotation_id).vector)
+    current_annotation_type_id = get_object_or_404(Annotation, id=annotation_id).type.id
     print(vector['x1'])
     return TemplateResponse(request, 'images/tageditview.html', {
                                 'selected_image': selected_image,
                                 'set_images': set_images,
                                 'annotation_types': annotation_types,
                                 'annotation': annotation_id,
+                                'current_annotation_type_id': current_annotation_type_id,
                                 'x1': vector['x1'],
                                 'y1': vector['y1'],
                                 'x2': vector['x2'],

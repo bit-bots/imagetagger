@@ -6,7 +6,7 @@ $(document).ready(function () {
     image_scale =  image.get(0).naturalWidth / image.width();
     selection = image.imgAreaSelect({
         instance: true,
-        handles: true,
+        handles: false,
         minHeight: 10,
         minWidth: 10,
         onSelectChange: function (img, selection) {
@@ -61,13 +61,11 @@ $(document).ready(function () {
 
 		if (typeof init_navigationbuttons === "function") {
     	init_navigationbuttons();
-      console.log('huhu!');
 		}
 
 		if (typeof loadannotation === "function") {
     	loadannotation();
 			reload_selection();
-      console.log('hihi!');
 		}
 
 });
@@ -75,7 +73,6 @@ $(document).ready(function () {
 $(window).resize(function() {
     selection.cancelSelection();
     image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
-    console.log(image_scale);
 });
 
 function reload_selection() {
@@ -85,7 +82,6 @@ function reload_selection() {
 }
 
 function reset_selection() {
-    console.log('haha');
     $('#x1Field').val(0);
     $('#y1Field').val(0);
     $('#x2Field').val(0);
