@@ -10,20 +10,20 @@ class ImageSet(models.Model):
     path = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
-    time = models.DateTimeField()
+    time = models.DateTimeField(default=datetime.now)
 
     def get_path(self):
         return str(settings.IMAGE_PATH + self.path + '/')
 
-
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)
+
 
 class Image(models.Model):
     image_set = models.ForeignKey(ImageSet, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    time = models.DateTimeField()
-    #LOCATION
+    time = models.DateTimeField(default=datetime.now)
+    # LOCATION
 
     def full_path(self):
         return str(self.image_set.get_path() + self.name)
@@ -31,11 +31,13 @@ class Image(models.Model):
     def __str__(self):
         return u'Image: {0}'.format(self.name)
 
+
 class AnnotationType(models.Model):
     name = models.CharField(max_length=50)
 
     def __str__(self):
         return u'AnnotationType: {0}'.format(self.name)
+
 
 class Annotation(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)

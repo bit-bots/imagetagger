@@ -1,0 +1,70 @@
+<head>
+    <meta charset="utf-8" />
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "css/imgareaselect-default.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "css/cursor.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
+    <script type="text/javascript" src="{% static "scripts/jquery.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "scripts/jquery.imgareaselect.pack.js" %}"></script>
+    <script type="text/javascript" src="{% static "scripts/scripts.js" %}"></script>
+    <script type="text/javascript">
+    function loadannotation(){
+			$('#x1Field').val({{ x1 }});
+      $('#y1Field').val({{ y1 }});
+      $('#x2Field').val({{ x2 }});
+      $('#y2Field').val({{ y2 }});
+		}
+    </script>
+    <title>Labeldings 0.6</title>
+</head>
+<body>
+
+<div id="crosshair-h" class="hair"></div>
+<div id="crosshair-v" class="hair"></div>
+<span id="mousepos" >(0,0)</span>
+
+<div class="main">
+    <div class="head">
+    </div>
+
+    <div class="imageview">
+        <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
+    </div>
+
+    <div class="toolbox">
+        {{selected_image.name}}
+        <form id="annotation_form" action="{% url 'images_tageditsaveview' selected_image.id annotation %}" enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="image_id" value="{{ selected_image.id }}">
+            <select name="selected_annotation_type">
+                {% for annotation_type in annotation_types %}
+                <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
+                {% endfor %}
+            </select>
+            <table border="1">
+                <tr>
+                    <td>Key</td>
+                    <td>Value</td>
+                </tr>
+                <tr>
+                    <td>X1</td>
+                    <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="{{ x1 }}"></td>
+                </tr>
+                <tr>
+                    <td>Y1</td>
+                    <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="{{ y1 }}"></td>
+                </tr>
+                <tr>
+                    <td>X2</td>
+                    <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="{{ x2 }}"></td>
+                </tr>
+                <tr>
+                    <td>Y2</td>
+                    <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="{{ y2 }}"></td>
+                </tr>
+            </table>
+            <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><input id="back_button" type="button" value="Back" onclick="window.location='{% url 'images_tagview' selected_image.id %}';">
+        </form>
+    </div>
+</div>
+</body>

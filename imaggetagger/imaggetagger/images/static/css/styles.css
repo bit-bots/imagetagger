@@ -45,6 +45,16 @@ div.filelist{
 
 }
 
+div.annotation{
+   border-radius: 5px;
+   border-color: silver;
+   border-style: solid;
+   border-width: thin;
+   padding: 5px;
+   margin-top: 5px;
+
+}
+
 #additional_feature_table{
 	width: 90%;
 

@@ -6,119 +6,48 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
     <script type="text/javascript" src="{% static "scripts/jquery.min.js" %}"></script>
     <script type="text/javascript" src="{% static "scripts/jquery.imgareaselect.pack.js" %}"></script>
-    <title>Labeldings 0.4</title>
-
-</head>
-<body>
-<script type="text/javascript">
-    var selection;
-    var image_scale = 0;
-
-
-    $(document).ready(function () {
-
-        var image = $('img#picture');
-        image_scale =  image.get(0).naturalWidth / image.width();
-        selection = image.imgAreaSelect({
-            instance: true,
-            handles: true,
-            minHeight: 10,
-            minWidth: 10,
-            onSelectChange: function (img, selection) {
-
-                $('#x1Field').val(Math.ceil(selection.x1 * image_scale));
-                $('#y1Field').val(Math.ceil(selection.y1 * image_scale));
-                $('#x2Field').val(Math.floor(selection.x2 * image_scale));
-                $('#y2Field').val(Math.floor(selection.y2 * image_scale));
-            }
-        });
-        $('#x1Field')[0].oninput = function () {
-            reload_selection();
-        };
-        $('#y1Field')[0].oninput = function () {
-            reload_selection();
-        };
-        $('#x2Field')[0].oninput = function () {
-            reload_selection();
-        };
-        $('#y2Field')[0].oninput = function () {
-            reload_selection();
-        };
-
-        $('#reset_button').click(function(){
-            $('#x1Field').val(0);
-            $('#y1Field').val(0);
-            $('#x2Field').val(0);
-            $('#y2Field').val(0);
-            selection.cancelSelection();
-        });
-
+    <script type="text/javascript" src="{% static "scripts/scripts.js" %}"></script>
+    <script type="text/javascript">
+    function init_navigationbuttons() {
         {% if next_image %}
         $('#next_button').click(function(){
             $('#annotation_form').attr('action', '{% url 'images_tagview' next_image.id %}');
             $('#annotation_form').submit();
-            $('#skip_button').click(function(){window.location.href="{% url 'images_tagview' next_image.id %}"});
         });
         $('#skip_button').click(function(){window.location.href="{% url 'images_tagview' next_image.id %}"});
         {% else %}
         $('#next_button').attr('disabled', 'true');
         $('#skip_button').attr('disabled', 'true');
         {% endif %}
-            
-        {% if last_image %}  
+
+        {% if last_image %}
         $('#last_button').click(function(){
             $('#annotation_form').attr('action', '{% url 'images_tagview' last_image.id %}');
             $('#annotation_form').submit();
-        });  
+        });
         $('#back_button').click(function(){window.location.href="{% url 'images_tagview' last_image.id %}"});
         {% else %}
         $('#last_button').attr('disabled', 'true');
         $('#back_button').attr('disabled', 'true');
         {% endif %}
-
-
-        
-
-        var cH = $('#crosshair-h'), cV = $('#crosshair-v');
-
-        $(this).on('mousemove touchmove', function(e) {
-            var x = e.pageX - 1;
-            var y = e.pageY - 1;
-            cH.css('top', e.pageY +1);
-            cV.css('left', e.pageX +1);
-
-            $('#mousepos').css({
-                top: e.pageY + 'px',
-                left: e.pageX  + 'px'
-            }, 800);
-            $('#mousepos').text( "X: " + x + "px, Y: " + y + "px");
-            e.stopPropagation();
-        });
-
-    });
-
-    $(window).resize(function() {
-        selection.cancelSelection();
-        image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
-        console.log(image_scale);
-    });
-
-    function reload_selection() {
-        selection.setSelection(($('#x1Field').val() / image_scale), ($('#y1Field').val() / image_scale), ($('#x2Field').val() / image_scale), ($('#y2Field').val() / image_scale));
-        selection.update();
     }
-</script>
+
+		</script>
+    <title>Labeldings 0.6</title>
+</head>
+<body>
 
 <div id="crosshair-h" class="hair"></div>
 <div id="crosshair-v" class="hair"></div>
+<span id="mousepos" >(0,0)</span>
 
 <div class="main">
     <div class="head">
     </div>
     <div class="filelist">
-        {{selected_image.image_set.name}}
+        {{selected_image.image_set.name}}<br>
         {% for set_image in set_images %}
-        <li><a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a></li>
+        <a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a>
         {% endfor %}
     </div>
 
@@ -128,7 +57,12 @@
         {% if image_annotations.all %}
         Annotations:
         {% for annotation in image_annotations %}
-        <li> {{annotation.type.name}}: <br>{{annotation.vector}}</li>
+        <div class="annotation">
+            {{annotation.type.name}}:
+            <a href="{% url 'images_tageditview' selected_image.id annotation.id%}">edit</a>
+            <a href="{% url 'images_tagdeleteview' selected_image.id annotation.id%}">delete</a>
+            <br>{{annotation.vector}}
+        </div>
         {% endfor %}
         {% else %}
         No annotations found.
@@ -142,7 +76,7 @@
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
             <select name="selected_annotation_type">
                 {% for annotation_type in annotation_types %}
-                    <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
+                <option value="{{annotation_type.id}}" selected>{{annotation_type.name}}</option>
                 {% endfor %}
             </select>
             <table border="1">
@@ -167,7 +101,7 @@
                     <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0"></td>
                 </tr>
             </table>
-            <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset"><br>
+            <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><br>
             <input id="last_button" type="button" value="Last">
             <input id="back_button" type="button" value="Back">
             <input id="skip_button" type="button" value="Skip">
@@ -175,5 +109,4 @@
         </form>
     </div>
 </div>
-
 </body>
