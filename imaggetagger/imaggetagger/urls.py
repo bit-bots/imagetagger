@@ -14,11 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.contrib.auth import views as auth_views
 from django.contrib import admin
-
+from django.views.generic.base import RedirectView
 import imaggetagger.images.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^login/$', auth_views.login),
     url(r'^images/', include(imaggetagger.images.urls)),
+    #url(r'^.*$', RedirectView.as_view(url='/images', permanent=True), name='index')
 ]

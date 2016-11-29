@@ -1,0 +1,8 @@
+<form class="login" method="POST" action="/login/">
+
+  {% csrf_token %}
+
+  {{form.as_p}}
+
+  <li><input type="submit" class="logBut" value="Log in"/></li>
+  </form>

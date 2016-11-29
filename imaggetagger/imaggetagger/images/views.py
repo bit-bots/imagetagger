@@ -1,26 +1,30 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from .models import ImageSet, Image, AnnotationType, Annotation
 import json
 
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(str('/images/'))
 
-# @login_required
+@login_required
 def index(request):
     imagesets = ImageSet.objects.all()
     return TemplateResponse(request, 'images/index.html', {
                                 'image_sets': imagesets,
                             })
 
-
+@login_required
 def overview(request, image_set_id):
     images = Image.objects.filter(image_set=image_set_id)
     return TemplateResponse(request, 'images/overview.html', {
                                 'images': images,
                             })
 
-
+@login_required
 def tagview(request, image_id):
     # here the stuff we got via POST gets put in the DB
     last_annotation_type_id = -1
@@ -56,7 +60,7 @@ def tagview(request, image_id):
                                 'last_annotation_type_id': int(last_annotation_type_id),
                             })
 
-
+@login_required
 def tageditview(request, image_id, annotation_id):
     annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
     selected_image = get_object_or_404(Image, id=image_id)
@@ -76,12 +80,13 @@ def tageditview(request, image_id, annotation_id):
                                 'y2': vector['y2'],
                             })
 
-
+@login_required
 def tagdeleteview(request, image_id, annotation_id):
     get_object_or_404(Annotation, id=annotation_id).delete()
     print('deleted annotation ', annotation_id)
     return HttpResponseRedirect(str('/images/tagview/' + str(image_id) + '/'))
 
+@login_required
 def tageditsaveview(request, image_id, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
     if request.method == 'POST':
@@ -92,4 +97,24 @@ def tageditsaveview(request, image_id, annotation_id):
         annotation.type=get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
     annotation.save()
     print('edited annotation ', annotation_id)
-    return HttpResponseRedirect(str('/images/tagview/' + str(image_id) + '/'))
+
+@login_required
+def exportview(request, image_set_id):
+    imageset = get_object_or_404(ImageSet, id = image_set_id)
+    images = Image.objects.filter(image_set = imageset)
+    annotation_types = set()
+    for image in images:
+        annotation_types = annotation_types.union([annotation.type for annotation in Annotation.objects.filter(image = image)])
+    return TemplateResponse(request, 'images/exportview.html', {
+                                'imageset': imageset,
+                                'annotationtypes': annotation_types,
+                            })
+
+@login_required
+def exportcreateview(request, image_set_id):
+    imageset = get_object_or_404(ImageSet, id = image_set_id)
+    images = Image.objects.filter(image_set = imageset)
+    annotation_types = set()
+    for image in images:
+        annotation_types = annotation_types.union([annotation.type for annotation in Annotation.objects.filter(image = image)])
+    return HttpResponseRedirect(str('/images/export/' + str(image_id) + '/'))

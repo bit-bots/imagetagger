@@ -8,7 +8,7 @@
 }
 
 .hair {
-  position: fixed;
+  position: absolute;
   top:0; left:0;
   margin-top: -3px;
   margin-left: -2px;

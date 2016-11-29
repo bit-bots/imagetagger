@@ -1,3 +1,6 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
 .checkbox{
 	border-radius: 3px;
 	border-color: silver;
@@ -33,7 +36,7 @@ div.imageview{
 div.filelist{
 	left: 0px;
 	width: 20%;
-	max-height: 90%;
+	max-height: 85%;
 	border-radius: 5px;
 	border-color: silver;
 	border-style: solid;
@@ -58,4 +61,20 @@ div.annotation{
 #additional_feature_table{
 	width: 90%;
 
+}
+div.head{
+	border-bottom-color: silver;
+	border-bottom-width: medium;
+	border-bottom-style: solid;
+	margin: 5px;
+	padding: 4px;
+}
+
+a.navbar{
+    padding: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-decoration: none;
+    color: black;
+    font-size : medium;
 }

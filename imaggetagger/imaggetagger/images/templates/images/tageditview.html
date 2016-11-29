@@ -1,36 +1,19 @@
-<head>
-    <meta charset="utf-8" />
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "css/imgareaselect-default.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "css/cursor.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
-    <script type="text/javascript" src="{% static "scripts/jquery.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "scripts/jquery.imgareaselect.pack.js" %}"></script>
-    <script type="text/javascript" src="{% static "scripts/scripts.js" %}"></script>
-    <script type="text/javascript">
+{% extends 'images/tagger_base.html' %}
+{% load static %}
+{% block individual_script %}
     function loadannotation(){
-			$('#x1Field').val({{ x1 }});
-      $('#y1Field').val({{ y1 }});
-      $('#x2Field').val({{ x2 }});
-      $('#y2Field').val({{ y2 }});
+		$('#x1Field').val({{ x1 }});
+        $('#y1Field').val({{ y1 }});
+        $('#x2Field').val({{ x2 }});
+        $('#y2Field').val({{ y2 }});
 		}
-    </script>
-    <title>Labeldings 0.6</title>
-</head>
-<body>
+{% endblock %}
 
-<div id="crosshair-h" class="hair"></div>
-<div id="crosshair-v" class="hair"></div>
-<span id="mousepos" >(0,0)</span>
 
-<div class="main">
-    <div class="head">
+{% block bodyblock %}
+<div class="imageview">
+        <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static selected_image.full_path %} not found!" width="100%"></br>
     </div>
-
-    <div class="imageview">
-        <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
-    </div>
-
     <div class="toolbox">
         {{selected_image.name}}
         <form id="annotation_form" action="{% url 'images_tageditsaveview' selected_image.id annotation %}" enctype="multipart/form-data" method="post">
@@ -66,5 +49,4 @@
             <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><input id="back_button" type="button" value="Back" onclick="window.location='{% url 'images_tagview' selected_image.id %}';">
         </form>
     </div>
-</div>
-</body>
+{% endblock %}

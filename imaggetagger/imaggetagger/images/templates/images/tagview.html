@@ -1,13 +1,6 @@
-<head>
-    <meta charset="utf-8" />
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "css/imgareaselect-default.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "css/cursor.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" />
-    <script type="text/javascript" src="{% static "scripts/jquery.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "scripts/jquery.imgareaselect.pack.js" %}"></script>
-    <script type="text/javascript" src="{% static "scripts/scripts.js" %}"></script>
-    <script type="text/javascript">
+{% extends 'images/tagger_base.html' %}
+{% load static %}
+{% block individual_script %}
     function init_navigationbuttons() {
         {% if next_image %}
         $('#next_button').click(function(){
@@ -31,19 +24,8 @@
         $('#back_button').attr('disabled', 'true');
         {% endif %}
     }
-
-		</script>
-    <title>Labeldings 0.6</title>
-</head>
-<body>
-
-<div id="crosshair-h" class="hair"></div>
-<div id="crosshair-v" class="hair"></div>
-<span id="mousepos" >(0,0)</span>
-
-<div class="main">
-    <div class="head">
-    </div>
+{% endblock %}
+{% block bodyblock %}
     <div class="filelist">
         {{selected_image.image_set.name}}
         {% for set_image in set_images %}
@@ -59,8 +41,8 @@
         {% for annotation in image_annotations %}
         <div class="annotation">
             {{annotation.type.name}}:
-            <div style="float: right;"><a href="{% url 'images_tageditview' selected_image.id annotation.id%}">edit</a>
-            <a href="{% url 'images_tagdeleteview' selected_image.id annotation.id%}">delete</a></div>
+            <div style="float: right;"><a href="{% url 'images_tageditview' selected_image.id annotation.id%}"><img src="{% static "symbols/pencil.png" %}" alt="edit"></a>
+            <a href="{% url 'images_tagdeleteview' selected_image.id annotation.id%}"><img src="{% static "symbols/bin.png" %}" alt="delete"></a></div>
             <br>{{annotation.vector}}
         </div>
         {% endfor %}
@@ -101,12 +83,11 @@
                     <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0"></td>
                 </tr>
             </table>
-            <input type="submit" value="Save"> <input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><br>
-            <input id="last_button" type="button" value="Last">
-            <input id="back_button" type="button" value="Back">
-            <input id="skip_button" type="button" value="Skip">
-            <input id="next_button" type="button" value="Next">
+            <input type="submit" value="Save (space)"> <input id="reset_button" type="button" value="Reset (r)" onclick="reset_selection()"><br>
+            <input id="last_button" type="button" value="Last (a)">
+            <input id="back_button" type="button" value="Back (s)"><br>
+            <input id="skip_button" type="button" value="Skip (d)">
+            <input id="next_button" type="button" value="Next (f)">
         </form>
     </div>
-</div>
-</body>
+{% endblock %}

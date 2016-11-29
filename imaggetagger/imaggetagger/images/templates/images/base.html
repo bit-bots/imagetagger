@@ -1,0 +1,30 @@
+{% load static %}
+<head>
+    <meta charset="utf-8" />
+
+    <script type="text/javascript" src="{% static 'scripts/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'scripts/scripts.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    {% block taggerimports %}{% endblock %}
+    <script type="text/javascript">
+    {% block individual_script %}{% endblock %}
+	</script>
+    <title>Labeldings 0.8</title>
+</head>
+<body>
+  {% block selectorblock %}{% endblock %}
+
+<div class="main">
+    <div class="head">
+      <div style="display: inline">
+          <img src="{% static 'symbols/bitbots-logo.png' %}" height="40px">
+          <h1 style="display: inline">Imagetagger</h1>
+      </div>
+      <div style="float: right; padding-top: 10px;">
+        <a class="navbar" href="{% url 'images_index' %}">Home</a>
+        <a class="navbar" href="{% url 'images_logout' %}">Logout</a>
+      </div>
+    </div>
+{% block bodyblock %}{% endblock %}
+</div>
+</body>
