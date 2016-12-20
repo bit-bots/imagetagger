@@ -17,12 +17,17 @@
 <div class="main">
     <div class="head">
       <div style="display: inline">
-          <img src="{% static 'symbols/bitbots-logo.png' %}" height="40px">
+          <a href="https://www.bit-bots.de" target="_blank"><img src="{% static 'symbols/bitbots-logo.png' %}" height="40px"></a>
           <h1 style="display: inline">Imagetagger</h1>
       </div>
       <div style="float: right; padding-top: 10px;">
         <a class="navbar" href="{% url 'images_index' %}">Home</a>
-        <a class="navbar" href="{% url 'images_logout' %}">Logout</a>
+        {% block navblock %}{% endblock %}
+        {% if user.is_authenticated %}
+          <a class="navbar" href="{% url 'images_logout' %}">Logout ({{ request.user.username }})</a>
+        {% else %}
+          <a class="navbar" href="{% url 'admin_login' %}">Login</a>
+        {% endif %}
       </div>
     </div>
 {% block bodyblock %}{% endblock %}

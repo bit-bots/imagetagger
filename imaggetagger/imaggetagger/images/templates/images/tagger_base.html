@@ -1,13 +1,15 @@
 {% extends 'images/base.html' %}
 {% load static %}
 
-    {% block taggerimports %}
+{% block taggerimports %}
     <script type="text/javascript" src="{% static 'scripts/jquery.imgareaselect.pack.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/imgareaselect-default.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/cursor.css' %}" />
-    {% endblock %}
-  {% block selectorblock %}
-  <div id="crosshair-h" class="hair"></div>
-<div id="crosshair-v" class="hair"></div>
-<span id="mousepos" >(0,0)</span>
 {% endblock %}
+{% block selectorblock %}
+    <div id="crosshair-h" class="hair"></div>
+    <div id="crosshair-v" class="hair"></div>
+    <span id="mousepos" >(0,0)</span>
+{% endblock %}
+{% block navblock %} <a class="navbar" href="{% url 'images_overview' selected_image.image_set.id %}">Overview</a> {% endblock %}
+

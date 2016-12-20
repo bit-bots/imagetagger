@@ -27,9 +27,13 @@
 {% endblock %}
 {% block bodyblock %}
     <div class="filelist">
-        {{selected_image.image_set.name}}
+        <a href="{% url 'images_overview' selected_image.image_set.id %}"><u><h3 align="center">{{selected_image.image_set.name}}</h3></u></a>
         {% for set_image in set_images %}
-        <br><a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a>
+        {% if set_image.id == selected_image.id %}
+        <b id="selected_image_row">{{set_image.name}}</b><br>
+        {% else %}
+        <a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a><br>
+        {% endif %}
         {% endfor %}
     </div>
 
@@ -37,7 +41,7 @@
         <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
         <hr color="silver" width="100%">
         {% if image_annotations.all %}
-        Annotations:
+        <u>Annotations:</u>
         {% for annotation in image_annotations %}
         <div class="annotation">
             {{annotation.type.name}}:
@@ -52,11 +56,11 @@
     </div>
 
     <div class="toolbox">
-        {{selected_image.name}}
+        <u><h3 align="center">{{selected_image.name}}</h3></u>
         <form id="annotation_form" action="{% url 'images_tagview' selected_image.id %}" enctype="multipart/form-data" method="post">
             {% csrf_token %}
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
-            <select name="selected_annotation_type">
+            Annotation type: <select name="selected_annotation_type">
                 {% for annotation_type in annotation_types %}
                 <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >{{annotation_type.name}}</option>
                 {% endfor %}
@@ -68,26 +72,26 @@
                 </tr>
                 <tr>
                     <td>X1</td>
-                    <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="0"></td>
+                    <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="0" min="0"></td>
                 </tr>
                 <tr>
                     <td>Y1</td>
-                    <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="0"></td>
+                    <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="0" min="0"></td>
                 </tr>
                 <tr>
                     <td>X2</td>
-                    <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="0"></td>
+                    <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="0" min="0"></td>
                 </tr>
                 <tr>
                     <td>Y2</td>
-                    <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0"></td>
+                    <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0" min="0"></td>
                 </tr>
             </table>
-            <input type="submit" value="Save (space)"> <input id="reset_button" type="button" value="Reset (r)" onclick="reset_selection()"><br>
-            <input id="last_button" type="button" value="Last (a)">
-            <input id="back_button" type="button" value="Back (s)"><br>
-            <input id="skip_button" type="button" value="Skip (d)">
-            <input id="next_button" type="button" value="Next (f)">
+            <input type="submit" value="&#128190; Save (space)"> <input id="reset_button" type="button" value="&#8634; Reset (r)" onclick="reset_selection()"><br>
+            <input id="last_button" type="button" value="&#8678; &#128190; Last (a)">
+            <input id="back_button" type="button" value="&#8678; Back (s)"><br>
+            <input id="skip_button" type="button" value="&#8680; Skip (d)">
+            <input id="next_button" type="button" value="&#128190; &#8680; Next (f)">
         </form>
     </div>
 {% endblock %}

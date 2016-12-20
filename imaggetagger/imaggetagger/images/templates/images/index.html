@@ -1,10 +1,12 @@
 
 {% extends 'images/base.html' %}
 {% block bodyblock %}
-<p>Please Choose an Imageset to tag</p>
+<div class="centerblock">
+<p>Please choose an Imageset to tag</p>
+<div align="left">
 <ul>
 {% for imageset in image_sets %}
     <li><a href="{% url 'images_overview' imageset.id %}">{{imageset.name}}</a></li>
 {% endfor %}
-</ul>
+</ul></div></div>
 {% endblock %}

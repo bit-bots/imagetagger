@@ -1,6 +1,9 @@
 body{
     font-family: Arial, Helvetica, sans-serif;
 }
+a{
+    color: #404040;
+}
 .checkbox{
 	border-radius: 3px;
 	border-color: silver;
@@ -70,11 +73,31 @@ div.head{
 	padding: 4px;
 }
 
+div.centerblock{
+   border-radius: 5px;
+   border-color: silver;
+   border-style: solid;
+   border-width: thin;
+   padding: 5px;
+   margin-top: 10px;
+   text-align: center;
+   margin-right: 30%;
+   margin-left: 30%;
+}
+
 a.navbar{
     padding: 5px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-decoration: none;
+    color: black;
+    font-size : medium;
+}
+a.navbar:hover{
+    padding: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-decoration: underline;
     color: black;
     font-size : medium;
 }
