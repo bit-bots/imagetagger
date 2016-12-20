@@ -4,6 +4,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class ImageSet(models.Model):
     path = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
@@ -43,7 +44,20 @@ class Annotation(models.Model):
     closed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
     type = models.ForeignKey(AnnotationType, on_delete=models.PROTECT)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='creator')
+    last_edit_time = models.DateTimeField(null=True, blank=True)
+    last_editor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='last_editor', null=True)
 
     def __str__(self):
         return u'Annotation: {0}'.format(self.type.name)
+
+
+class Export(models.Model):
+    time = models.DateField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    image_set = models.ForeignKey(ImageSet)
+    type = models.CharField(max_length=50)
+    annotation_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return u'Export: {0}'.format(self.id)
