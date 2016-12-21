@@ -3,9 +3,10 @@ from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from .models import ImageSet, Image, AnnotationType, Annotation
+from .models import ImageSet, Image, AnnotationType, Annotation, Export
 from django.conf import settings
 import json
+import datetime
 
 def logout_view(request):
     logout(request)
@@ -25,12 +26,16 @@ def overview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
     annotation_types = set()
+    exports = Export.objects.filter(image_set=image_set_id)
+    for export in exports:
+        print(export)
     for image in images:
         annotation_types = annotation_types.union([annotation.type for annotation in Annotation.objects.filter(image=image)])
     return TemplateResponse(request, 'images/overview.html', {
                             'images': images,
                             'imageset': imageset,
                             'annotationtypes': annotation_types,
+                            'exports': exports,
                             })
 
 @login_required
@@ -101,10 +106,12 @@ def tageditsaveview(request, image_id, annotation_id):
     if request.method == 'POST':
         vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
         annotation.vector = vector_text
-        annotation.image = get_object_or_404(Image, id=request.POST['image_id'])
-        annotation.user = (request.user if request.user.is_authenticated() else None)
+        # annotation.image = get_object_or_404(Image, id=request.POST['image_id'])
+        # annotation.last_change_time = datetime.now()
+        annotation.last_editor = (request.user if request.user.is_authenticated() else None)
         annotation.type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
     annotation.save()
+    return HttpResponseRedirect(str('/images/tagview/' + str(image_id) + '/'))
 
 @login_required
 def exportview(request, image_set_id):
@@ -124,14 +131,18 @@ def exportcreateview(request, image_set_id):
     if request.method == 'POST':
         export_format = request.POST['export_format']
         images = Image.objects.filter(image_set=imageset)
+        annotation_counter = 0
         if export_format == 'Bit-Bot AI':
             a = []
             a.append('Export of Imageset ' + imageset.name + '\n')
             for image in images:
                 annotations = Annotation.objects.filter(image=image)
                 for annotation in annotations:
+                    annotation_counter += 1
                     a.append(image.name + ' ' + annotation.vector + '\n')
-            with open(settings.EXPORT_PATH + str(imageset.id) + '_export.txt', 'w') as file:
+            export = Export(type="Bit-BotAI", image_set=imageset, user=(request.user if request.user.is_authenticated() else None), annotation_count=annotation_counter)
+            export.save()
+            with open(settings.EXPORT_PATH + str(export.id) + '_export.txt', 'w') as file:
                 file.write(''.join(a))
     return HttpResponseRedirect(str('/images/overview/' + str(image_set_id) + '/'))
 

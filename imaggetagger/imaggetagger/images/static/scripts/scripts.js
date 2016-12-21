@@ -16,8 +16,6 @@ $(document).ready(function () {
             $('#y2Field').val(Math.floor(selection.y2 * image_scale));
         }
         });
-    $('div.filelist').animate({
-        scrollTop: $("#selected_image_row").offset().top - 200}, 1000);
 
     $('#x1Field')[0].oninput = function () {
         reload_selection();
@@ -68,6 +66,8 @@ $(document).ready(function () {
 
 		if (typeof init_navigationbuttons === "function") { //tagview
     	init_navigationbuttons();
+      $('div.filelist').animate({
+          scrollTop: $("#selected_image_row").offset().top - 200}, 1000);
 
       $(document).keyup(function(event){
         switch(event.keyCode){

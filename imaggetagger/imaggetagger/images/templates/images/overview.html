@@ -21,6 +21,14 @@
     </select>
     <input type="submit" value="Export">
 </form>
+{% if exports %}
+  </hr>
+  <h3>Download exports:</h3>
+  {% for export in exports %}
+  <li><a>{{export.time}}</a></li>
+  {% endfor %}
+{% endif %}
+  
 
 </div>
 {% endblock %}
