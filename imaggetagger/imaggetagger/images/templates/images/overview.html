@@ -22,10 +22,10 @@
     <input type="submit" value="Export">
 </form>
 {% if exports %}
-  </hr>
+  <hr>
   <h3>Download exports:</h3>
   {% for export in exports %}
-  <li><a>{{export.time}}</a></li>
+  <li><a href="{% url 'images_index' %}export/{{export.id}}/download/">{{export.type}}: {{export.time}}</a></li>
   {% endfor %}
 {% endif %}
   
