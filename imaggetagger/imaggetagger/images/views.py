@@ -162,14 +162,32 @@ def exportcreateview(request, image_set_id):
                 for annotation in annotations:
                     annotation_counter += 1
                     vector = json.loads(annotation.vector)
-                    a.append(image.name + settings.EXPORT_SEPARATOR + vector['x1'] + settings.EXPORT_SEPARATOR + vector['y1'] + settings.EXPORT_SEPARATOR + vector['x2'] + settings.EXPORT_SEPARATOR + vector['y2'] + '\n')
-            export = Export(type="Bit-BotAI", image_set=imageset, user=(request.user if request.user.is_authenticated() else None), annotation_count=annotation_counter)
+                    a.append(image.name
+                             + settings.EXPORT_SEPARATOR + vector['x1']
+                             + settings.EXPORT_SEPARATOR + vector['y1']
+                             + settings.EXPORT_SEPARATOR + vector['x2']
+                             + settings.EXPORT_SEPARATOR + vector['y2']
+                             + '\n')
+            export = Export(type="Bit-BotAI",
+                            image_set=imageset,
+                            user=(request.user if request.user.is_authenticated() else None),
+                            annotation_count=annotation_counter)
             export.save()
             with open(settings.EXPORT_PATH + str(export.id) + '_export.txt', 'w') as file:
                 file.write(''.join(a))
     return HttpResponseRedirect(str('/images/overview/' + str(image_set_id) + '/'))
 
 
+@login_required
+def exportdownloadview(request, export_id):
+    with open(settings.EXPORT_PATH + '/' + export_id + '_export.txt', 'rb') as file:
+        export = file.read()
+    response = HttpResponse(export, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename="' + export_id + '_export.txt"'
+    return response
+
+
+# helping function to create the Bot-Bot AI export
 def bitbotai_export(imageset):
     images = Image.objects.filter(image_set=imageset)
     a = []
