@@ -44,9 +44,14 @@ class Annotation(models.Model):
     closed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
     type = models.ForeignKey(AnnotationType, on_delete=models.PROTECT)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='creator')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             related_name='creator',
+                             on_delete=models.SET_NULL,
+                             null=True)
     last_edit_time = models.DateTimeField(null=True, blank=True)
-    last_editor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='last_editor', null=True)
+    last_editor = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                    related_name='last_editor',
+                                    null=True)
 
     def __str__(self):
         return u'Annotation: {0}'.format(self.type.name)
