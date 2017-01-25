@@ -58,7 +58,7 @@ class Annotation(models.Model):
 
 
 class Export(models.Model):
-    time = models.DateField(auto_now_add=True)
+    time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     image_set = models.ForeignKey(ImageSet)
     type = models.CharField(max_length=50)
