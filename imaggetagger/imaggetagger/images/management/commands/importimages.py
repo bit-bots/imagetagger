@@ -32,11 +32,13 @@ class Command(BaseCommand):
             print(setimages)
 
             filenames = [f for f in os.listdir(url + dir)]
+            filenames.sort()
             print(dir)
             for filename in filenames:
                 (shortname, extension) = os.path.splitext(filename)
                 if(extension.lower() in settings.IMAGE_EXTENSION and filename not in setimages):
-                    Image(name = filename, image_set = ImageSet.objects.get(path=dir)).save()
+                    Image(name=filename, image_set=ImageSet.objects.get(path=dir)).save()
+
 
 def query_yes_no(question, default="yes"):  # from http://code.activestate.com/recipes/577058/
     """Ask a yes/no question via raw_input() and return their answer.
@@ -48,9 +50,9 @@ def query_yes_no(question, default="yes"):  # from http://code.activestate.com/r
 
     The "answer" return value is one of "yes" or "no".
     """
-    valid = {"yes":"yes",   "y":"yes",  "ye":"yes",
-             "no":"no",     "n":"no"}
-    if default == None:
+    valid = {"yes": "yes", "y": "yes", "ye": "yes",
+             "no": "no", "n": "no"}
+    if default is None:
         prompt = " [y/n] "
     elif default == "yes":
         prompt = " [Y/n] "
@@ -67,5 +69,5 @@ def query_yes_no(question, default="yes"):  # from http://code.activestate.com/r
         elif choice in valid.keys():
             return valid[choice]
         else:
-            sys.stdout.write("Please respond with 'yes' or 'no' "\
+            sys.stdout.write("Please respond with 'yes' or 'no' "
                              "(or 'y' or 'n').\n")
