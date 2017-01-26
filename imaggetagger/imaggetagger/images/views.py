@@ -151,38 +151,16 @@ def exportcreateview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if request.method == 'POST':
         export_format = request.POST['export_format']
-        images = Image.objects.filter(image_set=imageset)
-        annotation_counter = 0
         if export_format == 'Bit-Bot AI':
-            a = []
-            a.append('Export of Imageset ' +
-                     imageset.name +
-                     ' (ball annotations in bounding boxes)\n')
-            a.append('imagename' +
-                     settings.EXPORT_SEPARATOR + 'x1' +
-                     settings.EXPORT_SEPARATOR + 'y1' +
-                     settings.EXPORT_SEPARATOR + 'x2' +
-                     settings.EXPORT_SEPARATOR + 'y2\n')
-            for image in images:
-                annotations = Annotation.objects.filter(image=image,
-                                                        type__name='ball')
-                for annotation in annotations:
-                    annotation_counter += 1
-                    vector = json.loads(annotation.vector)
-                    a.append(image.name +
-                             settings.EXPORT_SEPARATOR + vector['x1'] +
-                             settings.EXPORT_SEPARATOR + vector['y1'] +
-                             settings.EXPORT_SEPARATOR + vector['x2'] +
-                             settings.EXPORT_SEPARATOR + vector['y2'] +
-                             '\n')
+            export_text, annotation_count = bitbotai_export(imageset)
             export = Export(type="Bit-BotAI",
                             image_set=imageset,
                             user=(request.user if request.user.is_authenticated() else None),
-                            annotation_count=annotation_counter)
+                            annotation_count=annotation_count)
             export.save()
-            print(annotation_counter)
+            print(annotation_count)
             with open(settings.EXPORT_PATH + str(export.id) + '_export.txt', 'w') as file:
-                file.write(''.join(a))
+                file.write(export_text)
     return HttpResponseRedirect(str('/images/overview/' + str(image_set_id) + '/'))
 
 
@@ -197,4 +175,26 @@ def exportdownloadview(request, export_id):
 
 # helping function to create the Bot-Bot AI export
 def bitbotai_export(imageset):
-    pass
+    images = Image.objects.filter(image_set=imageset)
+    annotation_counter = 0
+    a = []
+    a.append('Export of Imageset ' +
+             imageset.name +
+             ' (ball annotations in bounding boxes)\n')
+    a.append('imagename' +
+             settings.EXPORT_SEPARATOR + 'x1' +
+             settings.EXPORT_SEPARATOR + 'y1' +
+             settings.EXPORT_SEPARATOR + 'x2' +
+             settings.EXPORT_SEPARATOR + 'y2\n')
+    annotations = Annotation.objects.filter(image__in=images,
+                                            type__name='ball')
+    for annotation in annotations:
+        annotation_counter += 1
+        vector = json.loads(annotation.vector)
+        a.append(annotation.image.name +
+                 settings.EXPORT_SEPARATOR + vector['x1'] +
+                 settings.EXPORT_SEPARATOR + vector['y1'] +
+                 settings.EXPORT_SEPARATOR + vector['x2'] +
+                 settings.EXPORT_SEPARATOR + vector['y2'] +
+                 '\n')
+    return ''.join(a), annotation_counter
