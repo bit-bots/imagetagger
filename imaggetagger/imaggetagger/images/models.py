@@ -63,6 +63,7 @@ class Export(models.Model):
     image_set = models.ForeignKey(ImageSet)
     type = models.CharField(max_length=50)
     annotation_count = models.IntegerField(default=0)
+    export_text = models.TextField(default='')
 
     def __str__(self):
         return u'Export: {0}'.format(self.id)

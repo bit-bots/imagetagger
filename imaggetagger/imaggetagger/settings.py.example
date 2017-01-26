@@ -126,5 +126,4 @@ STATIC_URL = '/static/'
 STATIC_ROOT = 'imagetagger/imaggetagger/imaggetagger/images/static/' #root of static files (absolute path)
 IMAGE_PATH = 'pictures/'   # the path to the folder with the imagesets (in the static path)
 IMAGE_EXTENSION = set(['.png', '.jpg'])  # filename extension of accepted imagefiles
-EXPORT_PATH = 'export/'   # the path to the folder where the exportfiles are saved
 EXPORT_SEPARATOR = '|'

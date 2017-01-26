@@ -156,18 +156,17 @@ def exportcreateview(request, image_set_id):
             export = Export(type="Bit-BotAI",
                             image_set=imageset,
                             user=(request.user if request.user.is_authenticated() else None),
-                            annotation_count=annotation_count)
+                            annotation_count=annotation_count,
+                            export_text=export_text)
             export.save()
             print(annotation_count)
-            with open(settings.EXPORT_PATH + str(export.id) + '_export.txt', 'w') as file:
-                file.write(export_text)
     return HttpResponseRedirect(str('/images/overview/' + str(image_set_id) + '/'))
 
 
 @login_required
 def exportdownloadview(request, export_id):
-    with open(settings.EXPORT_PATH + '/' + export_id + '_export.txt', 'rb') as file:
-        export = file.read()
+    db_export = get_object_or_404(Export, id=export_id)
+    export = db_export.export_text
     response = HttpResponse(export, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="' + export_id + '_export.txt"'
     return response
@@ -181,20 +180,20 @@ def bitbotai_export(imageset):
     a.append('Export of Imageset ' +
              imageset.name +
              ' (ball annotations in bounding boxes)\n')
-    a.append('imagename' +
-             settings.EXPORT_SEPARATOR + 'x1' +
-             settings.EXPORT_SEPARATOR + 'y1' +
-             settings.EXPORT_SEPARATOR + 'x2' +
-             settings.EXPORT_SEPARATOR + 'y2\n')
+    a.append(settings.EXPORT_SEPARATOR.join([
+        'imagename',
+        'x1',
+        'y1',
+        'x2',
+        'y2\n']))
     annotations = Annotation.objects.filter(image__in=images,
                                             type__name='ball')
     for annotation in annotations:
         annotation_counter += 1
         vector = json.loads(annotation.vector)
-        a.append(annotation.image.name +
-                 settings.EXPORT_SEPARATOR + vector['x1'] +
-                 settings.EXPORT_SEPARATOR + vector['y1'] +
-                 settings.EXPORT_SEPARATOR + vector['x2'] +
-                 settings.EXPORT_SEPARATOR + vector['y2'] +
-                 '\n')
+        a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
+                                                vector['x1'],
+                                                vector['y1'],
+                                                vector['x2'],
+                                                (vector['y2'] + '\n')]))
     return ''.join(a), annotation_counter
