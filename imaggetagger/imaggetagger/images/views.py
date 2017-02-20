@@ -3,9 +3,10 @@ from django.contrib.auth import logout
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from .models import ImageSet, Image, AnnotationType, Annotation, Export
+from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification
 from django.conf import settings
 import json
+from datetime import datetime
 
 
 def logout_view(request):
@@ -51,12 +52,19 @@ def overview(request, image_set_id):
 def tagview(request, image_id):
     # here the stuff we got via POST gets put in the DB
     last_annotation_type_id = -1
-    if request.method == 'POST':
+    if request.method == 'POST' and verify_bounding_box_annotation(request.POST):
         vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
         last_annotation_type_id = request.POST['selected_annotation_type']
-        Annotation(vector=vector_text, image=get_object_or_404(Image, id=request.POST['image_id']),
-                   user=(request.user if request.user.is_authenticated() else None), type=get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])).save()
-
+        annotation = Annotation(vector=vector_text,
+                                image=get_object_or_404(Image, id=request.POST['image_id']),
+                                type=get_object_or_404(AnnotationType,
+                                                       id=request.POST['selected_annotation_type']))
+        annotation.user = (request.user if request.user.is_authenticated() else None)
+        if 'not_in_image' in request.POST:
+            annotation.not_in_image = 1  # 0 by default
+        annotation.save()
+        # the creator of the annotation verifies it instantly
+        user_verify(request.user, annotation, True)
     annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
     selected_image = get_object_or_404(Image, id=image_id)
     set_images = Image.objects.filter(image_set=selected_image.image_set)\
@@ -88,18 +96,18 @@ def tagview(request, image_id):
 
 
 @login_required
-def tageditview(request, image_id, annotation_id):
+def tageditview(request, annotation_id):
     annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
-    selected_image = get_object_or_404(Image, id=image_id)
+    annotation = get_object_or_404(Annotation, id=annotation_id)
+    selected_image = get_object_or_404(Image, id=annotation.image.id)
     set_images = Image.objects.filter(image_set=selected_image.image_set)
-    vector = json.loads(get_object_or_404(Annotation, id=annotation_id).vector)
-    current_annotation_type_id = get_object_or_404(Annotation, id=annotation_id).type.id
-    print(vector['x1'])
+    vector = json.loads(annotation.vector)
+    current_annotation_type_id = annotation.type.id
     return TemplateResponse(request, 'images/tageditview.html', {
                             'selected_image': selected_image,
                             'set_images': set_images,
                             'annotation_types': annotation_types,
-                            'annotation': annotation_id,
+                            'annotation': annotation,
                             'current_annotation_type_id': current_annotation_type_id,
                             'x1': vector['x1'],
                             'y1': vector['y1'],
@@ -109,28 +117,35 @@ def tageditview(request, image_id, annotation_id):
 
 
 @login_required
-def tagdeleteview(request, image_id, annotation_id):
-    get_object_or_404(Annotation, id=annotation_id).delete()
+def tagdeleteview(request, annotation_id):
+    annotation = get_object_or_404(Annotation, id=annotation_id)
+    image_id = annotation.image.id
+    annotation.delete()
     print('deleted annotation ', annotation_id)
     return HttpResponseRedirect(str('/images/tagview/' + str(image_id) + '/'))
 
 
 @login_required
-def tageditsaveview(request, image_id, annotation_id):
+def tageditsaveview(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    if request.method == 'POST':
+    if request.method == 'POST' and verify_bounding_box_annotation(request.POST):
         vector_text = json.dumps({
             'x1': request.POST['x1Field'],
             'y1': request.POST['y1Field'],
             'x2': request.POST['x2Field'],
             'y2': request.POST['y2Field']})
         annotation.vector = vector_text
-        # annotation.image = get_object_or_404(Image, id=request.POST['image_id'])
-        # annotation.last_change_time = datetime.now()
+        annotation.last_change_time = datetime.now()
         annotation.last_editor = (request.user if request.user.is_authenticated() else None)
         annotation.type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
-    annotation.save()
-    return HttpResponseRedirect(str('/images/tagview/' + str(image_id) + '/'))
+        annotation.verified_by.clear()
+        if 'not_in_image' in request.POST:
+            annotation.not_in_image = 1
+        else:
+            annotation.not_in_image = 0
+        annotation.save()
+        user_verify(request.user, annotation, True)
+    return HttpResponseRedirect(str('/images/tagview/' + str(annotation.image.id) + '/'))
 
 
 @login_required
@@ -159,7 +174,6 @@ def exportcreateview(request, image_set_id):
                             annotation_count=annotation_count,
                             export_text=export_text)
             export.save()
-            print(annotation_count)
     return HttpResponseRedirect(str('/images/overview/' + str(image_set_id) + '/'))
 
 
@@ -170,6 +184,22 @@ def exportdownloadview(request, export_id):
     response = HttpResponse(export, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="' + export_id + '_export.txt"'
     return response
+
+
+@login_required
+def annotationmanageview(request, image_set_id):
+    imageset = get_object_or_404(ImageSet, id=image_set_id)
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.filter(image__in=images)\
+                                    .order_by('image_id')
+    return TemplateResponse(request, 'images/annotationmanageview.html', {
+                            'selected_image_set': imageset,
+                            'image_sets': ImageSet.objects.all(),
+                            'annotations': annotations})
+
+
+def verifyview():
+    pass
 
 
 # helping function to create the Bot-Bot AI export
@@ -197,3 +227,15 @@ def bitbotai_export(imageset):
                                                 vector['x2'],
                                                 (vector['y2'] + '\n')]))
     return ''.join(a), annotation_counter
+
+
+def user_verify(user, annotation, verification_state):
+    if user.is_authenticated():
+        Verification.objects.filter(user=user, annotation=annotation).delete()
+        verification = Verification(user=user,
+                                    annotation=annotation, verified=verification_state)
+        verification.save()
+
+
+def verify_bounding_box_annotation(post_dict):
+    return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) > 10 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) > 10)

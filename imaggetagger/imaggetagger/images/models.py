@@ -52,9 +52,27 @@ class Annotation(models.Model):
     last_editor = models.ForeignKey(settings.AUTH_USER_MODEL,
                                     related_name='last_editor',
                                     null=True)
+    verified_by = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Verification')
+    not_in_image = models.BooleanField(default=0)  # if True, the object is definitely not in the image
 
     def __str__(self):
         return u'Annotation: {0}'.format(self.type.name)
+
+    def content(self):
+        if self.not_in_image:
+            return 'Not in image'
+        else:
+            return self.vector
+
+    def verification_count(self):
+        return (Verification.objects.filter(annotation=self.id).filter(verified=True).count() - Verification.objects.filter(annotation=self.id).filter(verified=False).count())
+
+
+class Verification(models.Model):
+    annotation = models.ForeignKey(Annotation, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    time = models.DateTimeField(auto_now_add=True)
+    verified = models.BooleanField(default=0)
 
 
 class Export(models.Model):

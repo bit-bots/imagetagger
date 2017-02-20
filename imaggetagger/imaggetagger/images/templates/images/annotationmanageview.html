@@ -1,0 +1,47 @@
+{% extends 'images/base.html' %}
+{% load static %}
+{% block navblock %}
+<a class='navbar' href='{% url 'images_overview' selected_image_set.id %}'>Overview</a>
+{% endblock %}
+{% block bodyblock %}
+<div class="filelist">
+  {% for image_set in image_sets %}
+  {% if image_set.id == selected_image_set.id %}
+  <b id="selected_image_row">{{selected_image_set.name}}</b><br>
+  {% else %}
+  <a href="{% url 'images_annotationmanageview' image_set.id %}"> {{image_set.name}}</a><br>
+  {% endif %}
+  {% endfor %}
+</div>
+<div class='tableblock'>
+  <table border='1' width='100%'>
+    <tr>
+      <td>Image</td>
+      <td>Type</td>
+      <td>Annotation</td>
+      <td>Verifications</td>
+      <td>Creator</td>
+      <td>Last editor</td>
+      <td>Action</td>
+    </tr>
+    {% for annotation in annotations %}
+    <tr>
+      <td><a href='{% url 'images_tagview' annotation.image.id %}'>{{ annotation.image.name }}</a></td>
+      <td>{{ annotation.type.name }}</td>
+      <td>{{ annotation.content }}</td>
+      <td>{{ annotation.verification_count }}</td>
+      <td>{{ annotation.user.username }}</td>
+      <td>{{ annotation.last_editor.username }}</td>
+      <td>
+        <a href="{% url 'images_tageditview' annotation.id%}">
+          <img src="{% static "symbols/pencil.png" %}" alt="edit">
+        </a>
+        <a href="{% url 'images_tagdeleteview' annotation.id%}">
+          <img src="{% static "symbols/bin.png" %}" alt="delete">
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

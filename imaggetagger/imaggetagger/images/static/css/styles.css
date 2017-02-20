@@ -85,6 +85,18 @@ div.centerblock{
    margin-left: 30%;
 }
 
+div.tableblock{
+   border-radius: 5px;
+   border-color: silver;
+   border-style: solid;
+   border-width: thin;
+   padding: 5px;
+   margin-top: 10px;
+   text-align: center;
+   margin-right: 0%;
+   margin-left: 30%;
+}
+
 a.navbar{
     padding: 5px;
     padding-top: 10px;

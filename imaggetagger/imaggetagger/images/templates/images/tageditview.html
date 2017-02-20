@@ -16,7 +16,7 @@
     </div>
     <div class="toolbox">
         {{selected_image.name}}
-        <form id="annotation_form" action="{% url 'images_tageditsaveview' selected_image.id annotation %}" enctype="multipart/form-data" method="post">
+        <form id="annotation_form" action="{% url 'images_tageditsaveview' annotation.id %}" enctype="multipart/form-data" method="post">
             {% csrf_token %}
             <input type="hidden" name="image_id" value="{{ selected_image.id }}">
             <select name="selected_annotation_type">
@@ -45,6 +45,10 @@
                     <td>Y2</td>
                     <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="{{ y2 }}"></td>
                 </tr>
+                <tr>
+                  <td colspan='2'><input type='checkbox' name='not_in_image'id='not_in_image' {% if annotation.not_in_image == 1 %}checked=""{% endif %}><label for='not_in_image'>Not in the image</label></td>
+                </tr>
+
             </table>
             <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset" onclick="reset_selection()"><input id="back_button" type="button" value="Back" onclick="window.location='{% url 'images_tagview' selected_image.id %}';">
         </form>

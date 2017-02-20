@@ -8,6 +8,10 @@
 </ul>
 </div>
 <div class="toolbox">
+  <h2>Management</h2>
+  <li><a href="{% url 'images_annotationmanageview' imageset.id %}">Manage annotations</a>
+  <li><a href="{% url 'images_index' %}">Verify annotations</a>
+  <br>&nbsp;<br>
   <h2>Export tags to file</h2>
     <form method="post" action="{% url 'images_exportview' imageset.id %}" enctype="multipart/form-data">
     {% csrf_token %}
@@ -28,7 +32,5 @@
   <li><a href="{% url 'images_index' %}export/{{export.id}}/download/">{{export.type}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
   {% endfor %}
 {% endif %}
-  
-
 </div>
 {% endblock %}
