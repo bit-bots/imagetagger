@@ -33,11 +33,14 @@
       <td>{{ annotation.user.username }}</td>
       <td>{{ annotation.last_editor.username }}</td>
       <td>
-        <a href="{% url 'images_tageditview' annotation.id%}">
-          <img src="{% static "symbols/pencil.png" %}" alt="edit">
+        <a href='{% url 'images_tageditview' annotation.id%}'>
+          <img src='{% static 'symbols/pencil.png' %}' alt='edit'>
         </a>
-        <a href="{% url 'images_tagdeleteview' annotation.id%}">
-          <img src="{% static "symbols/bin.png" %}" alt="delete">
+        <a href='{% url 'images_tagdeleteview' annotation.id%}'>
+          <img src='{% static 'symbols/bin.png' %}' alt='delete'>
+        </a>
+        <a href='{% url 'images_verifyview' annotation.id %}'>
+          <img src='{% static 'symbols/checkmark.png' %}' alt='verify'>
         </a>
       </td>
     </tr>

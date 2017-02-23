@@ -127,3 +127,4 @@ STATIC_ROOT = 'imagetagger/imaggetagger/imaggetagger/images/static/' #root of st
 IMAGE_PATH = 'pictures/'   # the path to the folder with the imagesets (in the static path)
 IMAGE_EXTENSION = set(['.png', '.jpg'])  # filename extension of accepted imagefiles
 EXPORT_SEPARATOR = '|'
+DATA_PATH = '/home/bububu/documents/Bit-Bots/imagetagger/data/'

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification
 from django.conf import settings
+from django.db.models import Q
 import json
 from datetime import datetime
 
@@ -198,8 +199,61 @@ def annotationmanageview(request, image_set_id):
                             'annotations': annotations})
 
 
-def verifyview():
-    pass
+@login_required
+def verifyview(request, annotation_id):
+    # here the stuff we got via POST gets put in the DB
+    if request.method == 'POST':  # TODO get shit working
+        print('huhu')
+        annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
+        if request.POST['state'] == 'accept':
+            state = True
+        elif request.POST['state']:
+            state = False
+        user_verify(request.user, annotation, state)
+    annotation = get_object_or_404(Annotation, id=annotation_id)
+    image = get_object_or_404(Image, id=annotation.image.id)
+    vector = json.loads(annotation.vector)
+    set_images = Image.objects.filter(image_set=image.image_set)
+    set_annotations = Annotation.objects.filter(image__in=set_images)\
+        .order_by('id')  # good... hopefully
+    unverified_annotations = set_annotations.filter(~Q(user=request.user))
+    # detecting next and last image in the set
+    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id')
+    if len(next_annotation) == 0:
+        next_annotation = None
+    else:
+        next_annotation = next_annotation[0]
+    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('-id')
+    if len(last_annotation) == 0:
+        last_annotation = None
+    else:
+        last_annotation = last_annotation[0]
+    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id')
+    if len(next_unverified_annotation) == 0:
+        next_unverified_annotation = None
+    else:
+        next_unverified_annotation = next_unverified_annotation[0]
+    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('-id')
+    if len(last_unverified_annotation) == 0:
+        last_unverified_annotation = None
+    else:
+        last_unverified_annotation = last_unverified_annotation[0]
+
+    return TemplateResponse(request, 'images/verificationview.html', {
+                            'image': image,
+                            'annotation': annotation,
+                            'next_annotation': next_annotation,
+                            'next_unverified_annotation': next_unverified_annotation,
+                            'last_annotation': last_annotation,
+                            'last_unverified_annotation': last_unverified_annotation,
+                            'set_annotations': set_annotations,
+                            'first_annotation': set_annotations[0],
+                            'unverified_annotations': unverified_annotations,
+                            'x1': vector['x1'],
+                            'y1': vector['y1'],
+                            'x2': vector['x2'],
+                            'y2': vector['y2'],
+                            })
 
 
 # helping function to create the Bot-Bot AI export

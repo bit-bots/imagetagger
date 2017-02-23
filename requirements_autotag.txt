@@ -1,0 +1,6 @@
+Django
+numpy
+opencv-python
+tensorflow
+keras
+h5py
