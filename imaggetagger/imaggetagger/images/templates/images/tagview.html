@@ -38,7 +38,7 @@
     </div>
 
     <div class="imageview">
-        <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static "pictures" selected_image.get_path %} not found!" width="100%"></br>
+        <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static selected_image.full_path %} not found!" width="100%"></br>
         <hr color="silver" width="100%">
         {% if image_annotations.all %}
         <u>Annotations:</u>

@@ -203,7 +203,6 @@ def annotationmanageview(request, image_set_id):
 def verifyview(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
     if request.method == 'POST':  # TODO get shit working
-        print('huhu')
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
         if request.POST['state'] == 'accept':
             state = True
@@ -249,10 +248,10 @@ def verifyview(request, annotation_id):
                             'set_annotations': set_annotations,
                             'first_annotation': set_annotations[0],
                             'unverified_annotations': unverified_annotations,
-                            'x1': vector['x1'],
-                            'y1': vector['y1'],
-                            'x2': vector['x2'],
-                            'y2': vector['y2'],
+                            'annotation_x': vector['x1'],
+                            'annotation_y': vector['y1'],
+                            'width': int(vector['x2']) - int(vector['x1']),
+                            'height': int(vector['y2']) - int(vector['y1']),
                             })
 
 

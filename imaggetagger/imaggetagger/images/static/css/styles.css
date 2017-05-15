@@ -13,6 +13,14 @@ a{
 	font-size: 15px;
 	width: auto;
 }
+div.wrapper{
+	position: absolute;
+}
+#boundingBox{
+	position: absolute;
+	border:2px solid #ff0000;
+    background-color: transparent;
+}
 div.toolbox{
 	right: 0px;
 	width: 30%;

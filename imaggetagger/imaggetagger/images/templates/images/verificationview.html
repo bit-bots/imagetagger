@@ -1,7 +1,6 @@
 {% extends 'images/base.html' %}
 {% load static %}
 {% block taggerimports %}
-<script src="{% static 'scripts/jcanvas.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'scripts/verify_scripts.js' %}"></script>
 {% endblock %}
 {% block individual_script %}
@@ -25,7 +24,7 @@
         $('#last_button').attr('disabled', 'true');
         $('#last_unverified_button').attr('disabled', 'true');
         {% endif %}
-        
+
         {% if next_unverified_annotation %}
         $('#next_unverified_button').click(function(){
             $('#verification_form').attr('action', '{% url 'images_verifyview' next_unverified_annotation.id %}');
@@ -56,7 +55,7 @@
           $('#verification_form').submit();
         });
         {% endif %}
-        
+
         {% if last_unverified_annotation %}
         $('#last_unverified_button').click(function(){
             $('#verification_form').attr('action', '{% url 'images_verifyview' last_unverified_annotation.id %}');
@@ -68,7 +67,8 @@
         $('#edit_button').click(function(){window.location.href='{% url 'images_tageditview' annotation.id %}'});
     }
 
-    img_src = '{{ image.full_path }}';
+
+
 {% endblock %}
 {% block bodyblock %}
     <div class="filelist">
@@ -83,8 +83,11 @@
     </div>
 
     <div class="imageview">
-        <canvas width="100%"></canvas>
-        <img id="picture" src="{% static image.full_path %}" alt="Picture {% static "pictures" image.get_path %} not found!" width="100%"></br>
+        <div class="wrapper">
+            <img id="picture" src="{% static image.full_path %}" alt="Picture {% static image.full_path %} not found!" width="100%" data-x="{{ annotation_x }}" data-y="{{ annotation_y }}" data-width="{{ width }}" data-height="{{ height }}"></br>
+            <div id="boundingBox"></div>
+        </div>
+
     </div>
 
     <div class="toolbox">
