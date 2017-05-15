@@ -10,7 +10,9 @@
 <div class="toolbox">
   <h2>Management</h2>
   <li><a href="{% url 'images_annotationmanageview' imageset.id %}">Manage annotations</a>
-  <li><a href="{% url 'images_index' %}">Verify annotations</a>
+  {% if first_annotation %}
+  <li><a href="{% url 'images_verifyview' first_annotation.id %}">Verify annotations</a>
+  {% endif %}
   <br>&nbsp;<br>
   <h2>Export tags to file</h2>
     <form method="post" action="{% url 'images_exportview' imageset.id %}" enctype="multipart/form-data">

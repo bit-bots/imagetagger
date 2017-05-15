@@ -39,7 +39,7 @@ class Command(BaseCommand):
                 circles = np.uint16(np.around(circles))
                 try:
                     for i in circles[0, :]:
-                        i[2] = i[2] + 3
+                        i[2] += 3
                         corp = ra[i[1] - i[2] - 3:i[1] + i[2] + 3, i[0] - i[2] - 3:i[0] + i[2] + 3]
                         # cv2.imshow("corp", corp)
 

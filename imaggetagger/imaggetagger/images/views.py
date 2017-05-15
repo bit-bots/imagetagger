@@ -39,12 +39,16 @@ def overview(request, image_set_id):
     exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
     # a list of annotation types used in the imageset
     annotation_types = set()
+    annotations = set()
     for image in images:
-        annotation_types = annotation_types.union([annotation.type for annotation in Annotation.objects.filter(image=image)])
+        annotations = annotations.union(Annotation.objects.filter(image=image))
+    annotation_types = annotation_types.union([annotation.type for annotation in annotations])
+    first_annotation = annotations.pop()
     return TemplateResponse(request, 'images/overview.html', {
                             'images': images,
                             'imageset': imageset,
                             'annotationtypes': annotation_types,
+                            'first_annotation': first_annotation,
                             'exports': exports,
                             })
 
@@ -206,9 +210,10 @@ def verifyview(request, annotation_id):
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
         if request.POST['state'] == 'accept':
             state = True
+            user_verify(request.user, annotation, state)
         elif request.POST['state']:
             state = False
-        user_verify(request.user, annotation, state)
+            user_verify(request.user, annotation, state)
     annotation = get_object_or_404(Annotation, id=annotation_id)
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)

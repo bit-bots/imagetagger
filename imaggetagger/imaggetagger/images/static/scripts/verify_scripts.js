@@ -39,5 +39,4 @@ $(window).resize(function() {
 function draw_box() {
     image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
     $('#boundingBox').css({'top': $('img#picture').attr('data-y')/image_scale, 'left': $('img#picture').attr('data-x')/image_scale, 'width': $('img#picture').attr('data-width')/image_scale, 'height': $('img#picture').attr('data-height')/image_scale});
-    console.log($('img#picture').attr('data-y'));
 }
