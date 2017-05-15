@@ -51,7 +51,7 @@
 
         $('#reject_button').click(function(){
           $('#state').attr('value', 'reject');
-          $('#verification_form').attr('action', '{% url 'images_verifyview' first_unverified_annotation.id %}');
+          $('#verification_form').attr('action', '{% url 'images_verifyview' first_annotation.id %}');
           $('#verification_form').submit();
         });
         {% endif %}

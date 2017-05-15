@@ -14,7 +14,7 @@ a{
 	width: auto;
 }
 div.wrapper{
-	position: absolute;
+	position: relative;
 }
 #boundingBox{
 	position: absolute;
@@ -41,7 +41,7 @@ div.imageview{
 	border-style: solid;
 	border-width: thin;
 	padding: 5px;
-  position:absolute;
+  	position:absolute;
 }
 
 div.filelist{
@@ -71,7 +71,6 @@ div.annotation{
 
 #additional_feature_table{
 	width: 90%;
-
 }
 div.head{
 	border-bottom-color: silver;

@@ -45,7 +45,7 @@
         {% for annotation in image_annotations %}
         <div class="annotation">
             {{annotation.type.name}}:
-            <div style="float: right;"><a href="{% url 'images_tageditview' annotation.id%}"><img src="{% static "symbols/pencil.png" %}" alt="edit"></a>
+            <div style="float: right;"><a href="{% url 'images_verifyview' annotation.id%}"><img src="{% static "symbols/checkmark.png" %}" alt="edit"></a><a href="{% url 'images_tageditview' annotation.id%}"><img src="{% static "symbols/pencil.png" %}" alt="edit"></a>
             <a href="{% url 'images_tagdeleteview' annotation.id%}"><img src="{% static "symbols/bin.png" %}" alt="delete"></a></div>
             <br>{{annotation.content}}
         </div>
