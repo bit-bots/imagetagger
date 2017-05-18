@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.urls import reverse
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -27,6 +29,7 @@ def index(request):
     imagesets = ImageSet.objects.all()
     return TemplateResponse(request, 'images/index.html', {
                             'image_sets': imagesets,
+                            'usergroups': request.user.groups.all(),
                             })
 
 
@@ -202,6 +205,41 @@ def annotationmanageview(request, image_set_id):
                             'image_sets': ImageSet.objects.all(),
                             'annotations': annotations})
 
+
+@login_required
+def userview(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    groups = user.groups.all()
+
+    # todo: count the points
+    points = 0
+
+    return TemplateResponse(request, 'images/userview.html', {
+                            'user': user,
+                            'usergroups': groups,
+                            'userpoints': points, })
+
+
+@login_required
+def groupview(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    members = group.user_set.all()
+    return TemplateResponse(request, 'images/groupview.html', {
+                            'group': group,
+                            'memberset': members, })
+
+
+@login_required
+def creategroupview(request):
+    name = request.POST['groupname']
+    if len(name) <= 20 and len(name) >= 3:
+        group = Group()
+        group.name = name
+        group.save()
+        group.user_set.add(request.user)
+        group.save()
+        return HttpResponseRedirect(reverse('images_groupview', args=(group.id,)))
+    return HttpResponseRedirect(str('/images/'))
 
 @login_required
 def verifyview(request, annotation_id):

@@ -59,6 +59,17 @@ div.filelist{
 
 }
 
+div.leftcontent{
+	left: 5px;
+	width: 60%;
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	float: left;
+}
+
 div.annotation{
    border-radius: 5px;
    border-color: silver;

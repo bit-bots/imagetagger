@@ -1,12 +1,29 @@
 
 {% extends 'images/base.html' %}
 {% block bodyblock %}
-<div class="centerblock">
-<p>Please choose an Imageset to tag</p>
-<div align="left">
-<ul>
+<h1>Home</h1>
+<div>
+    <div class="leftcontent">
+        <h2>Imagesets</h2>
+        <ul>
 {% for imageset in image_sets %}
     <li><a href="{% url 'images_overview' imageset.id %}">{{imageset.name}}</a></li>
 {% endfor %}
-</ul></div></div>
+        </ul>
+    </div>
+    <div class="toolbox">
+        <h3>Groups</h3>
+        <ul>
+        {% for group in usergroups %}
+            <li><a href="{% url 'images_groupview' group.id %}">{{group.name}}</a></li>
+        {% endfor %}
+        </ul>
+        <hr>
+        <p>Create new group:</p>
+        <form method="post" action="{% url 'images_creategroupview' %}">
+        {% csrf_token %}
+            <input type="text" placeholder="Groupname" maxlength="20" name="groupname"> <input type="submit" value="Create">
+        </form>
+    </div>
+</div>
 {% endblock %}

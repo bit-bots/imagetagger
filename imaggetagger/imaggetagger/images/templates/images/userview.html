@@ -1,0 +1,15 @@
+
+{% extends 'images/base.html' %}
+{% block bodyblock %}
+<div>
+    <div class="leftcontent">
+        <h2>Profile of {{ user.username }}</h2>
+        Points: {{userpoints}}
+
+        <h3>Groups:</h3>
+        {% for group in usergroups %}
+            <li><a href="{% url 'images_groupview' group.id %}">{{group.name}}</a></li>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
