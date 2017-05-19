@@ -1,12 +1,13 @@
 from django.conf.urls import url
 from django.contrib import auth
-from .views import index, logout_view, overview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, groupview, creategroupview, createuserview
+from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, groupview, creategroupview, createuserview, leavegroupview, exploreview
 
 urlpatterns = [
     url(r'^$', index, name='images_index'),
     url(r'^export/(\d+)/auth/$', export_auth_view, name='images_export_auth'),
     url(r'^logout/', logout_view, name='images_logout'),
-    url(r'^overview/(\d+)/$', overview, name='images_overview'),
+    url(r'^imageset/(\d+)/$', imagesetview, name='images_imagesetview'),
+    url(r'^imageset/explore/$', exploreview, {'mode': 'imageset'}, name='images_exploreimagesetview'),
     url(r'^tagview/(\d+)/$', tagview, name='images_tagview'),
     url(r'^tagview/edit/(\d+)/$', tageditview, name='images_tageditview'),
     url(r'^tagview/delete/(\d+)/$', tagdeleteview, name='images_tagdeleteview'),
@@ -17,7 +18,10 @@ urlpatterns = [
     url(r'^verify/(\d+)/$', verifyview, name='images_verifyview'),
     url(r'^user/(\d+)/$', userview, name='images_userview'),
     url(r'^user/create/$', createuserview, name='images_createuserview'),
+    url(r'^user/explore/$', exploreview, {'mode': 'user'}, name='images_exploreuserview'),
     url(r'^group/(\d+)/$', groupview, name='images_groupview'),
     url(r'^group/create/$', creategroupview, name='images_creategroupview'),
+    url(r'^group/explore/$', exploreview, {'mode': 'group'}, name='images_exploregroupview'),
+    url(r'^group/leave/(\d+)/$', leavegroupview, name='images_leavegroupview'),
     # url(r'^export/(\d+)/create/$', exportcreateview, name='images_exportcreateview'),
 ]

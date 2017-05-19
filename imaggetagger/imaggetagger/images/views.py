@@ -3,6 +3,7 @@ from django.contrib.auth import logout
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification
@@ -34,7 +35,7 @@ def index(request):
 
 
 @login_required
-def overview(request, image_set_id):
+def imagesetview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     # images the imageset contains
     images = Image.objects.filter(image_set=imageset)
@@ -46,8 +47,10 @@ def overview(request, image_set_id):
     for image in images:
         annotations = annotations.union(Annotation.objects.filter(image=image))
     annotation_types = annotation_types.union([annotation.type for annotation in annotations])
-    first_annotation = annotations.pop()
-    return TemplateResponse(request, 'images/overview.html', {
+    first_annotation = None
+    if len(annotations) > 0:
+        first_annotation = annotations.pop()
+    return TemplateResponse(request, 'images/imageset.html', {
                             'images': images,
                             'imageset': imageset,
                             'annotationtypes': annotation_types,
@@ -205,6 +208,27 @@ def annotationmanageview(request, image_set_id):
                             'image_sets': ImageSet.objects.all(),
                             'annotations': annotations})
 
+@login_required
+def exploreview(request, mode):
+    imagesets, groups, users = None, None, None
+    if mode == 'group':
+        groups = Group.objects.all()
+        if request.method == 'POST':
+            groups = groups.filter(name__contains=request.POST['searchquery'])
+    elif mode == 'user':
+        users = User.objects.all()
+        if request.method == 'POST':
+            users = users.filter(username__contains=request.POST['searchquery'])
+    else:
+        imagesets = ImageSet.objects.all()
+        if request.method == 'POST':
+            imagesets = imagesets.filter(name__contains=request.POST['searchquery'])
+
+    return TemplateResponse(request, 'images/exploreview.html', {
+                            'mode': mode,
+                            'imagesets': imagesets,
+                            'groups': groups,
+                            'users': users, })
 
 @login_required
 def userview(request, user_id):
@@ -260,6 +284,12 @@ def creategroupview(request):
         group.user_set.add(request.user)
         group.save()
         return HttpResponseRedirect(reverse('images_groupview', args=(group.id,)))
+    return HttpResponseRedirect(str('/images/'))
+
+@login_required
+def leavegroupview(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    group.user_set.remove(request.user)
     return HttpResponseRedirect(str('/images/'))
 
 @login_required

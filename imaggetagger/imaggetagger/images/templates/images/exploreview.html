@@ -1,0 +1,26 @@
+{% extends 'images/base.html' %}
+{% load static %}
+{% block bodyblock %}
+<h1>Explore</h1>
+<div class="leftlist">
+    <a href="{% url 'images_exploreimagesetview' %}">imagesets</a><br>
+    <a href="{% url 'images_exploregroupview' %}">groups</a><br>
+    <a href="{% url 'images_exploreuserview' %}">users</a><br>
+</div>
+<div class='rightcontent'>
+    <form action="" method="post">
+        {% csrf_token %}
+      <input id="searchbox" type="text" name="searchquery" placeholder="Search for {{mode}}s"><input type="submit" value="Search">
+    </form>
+    <hr>
+    {% for imageset in imagesets %}
+    <a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a><br>
+    {% endfor %}
+    {% for group in groups %}
+    <a href="{% url 'images_groupview' group.id %}">{{group.name}}</a><br>
+    {% endfor %}
+    {% for user in users %}
+    <a href="{% url 'images_userview' user.id %}">{{user.username}}</a><br>
+    {% endfor %}
+</div>
+{% endblock %}

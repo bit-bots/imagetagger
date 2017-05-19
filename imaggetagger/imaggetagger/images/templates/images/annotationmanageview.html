@@ -1,19 +1,20 @@
 {% extends 'images/base.html' %}
 {% load static %}
 {% block navblock %}
-<a class='navbar' href='{% url 'images_overview' selected_image_set.id %}'>Overview</a>
+<a class='navbar' href='{% url 'images_imagesetview' selected_image_set.id %}'>Overview</a>
 {% endblock %}
 {% block bodyblock %}
-<div class="filelist">
+<h1>Manage annotations</h1>
+<div class="leftlist">
   {% for image_set in image_sets %}
   {% if image_set.id == selected_image_set.id %}
-  <b id="selected_image_row">{{selected_image_set.name}}</b><br>
+  <b id="selected_row">{{selected_image_set.name}}</b><br>
   {% else %}
   <a href="{% url 'images_annotationmanageview' image_set.id %}"> {{image_set.name}}</a><br>
   {% endif %}
   {% endfor %}
 </div>
-<div class='tableblock'>
+<div class='rightcontent'>
   <table border='1' width='100%'>
     <tr>
       <td>Image</td>

@@ -26,8 +26,8 @@
     }
 {% endblock %}
 {% block bodyblock %}
-    <div class="filelist">
-        <a href="{% url 'images_overview' selected_image.image_set.id %}"><u><h3 align="center">{{selected_image.image_set.name}}</h3></u></a>
+    <div class="leftlist">
+        <a href="{% url 'images_imagesetview' selected_image.image_set.id %}"><u><h3 align="center">{{selected_image.image_set.name}}</h3></u></a>
         {% for set_image in set_images %}
         {% if set_image.id == selected_image.id %}
         <b id="selected_image_row">{{set_image.name}}</b><br>

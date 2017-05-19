@@ -66,7 +66,7 @@ $(document).ready(function () {
 
 		if (typeof init_navigationbuttons === "function") { //tagview
     	init_navigationbuttons();
-      $('div.filelist').animate({
+      $('div.leftlist').animate({
           scrollTop: $("#selected_image_row").offset().top - 200}, 1000);
 
       $(document).keyup(function(event){

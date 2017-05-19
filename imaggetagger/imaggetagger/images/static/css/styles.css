@@ -44,7 +44,7 @@ div.imageview{
   	position:absolute;
 }
 
-div.filelist{
+div.leftlist{
 	left: 0px;
 	width: 20%;
 	max-height: 85%;
@@ -54,7 +54,8 @@ div.filelist{
 	border-width: thin;
 	padding: 5px;
 	position: fixed;
-	margin-left: 2px;
+	margin-left: 4px;
+    margin-top: 5px;
 	overflow: auto;
 
 }
@@ -103,7 +104,7 @@ div.centerblock{
    margin-left: 30%;
 }
 
-div.tableblock{
+div.rightcontent{
    border-radius: 5px;
    border-color: silver;
    border-style: solid;
@@ -112,7 +113,7 @@ div.tableblock{
    margin-top: 10px;
    text-align: center;
    margin-right: 0%;
-   margin-left: 30%;
+   margin-left: 25%;
 }
 
 a.navbar{

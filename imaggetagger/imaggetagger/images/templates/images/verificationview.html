@@ -71,7 +71,7 @@
 
 {% endblock %}
 {% block bodyblock %}
-    <div class="filelist">
+    <div class="leftlist">
         <a href="{% url 'images_annotationmanageview' image.image_set.id %}"><u><h3 align="center">{{image.image_set.name}}</h3></u></a>
         {% for set_annotation in set_annotations %}
         {% if set_annotation.id == annotation.id %}

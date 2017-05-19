@@ -3,7 +3,7 @@ $(document).ready(function () {
     init_navigationbuttons();
     // init_image();
     draw_box();
-    $('div.filelist').animate({
+    $('div.leftlist').animate({
         scrollTop: $("#selected_annotation_row").offset().top - 200}, 1000);
 
     $(document).keyup(function(event){
