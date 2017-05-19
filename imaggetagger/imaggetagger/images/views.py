@@ -219,14 +219,35 @@ def userview(request, user_id):
                             'usergroups': groups,
                             'userpoints': points, })
 
+@login_required
+def createuserview(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        email = request.POST['email']
+        user = User()
+        user.username = username
+        user.password = password
+        user.email = email
+        user.is_active = True
+        user.save()
+        return HttpResponseRedirect(reverse('images_userview', args=(user.id,)))
+
 
 @login_required
 def groupview(request, group_id):
     group = get_object_or_404(Group, id=group_id)
+    if request.method == 'POST':
+        user_to_add = User.objects.filter(username=request.POST['username'])[0]
+        if user_to_add:
+            group.user_set.add(user_to_add)
+    group = get_object_or_404(Group, id=group_id)
     members = group.user_set.all()
+    is_member = request.user in members
     return TemplateResponse(request, 'images/groupview.html', {
                             'group': group,
-                            'memberset': members, })
+                            'memberset': members,
+                            'is_member': is_member, })
 
 
 @login_required

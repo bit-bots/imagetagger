@@ -4,6 +4,13 @@
 <div>
     <div class="leftcontent">
         <h1>Group-profile of {{ group.name }}</h1>
+        {% if is_member %}
+        Add Member:
+        <form method="post" action="{% url 'images_groupview' group.id %}">
+        {% csrf_token %}
+            <input type="text" placeholder="username" maxlength="20" name="username"> <input type="submit" value="Add">
+        </form>
+        {% endif %}
 
         Members:
         <ul>

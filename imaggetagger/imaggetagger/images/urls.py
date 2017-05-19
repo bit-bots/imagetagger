@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.contrib import auth
-from .views import index, logout_view, overview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, groupview, creategroupview
+from .views import index, logout_view, overview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, groupview, creategroupview, createuserview
 
 urlpatterns = [
     url(r'^$', index, name='images_index'),
@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^manage/annotation/(\d+)/$', annotationmanageview, name='images_annotationmanageview'),
     url(r'^verify/(\d+)/$', verifyview, name='images_verifyview'),
     url(r'^user/(\d+)/$', userview, name='images_userview'),
+    url(r'^user/create/$', createuserview, name='images_createuserview'),
     url(r'^group/(\d+)/$', groupview, name='images_groupview'),
     url(r'^group/create/$', creategroupview, name='images_creategroupview'),
     # url(r'^export/(\d+)/create/$', exportcreateview, name='images_exportcreateview'),
