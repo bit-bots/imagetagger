@@ -1,7 +1,7 @@
 
 from django.conf import settings
 from django.db import models
-
+from django.contrib.auth.models import Group
 # Create your models here.
 
 
@@ -10,6 +10,8 @@ class ImageSet(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     time = models.DateTimeField(auto_now_add=True)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    public = models.BooleanField(default=False)
 
     def get_path(self):
         return str(settings.IMAGE_PATH + self.path + '/')
@@ -51,7 +53,8 @@ class Annotation(models.Model):
     last_edit_time = models.DateTimeField(null=True, blank=True)
     last_editor = models.ForeignKey(settings.AUTH_USER_MODEL,
                                     related_name='last_editor',
-                                    null=True)
+                                    null=True,
+                                    on_delete=models.SET_NULL)
     verified_by = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Verification')
     not_in_image = models.BooleanField(default=0)  # if True, the object is definitely not in the image
 
@@ -66,6 +69,9 @@ class Annotation(models.Model):
 
     def verification_count(self):
         return (Verification.objects.filter(annotation=self.id).filter(verified=True).count() - Verification.objects.filter(annotation=self.id).filter(verified=False).count())
+
+    def owner(self):
+        return self.last_editor if self.last_editor else self.user
 
 
 class Verification(models.Model):

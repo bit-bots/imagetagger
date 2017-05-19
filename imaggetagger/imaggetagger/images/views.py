@@ -27,10 +27,11 @@ def export_auth_view(request, export_id):
 @login_required
 def index(request):
     # needed to show the list of the users imagesets
-    imagesets = ImageSet.objects.all()
+    usergroups = request.user.groups.all()
+    imagesets = ImageSet.objects.filter(group__in=usergroups)
     return TemplateResponse(request, 'images/index.html', {
                             'image_sets': imagesets,
-                            'usergroups': request.user.groups.all(),
+                            'usergroups': usergroups,
                             })
 
 

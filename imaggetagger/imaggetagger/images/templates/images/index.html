@@ -7,7 +7,7 @@
         <h2>Imagesets</h2>
         <ul>
 {% for imageset in image_sets %}
-    <li><a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
+    <li><a href="{% url 'images_groupview' imageset.group.id %}">{{imageset.group.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
 {% endfor %}
         </ul>
     </div>
