@@ -5,12 +5,23 @@ from django.contrib.auth.models import Group
 # Create your models here.
 
 
+class Team(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    members = models.ForeignKey(Group,
+                                related_name='members')
+    admins = models.ForeignKey(Group,
+                               related_name='admins')
+    website = models.CharField(max_length=100)
+
+    def __str__(self):
+        return u'Team: {0}'.format(self.name)
+
 class ImageSet(models.Model):
     path = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     time = models.DateTimeField(auto_now_add=True)
-    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     public = models.BooleanField(default=False)
 
     def get_path(self):
@@ -91,3 +102,4 @@ class Export(models.Model):
 
     def __str__(self):
         return u'Export: {0}'.format(self.id)
+

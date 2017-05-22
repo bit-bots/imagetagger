@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.contrib import auth
-from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, groupview, creategroupview, createuserview, leavegroupview, exploreview
+from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, teamview, createteamview, createuserview, leaveteamview, exploreview
 
 urlpatterns = [
     url(r'^$', index, name='images_index'),
@@ -19,9 +19,8 @@ urlpatterns = [
     url(r'^user/(\d+)/$', userview, name='images_userview'),
     url(r'^user/create/$', createuserview, name='images_createuserview'),
     url(r'^user/explore/$', exploreview, {'mode': 'user'}, name='images_exploreuserview'),
-    url(r'^group/(\d+)/$', groupview, name='images_groupview'),
-    url(r'^group/create/$', creategroupview, name='images_creategroupview'),
-    url(r'^group/explore/$', exploreview, {'mode': 'group'}, name='images_exploregroupview'),
-    url(r'^group/leave/(\d+)/$', leavegroupview, name='images_leavegroupview'),
-    # url(r'^export/(\d+)/create/$', exportcreateview, name='images_exportcreateview'),
+    url(r'^team/(\d+)/$', teamview, name='images_teamview'),
+    url(r'^team/create/$', createteamview, name='images_createteamview'),
+    url(r'^team/explore/$', exploreview, {'mode': 'team'}, name='images_exploreteamview'),
+    url(r'^team/leave/(\d+)/$', leaveteamview, name='images_leaveteamview'),
 ]

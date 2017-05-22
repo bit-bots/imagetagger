@@ -1,8 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import ImageSet, Image, Annotation, AnnotationType, Export, Verification
+from .models import ImageSet, Image, Annotation, AnnotationType, Export, Verification, Team
 
+admin.site.register(Team)
 admin.site.register(ImageSet)
 admin.site.register(Image)
 admin.site.register(Annotation)

@@ -7,22 +7,22 @@
         <h2>Imagesets</h2>
         <ul>
 {% for imageset in image_sets %}
-    <li><a href="{% url 'images_groupview' imageset.group.id %}">{{imageset.group.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
+    <li><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
 {% endfor %}
         </ul>
     </div>
     <div class="toolbox">
-        <h3>Groups</h3>
+        <h3>My Teams</h3>
         <ul>
-        {% for group in usergroups %}
-            <li><a href="{% url 'images_groupview' group.id %}">{{group.name}}</a></li>
+        {% for team in userteams %}
+            <li><a href="{% url 'images_teamview' team.id %}">{{team.name}}</a></li>
         {% endfor %}
         </ul>
         <hr>
-        <p>Create new group:</p>
-        <form method="post" action="{% url 'images_creategroupview' %}">
+        <p>Create new team:</p>
+        <form method="post" action="{% url 'images_createteamview' %}">
         {% csrf_token %}
-            <input type="text" placeholder="Groupname" maxlength="20" name="groupname"> <input type="submit" value="Create">
+            <input type="text" placeholder="Teamname" maxlength="20" name="teamname"> <input type="submit" value="Create">
         </form>
     </div>
 </div>

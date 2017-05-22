@@ -6,12 +6,12 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification
+from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification, Team
 from django.conf import settings
 from django.db.models import Q
 import json
 from datetime import datetime
-
+from guardian.shortcuts import assign_perm
 
 def logout_view(request):
     logout(request)
@@ -27,11 +27,11 @@ def export_auth_view(request, export_id):
 @login_required
 def index(request):
     # needed to show the list of the users imagesets
-    usergroups = request.user.groups.all()
-    imagesets = ImageSet.objects.filter(group__in=usergroups)
+    userteams = Team.objects.filter(members__in=request.user.groups.all())
+    imagesets = ImageSet.objects.filter(team__in=userteams)
     return TemplateResponse(request, 'images/index.html', {
                             'image_sets': imagesets,
-                            'usergroups': usergroups,
+                            'userteams': userteams,
                             })
 
 
@@ -161,19 +161,6 @@ def tageditsaveview(request, annotation_id):
 
 
 @login_required
-def exportview(request, image_set_id):
-    imageset = get_object_or_404(ImageSet, id=image_set_id)
-    images = Image.objects.filter(image_set=imageset)
-    annotation_types = set()
-    for image in images:
-        annotation_types = annotation_types.union([annotation.type for annotation in Annotation.objects.filter(image=image)])
-    return TemplateResponse(request, 'images/exportview.html', {
-                            'imageset': imageset,
-                            'annotationtypes': annotation_types,
-                            })
-
-
-@login_required
 def exportcreateview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if request.method == 'POST':
@@ -211,11 +198,11 @@ def annotationmanageview(request, image_set_id):
 
 @login_required
 def exploreview(request, mode):
-    imagesets, groups, users = None, None, None
-    if mode == 'group':
-        groups = Group.objects.all()
+    imagesets, teams, users = None, None, None
+    if mode == 'team':
+        teams = Team.objects.all()
         if request.method == 'POST':
-            groups = groups.filter(name__contains=request.POST['searchquery'])
+            teams = teams.filter(name__contains=request.POST['searchquery'])
     elif mode == 'user':
         users = User.objects.all()
         if request.method == 'POST':
@@ -228,20 +215,20 @@ def exploreview(request, mode):
     return TemplateResponse(request, 'images/exploreview.html', {
                             'mode': mode,
                             'imagesets': imagesets,
-                            'groups': groups,
+                            'teams': teams,
                             'users': users, })
 
 @login_required
 def userview(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    groups = user.groups.all()
+    userteams = Team.objects.filter(members__in=user.groups.all())
 
     # todo: count the points
     points = 0
 
     return TemplateResponse(request, 'images/userview.html', {
                             'user': user,
-                            'usergroups': groups,
+                            'userteams': userteams,
                             'userpoints': points, })
 
 @login_required
@@ -266,14 +253,46 @@ def groupview(request, group_id):
         user_to_add = User.objects.filter(username=request.POST['username'])[0]
         if user_to_add:
             group.user_set.add(user_to_add)
+            #assign_perm('create_set', user_to_add, group)
+            #assign_perm('edit_own_set', user_to_add, group)
+            #assign_perm('delete_own_set', user_to_add, group)
+
     group = get_object_or_404(Group, id=group_id)
     members = group.user_set.all()
     is_member = request.user in members
-    return TemplateResponse(request, 'images/groupview.html', {
+    imagesets = ImageSet.objects.filter(group=group)
+    pub_imagesets = imagesets.filter(public=True)
+    priv_imagesets = imagesets.filter(public=False)
+    return TemplateResponse(request, 'images/teamview.html', {
                             'group': group,
                             'memberset': members,
-                            'is_member': is_member, })
+                            'is_member': is_member,
+                            'pub_imagesets': pub_imagesets,
+                            'priv_imagesets': priv_imagesets, })
 
+
+@login_required
+def teamview(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    if request.method == 'POST':
+        user_to_add = User.objects.filter(username=request.POST['username'])[0]
+        if user_to_add:
+            team.members.user_set.add(user_to_add)
+
+    members = team.members.user_set.all()
+    is_member = request.user in members
+    admins = team.admins.user_set.all()
+    is_admin = request.user in admins
+    imagesets = ImageSet.objects.filter(team=team)
+    pub_imagesets = imagesets.filter(public=True)
+    priv_imagesets = imagesets.filter(public=False)
+    return TemplateResponse(request, 'images/teamview.html', {
+                            'team': team,
+                            'memberset': members,
+                            'is_member': is_member,
+                            'is_admin': is_admin,
+                            'pub_imagesets': pub_imagesets,
+                            'priv_imagesets': priv_imagesets, })
 
 @login_required
 def creategroupview(request):
@@ -282,15 +301,49 @@ def creategroupview(request):
         group = Group()
         group.name = name
         group.save()
-        group.user_set.add(request.user)
+        user = request.user
+        group.user_set.add(user)
         group.save()
+        #assign_perm('manage_users', user, group)
+        #assign_perm('create_set', user, group)
+        #assign_perm('edit_own_set', user, group)
+        #assign_perm('delete_own_set', user, group)
         return HttpResponseRedirect(reverse('images_groupview', args=(group.id,)))
+    return HttpResponseRedirect(str('/images/'))
+
+@login_required
+def createteamview(request):
+    name = request.POST['teamname']
+    if len(name) <= 20 and len(name) >= 3:
+        members = Group(name=name+'_members')
+        members.save()
+        admins = Group(name=name+'_admins')
+        admins.save()
+        user = request.user
+        members.user_set.add(user)
+        members.save()
+        admins.user_set.add(user)
+        admins.save()
+        team = Team()
+        team.name = name
+        team.members = members
+        team.admins = admins
+        team.website = ''
+        team.save()
+        return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
     return HttpResponseRedirect(str('/images/'))
 
 @login_required
 def leavegroupview(request, group_id):
     group = get_object_or_404(Group, id=group_id)
     group.user_set.remove(request.user)
+    return HttpResponseRedirect(str('/images/'))
+
+@login_required
+def leaveteamview(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    team.members.user_set.remove(request.user)
+    team.admins.user_set.remove(request.user)
     return HttpResponseRedirect(str('/images/'))
 
 @login_required
