@@ -247,34 +247,9 @@ def createuserview(request):
 
 
 @login_required
-def groupview(request, group_id):
-    group = get_object_or_404(Group, id=group_id)
-    if request.method == 'POST':
-        user_to_add = User.objects.filter(username=request.POST['username'])[0]
-        if user_to_add:
-            group.user_set.add(user_to_add)
-            #assign_perm('create_set', user_to_add, group)
-            #assign_perm('edit_own_set', user_to_add, group)
-            #assign_perm('delete_own_set', user_to_add, group)
-
-    group = get_object_or_404(Group, id=group_id)
-    members = group.user_set.all()
-    is_member = request.user in members
-    imagesets = ImageSet.objects.filter(group=group)
-    pub_imagesets = imagesets.filter(public=True)
-    priv_imagesets = imagesets.filter(public=False)
-    return TemplateResponse(request, 'images/teamview.html', {
-                            'group': group,
-                            'memberset': members,
-                            'is_member': is_member,
-                            'pub_imagesets': pub_imagesets,
-                            'priv_imagesets': priv_imagesets, })
-
-
-@login_required
 def teamview(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.has_perm('user_management', team):
         user_to_add = User.objects.filter(username=request.POST['username'])[0]
         if user_to_add:
             team.members.user_set.add(user_to_add)
@@ -294,22 +269,6 @@ def teamview(request, team_id):
                             'pub_imagesets': pub_imagesets,
                             'priv_imagesets': priv_imagesets, })
 
-@login_required
-def creategroupview(request):
-    name = request.POST['groupname']
-    if len(name) <= 20 and len(name) >= 3:
-        group = Group()
-        group.name = name
-        group.save()
-        user = request.user
-        group.user_set.add(user)
-        group.save()
-        #assign_perm('manage_users', user, group)
-        #assign_perm('create_set', user, group)
-        #assign_perm('edit_own_set', user, group)
-        #assign_perm('delete_own_set', user, group)
-        return HttpResponseRedirect(reverse('images_groupview', args=(group.id,)))
-    return HttpResponseRedirect(str('/images/'))
 
 @login_required
 def createteamview(request):
@@ -330,14 +289,11 @@ def createteamview(request):
         team.admins = admins
         team.website = ''
         team.save()
+        assign_perm('user_management', team.admins, team)
+        assign_perm('create_set', team.members, team)
         return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
     return HttpResponseRedirect(str('/images/'))
 
-@login_required
-def leavegroupview(request, group_id):
-    group = get_object_or_404(Group, id=group_id)
-    group.user_set.remove(request.user)
-    return HttpResponseRedirect(str('/images/'))
 
 @login_required
 def leaveteamview(request, team_id):

@@ -16,6 +16,12 @@ class Team(models.Model):
     def __str__(self):
         return u'Team: {0}'.format(self.name)
 
+    class Meta:
+        permissions = (
+            ('user_management', 'Manage users'),
+            ('create_set', 'Create imagesets'),
+        )
+
 class ImageSet(models.Model):
     path = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
@@ -29,6 +35,16 @@ class ImageSet(models.Model):
 
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)
+
+    class Meta:
+        permissions = (
+            ('edit_set', 'Edit set'),
+            ('delete_set', 'Delete set'),
+            ('edit_annotation', 'Edit annotations in the set'),
+            ('delete_annotion', 'Delete annotations in the set'),
+            ('annotate', 'Create annotations in the set'),
+            ('read', 'Read and download annotations and images'),
+        )
 
 
 class Image(models.Model):

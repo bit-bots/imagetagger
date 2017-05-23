@@ -1,6 +1,8 @@
 
 {% extends 'images/base.html' %}
 {% block bodyblock %}
+{% load guardian_tags %}
+{% get_obj_perms request.user for team as "team_perms" %}
 <div>
     <div class="leftcontent">
         <h1>Group-profile of {{ team.name }}</h1>
@@ -21,11 +23,13 @@
             {% endfor %}
         </ul>
         {% endif %}
+        {% if "user_management" in team_perms %}
         <h3>Add Member:</h3>
         <form method="post" action="{% url 'images_teamview' team.id %}">
         {% csrf_token %}
             <input type="text" placeholder="username" maxlength="20" name="username"> <input type="submit" value="Add">
         </form>
+        {% endif %}
         <hr>
         <a href="{% url 'images_leaveteamview' team.id %}">leave group</a>
         <hr>
