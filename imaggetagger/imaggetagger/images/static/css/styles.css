@@ -93,15 +93,16 @@ div.head{
 }
 
 div.centerblock{
+    width: 45%;
    border-radius: 5px;
    border-color: silver;
    border-style: solid;
    border-width: thin;
    padding: 5px;
-   margin-top: 10px;
+   position: absolute;
+   margin-top: 5px;
    text-align: center;
-   margin-right: 30%;
-   margin-left: 30%;
+   margin-left: 22%;
 }
 
 div.rightcontent{

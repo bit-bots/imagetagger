@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.contrib import auth
-from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, teamview, createteamview, createuserview, leaveteamview, exploreview
+from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, teamview, createteamview, createuserview, leaveteamview, exploreview, enthroneview, dethroneview
 
 urlpatterns = [
     url(r'^$', index, name='images_index'),
@@ -22,5 +22,8 @@ urlpatterns = [
     url(r'^team/(\d+)/$', teamview, name='images_teamview'),
     url(r'^team/create/$', createteamview, name='images_createteamview'),
     url(r'^team/explore/$', exploreview, {'mode': 'team'}, name='images_exploreteamview'),
-    url(r'^team/leave/(\d+)/$', leaveteamview, name='images_leaveteamview'),
+    url(r'^team/(\d+)/leave/$', leaveteamview, name='images_leaveteamview'),
+    url(r'^team/(\d+)/leave/(\d+)/$', leaveteamview, name='images_kickuserview'),
+    url(r'^team/(\d+)/enthrone/(\d+)/$', enthroneview, name='images_enthroneuserview'),
+    url(r'^team/(\d+)/dethrone/(\d+)/$', dethroneview, name='images_dethroneuserview'),
 ]

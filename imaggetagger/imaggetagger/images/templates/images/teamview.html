@@ -5,7 +5,7 @@
 {% get_obj_perms request.user for team as "team_perms" %}
 <div>
     <div class="leftcontent">
-        <h1>Group-profile of {{ team.name }}</h1>
+        <h1>Team-profile of {{ team.name }}</h1>
         {% if pub_imagesets %}
         <h3>Public Imagesets:</h3>
         <ul>
@@ -23,6 +23,9 @@
             {% endfor %}
         </ul>
         {% endif %}
+        {% if no_admin %}
+        This team has no admin! <a href="{% url 'images_enthroneuserview' team.id request.user.id %}">I want to be admin!</a>
+        {% endif %}
         {% if "user_management" in team_perms %}
         <h3>Add Member:</h3>
         <form method="post" action="{% url 'images_teamview' team.id %}">
@@ -38,7 +41,17 @@
         <h3>Members:</h3>
         <ul>
             {% for member in memberset %}
-            <li><a href="{% url 'images_userview' member.id %}">{{member.username}}</a></li>
+            <li>
+                <a href="{% url 'images_userview' member.id %}">{{member.username}}</a>
+                {% if "user_management" in team_perms %}
+                    <a href="{% url 'images_kickuserview' team.id member.id %}"> [kick]</a>
+                    {% if member in admins %}
+                        <a href="{% url 'images_dethroneuserview' team.id member.id %}"> [dethrone]</a>
+                    {% else %}
+                        <a href="{% url 'images_enthroneuserview' team.id member.id %}"> [enthrone]</a>
+                    {% endif %}
+                {% endif %}
+            </li>
             {% endfor %}
         </ul>
     </div>

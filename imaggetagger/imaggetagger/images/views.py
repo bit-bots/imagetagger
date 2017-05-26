@@ -258,6 +258,7 @@ def teamview(request, team_id):
     is_member = request.user in members
     admins = team.admins.user_set.all()
     is_admin = request.user in admins
+    no_admin = len(admins) ==0
     imagesets = ImageSet.objects.filter(team=team)
     pub_imagesets = imagesets.filter(public=True)
     priv_imagesets = imagesets.filter(public=False)
@@ -266,6 +267,8 @@ def teamview(request, team_id):
                             'memberset': members,
                             'is_member': is_member,
                             'is_admin': is_admin,
+                            'no_admin': no_admin,
+                            'admins': admins,
                             'pub_imagesets': pub_imagesets,
                             'priv_imagesets': priv_imagesets, })
 
@@ -296,11 +299,31 @@ def createteamview(request):
 
 
 @login_required
-def leaveteamview(request, team_id):
+def leaveteamview(request, team_id, user_id=None):
+    if user_id:
+        user = get_object_or_404(User, id=user_id)
+    else:
+        user=request.user
     team = get_object_or_404(Team, id=team_id)
-    team.members.user_set.remove(request.user)
-    team.admins.user_set.remove(request.user)
-    return HttpResponseRedirect(str('/images/'))
+    team.members.user_set.remove(user)
+    team.admins.user_set.remove(user)
+    return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
+
+@login_required
+def enthroneview(request, team_id, user_id):
+    user = get_object_or_404(User, id=user_id)
+    team = get_object_or_404(Team, id=team_id)
+    if request.user.has_perm('user_management', team) or 0 == len(team.admins.user_set.all()):
+        team.admins.user_set.add(user)
+    return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
+
+@login_required
+def dethroneview(request, team_id, user_id):
+    user = get_object_or_404(User, id=user_id)
+    team = get_object_or_404(Team, id=team_id)
+    if request.user.has_perm('user_management', team):
+        team.admins.user_set.remove(user)
+    return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
 
 @login_required
 def verifyview(request, annotation_id):
