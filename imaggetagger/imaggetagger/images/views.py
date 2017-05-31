@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import logout
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
@@ -9,6 +10,7 @@ from django.template.response import TemplateResponse
 from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification, Team
 from django.conf import settings
 from django.db.models import Q
+import os
 import json
 from datetime import datetime
 from guardian.shortcuts import assign_perm
@@ -58,6 +60,27 @@ def imagesetview(request, image_set_id):
                             'first_annotation': first_annotation,
                             'exports': exports,
                             })
+
+
+@login_required
+@require_http_methods(["POST", ])
+def imagesetcreateview(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    if request.user.has_perm('create_set', team):
+        # todo: check if name and path are unique in the team
+        name = request.POST["name"]
+        location = request.POST["location"]
+        public = request.POST["public"]
+        imageset = ImageSet(name=name, location=location)
+        imageset.public = public == 'on'
+        imageset.save()
+        imageset.path = '_'.join((str(team.id), str(imageset.id)))  # todo: some formatting would be great
+        imageset.team = team
+        imageset.save()
+        os.mkdir(os.path.join(settings.STATIC_ROOT, imageset.get_path()))  # create a folder to store the images of the set
+        return HttpResponseRedirect(reverse('images_imagesetview', args=(imageset.id,)))
+    return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
+
 
 
 @login_required
@@ -173,7 +196,14 @@ def exportcreateview(request, image_set_id):
                             annotation_count=annotation_count,
                             export_text=export_text)
             export.save()
-    return HttpResponseRedirect(str('/images/overview/' + str(image_set_id) + '/'))
+    return HttpResponseRedirect(reverse('images_imagesetview', args=(image_set_id,)))
+
+
+#@login_required
+#def exportdeleteview(request, export_id):
+#    export = get_object_or_404(Export, id=export_id)
+#    if request.user.has_perm('delete_export',
+#        return HttpResponseRedirect(reverse('images_imagesetview', args=(export.image_set.id,)))
 
 
 @login_required
@@ -257,8 +287,8 @@ def teamview(request, team_id):
     members = team.members.user_set.all()
     is_member = request.user in members
     admins = team.admins.user_set.all()
-    is_admin = request.user in admins
-    no_admin = len(admins) ==0
+    is_admin = request.user in admins  # The request.user is an admin of the team
+    no_admin = len(admins) == 0  # Team has no admin, so every member can claim the Position
     imagesets = ImageSet.objects.filter(team=team)
     pub_imagesets = imagesets.filter(public=True)
     priv_imagesets = imagesets.filter(public=False)

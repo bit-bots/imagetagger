@@ -14,7 +14,11 @@
     </form>
     <hr>
     {% for imageset in imagesets %}
+    {% if imageset.team %}
     <a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a><br>
+    {% else %}
+    <a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a><br>
+    {% endif %}
     {% endfor %}
     {% for team in teams %}
     <a href="{% url 'images_teamview' team.id %}">{{team.name}}</a><br>

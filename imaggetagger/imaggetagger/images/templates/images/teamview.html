@@ -4,8 +4,8 @@
 {% load guardian_tags %}
 {% get_obj_perms request.user for team as "team_perms" %}
 <div>
+    <h1>Team-profile of {{ team.name }}</h1>
     <div class="leftcontent">
-        <h1>Team-profile of {{ team.name }}</h1>
         {% if pub_imagesets %}
         <h3>Public Imagesets:</h3>
         <ul>
@@ -54,6 +54,19 @@
             </li>
             {% endfor %}
         </ul>
+    </div>
+    <div class="toolbox">
+        <h3>Create imageset</h3>
+        <form method="post" action="{% url 'images_imagesetcreateview' team.id %}">
+            {% csrf_token %}
+            <label for="name">Name: </label>
+            <input type="text" id="name" name="name"><br>
+            <label for="location">Location: </label>
+            <input type="text" id="location" name="location"><br>
+            <label for="public">Public: </label>
+            <input type="checkbox" id="public" name="public"><br>
+            <input type="submit" value="Create">
+        </form>
     </div>
 </div>
 {% endblock %}

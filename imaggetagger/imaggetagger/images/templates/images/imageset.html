@@ -1,5 +1,6 @@
 {% extends 'images/base.html' %}
 {% block bodyblock %}
+{% if images %}
 <div class="leftlist">
 <ul>
 {% for image in images %}
@@ -7,17 +8,19 @@
 {% endfor %}
 </ul>
 </div>
+{% endif %}
 <div class="centerblock">
     <h2>Imageset management</h2>
 
 </div>
 <div class="toolbox">
-    <h2>Annotation management</h2>
     {% if first_annotation %}
+    <h2>Annotation management</h2>
     <li><a href="{% url 'images_annotationmanageview' imageset.id %}">Manage annotations</a>
     <li><a href="{% url 'images_verifyview' first_annotation.id %}">Verify annotations</a>
+    <br>&nbsp;
+    <hr>
     {% endif %}
-    <br>&nbsp;<br>
     <h2>Export tags to file</h2>
         <form method="post" action="{% url 'images_exportview' imageset.id %}" enctype="multipart/form-data">
         {% csrf_token %}
@@ -30,9 +33,8 @@
             <option value="Bit-Bot AI">Bit-Bot AI</option>
         </select>
         <input type="submit" value="Export">
-</form>
+        </form>
 {% if exports %}
-    <hr>
     <h3>Download exports:</h3>
     {% for export in exports %}
     <li><a href="{% url 'images_index' %}export/{{export.id}}/download/">{{export.type}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>

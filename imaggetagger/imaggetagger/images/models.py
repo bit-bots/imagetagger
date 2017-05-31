@@ -22,8 +22,9 @@ class Team(models.Model):
             ('create_set', 'Create imagesets'),
         )
 
+
 class ImageSet(models.Model):
-    path = models.CharField(max_length=100)
+    path = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     time = models.DateTimeField(auto_now_add=True)
@@ -44,6 +45,8 @@ class ImageSet(models.Model):
             ('delete_annotion', 'Delete annotations in the set'),
             ('annotate', 'Create annotations in the set'),
             ('read', 'Read and download annotations and images'),
+            ('create_export', 'Create export files of the set'),
+            ('delete_export', 'Delete export files of the set'),
         )
 
 
@@ -51,7 +54,6 @@ class Image(models.Model):
     image_set = models.ForeignKey(ImageSet, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     time = models.DateTimeField(auto_now_add=True)
-    # LOCATION
 
     def full_path(self):
         return str(self.image_set.get_path() + self.name)

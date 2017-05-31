@@ -1,12 +1,13 @@
 from django.conf.urls import url
 from django.contrib import auth
-from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, teamview, createteamview, createuserview, leaveteamview, exploreview, enthroneview, dethroneview
+from .views import index, logout_view, imagesetview, tagview, tageditview, tagdeleteview, tageditsaveview, exportcreateview, export_auth_view, exportdownloadview, annotationmanageview, verifyview, userview, teamview, createteamview, createuserview, leaveteamview, exploreview, enthroneview, dethroneview, imagesetcreateview
 
 urlpatterns = [
     url(r'^$', index, name='images_index'),
     url(r'^export/(\d+)/auth/$', export_auth_view, name='images_export_auth'),
     url(r'^logout/', logout_view, name='images_logout'),
     url(r'^imageset/(\d+)/$', imagesetview, name='images_imagesetview'),
+    url(r'^imageset/create/(\d+)/$', imagesetcreateview, name='images_imagesetcreateview'),
     url(r'^imageset/explore/$', exploreview, {'mode': 'imageset'}, name='images_exploreimagesetview'),
     url(r'^tagview/(\d+)/$', tagview, name='images_tagview'),
     url(r'^tagview/edit/(\d+)/$', tageditview, name='images_tageditview'),
