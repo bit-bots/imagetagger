@@ -1,15 +1,17 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import logout
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
-from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from .models import ImageSet, Image, AnnotationType, Annotation, Export, Verification, Team
 from django.conf import settings
 from django.db.models import Q
+from django.core.files.uploadedfile import UploadedFile
 import os
 import json
 from datetime import datetime
@@ -35,6 +37,49 @@ def index(request):
                             'image_sets': imagesets,
                             'userteams': userteams,
                             })
+
+
+@login_required
+@require_http_methods(["POST", ])
+def imageuploadview(request, imageset_id):
+
+    if request.method == 'POST':
+        imageset = get_object_or_404(ImageSet, id=imageset_id)
+        if request.FILES is None:
+            return HttpResponseBadRequest('Must have files attached!')
+        json_files = []
+        for f in request.FILES.getlist('files[]'):
+            image = Image(name=f.name, image_set=imageset)
+            image.save()
+            with open(os.path.join(settings.STATIC_ROOT, imageset.get_path(), image.name), 'wb') as out:
+                for chunk in f.chunks():
+                    out.write(chunk)
+            json_files.append({'name': f.name,
+                               'size': f.size,
+                               'url': reverse('images_imageview', args=(image.id, )),
+                               'thumbnailUrl': reverse('images_imageview', args=(image.id, )),
+                               'deleteUrl': reverse('images_imagedeleteview', args=(image.id, )),
+                               'deleteType': "DELETE",
+                               })
+        return JsonResponse({'files': json_files})
+
+
+@login_required
+def imageview(request, image_id):
+    image = get_object_or_404(Image, image_id)
+    with open(os.path.join(settings.STATIC_ROOT, image.full_path()), "rb") as f:
+        return HttpResponse(f.read(), content_type="image/jpeg")
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST", ])
+def imagedeleteview(request, image_id):
+    image = get_object_or_404(Image, id=image_id)
+    if request.user.has_perm('edit_imageset', image.image_set):
+        os.remove(os.path.join(settings.STATIC_ROOT, image.full_path()))
+        image.delete()
+        return JsonResponse({'files': [{image.name: True}, ]})
 
 
 @login_required
