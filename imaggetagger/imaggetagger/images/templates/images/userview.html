@@ -1,15 +1,26 @@
 
 {% extends 'images/base.html' %}
 {% block bodyblock %}
-<div>
-    <div class="leftcontent">
-        <h2>Profile of {{ user.username }}</h2>
-        Points: {{userpoints}}
-
-        <h3>Teams:</h3>
-        {% for team in userteams %}
-            <li><a href="{% url 'images_teamview' team.id %}">{{team.name}}</a></li>
-        {% endfor %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Profile of {{ user.username }}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    Points: {{userpoints}}
+                    <h3>Teams:</h3>
+                    <ul>
+                        {% for team in userteams %}
+                            <li><a href="{% url 'images_teamview' team.id %}">{{team.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
