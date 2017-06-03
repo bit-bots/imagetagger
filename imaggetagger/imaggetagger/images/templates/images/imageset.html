@@ -97,8 +97,6 @@
 <script src="//blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
 <!-- The Canvas to Blob plugin is included for image resizing functionality -->
 <script src="//blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
-<!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
 <script src="{% static 'jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
 <!-- The basic File Upload plugin -->
@@ -148,31 +146,33 @@
                             {% csrf_token %}
                             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
                             <div class="row fileupload-buttonbar">
-                                <div class="col-lg-7" style="width:100%">
+                                <div class="col-lg-12">
                                     <!-- The fileinput-button span is used to style the file input field as button -->
                                     <span class="btn btn-success fileinput-button">
-                                        <i class="glyphicon glyphicon-plus"></i>
+                                        <i class="icon-plus icon-white"></i>
                                         <span>Add files...</span>
                                         <input type="file" name="files[]" multiple>
                                     </span>
                                     <button type="submit" class="btn btn-primary start">
-                                        <i class="glyphicon glyphicon-upload"></i>
+                                        <i class="icon-upload icon-white"></i>
                                         <span>Start upload</span>
                                     </button>
                                     <button type="reset" class="btn btn-warning cancel">
-                                        <i class="glyphicon glyphicon-ban-circle"></i>
+                                        <i class="icon-ban-circle icon-white"></i>
                                         <span>Cancel upload</span>
                                     </button>
                                     <button type="button" class="btn btn-danger delete">
-                                        <i class="glyphicon glyphicon-trash"></i>
+                                        <i class="icon-trash icon-white"></i>
                                         <span>Delete</span>
                                     </button>
-                                    <input type="checkbox" class="toggle">                </div>
+                                    <input type="checkbox" class="toggle">
                                     <!-- The global file processing state -->
                                     <span class="fileupload-process"></span>
                                 </div>
+                            </div>
+                            <div class="row">
                                 <!-- The global progress state -->
-                                <div class="col-lg-5 fileupload-progress fade">
+                                <div class="col-lg-12 fileupload-progress">
                                     <!-- The global progress bar -->
                                     <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
                                         <div class="progress-bar progress-bar-success" style="width:0%;"></div>
@@ -186,6 +186,7 @@
                         </form>
                     </div>
                 </div>
+            </div>
         </div>
         <div class="col-md-3">
             {% if first_annotation %}

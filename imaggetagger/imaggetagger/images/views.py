@@ -66,14 +66,14 @@ def imageuploadview(request, imageset_id):
 
 @login_required
 def imageview(request, image_id):
-    image = get_object_or_404(Image, image_id)
+    image = get_object_or_404(Image, id=image_id)
     with open(os.path.join(settings.STATIC_ROOT, image.full_path()), "rb") as f:
         return HttpResponse(f.read(), content_type="image/jpeg")
 
 
 @login_required
 @csrf_exempt
-@require_http_methods(["POST", ])
+@require_http_methods(["DELETE", ])
 def imagedeleteview(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if request.user.has_perm('edit_imageset', image.image_set):
