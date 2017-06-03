@@ -1,24 +1,48 @@
 {% extends 'images/base.html' %}
 {% block bodyblock %}
-<div class="centerblock">
-<h1>Login</h1>
-<form class="login" method="POST" action="/login/">
-    {% csrf_token %}
-    {{form.as_p}}
-    <input type="submit" class="logBut" value="Log in"/>
-</form>
-<hr>
-<h2>Create a new user</h2>
-<form action="{% url 'images_createuserview' %}" method="post">
-    {% csrf_token %}
-    <label for="username">Username: </label>
-    <input type="text" id="username" name="username" maxlength="20"><br>
-    <label for="password">Password: </label>
-    <input type="password" id="password" name="password" maxlength="50"><br>
-    <label for="email">E-Mail: </label>
-    <input type="text" id="email" name="email"><br>
-    <input type="submit" value="Create">
-
-    </form>
+<div class="container">
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Login</h1>
+                </div>
+                <div class="panel-body">
+                    <form class="login" method="POST" action="/login/">
+                    {% csrf_token %}
+                    {{form.as_p}}
+                    <input type="submit" class="btn btn-primary" value="Log in"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Create a new user</h2>
+                </div>
+                <div class="panel-body">
+                    <div action="{% url 'images_createuserview' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="username">Username: </label>
+                            <input class="form-control" type="text" id="username" name="username" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password: </label>
+                            <input class="form-control" type="password" id="password" name="password" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-Mail: </label>
+                            <input class="form-control" type="text" id="email" name="email">
+                        </div>
+                        <input class="btn btn-default" type="submit" value="Create">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

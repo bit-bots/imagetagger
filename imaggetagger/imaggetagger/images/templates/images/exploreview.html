@@ -34,7 +34,10 @@
                         <div class="col-md-12">
                             <form action="" method="post">
                                 {% csrf_token %}
-                                    <input id="searchbox" type="text" name="searchquery" placeholder="Search for {{mode}}s"> <input type="submit" class="btn btn-primary" value="Search">
+                                <input id="searchbox" type="text" name="searchquery" placeholder="Search for {{mode}}s">
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
+                                </button>
                             </form>
                             <hr>
                         </div>
@@ -42,29 +45,40 @@
                     <div class="row">
                         <div class="col-md-12">
                             <dl>
+                                <table class="table table-striped">
                                 {% for imageset in imagesets %}
-                                    {% if imageset.team %}
-                                        <dt>
-                                            <a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a>
-                                        </dt>
-                                    {% else %}
-                                        <dt>
-                                            <a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a>
-                                        </dt>
-                                     {% endif %}
-                                        <dd>
-                                            {{ imageset.location }}
-                                        </dd>
+                                    <tr>
+                                        <td>
+                                            <dt>
+                                                {% if imageset.team %}
+                                                    <a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a>
+                                                {% else %}
+                                                    <a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a>
+                                                {% endif %}
+                                            </dt>
+                                            <dd>
+                                                {{ imageset.location }}
+                                            </dd>
+                                        </td>
+                                    </tr>
                                 {% endfor %}
                                 {% for team in teams %}
-                                    <dt>
-                                        <a href="{% url 'images_teamview' team.id %}">{{team.name}}</a>
-                                    </dt>
+                                    <tr>
+                                        <td>
+                                            <dt>
+                                                <a href="{% url 'images_teamview' team.id %}">{{team.name}}</a>
+                                            </dt>
+                                        </td>
+                                    </tr>
                                 {% endfor %}
                                 {% for user in users %}
-                                    <dt>
-                                        <a href="{% url 'images_userview' user.id %}">{{user.username}}</a>
-                                    </dt>
+                                    <tr>
+                                        <td>
+                                            <dt>
+                                                <a href="{% url 'images_userview' user.id %}">{{user.username}}</a>
+                                            </dt>
+                                        </td>
+                                    </tr>
                                 {% endfor %}
                             </dl>
                         </div>

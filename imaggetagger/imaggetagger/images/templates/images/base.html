@@ -24,21 +24,22 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-            <li><a href="{% url 'images_index' %}">Home</a></li>
-        {% block navblock %}{% endblock %}
-            <li><a href="{% url 'images_exploreimagesetview' %}">Explore</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    <li><a href="{% url 'images_userview' request.user.id %}">Profile</a> </li>
-                    {% if user.is_authenticated %}
-                    <li><a href="{% url 'images_logout' %}">Logout</a></li>
-                    {% else %}
-                    <li><a href="{% url 'admin_login' %}">Login</a></li>
-                    {% endif %}
-                </ul>
-            </li>
-
+                <li><a href="{% url 'images_index' %}">Home</a></li>
+                {% block navblock %}{% endblock %}
+                {% if request.user.is_authenticated %}
+                    <li><a href="{% url 'images_exploreimagesetview' %}">Explore</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'images_userview' request.user.id %}">Profile</a> </li>
+                            {% if user.is_authenticated %}
+                                <li><a href="{% url 'images_logout' %}">Logout</a></li>
+                            {% else %}
+                                <li><a href="{% url 'admin_login' %}">Login</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
             </ul>
       </div>
     </div>
