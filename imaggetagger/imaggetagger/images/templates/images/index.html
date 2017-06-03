@@ -1,29 +1,48 @@
 
 {% extends 'images/base.html' %}
 {% block bodyblock %}
-<h1>Home</h1>
-<div>
-    <div class="leftcontent">
-        <h2>Imagesets</h2>
-        <ul>
-{% for imageset in image_sets %}
-    <li><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
-{% endfor %}
-        </ul>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Home</h1>
+        </div>
     </div>
-    <div class="toolbox">
-        <h3>My Teams</h3>
-        <ul>
-        {% for team in userteams %}
-            <li><a href="{% url 'images_teamview' team.id %}">{{team.name}}</a></li>
-        {% endfor %}
-        </ul>
-        <hr>
-        <p>Create new team:</p>
-        <form method="post" action="{% url 'images_createteamview' %}">
-        {% csrf_token %}
-            <input type="text" placeholder="Teamname" maxlength="20" name="teamname"> <input type="submit" value="Create">
-        </form>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Imagesets</h2>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        {% for imageset in image_sets %}
+                            <li><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">My Teams</h3>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        {% for team in userteams %}
+                            <li><a href="{% url 'images_teamview' team.id %}">{{team.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                    <hr>
+                    <p>Create new team:</p>
+                    <form method="post" action="{% url 'images_createteamview' %}">
+                        {% csrf_token %}
+                        <input type="text" placeholder="Teamname" maxlength="20" name="teamname">
+                        <input class="btn btn-primary" type="submit" value="Create">
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

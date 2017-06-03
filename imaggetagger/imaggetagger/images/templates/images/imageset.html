@@ -116,87 +116,115 @@
 <![endif]-->
 {% endblock %}
 {% block bodyblock %}
-{% if images %}
-<div class="leftlist">
-<ul>
-{% for image in images %}
-        <li><a href="{% url 'images_tagview' image.id %}"> {{image.name}}</a></li>
-{% endfor %}
-</ul>
-</div>
-{% endif %}
-<div class="centerblock">
-    <h2>Imageset management</h2>
-    Upload new images: <br>
-    <div >
-    <form id="fileupload" action="{% url 'images_imageuploadview' imageset.id %}" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-        <div class="row fileupload-buttonbar">
-            <div class="col-lg-7" style="width:100%">
-                <!-- The fileinput-button span is used to style the file input field as button -->
-                <span class="btn btn-success fileinput-button">
-                    <i class="glyphicon glyphicon-plus"></i>
-                    <span>Add files...</span>
-                    <input type="file" name="files[]" multiple>
-                </span>
-                <button type="submit" class="btn btn-primary start">
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>Start upload</span>
-                </button>
-                <button type="reset" class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
-                    <span>Cancel upload</span>
-                </button>
-                <button type="button" class="btn btn-danger delete">
-                    <i class="glyphicon glyphicon-trash"></i>
-                    <span>Delete</span>
-                </button>
-                <input type="checkbox" class="toggle">
-                <!-- The global file processing state -->
-                <span class="fileupload-process"></span>
-            </div>
-            <!-- The global progress state -->
-            <div class="col-lg-5 fileupload-progress fade">
-                <!-- The global progress bar -->
-                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            {% if images %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">Images</h2>
+                    </div>
+                    <div class="panel-body">
+                        <ul>
+                            {% for image in images %}
+                                <li>
+                                    <a href="{% url 'images_tagview' image.id %}"> {{image.name}}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                <!-- The extended global progress state -->
-                <div class="progress-extended">&nbsp;</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Imageset management</h2>
+                </div>
+                <div class="panel-body">
+                    Upload new images: <br>
+                    <div >
+                        <form id="fileupload" action="{% url 'images_imageuploadview' imageset.id %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                            <div class="row fileupload-buttonbar">
+                                <div class="col-lg-7" style="width:100%">
+                                    <!-- The fileinput-button span is used to style the file input field as button -->
+                                    <span class="btn btn-success fileinput-button">
+                                        <i class="glyphicon glyphicon-plus"></i>
+                                        <span>Add files...</span>
+                                        <input type="file" name="files[]" multiple>
+                                    </span>
+                                    <button type="submit" class="btn btn-primary start">
+                                        <i class="glyphicon glyphicon-upload"></i>
+                                        <span>Start upload</span>
+                                    </button>
+                                    <button type="reset" class="btn btn-warning cancel">
+                                        <i class="glyphicon glyphicon-ban-circle"></i>
+                                        <span>Cancel upload</span>
+                                    </button>
+                                    <button type="button" class="btn btn-danger delete">
+                                        <i class="glyphicon glyphicon-trash"></i>
+                                        <span>Delete</span>
+                                    </button>
+                                    <input type="checkbox" class="toggle">                </div>
+                                    <!-- The global file processing state -->
+                                    <span class="fileupload-process"></span>
+                                </div>
+                                <!-- The global progress state -->
+                                <div class="col-lg-5 fileupload-progress fade">
+                                    <!-- The global progress bar -->
+                                    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                                    </div>
+                                    <!-- The extended global progress state -->
+                                    <div class="progress-extended">&nbsp;</div>
+                                </div>
+                            </div>
+                            <!-- The table listing the files available for upload/download -->
+                            <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+                        </form>
+                    </div>
+                </div>
+        </div>
+        <div class="col-md-3">
+            {% if first_annotation %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">Annotation management</h2>
+                    </div>
+                    <div class="panel-body">
+                        <li><a href="{% url 'images_annotationmanageview' imageset.id %}">Manage annotations</a></li>
+                        <li><a href="{% url 'images_verifyview' first_annotation.id %}">Verify annotations</a></li>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Export tags to file</h2>
+                </div>
+                <div class="panel-body">
+                    <form method="post" action="{% url 'images_exportview' imageset.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                            {% comment %}
+                                {% for annotationtype in annotationtypes %}
+                                    <li><input type="checkbox" name="selected_annotation_type" value="{{annotationtype.id}}"> {{annotationtype.name}}</li>
+                                {% endfor %}
+                            {% endcomment %}
+                        <select name="export_format">
+                            <option value="Bit-Bot AI">Bit-Bot AI</option>
+                        </select>
+                        <input type="submit" value="Export">
+                    </form>
+                    {% if exports %}
+                        <h3>Download exports:</h3>
+                        {% for export in exports %}
+                            <li><a href="{% url 'images_index' %}export/{{export.id}}/download/">{{export.type}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
         </div>
-        <!-- The table listing the files available for upload/download -->
-        <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-    </form>
     </div>
-</div>
-<div class="toolbox">
-    {% if first_annotation %}
-    <h2>Annotation management</h2>
-    <li><a href="{% url 'images_annotationmanageview' imageset.id %}">Manage annotations</a>
-    <li><a href="{% url 'images_verifyview' first_annotation.id %}">Verify annotations</a>
-    <br>&nbsp;
-    <hr>
-    {% endif %}
-    <h2>Export tags to file</h2>
-        <form method="post" action="{% url 'images_exportview' imageset.id %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% comment %}
-        {% for annotationtype in annotationtypes %}
-        <li><input type="checkbox" name="selected_annotation_type" value="{{annotationtype.id}}"> {{annotationtype.name}}</li>
-        {% endfor %}
-        i{% endcomment %}
-        <select name="export_format">
-            <option value="Bit-Bot AI">Bit-Bot AI</option>
-        </select>
-        <input type="submit" value="Export">
-        </form>
-{% if exports %}
-    <h3>Download exports:</h3>
-    {% for export in exports %}
-    <li><a href="{% url 'images_index' %}export/{{export.id}}/download/">{{export.type}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
-    {% endfor %}
-{% endif %}
 </div>
 {% endblock %}

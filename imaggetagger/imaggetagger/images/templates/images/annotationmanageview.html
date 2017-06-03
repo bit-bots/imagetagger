@@ -1,30 +1,51 @@
 {% extends 'images/base.html' %}
 {% load static %}
 {% block navblock %}
-<a class='navbar' href='{% url 'images_imagesetview' selected_image_set.id %}'>Overview</a>
+<li><a href='{% url 'images_imagesetview' selected_image_set.id %}'>Imageset</a></li>
 {% endblock %}
 {% block bodyblock %}
-<h1>Manage annotations</h1>
-<div class="leftlist">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Manage annotations</h1>
+        </div>
+    </div>
+    <div class="row">
+<div class="col-md-3">
+  <div class="list-group">
   {% for image_set in image_sets %}
   {% if image_set.id == selected_image_set.id %}
-  <b id="selected_row">{{selected_image_set.name}}</b><br>
+    <a class="list-group-item active">
+        {% if image_set.team %}
+        {{image_set.team.name}} /
+        {% endif %}
+        {{image_set.name}}
+    </a>
   {% else %}
-  <a href="{% url 'images_annotationmanageview' image_set.id %}"> {{image_set.name}}</a><br>
+      <a class="list-group-item" href="{% url 'images_annotationmanageview' image_set.id %}">
+          {% if image_set.team %}
+          {{image_set.team.name}} /
+          {% endif %}
+          {{image_set.name}}
+      </a>
   {% endif %}
   {% endfor %}
+  </div>
 </div>
-<div class='rightcontent'>
-  <table border='1' width='100%'>
+<div class="col-md-9">
+    <div class="panel panel-default">
+  <table class="table table-striped" width='100%'>
+    <thead>
     <tr>
-      <td>Image</td>
-      <td>Type</td>
-      <td>Annotation</td>
-      <td>Verifications</td>
-      <td>Creator</td>
-      <td>Last editor</td>
-      <td>Action</td>
+      <th>Image</th>
+      <th>Type</th>
+      <th>Annotation</th>
+      <th>Verifications</th>
+      <th>Creator</th>
+      <th>Last editor</th>
+      <th>Action</th>
     </tr>
+    </thead>
     {% for annotation in annotations %}
     <tr>
       <td><a href='{% url 'images_tagview' annotation.image.id %}'>{{ annotation.image.name }}</a></td>
@@ -47,5 +68,8 @@
     </tr>
     {% endfor %}
   </table>
+    </div>
+</div>
+    </div>
 </div>
 {% endblock %}

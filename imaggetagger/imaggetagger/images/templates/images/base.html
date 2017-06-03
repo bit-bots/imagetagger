@@ -2,7 +2,11 @@
 <head>
     <meta charset="utf-8" />
     <script type="text/javascript" src="{% static 'scripts/jquery.min.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     {% block taggerimports %}{% endblock %}
     <script type="text/javascript">
     {% block individual_script %}{% endblock %}
@@ -11,24 +15,35 @@
 </head>
 <body>
   {% block selectorblock %}{% endblock %}
-
 <div class="main">
-    <div class="head">
-      <div style="display: inline">
-          <a href="https://www.bit-bots.de" target="_blank"><img src="{% static 'symbols/bitbots-logo.png' %}" height="40px"></a>
-          <h1 style="display: inline"><a style="text-decoration: none; color: #000000"  href="{% url 'images_index' %}">Imagetagger</a></h1>
-      </div>
-      <div style="float: right; padding-top: 10px;">
-        <a class="navbar" href="{% url 'images_index' %}">Home</a>
+    <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand bitbot-logo" href="https://www.bit-bots.de" target="_blank"><img src="{% static 'symbols/bitbots-logo.png' %}" height="40px"></a>
+          <a class="navbar-brand"  href="{% url 'images_index' %}">Imagetagger</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'images_index' %}">Home</a></li>
         {% block navblock %}{% endblock %}
-          <a class="navbar" href="{% url 'images_exploreimagesetview' %}">Explore</a>
-        {% if user.is_authenticated %}
-          <a class="navbar" href="{% url 'images_logout' %}">Logout ({{ request.user.username }})</a>
-        {% else %}
-          <a class="navbar" href="{% url 'admin_login' %}">Login</a>
-        {% endif %}
+            <li><a href="{% url 'images_exploreimagesetview' %}">Explore</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{% url 'images_userview' request.user.id %}">Profile</a> </li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'images_logout' %}">Logout</a></li>
+                    {% else %}
+                    <li><a href="{% url 'admin_login' %}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </li>
+
+            </ul>
       </div>
     </div>
+</nav>
+    <div class="content">
 {% block bodyblock %}{% endblock %}
-</div>
+</div></div>
 </body>

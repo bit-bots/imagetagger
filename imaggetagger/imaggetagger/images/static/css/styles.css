@@ -4,6 +4,9 @@ body{
 a{
     color: #404040;
 }
+.content{
+	padding-top: 60px;
+}
 .checkbox{
 	border-radius: 3px;
 	border-color: silver;
@@ -55,7 +58,6 @@ div.leftlist{
 	padding: 5px;
 	position: fixed;
 	margin-left: 4px;
-    margin-top: 5px;
 	overflow: auto;
 
 }
@@ -100,9 +102,12 @@ div.centerblock{
    border-width: thin;
    padding: 5px;
    position: absolute;
-   margin-top: 5px;
    text-align: center;
    margin-left: 22%;
+}
+
+a.bitbot-logo{
+	padding-top: 5px;
 }
 
 div.rightcontent{
@@ -111,25 +116,8 @@ div.rightcontent{
    border-style: solid;
    border-width: thin;
    padding: 5px;
-   margin-top: 10px;
    text-align: center;
    margin-right: 0%;
    margin-left: 25%;
 }
 
-a.navbar{
-    padding: 5px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    text-decoration: none;
-    color: black;
-    font-size : medium;
-}
-a.navbar:hover{
-    padding: 5px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    text-decoration: underline;
-    color: black;
-    font-size : medium;
-}
