@@ -24,7 +24,7 @@
                     <h2 class="panel-title">Create a new user</h2>
                 </div>
                 <div class="panel-body">
-                    <div action="{% url 'images_createuserview' %}" method="post">
+                    <form action="{% url 'images_createuserview' %}" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="username">Username: </label>

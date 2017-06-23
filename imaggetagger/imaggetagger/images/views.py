@@ -42,16 +42,15 @@ def index(request):
 @login_required
 @require_http_methods(["POST", ])
 def imageuploadview(request, imageset_id):
-
-    if request.method == 'POST':
-        imageset = get_object_or_404(ImageSet, id=imageset_id)
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if request.method == 'POST' and request.user.has_perm('edit_set', imageset):
         if request.FILES is None:
             return HttpResponseBadRequest('Must have files attached!')
         json_files = []
         for f in request.FILES.getlist('files[]'):
-            image = Image(name=f.name, image_set=imageset)
+            image = Image(name=f.name, image_set=imageset, filename=f.name)
             image.save()
-            with open(os.path.join(settings.STATIC_ROOT, imageset.get_path(), image.name), 'wb') as out:
+            with open(image.path(), 'wb') as out:
                 for chunk in f.chunks():
                     out.write(chunk)
             json_files.append({'name': f.name,
@@ -67,7 +66,7 @@ def imageuploadview(request, imageset_id):
 @login_required
 def imageview(request, image_id):
     image = get_object_or_404(Image, id=image_id)
-    with open(os.path.join(settings.STATIC_ROOT, image.full_path()), "rb") as f:
+    with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
         return HttpResponse(f.read(), content_type="image/jpeg")
 
 
@@ -115,14 +114,21 @@ def imagesetcreateview(request, team_id):
         # todo: check if name and path are unique in the team
         name = request.POST["name"]
         location = request.POST["location"]
-        public = request.POST["public"]
         imageset = ImageSet(name=name, location=location)
-        imageset.public = public == 'on'
+        imageset.public = "public" in request.POST
         imageset.save()
         imageset.path = '_'.join((str(team.id), str(imageset.id)))  # todo: some formatting would be great
         imageset.team = team
         imageset.save()
-        os.mkdir(os.path.join(settings.STATIC_ROOT, imageset.get_path()))  # create a folder to store the images of the set
+        os.mkdir(imageset.root_path())  # create a folder to store the images of the set
+        assign_perm('edit_set', team.members, imageset)
+        assign_perm('delete_set', team.admins, imageset)
+        assign_perm('edit_annotation', team.members, imageset)
+        assign_perm('delete_annotation', team.members, imageset)
+        assign_perm('annotate', team.members, imageset)
+        assign_perm('read', team.members, imageset)
+        assign_perm('create_export', team.members, imageset)
+        assign_perm('delete_export', team.members, imageset)
         return HttpResponseRedirect(reverse('images_imagesetview', args=(imageset.id,)))
     return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
 
@@ -130,85 +136,95 @@ def imagesetcreateview(request, team_id):
 
 @login_required
 def tagview(request, image_id):
-    # here the stuff we got via POST gets put in the DB
-    last_annotation_type_id = -1
-    if request.method == 'POST' and verify_bounding_box_annotation(request.POST):
-        vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
-        last_annotation_type_id = request.POST['selected_annotation_type']
-        annotation = Annotation(vector=vector_text,
-                                image=get_object_or_404(Image, id=request.POST['image_id']),
-                                type=get_object_or_404(AnnotationType,
-                                                       id=request.POST['selected_annotation_type']))
-        annotation.user = (request.user if request.user.is_authenticated() else None)
-        if 'not_in_image' in request.POST:
-            annotation.not_in_image = 1  # 0 by default
-        annotation.save()
-        # the creator of the annotation verifies it instantly
-        user_verify(request.user, annotation, True)
-    annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
     selected_image = get_object_or_404(Image, id=image_id)
-    set_images = Image.objects.filter(image_set=selected_image.image_set)\
-        .order_by('name')
+    if request.user.has_perm('annotate', selected_image.image_set) or selected_image.image_set.public:
+        # here the stuff we got via POST gets put in the DB
+        last_annotation_type_id = -1
+        if request.method == 'POST' and verify_bounding_box_annotation(request.POST):
+            vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
+            last_annotation_type_id = request.POST['selected_annotation_type']
+            annotation = Annotation(vector=vector_text,
+                                    image=get_object_or_404(Image, id=request.POST['image_id']),
+                                    type=get_object_or_404(AnnotationType,
+                                                           id=request.POST['selected_annotation_type']))
+            annotation.user = (request.user if request.user.is_authenticated() else None)
+            if 'not_in_image' in request.POST:
+                annotation.not_in_image = 1  # 0 by default
+            annotation.save()
+            # the creator of the annotation verifies it instantly
+            user_verify(request.user, annotation, True)
+        annotation_types = AnnotationType.objects.filter(active=True)  # needed to select the annotation in the drop-down-menu
+        set_images = Image.objects.filter(image_set=selected_image.image_set)\
+            .order_by('name')
 
-    # detecting next and last image in the set
-    next_image = Image.objects.filter(image_set=selected_image.image_set)\
-        .filter(id__gt=selected_image.id).order_by('id')
-    if len(next_image) == 0:
-        next_image = None
-    else:
-        next_image = next_image[0]
-    last_image = Image.objects.filter(image_set=selected_image.image_set)\
-        .filter(id__lt=selected_image.id).order_by('-id')
-    if len(last_image) == 0:
-        last_image = None
-    else:
-        last_image = last_image[0]
+        # detecting next and last image in the set
+        next_image = Image.objects.filter(image_set=selected_image.image_set)\
+            .filter(id__gt=selected_image.id).order_by('name')
+        if len(next_image) == 0:
+            next_image = None
+        else:
+            next_image = next_image[0]
+        last_image = Image.objects.filter(image_set=selected_image.image_set)\
+            .filter(id__lt=selected_image.id).order_by('-name')
+        if len(last_image) == 0:
+            last_image = None
+        else:
+            last_image = last_image[0]
 
-    return TemplateResponse(request, 'images/tagview.html', {
-                            'selected_image': selected_image,
-                            'next_image': next_image,
-                            'last_image': last_image,
-                            'set_images': set_images,
-                            'annotation_types': annotation_types,
-                            'image_annotations': Annotation.objects.filter(image=selected_image),
-                            'last_annotation_type_id': int(last_annotation_type_id),
-                            })
+        return TemplateResponse(request, 'images/tagview.html', {
+                                'selected_image': selected_image,
+                                'next_image': next_image,
+                                'last_image': last_image,
+                                'set_images': set_images,
+                                'annotation_types': annotation_types,
+                                'image_annotations': Annotation.objects.filter(image=selected_image),
+                                'last_annotation_type_id': int(last_annotation_type_id),
+                                })
+    else:
+        return HttpResponseRedirect(reverse('images_imagesetview', args=(selected_image.image_set.id,)))
+
 
 
 @login_required
 def tageditview(request, annotation_id):
-    annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    selected_image = get_object_or_404(Image, id=annotation.image.id)
-    set_images = Image.objects.filter(image_set=selected_image.image_set)
-    vector = json.loads(annotation.vector)
-    current_annotation_type_id = annotation.type.id
-    return TemplateResponse(request, 'images/tageditview.html', {
-                            'selected_image': selected_image,
-                            'set_images': set_images,
-                            'annotation_types': annotation_types,
-                            'annotation': annotation,
-                            'current_annotation_type_id': current_annotation_type_id,
-                            'x1': vector['x1'],
-                            'y1': vector['y1'],
-                            'x2': vector['x2'],
-                            'y2': vector['y2'],
-                            })
+    if request.user is annotation.user or request.user.has_perm('edit_annotation', annotation.image.image_set):
+        annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
+        selected_image = get_object_or_404(Image, id=annotation.image.id)
+        set_images = Image.objects.filter(image_set=selected_image.image_set)
+        vector = json.loads(annotation.vector)
+        current_annotation_type_id = annotation.type.id
+        return TemplateResponse(request, 'images/tageditview.html', {
+                                'selected_image': selected_image,
+                                'set_images': set_images,
+                                'annotation_types': annotation_types,
+                                'annotation': annotation,
+                                'current_annotation_type_id': current_annotation_type_id,
+                                'x1': vector['x1'],
+                                'y1': vector['y1'],
+                                'x2': vector['x2'],
+                                'y2': vector['y2'],
+                                })
+    else:
+        return HttpResponseRedirect(reverse('images_tagview', args=(annotation.image.id,)))
 
 
 @login_required
 def tagdeleteview(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    image_id = annotation.image.id
-    annotation.delete()
-    print('deleted annotation ', annotation_id)
-    return HttpResponseRedirect(str('/images/tagview/' + str(image_id) + '/'))
+    if request.user.has_perm('delete_annotation', annotation.image.image_set):
+        annotation.delete()
+        print('deleted annotation ', annotation_id)
+    return HttpResponseRedirect(reverse('images_tagview', args=(annotation.image.id,)))
 
 
 @login_required
 def tageditsaveview(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    if request.method == 'POST' and verify_bounding_box_annotation(request.POST):
+    if request.method == 'POST' \
+            and verify_bounding_box_annotation(request.POST) \
+            and (request.user is annotation.user
+                 or request.user.has_perm('edit_annotation', annotation.image.image_set)):
         vector_text = json.dumps({
             'x1': request.POST['x1Field'],
             'y1': request.POST['y1Field'],
@@ -225,23 +241,25 @@ def tageditsaveview(request, annotation_id):
             annotation.not_in_image = 0
         annotation.save()
         user_verify(request.user, annotation, True)
-    return HttpResponseRedirect(str('/images/tagview/' + str(annotation.image.id) + '/'))
+    return HttpResponseRedirect(reverse('images_tagview', args=(annotation.image.id,)))
 
 
 @login_required
 def exportcreateview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
-    if request.method == 'POST':
-        export_format = request.POST['export_format']
-        if export_format == 'Bit-Bot AI':
-            export_text, annotation_count = bitbotai_export(imageset)
-            export = Export(type="Bit-BotAI",
-                            image_set=imageset,
-                            user=(request.user if request.user.is_authenticated() else None),
-                            annotation_count=annotation_count,
-                            export_text=export_text)
-            export.save()
+    if request.user.has_perm('create_export', imageset) or imageset.public:
+        if request.method == 'POST':
+            export_format = request.POST['export_format']
+            if export_format == 'Bit-Bot AI':
+                export_text, annotation_count = bitbotai_export(imageset)
+                export = Export(type="Bit-BotAI",
+                                image_set=imageset,
+                                user=(request.user if request.user.is_authenticated() else None),
+                                annotation_count=annotation_count,
+                                export_text=export_text)
+                export.save()
     return HttpResponseRedirect(reverse('images_imagesetview', args=(image_set_id,)))
+
 
 
 #@login_required
@@ -306,17 +324,12 @@ def userview(request, user_id):
                             'userteams': userteams,
                             'userpoints': points, })
 
-@login_required
 def createuserview(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         email = request.POST['email']
-        user = User()
-        user.username = username
-        user.password = password
-        user.email = email
-        user.is_active = True
+        user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
         return HttpResponseRedirect(reverse('images_userview', args=(user.id,)))
 
@@ -378,7 +391,7 @@ def leaveteamview(request, team_id, user_id=None):
     if user_id:
         user = get_object_or_404(User, id=user_id)
     else:
-        user=request.user
+        user = request.user
     team = get_object_or_404(Team, id=team_id)
     team.members.user_set.remove(user)
     team.admins.user_set.remove(user)

@@ -1,29 +1,29 @@
 {% extends 'images/tagger_base.html' %}
 {% load static %}
 {% block individual_script %}
-    function init_navigationbuttons() {
-        {% if next_image %}
-        $('#next_button').click(function(){
-            $('#annotation_form').attr('action', '{% url 'images_tagview' next_image.id %}');
-            $('#annotation_form').submit();
-        });
-        $('#skip_button').click(function(){window.location.href="{% url 'images_tagview' next_image.id %}"});
-        {% else %}
-        $('#next_button').attr('disabled', 'true');
-        $('#skip_button').attr('disabled', 'true');
-        {% endif %}
+function init_navigationbuttons() {
+{% if next_image %}
+$('#next_button').click(function(){
+$('#annotation_form').attr('action', '{% url 'images_tagview' next_image.id %}');
+$('#annotation_form').submit();
+});
+$('#skip_button').click(function(){window.location.href="{% url 'images_tagview' next_image.id %}"});
+{% else %}
+$('#next_button').attr('disabled', 'true');
+$('#skip_button').attr('disabled', 'true');
+{% endif %}
 
-        {% if last_image %}
-        $('#last_button').click(function(){
-            $('#annotation_form').attr('action', '{% url 'images_tagview' last_image.id %}');
-            $('#annotation_form').submit();
-        });
-        $('#back_button').click(function(){window.location.href="{% url 'images_tagview' last_image.id %}"});
-        {% else %}
-        $('#last_button').attr('disabled', 'true');
-        $('#back_button').attr('disabled', 'true');
-        {% endif %}
-    }
+{% if last_image %}
+$('#last_button').click(function(){
+$('#annotation_form').attr('action', '{% url 'images_tagview' last_image.id %}');
+$('#annotation_form').submit();
+});
+$('#back_button').click(function(){window.location.href="{% url 'images_tagview' last_image.id %}"});
+{% else %}
+$('#last_button').attr('disabled', 'true');
+$('#back_button').attr('disabled', 'true');
+{% endif %}
+}
 {% endblock %}
 {% block bodyblock %}
 <div class="container">
@@ -35,40 +35,40 @@
                 </div>
                 <div class="panel-body">
                     {% for set_image in set_images %}
-                        {% if set_image.id == selected_image.id %}
-                            <b id="selected_image_row">{{set_image.name}}</b><br>
-                        {% else %}
-                            <a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a><br>
-                        {% endif %}
+                    {% if set_image.id == selected_image.id %}
+                    <b id="selected_image_row">{{set_image.name}}</b><br>
+                    {% else %}
+                    <a href="{% url 'images_tagview' set_image.id %}"> {{set_image.name}}</a><br>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
         </div>
         <div class="col-md-5">
-            <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static selected_image.full_path %} not found!" width="100%"></br>
+            <img id="picture" src="{% url 'images_imageview' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
             <hr color="silver" width="100%">
             {% if image_annotations.all %}
-                <u>Annotations:</u>
-                {% for annotation in image_annotations %}
-                    <div class="annotation">
-                        {{annotation.type.name}}:
-                        <div style="float: right;">
-                            <a href="{% url 'images_verifyview' annotation.id%}">
-                                <img src="{% static "symbols/checkmark.png" %}" alt="edit">
-                            </a>
-                            <a href="{% url 'images_tageditview' annotation.id%}">
-                                <img src="{% static "symbols/pencil.png" %}" alt="edit">
-                            </a>
-                            <a href="{% url 'images_tagdeleteview' annotation.id%}">
-                                <img src="{% static "symbols/bin.png" %}" alt="delete">
-                            </a>
-                        </div>
-                        <br>
-                        {{annotation.content}}
-                    </div>
-                {% endfor %}
+            <u>Annotations:</u>
+            {% for annotation in image_annotations %}
+            <div class="annotation">
+                {{annotation.type.name}}:
+                <div style="float: right;">
+                    <a href="{% url 'images_verifyview' annotation.id%}">
+                        <img src="{% static "symbols/checkmark.png" %}" alt="edit">
+                    </a>
+                    <a href="{% url 'images_tageditview' annotation.id%}">
+                        <img src="{% static "symbols/pencil.png" %}" alt="edit">
+                    </a>
+                    <a href="{% url 'images_tagdeleteview' annotation.id%}">
+                        <img src="{% static "symbols/bin.png" %}" alt="delete">
+                    </a>
+                </div>
+                <br>
+                {{annotation.content}}
+            </div>
+            {% endfor %}
             {% else %}
-                <div class="alert alert-warning" role="alert">No annotations found.</div>
+            <div class="alert alert-warning" role="alert">No annotations found.</div>
             {% endif %}
         </div>
         <div class="col-md-4">
@@ -83,9 +83,9 @@
                         annotation type:
                         <select name="selected_annotation_type">
                             {% for annotation_type in annotation_types %}
-                                <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
-                                    {{annotation_type.name}}
-                                </option>
+                            <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
+                                {{annotation_type.name}}
+                            </option>
                             {% endfor %}
                         </select>
                         <table border="1">
@@ -141,3 +141,4 @@
 </div>
 
 {% endblock %}
+

@@ -124,7 +124,7 @@ LOGIN_REDIRECT_URL = '/images/'
 STATIC_URL = '/static/'
 
 STATIC_ROOT = 'imagetagger/imaggetagger/imaggetagger/images/static/' #root of static files (absolute path)
-IMAGE_PATH = 'pictures/'   # the path to the folder with the imagesets (in the static path)
+IMAGE_PATH = '/home/user/pictures/'   # the absolute path to the folder with the imagesets
 IMAGE_EXTENSION = set(['.png', '.jpg'])  # filename extension of accepted imagefiles
 EXPORT_SEPARATOR = '|'
 DATA_PATH = '/home/bububu/documents/Bit-Bots/imagetagger/data/'

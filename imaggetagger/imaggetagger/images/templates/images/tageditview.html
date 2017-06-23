@@ -12,7 +12,7 @@
 
 {% block bodyblock %}
 <div class="imageview">
-        <img id="picture" src="{% static selected_image.full_path %}" alt="Picture {% static selected_image.full_path %} not found!" width="100%"></br>
+        <img id="picture" src="{% url images_imageview selected_image.id %}" alt="Picture {% static selected_image.full_path %} not found!" width="100%"></br>
     </div>
     <div class="toolbox">
         {{selected_image.name}}

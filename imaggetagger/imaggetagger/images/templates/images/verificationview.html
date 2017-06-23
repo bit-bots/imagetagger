@@ -84,7 +84,7 @@
 
     <div class="imageview">
         <div class="wrapper">
-            <img id="picture" src="{% static image.full_path %}" alt="Picture {% static image.full_path %} not found!" width="100%" data-x="{{ annotation_x }}" data-y="{{ annotation_y }}" data-width="{{ width }}" data-height="{{ height }}"></br>
+            <img id="picture" src="{% url 'images_imageview' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation_x }}" data-y="{{ annotation_y }}" data-width="{{ width }}" data-height="{{ height }}"></br>
             <div id="boundingBox"></div>
         </div>
 

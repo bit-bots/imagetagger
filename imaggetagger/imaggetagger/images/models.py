@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import Group
+import os
 # Create your models here.
 
 
@@ -24,15 +25,15 @@ class Team(models.Model):
 
 
 class ImageSet(models.Model):
-    path = models.CharField(max_length=100, unique=True)
+    path = models.CharField(max_length=100, unique=True, null=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     time = models.DateTimeField(auto_now_add=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     public = models.BooleanField(default=False)
 
-    def get_path(self):
-        return str(settings.IMAGE_PATH + self.path + '/')
+    def root_path(self):
+        return os.path.join(settings.IMAGE_PATH, self.path)
 
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)
@@ -42,7 +43,7 @@ class ImageSet(models.Model):
             ('edit_set', 'Edit set'),
             ('delete_set', 'Delete set'),
             ('edit_annotation', 'Edit annotations in the set'),
-            ('delete_annotion', 'Delete annotations in the set'),
+            ('delete_annotation', 'Delete annotations in the set'),
             ('annotate', 'Create annotations in the set'),
             ('read', 'Read and download annotations and images'),
             ('create_export', 'Create export files of the set'),
@@ -53,17 +54,19 @@ class ImageSet(models.Model):
 class Image(models.Model):
     image_set = models.ForeignKey(ImageSet, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    filename = models.CharField(max_length=100, unique=True)
     time = models.DateTimeField(auto_now_add=True)
 
-    def full_path(self):
-        return str(self.image_set.get_path() + self.name)
+    def path(self):
+        return os.path.join(self.image_set.root_path(), self.filename)
 
     def __str__(self):
         return u'Image: {0}'.format(self.name)
 
 
 class AnnotationType(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=20, unique=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return u'AnnotationType: {0}'.format(self.name)
