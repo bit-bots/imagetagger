@@ -71,37 +71,48 @@
 
 {% endblock %}
 {% block bodyblock %}
-    <div class="leftlist">
-        <a href="{% url 'images_annotationmanageview' image.image_set.id %}"><u><h3 align="center">{{image.image_set.name}}</h3></u></a>
-        {% for set_annotation in set_annotations %}
-        {% if set_annotation.id == annotation.id %}
-        <b id="selected_annotation_row">{{annotation.content}}</b><br>
-        {% else %}
-        <a href="{% url 'images_verifyview' set_annotation.id %}">{{set_annotation.content}}</a><br>
-        {% endif %}
-        {% endfor %}
-    </div>
-
-    <div class="imageview">
-        <div class="wrapper">
-            <img id="picture" src="{% url 'images_imageview' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation_x }}" data-y="{{ annotation_y }}" data-width="{{ width }}" data-height="{{ height }}"></br>
-            <div id="boundingBox"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="{% url 'images_annotationmanageview' image.image_set.id %}"><u><h3 class="panel-title">{{image.image_set.name}}</h3></u></a>
+                </div>
+                <div class="panel-body">
+                    {% for set_annotation in set_annotations %}
+                        {% if set_annotation.id == annotation.id %}
+                            {{ set_annotation.image.name }}: <b id="selected_annotation_row">{{annotation.content}}</b><br>
+                        {% else %}
+                            {{ set_annotation.image.name }}: <a href="{% url 'images_verifyview' set_annotation.id %}">{{set_annotation.content}}</a><br>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-
+        <div class="col-md-5">
+            <div class="wrapper">
+                <img id="picture" src="{% url 'images_imageview' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation_x }}" data-y="{{ annotation_y }}" data-width="{{ width }}" data-height="{{ height }}"></br>
+                <div id="boundingBox"></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form id='verification_form' enctype="multipart/form-data" method="post" action="">
+                        {% csrf_token %}
+                        <input type='hidden' id='state' name='state' value='blank'>
+                        <input type='hidden' id='annotation' name='annotation' value='{{ annotation.id }}'>
+                        <input type='button' id='accept_button' value='YAY'>
+                        <input type='button' id='reject_button' value='NAY'>
+                        <input type='button' id='edit_button' value='Edit'>
+                        <input type='button' id='last_unverified_button' value='Last unverified'>
+                        <input type='button' id='last_button' value='Last'>
+                        <input type='button' id='next_button' value='Next'>
+                        <input type='button' id='next_unverified_button' value='Next unverified'>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="toolbox">
-      <form id='verification_form' enctype="multipart/form-data" method="post">
-        {% csrf_token %}
-        <input type='hidden' id='state' name='state' value='blank'>
-        <input type='hidden' id='annotation' name='annotation' value='{{ annotation.id }}'>
-        <input type='button' id='accept_button' value='YAY'>
-        <input type='button' id='reject_button' value='NAY'>
-        <input type='button' id='edit_button' value='Edit'>
-        <input type='button' id='last_unverified_button' value='Last unverified'>
-        <input type='button' id='last_button' value='Last'>
-        <input type='button' id='next_button' value='Next'>
-        <input type='button' id='next_unverified_button' value='Next unverified'>
-      </form>
-    </div>
+</div>
 {% endblock %}

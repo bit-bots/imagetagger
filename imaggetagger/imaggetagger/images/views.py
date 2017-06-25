@@ -13,6 +13,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.files.uploadedfile import UploadedFile
 import os
+import string
+import random
 import json
 from datetime import datetime
 from guardian.shortcuts import assign_perm
@@ -48,7 +50,9 @@ def imageuploadview(request, imageset_id):
             return HttpResponseBadRequest('Must have files attached!')
         json_files = []
         for f in request.FILES.getlist('files[]'):
-            image = Image(name=f.name, image_set=imageset, filename=f.name)
+            fname = f.name.split('.')
+            fname = '_'.join(fname[:-1]) + '_' + ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + '.' + fname[-1]
+            image = Image(name=f.name, image_set=imageset, filename=fname)
             image.save()
             with open(image.path(), 'wb') as out:
                 for chunk in f.chunks():
@@ -280,13 +284,15 @@ def exportdownloadview(request, export_id):
 
 @login_required
 def annotationmanageview(request, image_set_id):
+    userteams = Team.objects.filter(members__in=request.user.groups.all())
+    imagesets = ImageSet.objects.filter(team__in=userteams) | ImageSet.objects.filter(public=True)
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.filter(image__in=images)\
                                     .order_by('image_id')
     return TemplateResponse(request, 'images/annotationmanageview.html', {
                             'selected_image_set': imageset,
-                            'image_sets': ImageSet.objects.all(),
+                            'image_sets': imagesets,
                             'annotations': annotations})
 
 @login_required
@@ -301,7 +307,8 @@ def exploreview(request, mode):
         if request.method == 'POST':
             users = users.filter(username__contains=request.POST['searchquery'])
     else:
-        imagesets = ImageSet.objects.all()
+        userteams = Team.objects.filter(members__in=request.user.groups.all())
+        imagesets = ImageSet.objects.filter(team__in=userteams) | ImageSet.objects.filter(public=True)
         if request.method == 'POST':
             imagesets = imagesets.filter(name__contains=request.POST['searchquery'])
 
@@ -428,26 +435,26 @@ def verifyview(request, annotation_id):
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
-    set_annotations = Annotation.objects.filter(image__in=set_images)\
-        .order_by('id')  # good... hopefully
+    set_annotations = Annotation.objects.filter(image__in=set_images)
+    set_annotations = set_annotations.order_by('image', 'id')  # good... hopefully
     unverified_annotations = set_annotations.filter(~Q(user=request.user))
     # detecting next and last image in the set
-    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id')
+    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('image', 'id')
     if len(next_annotation) == 0:
         next_annotation = None
     else:
         next_annotation = next_annotation[0]
-    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('-id')
+    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('-image', '-id')
     if len(last_annotation) == 0:
         last_annotation = None
     else:
         last_annotation = last_annotation[0]
-    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id')
+    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('image', 'id')
     if len(next_unverified_annotation) == 0:
         next_unverified_annotation = None
     else:
         next_unverified_annotation = next_unverified_annotation[0]
-    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('-id')
+    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('-image', '-id')
     if len(last_unverified_annotation) == 0:
         last_unverified_annotation = None
     else:
