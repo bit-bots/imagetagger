@@ -12,5 +12,5 @@
     <div id="crosshair-v" class="hair"></div>
     <span id="mousepos" >(0,0)</span>
 {% endblock %}
-{% block navblock %} <li><a href="{% url 'images_imagesetview' selected_image.image_set.id %}">Overview</a></li> {% endblock %}
+{% block navblock %} <li><a href="{% url 'images_imagesetview' selected_image.image_set.id %}">{{ selected_image.image_set.name }}</a></li> {% endblock %}
 
