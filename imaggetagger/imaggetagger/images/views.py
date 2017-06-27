@@ -158,18 +158,18 @@ def tagview(request, image_id):
             # the creator of the annotation verifies it instantly
             user_verify(request.user, annotation, True)
         annotation_types = AnnotationType.objects.filter(active=True)  # needed to select the annotation in the drop-down-menu
-        set_images = Image.objects.filter(image_set=selected_image.image_set)\
-            .order_by('name')
+        set_images = Image.objects.filter(image_set=selected_image.image_set)
+        set_images = set_images.order_by('id')
 
         # detecting next and last image in the set
         next_image = Image.objects.filter(image_set=selected_image.image_set)\
-            .filter(id__gt=selected_image.id).order_by('name')
+            .filter(id__gt=selected_image.id).order_by('id')
         if len(next_image) == 0:
             next_image = None
         else:
             next_image = next_image[0]
         last_image = Image.objects.filter(image_set=selected_image.image_set)\
-            .filter(id__lt=selected_image.id).order_by('-name')
+            .filter(id__lt=selected_image.id).order_by('-id')
         if len(last_image) == 0:
             last_image = None
         else:
@@ -428,7 +428,7 @@ def verifyview(request, annotation_id):
         if request.POST['state'] == 'accept':
             state = True
             user_verify(request.user, annotation, state)
-        elif request.POST['state']:
+        elif request.POST['state'] == 'reject':
             state = False
             user_verify(request.user, annotation, state)
     annotation = get_object_or_404(Annotation, id=annotation_id)
@@ -436,25 +436,25 @@ def verifyview(request, annotation_id):
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.filter(image__in=set_images)
-    set_annotations = set_annotations.order_by('image', 'id')  # good... hopefully
+    set_annotations = set_annotations.order_by('id')  # good... hopefully
     unverified_annotations = set_annotations.filter(~Q(user=request.user))
     # detecting next and last image in the set
-    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('image', 'id')
+    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id')
     if len(next_annotation) == 0:
         next_annotation = None
     else:
         next_annotation = next_annotation[0]
-    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('-image', '-id')
+    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('-id')
     if len(last_annotation) == 0:
         last_annotation = None
     else:
         last_annotation = last_annotation[0]
-    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('image', 'id')
+    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id')
     if len(next_unverified_annotation) == 0:
         next_unverified_annotation = None
     else:
         next_unverified_annotation = next_unverified_annotation[0]
-    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('-image', '-id')
+    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('-id')
     if len(last_unverified_annotation) == 0:
         last_unverified_annotation = None
     else:

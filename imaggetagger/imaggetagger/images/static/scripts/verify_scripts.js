@@ -5,32 +5,34 @@ $(document).ready(function () {
     draw_box();
 
     $(document).keyup(function(event){
-        /*switch(event.keyCode){
+        switch(event.keyCode){
           case 70: //f
-            $('#next_button').click();
+            $('#next_unverified_button').click();
             break;
           case 68: //d
-            $('#skip_button').click();
+            $('#next_button').click();
             break;
           case 83: //s
-            $('#back_button').click();
-            break;
-          case 65: //a
             $('#last_button').click();
             break;
-          case 82: //r
-            $('#reset_button').click();
+          case 65: //a
+            $('#last_unverified_button').click();
             break;
-          case 32: //' '
-            $('#annotation_form').submit();
+          case 69: //e
+            $('#edit_button').click();
             break;
-        }*/
+          case 74: //j
+            $('#accept_button').click();
+            break;
+          case 75: //k
+            $('#reject_button').click();
+            break;
+        }
     });
 });
 
 
 $(window).resize(function() {
-    image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
     draw_box();
 });
 

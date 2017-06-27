@@ -41,8 +41,9 @@
           $('#verification_form').attr('action', '{% url 'images_verifyview' next_unverified_annotation.id %}');
           $('#verification_form').submit();
         });
+
         {% else %}
-        $('#last_unverified_button').attr('disabled', 'true');
+        $('#next_unverified_button').attr('disabled', 'true');
         $('#accept_button').click(function(){
           $('#state').attr('value', 'accept');
           $('#verification_form').attr('action', '{% url 'images_verifyview' first_annotation.id %}');
@@ -102,13 +103,13 @@
                         {% csrf_token %}
                         <input type='hidden' id='state' name='state' value='blank'>
                         <input type='hidden' id='annotation' name='annotation' value='{{ annotation.id }}'>
-                        <input type='button' id='accept_button' value='YAY'>
-                        <input type='button' id='reject_button' value='NAY'>
-                        <input type='button' id='edit_button' value='Edit'>
-                        <input type='button' id='last_unverified_button' value='Last unverified'>
-                        <input type='button' id='last_button' value='Last'>
-                        <input type='button' id='next_button' value='Next'>
-                        <input type='button' id='next_unverified_button' value='Next unverified'>
+                        <input type='button' id='accept_button' value='YAY (j)'>
+                        <input type='button' id='reject_button' value='NAY (k)'>
+                        <input type='button' id='edit_button' value='Edit (e)'>
+                        <input type='button' id='last_unverified_button' value='Last unverified (a)'>
+                        <input type='button' id='last_button' value='Last (s)'>
+                        <input type='button' id='next_button' value='Next (d)'>
+                        <input type='button' id='next_unverified_button' value='Next unverified (f)'>
                     </form>
                 </div>
             </div>
