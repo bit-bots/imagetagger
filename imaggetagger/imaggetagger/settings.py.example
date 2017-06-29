@@ -83,7 +83,7 @@ DATABASES = {
     }
 }
 
-
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'guardian.backends.ObjectPermissionBackend')
 FILE_UPLOAD_HANDLERS = (
     "progressbarupload.uploadhandler.ProgressBarUploadHandler",
     "django.core.files.uploadhandler.MemoryFileUploadHandler",
