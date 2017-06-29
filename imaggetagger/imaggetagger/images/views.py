@@ -289,7 +289,7 @@ def annotationmanageview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.filter(image__in=images)\
-                                    .order_by('image_id')
+                                    .order_by('id')
     return TemplateResponse(request, 'images/annotationmanageview.html', {
                             'selected_image_set': imageset,
                             'image_sets': imagesets,

@@ -1,7 +1,8 @@
-django
+Django
 django-guardian
 numpy
 opencv-python
 tensorflow
 keras
 h5py
+django-progressbarupload
