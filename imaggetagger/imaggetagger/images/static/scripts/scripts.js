@@ -3,6 +3,9 @@ var image_scale = 0;
 
 $(document).ready(function () {
     var image = $('img#picture');
+    while(!image.width > 0) {
+        image = $('img#picture');
+    }
     image_scale =  image.get(0).naturalWidth / image.width();
     selection = image.imgAreaSelect({
         instance: true,
@@ -84,7 +87,7 @@ $(document).ready(function () {
           case 82: //r
             $('#reset_button').click();
             break;
-          case 32: //' '
+          case 86: //'v'
             $('#annotation_form').submit();
             break;
         }
