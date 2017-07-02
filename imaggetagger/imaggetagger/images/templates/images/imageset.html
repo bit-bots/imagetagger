@@ -1,6 +1,4 @@
 {% extends 'images/base.html' %}
-{% load guardian_tags %}
-{% get_obj_perms request.user for imageset as "imageset_perms" %}
 {% load static %}
 
 {% block taggerimports %}
@@ -116,6 +114,8 @@
 <![endif]-->
 {% endblock %}
 {% block bodyblock %}
+{% load guardian_tags %}
+{% get_obj_perms request.user for imageset as "imageset_perms" %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
@@ -137,70 +137,158 @@
             {% endif %}
         </div>
         <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h2 class="panel-title">Imageset management</h2>
-                </div>
-                <div class="panel-body">
-                    <div>
-                        <form id="edit_set" action="" method="POST">
-                            <label for="name_field">Name:</label>
-                            <input type="text" id="name_field" name="name" value="{{imageset.name}}">
-                            <label for="location">Location: </label>
-                            <input type="text" id="location" name="location" value="{{imageset.location}}">
-                            <label for="public">Public: </label>
-                            <input type="checkbox" id="public" name="public" {% if imageset.public  %} checked="" {% endif %}>
-                            <br>
-                            <input class="btn btn-primary" type="submit" value="Save">
-                        </form>
+            <div class="row">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">{{imageset.name}}</h2>
                     </div>
-                    Upload new images: <br>
-                    <div >
-                        <form id="fileupload" action="{% url 'images_imageuploadview' imageset.id %}" method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-                            <div class="row fileupload-buttonbar">
-                                <div class="col-lg-12">
-                                    <!-- The fileinput-button span is used to style the file input field as button -->
-                                    <span class="btn btn-success fileinput-button">
-                                        <i class="icon-plus icon-white"></i>
-                                        <span>Add files...</span>
-                                        <input type="file" name="files[]" multiple>
-                                    </span>
-                                    <button type="submit" class="btn btn-primary start">
-                                        <i class="icon-upload icon-white"></i>
-                                        <span>Start upload</span>
-                                    </button>
-                                    <button type="reset" class="btn btn-warning cancel">
-                                        <i class="icon-ban-circle icon-white"></i>
-                                        <span>Cancel upload</span>
-                                    </button>
-                                    <button type="button" class="btn btn-danger delete">
-                                        <i class="icon-trash icon-white"></i>
-                                        <span>Delete</span>
-                                    </button>
-                                    <input type="checkbox" class="toggle">
-                                    <!-- The global file processing state -->
-                                    <span class="fileupload-process"></span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <!-- The global progress state -->
-                                <div class="col-lg-12 fileupload-progress">
-                                    <!-- The global progress bar -->
-                                    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                                    </div>
-                                    <!-- The extended global progress state -->
-                                    <div class="progress-extended">&nbsp;</div>
-                                </div>
-                            </div>
-                            <!-- The table listing the files available for upload/download -->
-                            <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-                        </form>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>{{imageset.name}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Team</td>
+                                    <td>{{imageset.team.name}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td>{{imageset.location}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td>{{imageset.description}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Image count</td>
+                                    <td>{{imageset.image_count}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Annotation count</td>
+                                    <td>{{annotationcount}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+            {% if "edit_set" in imageset_perms %}
+            <div class="row">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">Imageset management</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <form id="edit_set" action="{% url 'images_imageseteditview' imageset.id %}" method="POST">
+                                        {% csrf_token %}
+                                    <tr>
+                                        <td>
+                                            <label for="name_field">Name:</label>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="name_field" name="name" value="{{imageset.name}}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="location">Location: </label>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="location" name="location" value="{{imageset.location}}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="description">Description: </label>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="description" name="description" value="{{imageset.description}}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="public">Public: </label>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" id="public" name="public" {% if imageset.public  %} checked="" {% endif %}>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="image-lock">Image-lock: </label>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" id="image-lock" name="image-lock" {% if imageset.image_lock  %} checked="" {% endif %}>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            {% if "delete_set" in imageset_perms %}
+                                                <a class="btn btn-danger" href="{% url 'images_imagesetdeleteview' imageset.id %}">Delete Set</a>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary" type="submit">Save changes</button>
+                                        </td>
+                                    </tr>
+                                    </form>
+                                </tbody>
+                            </table>
+                        </div>
+                        Upload new images: <br>
+                        <div >
+                            <form id="fileupload" action="{% url 'images_imageuploadview' imageset.id %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                                <div class="row fileupload-buttonbar">
+                                    <div class="col-lg-12">
+                                        <!-- The fileinput-button span is used to style the file input field as button -->
+                                        <span class="btn btn-success fileinput-button">
+                                            <i class="icon-plus icon-white"></i>
+                                            <span>Add files...</span>
+                                            <input type="file" name="files[]" multiple>
+                                        </span>
+                                        <button type="submit" class="btn btn-primary start">
+                                            <i class="icon-upload icon-white"></i>
+                                            <span>Start upload</span>
+                                        </button>
+                                        <button type="reset" class="btn btn-warning cancel">
+                                            <i class="icon-ban-circle icon-white"></i>
+                                            <span>Cancel upload</span>
+                                        </button>
+                                        <button type="button" class="btn btn-danger delete">
+                                            <i class="icon-trash icon-white"></i>
+                                            <span>Delete</span>
+                                        </button>
+                                        <input type="checkbox" class="toggle">
+                                        <!-- The global file processing state -->
+                                        <span class="fileupload-process"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <!-- The global progress state -->
+                                    <div class="col-lg-12 fileupload-progress">
+                                        <!-- The global progress bar -->
+                                        <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                                        </div>
+                                        <!-- The extended global progress state -->
+                                        <div class="progress-extended">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <!-- The table listing the files available for upload/download -->
+                                <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
         <div class="col-md-3">
             {% if first_annotation %}

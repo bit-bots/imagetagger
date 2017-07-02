@@ -18,6 +18,7 @@ $(function () {
     $('#fileupload').fileupload({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
+        sequentialUploads: true // solves the issues with high Image counts... hopefully.
     });
 
     // Enable iframe cross-domain access via redirect option:

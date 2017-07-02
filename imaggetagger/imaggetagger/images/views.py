@@ -13,6 +13,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.files.uploadedfile import UploadedFile
 import os
+import shutil
 import string
 import random
 import json
@@ -89,7 +90,7 @@ def imagedeleteview(request, image_id):
 def imagesetview(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     # images the imageset contains
-    images = Image.objects.filter(image_set=imageset)
+    images = Image.objects.filter(image_set=imageset).order_by('id')
     # the saved exports of the imageset
     exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
     # a list of annotation types used in the imageset
@@ -103,6 +104,7 @@ def imagesetview(request, image_set_id):
         first_annotation = annotations.pop()
     return TemplateResponse(request, 'images/imageset.html', {
                             'images': images,
+                            'annotationcount': len(annotations),
                             'imageset': imageset,
                             'annotationtypes': annotation_types,
                             'first_annotation': first_annotation,
@@ -136,6 +138,29 @@ def imagesetcreateview(request, team_id):
         return HttpResponseRedirect(reverse('images_imagesetview', args=(imageset.id,)))
     return HttpResponseRedirect(reverse('images_teamview', args=(team.id,)))
 
+
+@login_required
+@require_http_methods(["POST", ])
+def imageseteditview(request, imageset_id):
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if request.user.has_perm('edit_set', imageset):
+        # todo: check if name and path are unique in the team
+        imageset.name = request.POST["name"]
+        imageset.location = request.POST["location"]
+        imageset.description = request.POST["description"]
+        imageset.public = "public" in request.POST
+        imageset.image_lock = "image-lock" in request.POST
+        imageset.save()
+    return HttpResponseRedirect(reverse('images_imagesetview', args=(imageset.id,)))
+
+
+@login_required
+def imagesetdeleteview(request, imageset_id):
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if request.user.has_perm('delete_set', imageset):
+        shutil.rmtree(imageset.root_path())
+        imageset.delete()
+    return HttpResponseRedirect(reverse('images_teamview', args=(imageset.team.id,)))
 
 
 @login_required

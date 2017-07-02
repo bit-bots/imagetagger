@@ -28,12 +28,18 @@ class ImageSet(models.Model):
     path = models.CharField(max_length=100, unique=True, null=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
+    description = models.TextField(max_length=1000, null=True)
     time = models.DateTimeField(auto_now_add=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     public = models.BooleanField(default=False)
+    image_lock = models.BooleanField(default=False)
 
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)
+
+    def image_count(self):
+        path = self.root_path()
+        return len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
 
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)

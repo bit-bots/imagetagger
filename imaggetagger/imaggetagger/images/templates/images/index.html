@@ -16,7 +16,7 @@
                 <div class="panel-body">
                     <ul>
                         {% for imageset in image_sets %}
-                            <li><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a></li>
+                            <li><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
                         {% endfor %}
                     </ul>
                 </div>

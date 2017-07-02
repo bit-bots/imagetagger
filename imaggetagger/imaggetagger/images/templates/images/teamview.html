@@ -17,7 +17,7 @@
                         <h3>Public Imagesets:</h3>
                         <ul>
                         {% for imageset in pub_imagesets %}
-                            <li><a href="{% url 'images_imagesetview' imageset.id%}">{{imageset.name}}</a></li>
+                            <li><a href="{% url 'images_imagesetview' imageset.id%}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
                         {% endfor %}
                         </ul>
                     {% endif %}
@@ -26,7 +26,7 @@
                             <h3>Private Imagesets:</h3>
                             <ul>
                             {% for imageset in priv_imagesets %}
-                                <li><a href="{% url 'images_imagesetview' imageset.id%}">{{imageset.name}}</a></li>
+                                <li><a href="{% url 'images_imagesetview' imageset.id%}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
                             {% endfor %}
                             </ul>
                         {% endif %}
