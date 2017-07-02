@@ -19,6 +19,7 @@ import random
 import json
 from datetime import datetime
 from guardian.shortcuts import assign_perm
+import zipfile
 
 def logout_view(request):
     logout(request)
@@ -52,18 +53,40 @@ def imageuploadview(request, imageset_id):
         json_files = []
         for f in request.FILES.getlist('files[]'):
             fname = f.name.split('.')
-            fname = '_'.join(fname[:-1]) + '_' + ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + '.' + fname[-1]
-            image = Image(name=f.name, image_set=imageset, filename=fname)
-            image.save()
-            with open(image.path(), 'wb') as out:
-                for chunk in f.chunks():
-                    out.write(chunk)
+            if fname[-1] == 'zip':
+                zipname = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + '.zip'
+                if not os.path.exists(os.path.join(imageset.root_path(), 'tmp')):
+                    os.makedirs(os.path.join(imageset.root_path(), 'tmp'))
+                with open(os.path.join(imageset.root_path(), 'tmp', zipname), 'wb') as out:
+                    for chunk in f.chunks():
+                        out.write(chunk)
+                # unpack zip-file
+                zip_ref = zipfile.ZipFile(os.path.join(imageset.root_path(), 'tmp', zipname), 'r')
+                zip_ref.extractall(os.path.join(imageset.root_path(), 'tmp'))
+                zip_ref.close()
+                # delete zip-file
+                os.remove(os.path.join(imageset.root_path(), 'tmp', zipname))
+                filenames = [f for f in os.listdir(os.path.join(imageset.root_path(), 'tmp'))]
+                filenames.sort()
+                for filename in filenames:
+                    (shortname, extension) = os.path.splitext(filename)
+                    if(extension.lower() in settings.IMAGE_EXTENSION):
+                        img_fname = ''.join(shortname) + '_' + ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + extension
+                        shutil.move(os.path.join(imageset.root_path(), 'tmp', filename), os.path.join(imageset.root_path(), img_fname))
+                        Image(name=filename, image_set=imageset, filename=img_fname).save()
+            else:
+                fname = '_'.join(fname[:-1]) + '_' + ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + '.' + fname[-1]
+                image = Image(name=f.name, image_set=imageset, filename=fname)
+                image.save()
+                with open(image.path(), 'wb') as out:
+                    for chunk in f.chunks():
+                        out.write(chunk)
             json_files.append({'name': f.name,
                                'size': f.size,
-                               'url': reverse('images_imageview', args=(image.id, )),
-                               'thumbnailUrl': reverse('images_imageview', args=(image.id, )),
-                               'deleteUrl': reverse('images_imagedeleteview', args=(image.id, )),
-                               'deleteType': "DELETE",
+                               # 'url': reverse('images_imageview', args=(image.id, )),
+                               #'thumbnailUrl': reverse('images_imageview', args=(image.id, )),
+                               # 'deleteUrl': reverse('images_imagedeleteview', args=(image.id, )),
+                               # 'deleteType': "DELETE",
                                })
         return JsonResponse({'files': json_files})
 
