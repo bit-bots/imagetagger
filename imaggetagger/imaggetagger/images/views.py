@@ -46,7 +46,7 @@ def index(request):
 @require_http_methods(["POST", ])
 def imageuploadview(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
-    if request.method == 'POST' and request.user.has_perm('edit_set', imageset):
+    if request.method == 'POST' and request.user.has_perm('edit_set', imageset) and not imageset.image_lock:
         if request.FILES is None:
             return HttpResponseBadRequest('Must have files attached!')
         json_files = []
@@ -120,7 +120,7 @@ def imagesetcreateview(request, team_id):
         # todo: check if name and path are unique in the team
         name = request.POST["name"]
         location = request.POST["location"]
-        imageset = ImageSet(name=name, location=location)
+        imageset = ImageSet(name=name, location=location, description='')
         imageset.public = "public" in request.POST
         imageset.save()
         imageset.path = '_'.join((str(team.id), str(imageset.id)))  # todo: some formatting would be great

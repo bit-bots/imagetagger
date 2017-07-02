@@ -151,7 +151,7 @@
                                 </tr>
                                 <tr>
                                     <td>Team</td>
-                                    <td>{{imageset.team.name}}</td>
+                                    <td><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a></td>
                                 </tr>
                                 <tr>
                                     <td>Location</td>
@@ -240,6 +240,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% if not imageset.image_lock %}
                         Upload new images: <br>
                         <div >
                             <form id="fileupload" action="{% url 'images_imageuploadview' imageset.id %}" method="POST" enctype="multipart/form-data">
@@ -285,6 +286,7 @@
                                 <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
                             </form>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
