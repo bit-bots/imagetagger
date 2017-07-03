@@ -6,19 +6,22 @@ $(document).ready(function () {
     while(!image.width > 0) {
         image = $('img#picture');
     }
-    image_scale =  image.get(0).naturalWidth / image.width();
-    selection = image.imgAreaSelect({
-        instance: true,
-        handles: false,
-        minHeight: 10,
-        minWidth: 10,
-        onSelectChange: function (img, selection) {
-            $('#x1Field').val(Math.ceil(selection.x1 * image_scale));
-            $('#y1Field').val(Math.ceil(selection.y1 * image_scale));
-            $('#x2Field').val(Math.floor(selection.x2 * image_scale));
-            $('#y2Field').val(Math.floor(selection.y2 * image_scale));
-        }
-        });
+    image.on('load', function() {
+        image_scale =  image.get(0).naturalWidth / image.width();
+        selection = image.imgAreaSelect({
+            instance: true,
+            handles: false,
+            minHeight: 10,
+            minWidth: 10,
+            onSelectChange: function (img, selection) {
+                $('#x1Field').val(Math.ceil(selection.x1 * image_scale));
+                $('#y1Field').val(Math.ceil(selection.y1 * image_scale));
+                $('#x2Field').val(Math.floor(selection.x2 * image_scale));
+                $('#y2Field').val(Math.floor(selection.y2 * image_scale));
+            }
+        })
+
+    });
 
     $('#x1Field')[0].oninput = function () {
         reload_selection();
