@@ -3,11 +3,13 @@ var image_scale = 0;
 
 $(document).ready(function () {
     var image = $('img#picture');
-    while(!image.width > 0) {
+    if(!image.width > 0) {
+        var image = $('img#picture');
         image = $('img#picture');
     }
     image.on('load', function() {
-        while(!image_scale > 0) {
+        if(!image_scale > 0) {
+            var image = $('img#picture');
             image_scale =  image.get(0).naturalWidth / image.width();
         }
         selection = image.imgAreaSelect({
@@ -55,7 +57,8 @@ $(document).ready(function () {
             cV.css("margin-top", position.top);
             cH.css("width", image.width() -1);
             cH.css("margin-left", position.left);
-            while(!image_scale > 0) {
+            if(!image_scale > 0) {
+                var image = $('img#picture');
                 image_scale =  image.get(0).naturalWidth / image.width();
             }
 
