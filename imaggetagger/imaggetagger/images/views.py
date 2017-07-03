@@ -36,7 +36,7 @@ def export_auth_view(request, export_id):
 def index(request):
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members__in=request.user.groups.all())
-    imagesets = ImageSet.objects.filter(team__in=userteams)
+    imagesets = ImageSet.objects.filter(team__in=userteams).order_by('id')
     return TemplateResponse(request, 'images/index.html', {
                             'image_sets': imagesets,
                             'userteams': userteams,
@@ -313,7 +313,6 @@ def exportcreateview(request, image_set_id):
     return HttpResponseRedirect(reverse('images_imagesetview', args=(image_set_id,)))
 
 
-
 #@login_required
 #def exportdeleteview(request, export_id):
 #    export = get_object_or_404(Export, id=export_id)
@@ -403,8 +402,8 @@ def teamview(request, team_id):
     is_admin = request.user in admins  # The request.user is an admin of the team
     no_admin = len(admins) == 0  # Team has no admin, so every member can claim the Position
     imagesets = ImageSet.objects.filter(team=team)
-    pub_imagesets = imagesets.filter(public=True)
-    priv_imagesets = imagesets.filter(public=False)
+    pub_imagesets = imagesets.filter(public=True).order_by('id')
+    priv_imagesets = imagesets.filter(public=False).order_by('id')
     return TemplateResponse(request, 'images/teamview.html', {
                             'team': team,
                             'memberset': members,
