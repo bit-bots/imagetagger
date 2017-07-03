@@ -7,7 +7,9 @@ $(document).ready(function () {
         image = $('img#picture');
     }
     image.on('load', function() {
-        image_scale =  image.get(0).naturalWidth / image.width();
+        while(!image_scale > 0) {
+            image_scale =  image.get(0).naturalWidth / image.width();
+        }
         selection = image.imgAreaSelect({
             instance: true,
             handles: false,
@@ -53,6 +55,9 @@ $(document).ready(function () {
             cV.css("margin-top", position.top);
             cH.css("width", image.width() -1);
             cH.css("margin-left", position.left);
+            while(!image_scale > 0) {
+                image_scale =  image.get(0).naturalWidth / image.width();
+            }
 
             $('#mousepos').css({
                 top: (e.pageY) + 'px',
