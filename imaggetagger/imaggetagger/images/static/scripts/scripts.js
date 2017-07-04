@@ -8,8 +8,9 @@ $(document).ready(function () {
         image = $('img#picture');
     }
     image.on('load', function() {
+        var image = $('img#picture');
         if(!image_scale > 0) {
-            var image = $('img#picture');
+            image = $('img#picture');
             image_scale =  image.get(0).naturalWidth / image.width();
         }
         selection = image.imgAreaSelect({
