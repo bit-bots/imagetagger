@@ -26,7 +26,7 @@ $('#back_button').attr('disabled', 'true');
 }
 {% endblock %}
 {% block bodyblock %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
             <div class="panel panel-default">
@@ -44,7 +44,7 @@ $('#back_button').attr('disabled', 'true');
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-6">
             <img id="picture" src="{% url 'images_imageview' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
             <hr color="silver" width="100%">
             {% if image_annotations.all %}
@@ -71,7 +71,7 @@ $('#back_button').attr('disabled', 'true');
             <div class="alert alert-warning" role="alert">No annotations found.</div>
             {% endif %}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">{{selected_image.name}}</h3>

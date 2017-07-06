@@ -25,7 +25,10 @@ $(document).ready(function () {
                 $('#y2Field').val(Math.floor(selection.y2 * image_scale));
             }
         })
-
+        if (typeof loadannotation === "function") { //tageditview
+    	loadannotation();
+			reload_selection();
+		}
     });
 
     $('#x1Field')[0].oninput = function () {
@@ -82,35 +85,32 @@ $(document).ready(function () {
 		if (typeof init_navigationbuttons === "function") { //tagview
     	init_navigationbuttons();
 
-      $(document).keyup(function(event){
-        switch(event.keyCode){
-          case 70: //f
-            $('#next_button').click();
-            break;
-          case 68: //d
-            $('#skip_button').click();
-            break;
-          case 83: //s
-            $('#back_button').click();
-            break;
-          case 65: //a
-            $('#last_button').click();
-            break;
-          case 82: //r
-            $('#reset_button').click();
-            break;
-          case 86: //'v'
-            $('#annotation_form').submit();
-            break;
-        }
-      });
+        $(document).keyup(function(event){
+            switch(event.keyCode){
+                case 70: //f
+                    $('#next_button').click();
+                    break;
+                case 68: //d
+                    $('#skip_button').click();
+                    break;
+                case 83: //s
+                    $('#back_button').click();
+                    break;
+                case 65: //a
+                    $('#last_button').click();
+                    break;
+                case 82: //r
+                    $('#reset_button').click();
+                    break;
+                case 86: //'v'
+                    $('#annotation_form').submit();
+                    break;
+            }
+        });
 
     }
 
-		if (typeof loadannotation === "function") { //tageditview
-    	loadannotation();
-			reload_selection();
-		}
+
 
 });
 
