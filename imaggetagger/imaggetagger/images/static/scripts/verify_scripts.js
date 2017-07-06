@@ -2,7 +2,9 @@ var image_scale = 0;
 $(document).ready(function () {
     init_navigationbuttons();
     // init_image();
-    draw_box();
+    $('img#picture').on('load', function () {
+        draw_box();
+    });
 
     $(document).keyup(function(event){
         switch(event.keyCode){
