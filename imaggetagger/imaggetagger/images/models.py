@@ -66,6 +66,9 @@ class Image(models.Model):
     def path(self):
         return os.path.join(self.image_set.root_path(), self.filename)
 
+    def relative_path(self):
+        return os.path.join(self.image_set.path, self.filename)
+
     def __str__(self):
         return u'Image: {0}'.format(self.name)
 

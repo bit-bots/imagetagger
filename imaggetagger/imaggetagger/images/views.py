@@ -109,8 +109,11 @@ def image_auth_nginx(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if not request.user.has_perm('read', image.image_set_id):
         return HttpResponseForbidden()
-
-    return HttpResponse()
+    response = HttpResponse()
+    response["Content-Disposition"] = "attachment; filename={0}".format(
+            image.name)
+    response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image.relative_path())
+    return response
 
 
 @login_required
@@ -118,8 +121,8 @@ def get_image_list(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if not request.user.has_perm('read', imageset):
         return HttpResponseForbidden()
-    return TemplateResponse(request, '', {
-        'images': imageset.image_set
+    return TemplateResponse(request, 'images/imagelist.txt', {
+        'images': imageset.image_set.all()
     })
         
 
