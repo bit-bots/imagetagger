@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^imageset/edit/(\d+)/$', imageseteditview, name='images_imageseteditview'),
     url(r'^imageset/delete/(\d+)/$', imagesetdeleteview, name='images_imagesetdeleteview'),
     url(r'^imageset/explore/$', exploreview, {'mode': 'imageset'}, name='images_exploreimagesetview'),
+    url(r'^imageset/imagetagger_dl_script.sh$', dl_script, name='images_dl_script'),
     url(r'^tagview/(\d+)/$', tagview, name='images_tagview'),
     url(r'^tagview/edit/(\d+)/$', tageditview, name='images_tageditview'),
     url(r'^tagview/delete/(\d+)/$', tagdeleteview, name='images_tagdeleteview'),

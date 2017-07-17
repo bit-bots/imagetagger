@@ -97,15 +97,13 @@ def imageview(request, image_id):
     with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
         return HttpResponse(f.read(), content_type="image/jpeg")
 
-
+@login_required
 def image_auth_nginx(request, image_id):
     """
     This view is to authenticate direct access to the images via nginx auth_request directive
 
     it will return forbidden on if the user is not authenticated
     """
-    if request.user.is_anonymous:
-        return HttpResponseForbidden()
     image = get_object_or_404(Image, id=image_id)
     if not request.user.has_perm('read', image.image_set_id):
         return HttpResponseForbidden()
@@ -215,6 +213,11 @@ def imagesetdeleteview(request, imageset_id):
     return HttpResponseRedirect(reverse('images_teamview', args=(imageset.team.id,)))
 
 
+@login_required
+def dl_script(request):
+    return TemplateResponse(request, 'images/download.sh')
+    
+    
 @login_required
 def tagview(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
