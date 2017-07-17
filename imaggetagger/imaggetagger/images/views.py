@@ -213,7 +213,6 @@ def imagesetdeleteview(request, imageset_id):
     return HttpResponseRedirect(reverse('images_teamview', args=(imageset.team.id,)))
 
 
-@login_required
 def dl_script(request):
     return TemplateResponse(request, 'images/download.sh')
     
