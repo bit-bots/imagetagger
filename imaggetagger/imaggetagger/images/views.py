@@ -558,6 +558,9 @@ def bitbotai_export(imageset):
     a.append('Export of Imageset ' +
              imageset.name +
              ' (ball annotations in bounding boxes)\n')
+    a.append('set[' +
+             imageset.name +
+             ']\n')
     a.append(settings.EXPORT_SEPARATOR.join([
         'imagename',
         'x1',
