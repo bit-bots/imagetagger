@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.contrib.auth import logout
+from django.views.decorators.http import require_http_methods, require_POST
+from django.contrib.auth import logout, login
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -96,6 +96,32 @@ def imageview(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
         return HttpResponse(f.read(), content_type="image/jpeg")
+
+
+def image_auth_nginx(request, image_id):
+    """
+    This view is to authenticate direct access to the images via nginx auth_request directive
+
+    it will return forbidden on if the user is not authenticated
+    """
+    if request.user.is_anonymous:
+        return HttpResponseForbidden()
+    image = get_object_or_404(Image, id=image_id)
+    if not request.user.has_perm('read', image.image_set_id):
+        return HttpResponseForbidden()
+
+    return HttpResponse()
+
+
+@login_required
+def get_image_list(request, image_set_id):
+    imageset = get_object_or_404(ImageSet, id=image_set_id)
+    if not request.user.has_perm('read', imageset):
+        return HttpResponseForbidden()
+    return TemplateResponse(request, '', {
+        'images': imageset.image_set
+    })
+        
 
 
 @login_required

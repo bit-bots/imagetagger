@@ -1,0 +1,3 @@
+{% for image in images %}
+{{ static_root }}/ngx_std_direct/{{ image.path }}
+{% endfor %}
