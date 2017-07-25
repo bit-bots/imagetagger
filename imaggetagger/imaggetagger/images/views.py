@@ -341,6 +341,14 @@ def exportcreateview(request, image_set_id):
                                 annotation_count=annotation_count,
                                 export_text=export_text)
                 export.save()
+            if export_format == 'wf_wolves':
+                export_text, annotation_count = wf_wolves_export(imageset)
+                export = Export(type="Bit-BotAI",
+                                image_set=imageset,
+                                user=(request.user if request.user.is_authenticated() else None),
+                                annotation_count=annotation_count,
+                                export_text=export_text)
+                export.save()
     return HttpResponseRedirect(reverse('images_imagesetview', args=(image_set_id,)))
 
 
@@ -578,6 +586,36 @@ def bitbotai_export(imageset):
         annotation_counter += 1
         vector = json.loads(annotation.vector)
         a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
+                                                vector['x1'],
+                                                vector['y1'],
+                                                vector['x2'],
+                                                (vector['y2'] + '\n')]))
+    return ''.join(a), annotation_counter
+
+
+# helping function to create the Bot-Bot AI export
+def wf_wolves_export(imageset):
+    images = Image.objects.filter(image_set=imageset)
+    annotation_counter = 0
+    a = []
+    a.append('Export of Imageset ' +
+             imageset.name +
+             ' (ball annotations in bounding boxes)\n')
+    a.append('set[' +
+             imageset.name +
+             ']\n')
+    a.append(settings.EXPORT_SEPARATOR.join([
+        'imagename',
+        'x1',
+        'y1',
+        'x2',
+        'y2\n']))
+    annotations = Annotation.objects.filter(image__in=images)
+    for annotation in annotations:
+        annotation_counter += 1
+        vector = json.loads(annotation.vector)
+        a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
+                                                annotation.type.name,
                                                 vector['x1'],
                                                 vector['y1'],
                                                 vector['x2'],
