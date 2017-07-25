@@ -566,10 +566,10 @@ def bitbotai_export(imageset):
     images = Image.objects.filter(image_set=imageset)
     annotation_counter = 0
     a = []
-    a.append('Export of Imageset ' +
+    a.append('# Export of Imageset ' +
              imageset.name +
              ' (ball annotations in bounding boxes)\n')
-    a.append('set[' +
+    a.append('# set[' +
              imageset.name +
              ']\n')
     a.append(settings.EXPORT_SEPARATOR.join([
@@ -596,10 +596,10 @@ def wf_wolves_export(imageset):
     images = Image.objects.filter(image_set=imageset)
     annotation_counter = 0
     a = []
-    a.append('Export of Imageset ' +
+    a.append('# Export of Imageset ' +
              imageset.name +
              ' (all annotations in bounding boxes)\n')
-    a.append('set[' +
+    a.append('# set[' +
              imageset.name +
              ']\n')
     a.append(settings.EXPORT_SEPARATOR.join([
