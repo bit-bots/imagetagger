@@ -341,7 +341,7 @@ def exportcreateview(request, image_set_id):
                 export.save()
             if export_format == 'wf_wolves':
                 export_text, annotation_count = wf_wolves_export(imageset)
-                export = Export(type="Bit-BotAI",
+                export = Export(type="WF-Wolves",
                                 image_set=imageset,
                                 user=(request.user if request.user.is_authenticated() else None),
                                 annotation_count=annotation_count,
@@ -598,12 +598,13 @@ def wf_wolves_export(imageset):
     a = []
     a.append('Export of Imageset ' +
              imageset.name +
-             ' (ball annotations in bounding boxes)\n')
+             ' (all annotations in bounding boxes)\n')
     a.append('set[' +
              imageset.name +
              ']\n')
     a.append(settings.EXPORT_SEPARATOR.join([
         'imagename',
+        'annotationtype',
         'x1',
         'y1',
         'x2',
