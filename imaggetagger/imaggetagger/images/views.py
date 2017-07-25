@@ -145,13 +145,11 @@ def imagesetview(request, image_set_id):
     exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
     # a list of annotation types used in the imageset
     annotation_types = set()
-    annotations = set()
-    for image in images:
-        annotations = annotations.union(Annotation.objects.filter(image=image))
+    annotations = Annotation.objects.filter(image__in=images)
     annotation_types = annotation_types.union([annotation.type for annotation in annotations])
     first_annotation = None
     if len(annotations) > 0:
-        first_annotation = annotations.pop()
+        first_annotation = annotations[0]
     return TemplateResponse(request, 'images/imageset.html', {
                             'images': images,
                             'annotationcount': len(annotations),
@@ -336,6 +334,14 @@ def exportcreateview(request, image_set_id):
             if export_format == 'Bit-Bot AI':
                 export_text, annotation_count = bitbotai_export(imageset)
                 export = Export(type="Bit-BotAI",
+                                image_set=imageset,
+                                user=(request.user if request.user.is_authenticated() else None),
+                                annotation_count=annotation_count,
+                                export_text=export_text)
+                export.save()
+            if export_format == 'wf_wolves':
+                export_text, annotation_count = wf_wolves_export(imageset)
+                export = Export(type="WF-Wolves",
                                 image_set=imageset,
                                 user=(request.user if request.user.is_authenticated() else None),
                                 annotation_count=annotation_count,
@@ -585,6 +591,37 @@ def bitbotai_export(imageset):
     return ''.join(a), annotation_counter
 
 
+# helping function to create the Bot-Bot AI export
+def wf_wolves_export(imageset):
+    images = Image.objects.filter(image_set=imageset)
+    annotation_counter = 0
+    a = []
+    a.append('Export of Imageset ' +
+             imageset.name +
+             ' (all annotations in bounding boxes)\n')
+    a.append('set[' +
+             imageset.name +
+             ']\n')
+    a.append(settings.EXPORT_SEPARATOR.join([
+        'imagename',
+        'annotationtype',
+        'x1',
+        'y1',
+        'x2',
+        'y2\n']))
+    annotations = Annotation.objects.filter(image__in=images)
+    for annotation in annotations:
+        annotation_counter += 1
+        vector = json.loads(annotation.vector)
+        a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
+                                                annotation.type.name,
+                                                vector['x1'],
+                                                vector['y1'],
+                                                vector['x2'],
+                                                (vector['y2'] + '\n')]))
+    return ''.join(a), annotation_counter
+
+
 def user_verify(user, annotation, verification_state):
     if user.is_authenticated():
         Verification.objects.filter(user=user, annotation=annotation).delete()
@@ -594,4 +631,4 @@ def user_verify(user, annotation, verification_state):
 
 
 def verify_bounding_box_annotation(post_dict):
-    return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) > 10 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) > 10)
+    return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) >= 1 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) >= 1)

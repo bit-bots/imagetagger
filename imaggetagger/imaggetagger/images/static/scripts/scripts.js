@@ -16,8 +16,8 @@ $(document).ready(function () {
         selection = image.imgAreaSelect({
             instance: true,
             handles: false,
-            minHeight: 10,
-            minWidth: 10,
+            minHeight: 2,
+            minWidth: 2,
             onSelectChange: function (img, selection) {
                 $('#x1Field').val(Math.ceil(selection.x1 * image_scale));
                 $('#y1Field').val(Math.ceil(selection.y1 * image_scale));
