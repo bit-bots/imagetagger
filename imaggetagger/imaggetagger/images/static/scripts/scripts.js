@@ -7,6 +7,10 @@ $(document).ready(function () {
         var image = $('img#picture');
         image = $('img#picture');
     }
+    jQuery("#not_in_image").each(function(){
+        if (jQuery(this).is(":checked"))
+            ReturnVal = true;
+    });
     image.on('load', function() {
         var image = $('img#picture');
         if(!image_scale > 0) {
@@ -98,6 +102,15 @@ $(document).ready(function () {
                     break;
                 case 65: //a
                     $('#last_button').click();
+                    break;
+                case 71: //g
+                    var nii = $('#not_in_image');
+                    if(nii.prop('checked')) {
+                        nii.prop('checked', false)
+                    }
+                    else {
+                        nii.prop('checked', true)
+                    }
                     break;
                 case 82: //r
                     $('#reset_button').click();
