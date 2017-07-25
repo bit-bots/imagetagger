@@ -145,13 +145,11 @@ def imagesetview(request, image_set_id):
     exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
     # a list of annotation types used in the imageset
     annotation_types = set()
-    annotations = set()
-    for image in images:
-        annotations = annotations.union(Annotation.objects.filter(image=image))
+    annotations = Annotation.objects.filter(image__in=images)
     annotation_types = annotation_types.union([annotation.type for annotation in annotations])
     first_annotation = None
     if len(annotations) > 0:
-        first_annotation = annotations.pop()
+        first_annotation = annotations[0]
     return TemplateResponse(request, 'images/imageset.html', {
                             'images': images,
                             'annotationcount': len(annotations),
