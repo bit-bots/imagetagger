@@ -105,7 +105,7 @@ def image_auth_nginx(request, image_id):
     it will return forbidden on if the user is not authenticated
     """
     image = get_object_or_404(Image, id=image_id)
-    if not image.image_set.public or not request.user.has_perm('read', image.image_set):
+    if not (image.image_set.public or request.user.has_perm('read', image.image_set)):
         return HttpResponseForbidden()
     response = HttpResponse()
     response["Content-Disposition"] = "attachment; filename={0}".format(
@@ -117,7 +117,7 @@ def image_auth_nginx(request, image_id):
 @login_required
 def get_image_list(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
-    if not imageset.public or not request.user.has_perm('read', imageset):
+    if not (imageset.public or request.user.has_perm('read', imageset)):
         return HttpResponseForbidden()
     return TemplateResponse(request, 'images/imagelist.txt', {
         'images': imageset.image_set.all()
