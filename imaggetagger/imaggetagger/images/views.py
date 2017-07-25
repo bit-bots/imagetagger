@@ -632,4 +632,4 @@ def user_verify(user, annotation, verification_state):
 
 
 def verify_bounding_box_annotation(post_dict):
-    return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) > 10 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) > 10)
+    return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) >= 1 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) >= 1)
