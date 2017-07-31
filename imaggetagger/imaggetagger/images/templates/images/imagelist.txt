@@ -1,3 +1,3 @@
 {% for image in images %}
-{% url 'images_nginx_imageauth' image.id %}
+{% url 'images_nginx_imageview' image.id %}
 {% endfor %}

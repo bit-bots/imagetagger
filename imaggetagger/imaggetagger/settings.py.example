@@ -136,3 +136,4 @@ IMAGE_PATH = '/home/user/pictures/'   # the absolute path to the folder with the
 IMAGE_EXTENSION = set(['.png', '.jpg'])  # filename extension of accepted imagefiles
 EXPORT_SEPARATOR = '|'
 DATA_PATH = '/home/bububu/documents/Bit-Bots/imagetagger/data/'
+USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance

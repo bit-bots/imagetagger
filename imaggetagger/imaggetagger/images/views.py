@@ -91,14 +91,14 @@ def imageuploadview(request, imageset_id):
         return JsonResponse({'files': json_files})
 
 
-@login_required
-def imageview(request, image_id):
-    image = get_object_or_404(Image, id=image_id)
-    with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
-        return HttpResponse(f.read(), content_type="image/jpeg")
+# @login_required
+# def imageview(request, image_id):
+#     image = get_object_or_404(Image, id=image_id)
+#     with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
+#         return HttpResponse(f.read(), content_type="image/jpeg")
 
 @login_required
-def image_auth_nginx(request, image_id):
+def imageview(request, image_id):
     """
     This view is to authenticate direct access to the images via nginx auth_request directive
 
@@ -107,11 +107,14 @@ def image_auth_nginx(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if not (image.image_set.public or request.user.has_perm('read', image.image_set)):
         return HttpResponseForbidden()
-    response = HttpResponse()
-    response["Content-Disposition"] = "attachment; filename={0}".format(
-            image.name)
-    response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image.relative_path())
-    return response
+    if settings.USE_NGINX_IMAGE_PROVISION:
+        response = HttpResponse()
+        response["Content-Disposition"] = "attachment; filename={0}".format(
+                image.name)
+        response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image.relative_path())
+        return response
+    with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
+        return HttpResponse(f.read(), content_type="image/jpeg")
 
 
 @login_required
@@ -348,13 +351,6 @@ def exportcreateview(request, image_set_id):
                                 export_text=export_text)
                 export.save()
     return HttpResponseRedirect(reverse('images_imagesetview', args=(image_set_id,)))
-
-
-#@login_required
-#def exportdeleteview(request, export_id):
-#    export = get_object_or_404(Export, id=export_id)
-#    if request.user.has_perm('delete_export',
-#        return HttpResponseRedirect(reverse('images_imagesetview', args=(export.image_set.id,)))
 
 
 @login_required

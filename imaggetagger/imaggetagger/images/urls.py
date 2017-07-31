@@ -21,9 +21,9 @@ urlpatterns = [
     url(r'^manage/annotation/(\d+)/$', annotationmanageview, name='images_annotationmanageview'),
     url(r'^verify/(\d+)/$', verifyview, name='images_verifyview'),
     url(r'^imagelist/(\d+)/$', get_image_list, name='images_imagelist'),
-    # this view will be shadowed by nginx via image_nginx auth and direct access
     url(r'^image/(\d+)/$', imageview, name='images_imageview'),
-    url(r'^image_nginx/(\d+)/$', image_auth_nginx, name='images_nginx_imageauth'),
+    # this view will be shadowed by nginx via image_nginx auth and direct access
+    url(r'^image_nginx/(\d+)/$', imageview, name='images_nginx_imageauth'),
     url(r'^image/upload/(\d+)/$', imageuploadview, name='images_imageuploadview'),
     url(r'^image/delete/(\d+)/$', imagedeleteview, name='images_imagedeleteview'),
     url(r'^user/(\d+)/$', userview, name='images_userview'),
