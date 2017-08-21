@@ -131,9 +131,14 @@ LOGIN_REDIRECT_URL = '/images/'
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = 'imagetagger/imagetagger/imagetagger/images/static/' #root of static files (absolute path)
-IMAGE_PATH = '/home/user/pictures/'   # the absolute path to the folder with the imagesets
-IMAGE_EXTENSION = set(['.png', '.jpg'])  # filename extension of accepted imagefiles
 EXPORT_SEPARATOR = '|'
-DATA_PATH = '/home/bububu/documents/Bit-Bots/imagetagger/data/'
+DATA_PATH = os.path.join(BASE_DIR, 'data')
+
+IMAGE_PATH = os.path.join(BASE_DIR, 'images')  # the absolute path to the folder with the imagesets
+
+# filename extension of accepted imagefiles
+IMAGE_EXTENSION = {
+    '.png',
+    '.jpg',
+}
 USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance
