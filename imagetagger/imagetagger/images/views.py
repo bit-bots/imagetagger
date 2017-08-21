@@ -125,7 +125,7 @@ def get_image_list(request, image_set_id):
     return TemplateResponse(request, 'images/imagelist.txt', {
         'images': imageset.image_set.all()
     })
-        
+
 
 
 @login_required
@@ -216,8 +216,8 @@ def imagesetdeleteview(request, imageset_id):
 
 def dl_script(request):
     return TemplateResponse(request, 'images/download.sh')
-    
-    
+
+
 @login_required
 def tagview(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
