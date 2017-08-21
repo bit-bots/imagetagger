@@ -2,7 +2,7 @@ from django.conf import settings
 import os
 import sys
 from django.core.management.base import BaseCommand
-from imaggetagger.images.models import ImageSet, Image
+from imagetagger.images.models import ImageSet, Image
 
 
 class Command(BaseCommand):

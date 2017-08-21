@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import cv2
 import json
-from imaggetagger.images.models import ImageSet, Image, Annotation, AnnotationType
+from imagetagger.images.models import ImageSet, Image, Annotation, AnnotationType
 from keras.models import model_from_json
 from django.conf import settings
 from django.core.management.base import BaseCommand

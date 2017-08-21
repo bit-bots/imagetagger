@@ -1,4 +1,4 @@
-"""imaggetagger URL Configuration
+"""imagetagger URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.10/topics/http/urls/
@@ -17,12 +17,12 @@ from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
 from django.contrib import admin
 from django.views.generic.base import RedirectView
-import imaggetagger.images.urls
+import imagetagger.images.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name='admin_login'),
     url(r'^login/$', auth_views.login, {'template_name': 'images/login.html'}),
-    url(r'^images/', include(imaggetagger.images.urls)),
+    url(r'^images/', include(imagetagger.images.urls)),
     url(r'^$', RedirectView.as_view(url='/images', permanent=True), name='index')
 ]

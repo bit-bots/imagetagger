@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class ImagesConfig(AppConfig):
-    name = 'imaggetagger.images'
+    name = 'imagetagger.images'
