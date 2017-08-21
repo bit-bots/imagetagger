@@ -22,7 +22,6 @@ import imagetagger.images.urls
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name='admin_login'),
-    url(r'^login/$', auth_views.login, {'template_name': 'images/login.html'}),
     url(r'^images/', include(imagetagger.images.urls)),
     url(r'^$', RedirectView.as_view(url='/images', permanent=True), name='index')
 ]
