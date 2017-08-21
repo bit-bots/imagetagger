@@ -177,7 +177,7 @@ def imagesetcreateview(request, team_id):
         imageset.path = '_'.join((str(team.id), str(imageset.id)))  # todo: some formatting would be great
         imageset.team = team
         imageset.save()
-        os.mkdir(imageset.root_path())  # create a folder to store the images of the set
+        os.makedirs(imageset.root_path())  # create a folder to store the images of the set
         assign_perm('edit_set', team.members, imageset)
         assign_perm('delete_set', team.admins, imageset)
         assign_perm('edit_annotation', team.members, imageset)
