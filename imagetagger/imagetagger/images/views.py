@@ -215,7 +215,8 @@ def imagesetdeleteview(request, imageset_id):
 
 
 def dl_script(request):
-    return TemplateResponse(request, 'images/download.sh')
+    return TemplateResponse(
+        request, 'images/download.sh', content_type='text/plain')
 
 
 @login_required
