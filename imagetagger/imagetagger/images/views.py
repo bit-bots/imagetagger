@@ -94,7 +94,7 @@ def imageuploadview(request, imageset_id):
 # @login_required
 # def imageview(request, image_id):
 #     image = get_object_or_404(Image, id=image_id)
-#     with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
+#     with open(os.path.join(settings.IMAGE_PATH, image.path()), "rb") as f:
 #         return HttpResponse(f.read(), content_type="image/jpeg")
 
 @login_required
@@ -113,7 +113,7 @@ def imageview(request, image_id):
                 image.name)
         response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image.relative_path())
         return response
-    with open(os.path.join(settings.STATIC_ROOT, image.path()), "rb") as f:
+    with open(os.path.join(settings.IMAGE_PATH, image.path()), "rb") as f:
         return HttpResponse(f.read(), content_type="image/jpeg")
 
 
@@ -134,7 +134,7 @@ def get_image_list(request, image_set_id):
 def imagedeleteview(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if request.user.has_perm('edit_imageset', image.image_set):
-        os.remove(os.path.join(settings.STATIC_ROOT, image.full_path()))
+        os.remove(os.path.join(settings.IMAGE_PATH, image.full_path()))
         image.delete()
         return JsonResponse({'files': [{image.name: True}, ]})
 

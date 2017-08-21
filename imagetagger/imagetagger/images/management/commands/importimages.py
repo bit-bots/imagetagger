@@ -11,7 +11,7 @@ class Command(BaseCommand):
     #    parser.add_argument('arg_imageset')
 
     def handle(self, *args, **options):
-        url = settings.STATIC_ROOT + settings.IMAGE_PATH
+        url = os.path.join(settings.IMAGE_PATH, settings.IMAGE_PATH)
     #    print(options['arg_imageset'])
         print('url: ', url)
         dirnames = [e for e in os.listdir(url) if os.path.isdir(url + e)]

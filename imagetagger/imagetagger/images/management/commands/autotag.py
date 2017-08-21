@@ -17,7 +17,7 @@ class Command(BaseCommand):
         print('Enter image set name.')
         image_set_name = input()
         try:
-            image_set_path = settings.STATIC_ROOT + ImageSet.objects.get(name=image_set_name).get_path()
+            image_set_path = settings.IMAGE_PATH + ImageSet.objects.get(name=image_set_name).get_path()
         except ImageSet.model.DoesNotExist:
             print('Imageset not found.')
             sys.exit(1)
