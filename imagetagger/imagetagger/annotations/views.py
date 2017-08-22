@@ -28,6 +28,7 @@ def annotate(request, image_id):
         # here the stuff we got via POST gets put in the DB
         last_annotation_type_id = -1
         if request.method == 'POST' and verify_bounding_box_annotation(request.POST):
+            vector = {'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']}
             vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
             last_annotation_type_id = request.POST['selected_annotation_type']
             annotation = Annotation(vector=vector_text,
@@ -37,8 +38,18 @@ def annotate(request, image_id):
             annotation.user = (request.user if request.user.is_authenticated() else None)
             if 'not_in_image' in request.POST:
                 annotation.not_in_image = 1  # 0 by default
-            #tests for duplicates of same tag type & coordinates on image
-            if Annotation.objects.filter(image=selected_image, vector=vector_text, type=last_annotation_type_id).count() == 0:
+            #tests for duplicates of same tag type & similiar coordinates (+-5 on every coordinate) on image
+            result = []
+            for annota in Annotation.objects.filter(image=selected_image, type=last_annotation_type_id):
+                anno_vector = json.loads(annota .vector)
+                sum = 0
+                for key, value in anno_vector.items():
+                    if abs(int(value) - int(vector[key])) <= 5:
+                        sum = sum + abs(int(value) - int(vector[key]))
+                    else:
+                        sum = sum + len(vector)*5 +1
+                result.append(sum)
+            if (not any(elem <= len(vector)*5 for elem in result)) or result == []:
                 annotation.save()
                 # the creator of the annotation verifies it instantly
                 user_verify(request.user, annotation, True)
