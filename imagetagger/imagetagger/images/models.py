@@ -62,6 +62,7 @@ class Image(models.Model):
     name = models.CharField(max_length=100)
     filename = models.CharField(max_length=100, unique=True)
     time = models.DateTimeField(auto_now_add=True)
+    checksum = models.BinaryField()
 
     def path(self):
         return os.path.join(self.image_set.root_path(), self.filename)

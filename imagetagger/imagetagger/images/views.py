@@ -20,6 +20,7 @@ import json
 from datetime import datetime
 from guardian.shortcuts import assign_perm
 import zipfile
+import hashlib
 
 def logout_view(request):
     logout(request)
@@ -71,16 +72,38 @@ def imageuploadview(request, imageset_id):
                 for filename in filenames:
                     (shortname, extension) = os.path.splitext(filename)
                     if(extension.lower() in settings.IMAGE_EXTENSION):
-                        img_fname = ''.join(shortname) + '_' + ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + extension
-                        shutil.move(os.path.join(imageset.root_path(), 'tmp', filename), os.path.join(imageset.root_path(), img_fname))
-                        Image(name=filename, image_set=imageset, filename=img_fname).save()
+                        img_fname = (''.join(shortname) + '_' +
+                                     ''.join(
+                                         random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                         for _ in range(6)) + extension)
+                        fchecksum = hashlib.sha512()
+                        with open(os.path.join(imageset.root_path(), 'tmp', filename), 'rb') as fil:
+                            while True:
+                                buf = fil.read(10000)
+                                if not buf:
+                                    break
+                                fchecksum.update(buf)
+                        fchecksum = fchecksum.digest()
+                        if Image.objects.filter(checksum=fchecksum, image_set=imageset).count() == 0:
+                            shutil.move(os.path.join(imageset.root_path(), 'tmp', filename), os.path.join(imageset.root_path(), img_fname))
+                            Image(name=filename, image_set=imageset, filename=img_fname, checksum=fchecksum).save()
+                        else:
+                            os.remove(os.path.join(imageset.root_path(), 'tmp', filename))
             else:
-                fname = '_'.join(fname[:-1]) + '_' + ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6)) + '.' + fname[-1]
-                image = Image(name=f.name, image_set=imageset, filename=fname)
-                image.save()
-                with open(image.path(), 'wb') as out:
-                    for chunk in f.chunks():
-                        out.write(chunk)
+                fname = ('_'.join(fname[:-1]) + '_' +
+                         ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                 for _ in range(6)) + '.' + fname[-1])
+                fchecksum = hashlib.sha512()
+                for chunk in f.chunks():
+                    fchecksum.update(chunk)
+                fchecksum = fchecksum.digest()
+                if Image.objects.filter(checksum=fchecksum, image_set=imageset).count() == 0:
+
+                    image = Image(name=f.name, image_set=imageset, filename=fname, checksum=fchecksum)
+                    image.save()
+                    with open(image.path(), 'wb') as out:
+                        for chunk in f.chunks():
+                            out.write(chunk)
             json_files.append({'name': f.name,
                                'size': f.size,
                                # 'url': reverse('images_imageview', args=(image.id, )),
