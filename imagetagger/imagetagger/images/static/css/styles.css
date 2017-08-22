@@ -1,8 +1,8 @@
 body{
-    font-family: Arial, Helvetica, sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 }
 a{
-    color: #404040;
+	color: #404040;
 }
 .content{
 	padding-top: 60px;
@@ -19,11 +19,13 @@ a{
 div.wrapper{
 	position: relative;
 }
+
 #boundingBox{
 	position: absolute;
 	border:2px solid #ff0000;
-    background-color: transparent;
+	background-color: transparent;
 }
+
 div.toolbox{
 	right: 0px;
 	width: 30%;
@@ -34,8 +36,8 @@ div.toolbox{
 	padding: 5px;
 	position: fixed;
 	margin-right: 2px;
-
 }
+
 div.imageview{
 	left: 25%;
 	width: 40%;
@@ -44,7 +46,7 @@ div.imageview{
 	border-style: solid;
 	border-width: thin;
 	padding: 5px;
-  	position:absolute;
+	position:absolute;
 }
 
 div.leftlist{
@@ -59,7 +61,11 @@ div.leftlist{
 	position: fixed;
 	margin-left: 4px;
 	overflow: auto;
+}
 
+div.col-md-3:nth-child(1) .panel-body{
+	height: 600px;
+	overflow-y: scroll;
 }
 
 div.leftcontent{
@@ -74,13 +80,12 @@ div.leftcontent{
 }
 
 div.annotation{
-   border-radius: 5px;
-   border-color: silver;
-   border-style: solid;
-   border-width: thin;
-   padding: 5px;
-   margin-top: 5px;
-
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	margin-top: 5px;
 }
 
 #additional_feature_table{
@@ -95,15 +100,15 @@ div.head{
 }
 
 div.centerblock{
-    width: 45%;
-   border-radius: 5px;
-   border-color: silver;
-   border-style: solid;
-   border-width: thin;
-   padding: 5px;
-   position: absolute;
-   text-align: center;
-   margin-left: 22%;
+	width: 45%;
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	position: absolute;
+	text-align: center;
+	margin-left: 22%;
 }
 
 a.bitbot-logo{
@@ -111,13 +116,12 @@ a.bitbot-logo{
 }
 
 div.rightcontent{
-   border-radius: 5px;
-   border-color: silver;
-   border-style: solid;
-   border-width: thin;
-   padding: 5px;
-   text-align: center;
-   margin-right: 0%;
-   margin-left: 25%;
+	border-radius: 5px;
+	border-color: silver;
+	border-style: solid;
+	border-width: thin;
+	padding: 5px;
+	text-align: center;
+	margin-right: 0%;
+	margin-left: 25%;
 }
-
