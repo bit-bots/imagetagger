@@ -29,6 +29,18 @@ $('#back_button').attr('disabled', 'true');
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
+            <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="image_id" value="{{ selected_image.id }}">
+                        annotation type:
+                        {% include "annotations/annotationtypes.html" %}
+
+                <input type="submit" value="filter">
+
+                {% if filtered %}
+                    <a href="{{request.get_full_path}}" target="_self"> [x] </a>
+                {% endif %}
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href="{% url 'images:view_imageset' selected_image.image_set.id %}"><u><h3 class="panel-title">{{selected_image.image_set.name}}</h3></u></a>
@@ -81,13 +93,7 @@ $('#back_button').attr('disabled', 'true');
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
-                        <select name="selected_annotation_type">
-                            {% for annotation_type in annotation_types %}
-                            <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
-                                {{annotation_type.name}}
-                            </option>
-                            {% endfor %}
-                        </select>
+                        {% include "annotations/annotationtypes.html" %}
                         <table border="1">
                             <tr>
                                 <td>key</td>

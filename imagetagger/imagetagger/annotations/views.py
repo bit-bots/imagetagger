@@ -41,6 +41,11 @@ def annotate(request, image_id):
             user_verify(request.user, annotation, True)
         annotation_types = AnnotationType.objects.filter(active=True)  # needed to select the annotation in the drop-down-menu
         set_images = Image.objects.filter(image_set=selected_image.image_set)
+        filtered = False
+        if request.method == "POST":
+            filtered = True
+            # filter images for annotationtype
+            set_images = set_images.filter(annotation__type_id=request.POST.get("selected_annotation_type"))
         set_images = set_images.order_by('id')
 
         # detecting next and last image in the set
@@ -65,6 +70,7 @@ def annotate(request, image_id):
             'annotation_types': annotation_types,
             'image_annotations': Annotation.objects.filter(image=selected_image),
             'last_annotation_type_id': int(last_annotation_type_id),
+            'filtered' : filtered,
         })
     else:
         return redirect(reverse('images:view_imageset', args=(selected_image.image_set.id,)))
