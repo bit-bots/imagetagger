@@ -1,8 +1,12 @@
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.http import require_POST
 from guardian.shortcuts import assign_perm
 
 from imagetagger.images.models import ImageSet
@@ -136,11 +140,14 @@ def user(request, user_id):
     })
 
 
+@require_POST
 def create_user(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        email = request.POST['email']
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
-        return redirect(reverse('users:user', args=(user.id,)))
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    email = request.POST.get('email')
+    if User.objects.filter(Q(username=username) | Q(email=email)).exists():
+        messages.warning(request, _('A user with that username or email address exists.'))
+        return redirect(reverse('users:login'))
+    user = User.objects.create_user(username=username, email=email, password=password)
+    messages.success(request, _('Your account was successfully created.'))
+    return redirect(reverse('users:user', args=(user.id,)))

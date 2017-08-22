@@ -129,6 +129,15 @@ USE_TZ = True
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/images/'
 
+from django.contrib.messages import constants as messages
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_TAGS = {
+    messages.INFO: 'info',
+    messages.ERROR: 'danger',
+    messages.WARNING: 'warning',
+    messages.SUCCESS: 'success',
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 

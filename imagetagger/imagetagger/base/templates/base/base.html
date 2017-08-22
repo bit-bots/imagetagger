@@ -45,6 +45,9 @@
     </div>
 </nav>
     <div class="content">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
 {% block bodyblock %}{% endblock %}
 </div></div>
 </body>
