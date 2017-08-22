@@ -1,4 +1,4 @@
-{% extends 'images/base.html' %}
+{% extends 'base/base.html' %}
 {% load static %}
 
 {% block taggerimports %}
@@ -126,7 +126,7 @@
                         <ul>
                             {% for image in images %}
                                 <li>
-                                    <a href="{% url 'images_tagview' image.id %}"> {{image.name}}</a>
+                                    <a href="{% url 'annotations:annotate' image.id %}"> {{image.name}}</a>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -149,7 +149,7 @@
                                 </tr>
                                 <tr>
                                     <td>Team</td>
-                                    <td><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a></td>
+                                    <td><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a></td>
                                 </tr>
                                 <tr>
                                     <td>Location</td>
@@ -169,7 +169,7 @@
                                 </tr>
                                 <tr>
                                     <td>Download</td>
-                                    <td><a href="{% url 'images_dl_script' %}">Download Script</a> Image Download via <pre>./imagetagger_dl_script.sh {{ imageset.id }}</pre> to current directory</td>
+                                    <td><a href="{% url 'images:dl_script' %}">Download Script</a> Image Download via <pre>./imagetagger_dl_script.sh {{ imageset.id }}</pre> to current directory</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -186,7 +186,7 @@
                         <div>
                             <table class="table table-striped">
                                 <tbody>
-                                    <form id="edit_set" action="{% url 'images_imageseteditview' imageset.id %}" method="POST">
+                                    <form id="edit_set" action="{% url 'images:edit_imageset' imageset.id %}" method="POST">
                                         {% csrf_token %}
                                     <tr>
                                         <td>
@@ -231,7 +231,7 @@
                                     <tr>
                                         <td>
                                             {% if "delete_set" in imageset_perms %}
-                                                <a class="btn btn-danger" href="{% url 'images_imagesetdeleteview' imageset.id %}">Delete Set</a>
+                                                <a class="btn btn-danger" href="{% url 'images:delete_imageset' imageset.id %}">Delete Set</a>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -245,7 +245,7 @@
                         {% if not imageset.image_lock %}
                         Upload new images: <br>
                         <div >
-                            <form id="fileupload" action="{% url 'images_imageuploadview' imageset.id %}" method="POST" enctype="multipart/form-data">
+                            <form id="fileupload" action="{% url 'images:upload_image' imageset.id %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
                                 <div class="row fileupload-buttonbar">
@@ -301,8 +301,8 @@
                         <h2 class="panel-title">Annotation management</h2>
                     </div>
                     <div class="panel-body">
-                        <li><a href="{% url 'images_annotationmanageview' imageset.id %}">Manage annotations</a></li>
-                        <li><a href="{% url 'images_verifyview' first_annotation.id %}">Verify annotations</a></li>
+                        <li><a href="{% url 'annotations:manage_annotations' imageset.id %}">Manage annotations</a></li>
+                        <li><a href="{% url 'annotations:verify' first_annotation.id %}">Verify annotations</a></li>
                     </div>
                 </div>
             {% endif %}
@@ -311,7 +311,7 @@
                     <h2 class="panel-title">Export tags to file</h2>
                 </div>
                 <div class="panel-body">
-                    <form method="post" action="{% url 'images_exportview' imageset.id %}" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'annotations:create_export' imageset.id %}" enctype="multipart/form-data">
                         {% csrf_token %}
                             {% comment %}
                                 {% for annotationtype in annotationtypes %}
@@ -327,7 +327,7 @@
                     {% if exports %}
                         <h3>Download exports:</h3>
                         {% for export in exports %}
-                            <li><a href="{% url 'images_index' %}export/{{export.id}}/download/">{{export.type}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
+                            <li><a href="{% url 'annotations:download_export' export.id %}">{{export.type}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
                         {% endfor %}
                     {% endif %}
                 </div>

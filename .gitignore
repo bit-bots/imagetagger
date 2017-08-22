@@ -64,3 +64,7 @@ target/
 .pyenv
 .idea
 db.sqlite3
+
+
+imagetagger/data
+imagetagger/images

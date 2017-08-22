@@ -1,0 +1,80 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block bodyblock %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Explore {{mode}}s</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a class="list-group-item{% if mode == 'imageset' %} active{% endif %}" href="{% url 'images:explore_imageset' %}">imagesets</a>
+                <a class="list-group-item{% if mode == 'team' %} active{% endif %}" href="{% url 'users:explore_team' %}">teams</a>
+                <a class="list-group-item{% if mode == 'user' %} active{% endif %}" href="{% url 'users:explore_user' %}">users</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                <input id="searchbox" type="text" name="searchquery" placeholder="Search for {{mode}}s">
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
+                                </button>
+                            </form>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <dl>
+                                <table class="table table-striped">
+                                {% for imageset in imagesets %}
+                                    <tr>
+                                        <td>
+                                            <dt>
+                                                {% if imageset.team %}
+                                                    <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a>
+                                                {% else %}
+                                                    <a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a>
+                                                {% endif %}
+                                            </dt>
+                                            <dd>
+                                                {{ imageset.location }}
+                                            </dd>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% for team in teams %}
+                                    <tr>
+                                        <td>
+                                            <dt>
+                                                <a href="{% url 'users:team' team.id %}">{{team.name}}</a>
+                                            </dt>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% for user in users %}
+                                    <tr>
+                                        <td>
+                                            <dt>
+                                                <a href="{% url 'users:user' user.id %}">{{user.username}}</a>
+                                            </dt>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

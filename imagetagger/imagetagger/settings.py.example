@@ -31,6 +31,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'imagetagger.annotations',
+    'imagetagger.base',
+    'imagetagger.images',
+    'imagetagger.users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'progressbarupload',
     'guardian',
-    'imagetagger.images',
 ]
 
 MIDDLEWARE = [
@@ -123,7 +126,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/images/'
 
 # Static files (CSS, JavaScript, Images)

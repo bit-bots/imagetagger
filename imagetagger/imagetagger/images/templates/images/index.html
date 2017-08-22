@@ -1,5 +1,4 @@
-
-{% extends 'images/base.html' %}
+{% extends 'base/base.html' %}
 {% block bodyblock %}
 <div class="container-fluid">
     <div class="row">
@@ -16,7 +15,7 @@
                 <div class="panel-body">
                     <ul>
                         {% for imageset in image_sets %}
-                            <li><a href="{% url 'images_teamview' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images_imagesetview' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                            <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -30,12 +29,12 @@
                 <div class="panel-body">
                     <ul>
                         {% for team in userteams %}
-                            <li><a href="{% url 'images_teamview' team.id %}">{{team.name}}</a></li>
+                            <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
                         {% endfor %}
                     </ul>
                     <hr>
                     <p>Create new team:</p>
-                    <form method="post" action="{% url 'images_createteamview' %}">
+                    <form method="post" action="{% url 'users:create_team' %}">
                         {% csrf_token %}
                         <input type="text" placeholder="Teamname" maxlength="20" name="teamname">
                         <input class="btn btn-primary" type="submit" value="Create">

@@ -1,0 +1,86 @@
+{% extends 'base/base.html' %}
+{% block bodyblock %}
+{% load guardian_tags %}
+{% get_obj_perms request.user for team as "team_perms" %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Team-profile of {{ team.name }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {% if pub_imagesets %}
+                        <h3>Public Imagesets:</h3>
+                        <ul>
+                        {% for imageset in pub_imagesets %}
+                            <li><a href="{% url 'images:view_imageset' imageset.id%}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if is_member %}
+                        {% if priv_imagesets %}
+                            <h3>Private Imagesets:</h3>
+                            <ul>
+                            {% for imageset in priv_imagesets %}
+                                <li><a href="{% url 'images:view_imageset' imageset.id%}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if no_admin %}
+                            This team has no admin! <a href="{% url 'users:enthrone_user' team.id request.user.id %}">I want to be admin!</a>
+                        {% endif %}
+                        {% if "user_management" in team_perms %}
+                            <h3>Add Member:</h3>
+                            <form method="post" action="{% url 'users:team' team.id %}">
+                                {% csrf_token %}
+                                <input type="text" placeholder="username" maxlength="20" name="username"> <input type="submit" value="Add">
+                            </form>
+                        {% endif %}
+                        <hr>
+                        <a href="{% url 'users:leave_team' team.id %}">leave group</a>
+                        <hr>
+                    {% endif %}
+                    <h3>Members:</h3>
+                    <ul>
+                        {% for member in memberset %}
+                            <li>
+                                <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
+                                {% if "user_management" in team_perms %}
+                                    <a href="{% url 'users:kick_user' team.id member.id %}"> [kick]</a>
+                                    {% if member in admins %}
+                                        <a href="{% url 'users:dethrone_user' team.id member.id %}"> [dethrone]</a>
+                                    {% else %}
+                                        <a href="{% url 'users:enthrone_user' team.id member.id %}"> [enthrone]</a>
+                                    {% endif %}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                   <h3 class="panel-title">Create imageset</h3>
+                </div>
+                <div class="panel-body">
+                    <form method="post" action="{% url 'images:create_imageset' team.id %}">
+                        {% csrf_token %}
+                        <label for="name">Name: </label>
+                        <input type="text" id="name" name="name"><br>
+                        <label for="location">Location: </label>
+                        <input type="text" id="location" name="location"><br>
+                        <label for="public">Public: </label>
+                        <input type="checkbox" id="public" name="public"><br>
+                        <input class="btn btn-primary" type="submit" value="Create">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
