@@ -1,3 +1,4 @@
 Django
 django-guardian
 django-progressbarupload
+django-widget-tweaks

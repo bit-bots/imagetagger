@@ -1,15 +1,15 @@
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User, Group
-from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.http import require_POST
 from guardian.shortcuts import assign_perm
 
 from imagetagger.images.models import ImageSet
+from imagetagger.users.forms import RegistrationForm
 from .models import Team
 
 
@@ -140,14 +140,36 @@ def user(request, user_id):
     })
 
 
-@require_POST
-def create_user(request):
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    email = request.POST.get('email')
-    if User.objects.filter(Q(username=username) | Q(email=email)).exists():
-        messages.warning(request, _('A user with that username or email address exists.'))
-        return redirect(reverse('users:login'))
-    user = User.objects.create_user(username=username, email=email, password=password)
-    messages.success(request, _('Your account was successfully created.'))
-    return redirect(reverse('users:user', args=(user.id,)))
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect(reverse('images:index'))
+
+    authentication_form = AuthenticationForm()
+    registration_form = RegistrationForm()
+    registration_success = False
+
+    if request.method == 'POST':
+        if request.POST.get('login') is not None:
+            authentication_form = AuthenticationForm(request=request, data=request.POST)
+            if authentication_form.is_valid():
+                login(request, authentication_form.user_cache)
+                return redirect(reverse('images:index'))
+        else:
+            # registration
+            registration_form = RegistrationForm(request.POST)
+
+            if registration_form.is_valid():
+                if User.objects.filter(username=registration_form.instance.username).exists():
+                    registration_form.add_error(
+                        'username',
+                        _('A user with that username or email address exists.'))
+                else:
+                    User.objects.create_user(**registration_form.cleaned_data)
+                    registration_success = True
+                    messages.success(request, _('Your account was successfully created.'))
+
+    return render(request, 'users/login.html', {
+        'authentication_form': authentication_form,
+        'registration_form': registration_form,
+        'registration_success': registration_success,
+    })

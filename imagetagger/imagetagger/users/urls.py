@@ -1,4 +1,3 @@
-from django.contrib.auth import views as auth_views
 from django.conf.urls import url
 
 from . import views
@@ -6,7 +5,7 @@ from . import views
 
 app_name = 'users'
 urlpatterns = [
-    url(r'^login/$', auth_views.login, name='login'),
+    url(r'^login/$', views.login_view, name='login'),
     url(r'^logout/', views.logout_view, name='logout'),
     url(r'^team/(\d+)/$', views.view_team, name='team'),
     url(r'^team/create/$', views.create_team, name='create_team'),
@@ -16,6 +15,5 @@ urlpatterns = [
     url(r'^team/(\d+)/enthrone/(\d+)/$', views.enthrone, name='enthrone_user'),
     url(r'^team/(\d+)/dethrone/(\d+)/$', views.dethrone, name='dethrone_user'),
     url(r'^user/(\d+)/$', views.user, name='user'),
-    url(r'^user/create/$', views.create_user, name='create_user'),
     url(r'^user/explore/$', views.explore_user, name='explore_user'),
 ]
