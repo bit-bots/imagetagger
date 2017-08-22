@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
@@ -41,6 +42,8 @@ def annotate(request, image_id):
                 annotation.save()
                 # the creator of the annotation verifies it instantly
                 user_verify(request.user, annotation, True)
+            else:
+                messages.warning(request, "This tag already exists!")
         annotation_types = AnnotationType.objects.filter(active=True)  # needed to select the annotation in the drop-down-menu
         set_images = Image.objects.filter(image_set=selected_image.image_set)
         filtered = False

@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -72,6 +73,7 @@ def upload_image(request, imageset_id):
                 os.remove(os.path.join(imageset.root_path(), 'tmp', zipname))
                 filenames = [f for f in os.listdir(os.path.join(imageset.root_path(), 'tmp'))]
                 filenames.sort()
+                duplicat_count = 0
                 for filename in filenames:
                     (shortname, extension) = os.path.splitext(filename)
                     if(extension.lower() in settings.IMAGE_EXTENSION):
@@ -95,6 +97,9 @@ def upload_image(request, imageset_id):
                             Image(name=filename, image_set=imageset, filename=img_fname, checksum=fchecksum).save()
                         else:
                             os.remove(os.path.join(imageset.root_path(), 'tmp', filename))
+                            duplicat_count = duplicat_count + 1
+                if duplicat_count > 0:
+                    messages.warning(request, "Duplicates detected: "+ str(duplicat_count))
             else:
                 #creates a checksum for image
                 fchecksum = hashlib.sha512()
@@ -111,6 +116,8 @@ def upload_image(request, imageset_id):
                     with open(image.path(), 'wb') as out:
                         for chunk in f.chunks():
                             out.write(chunk)
+                else:
+                    messages.warning(request, "This image already exists in this set!")
             json_files.append({'name': f.name,
                                'size': f.size,
                                # 'url': reverse('images_imageview', args=(image.id, )),
