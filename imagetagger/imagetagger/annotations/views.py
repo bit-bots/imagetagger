@@ -36,9 +36,11 @@ def annotate(request, image_id):
             annotation.user = (request.user if request.user.is_authenticated() else None)
             if 'not_in_image' in request.POST:
                 annotation.not_in_image = 1  # 0 by default
-            annotation.save()
-            # the creator of the annotation verifies it instantly
-            user_verify(request.user, annotation, True)
+            #tests for duplicates of same tag type & coordinates on image
+            if Annotation.objects.filter(image=selected_image, vector=vector_text, type=last_annotation_type_id).count() == 0:
+                annotation.save()
+                # the creator of the annotation verifies it instantly
+                user_verify(request.user, annotation, True)
         annotation_types = AnnotationType.objects.filter(active=True)  # needed to select the annotation in the drop-down-menu
         set_images = Image.objects.filter(image_set=selected_image.image_set)
         filtered = False

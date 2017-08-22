@@ -75,10 +75,7 @@ def upload_image(request, imageset_id):
                 for filename in filenames:
                     (shortname, extension) = os.path.splitext(filename)
                     if(extension.lower() in settings.IMAGE_EXTENSION):
-                        img_fname = (''.join(shortname) + '_' +
-                                     ''.join(
-                                         random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
-                                         for _ in range(6)) + extension)
+                        #creates a checksum for image
                         fchecksum = hashlib.sha512()
                         with open(os.path.join(imageset.root_path(), 'tmp', filename), 'rb') as fil:
                             while True:
@@ -87,21 +84,28 @@ def upload_image(request, imageset_id):
                                     break
                                 fchecksum.update(buf)
                         fchecksum = fchecksum.digest()
+                        #Tests for duplicats in imageset
                         if Image.objects.filter(checksum=fchecksum, image_set=imageset).count() == 0:
+                            img_fname = (''.join(shortname) + '_' +
+                                         ''.join(
+                                             random.choice(
+                                                 string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                             for _ in range(6)) + extension)
                             shutil.move(os.path.join(imageset.root_path(), 'tmp', filename), os.path.join(imageset.root_path(), img_fname))
                             Image(name=filename, image_set=imageset, filename=img_fname, checksum=fchecksum).save()
                         else:
                             os.remove(os.path.join(imageset.root_path(), 'tmp', filename))
             else:
-                fname = ('_'.join(fname[:-1]) + '_' +
-                         ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
-                                 for _ in range(6)) + '.' + fname[-1])
+                #creates a checksum for image
                 fchecksum = hashlib.sha512()
                 for chunk in f.chunks():
                     fchecksum.update(chunk)
                 fchecksum = fchecksum.digest()
+                #tests for duplicats in  imageset
                 if Image.objects.filter(checksum=fchecksum, image_set=imageset).count() == 0:
-
+                    fname = ('_'.join(fname[:-1]) + '_' +
+                             ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                     for _ in range(6)) + '.' + fname[-1])
                     image = Image(name=f.name, image_set=imageset, filename=fname, checksum=fchecksum)
                     image.save()
                     with open(image.path(), 'wb') as out:
