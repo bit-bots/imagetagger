@@ -207,9 +207,11 @@ def verify(request, annotation_id):
         if request.POST['state'] == 'accept':
             state = True
             user_verify(request.user, annotation, state)
+            messages.info(request, "You verified this tag to be true!")
         elif request.POST['state'] == 'reject':
             state = False
             user_verify(request.user, annotation, state)
+            messages.info(request, "You verified this tag to be false!")
     annotation = get_object_or_404(Annotation, id=annotation_id)
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
@@ -319,11 +321,7 @@ def wf_wolves_export(imageset):
 
 def user_verify(user, annotation, verification_state):
     if user.is_authenticated():
-        Verification.objects.filter(user=user, annotation=annotation).delete()
-        verification = Verification(user=user,
-                                    annotation=annotation, verified=verification_state)
-        verification.save()
-
+        Verification.objects.filter(user=user, annotation=annotation).update(verified=verification_state)
 
 def verify_bounding_box_annotation(post_dict):
     return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) >= 1 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) >= 1)
