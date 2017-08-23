@@ -204,7 +204,6 @@ def verify(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
     if request.method == 'POST':
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
-
         if request.POST['state'] == 'accept':
             state = True
             user_verify(request.user, annotation, state)
@@ -214,6 +213,9 @@ def verify(request, annotation_id):
             user_verify(request.user, annotation, state)
             messages.success(request, "You verified this tag to be false!")
     annotation = get_object_or_404(Annotation, id=annotation_id)
+    #checks if user has already verified this tag
+    if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
+        messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
@@ -322,7 +324,11 @@ def wf_wolves_export(imageset):
 
 def user_verify(user, annotation, verification_state):
     if user.is_authenticated():
-        Verification.objects.filter(user=user, annotation=annotation).update(verified=verification_state)
+        #if verication already exists it'll be updated otherwise a new one will be created
+        if Verification.objects.filter(user=user, annotation=annotation).count() > 0:
+            Verification.objects.filter(user=user, annotation=annotation).update(verified=verification_state)
+        else:
+            Verification(annotation=annotation, user=user, verified=verification_state).save()
 
 def verify_bounding_box_annotation(post_dict):
     return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) >= 1 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) >= 1)
