@@ -49,8 +49,8 @@ def annotate(request, image_id):
         filtered = False
         if request.method == "POST":
             filtered = True
-            # filter images for annotationtype
-            set_images = set_images.filter(annotation__type_id=request.POST.get("selected_annotation_type"))
+            # filter images for missing annotationtype
+            set_images = set_images.exclude(annotation__type_id=request.POST.get("selected_annotation_type"))
         set_images = set_images.order_by('id')
 
         # detecting next and last image in the set
