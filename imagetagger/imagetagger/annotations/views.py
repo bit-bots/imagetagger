@@ -221,7 +221,8 @@ def verify(request, annotation_id):
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.filter(image__in=set_images)
     set_annotations = set_annotations.order_by('id')  # good... hopefully
-    unverified_annotations = set_annotations.filter(~Q(user=request.user))
+    #filters the unverified annotations
+    unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))
     # detecting next and last image in the set
     next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id')
     if len(next_annotation) == 0:
@@ -233,6 +234,7 @@ def verify(request, annotation_id):
         last_annotation = None
     else:
         last_annotation = last_annotation[0]
+    #detecting next and last unverified image in the set
     next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id')
     if len(next_unverified_annotation) == 0:
         next_unverified_annotation = None
