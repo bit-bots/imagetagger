@@ -1,0 +1,11 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+
+{% block bodyblock %}
+    <form method="POST" action="{% url 'users:create_team' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="{% trans 'Create team' %}" />
+    </form>
+
+{% endblock bodyblock %}

@@ -3,39 +3,39 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User, Group
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.http import require_POST
 from guardian.shortcuts import assign_perm
 
+from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.models import ImageSet
-from imagetagger.users.forms import RegistrationForm
+from imagetagger.users.forms import RegistrationForm, TeamCreationForm
 from .models import Team
 
 
 @login_required
 def create_team(request):
-    name = request.POST['teamname']
-    if len(name) <= 20 and len(name) >= 3:
-        members = Group(name=name+'_members')
-        members.save()
-        admins = Group(name=name+'_admins')
-        admins.save()
-        user = request.user
-        members.user_set.add(user)
-        members.save()
-        admins.user_set.add(user)
-        admins.save()
-        team = Team()
-        team.name = name
-        team.members = members
-        team.admins = admins
-        team.website = ''
-        team.save()
-        assign_perm('user_management', team.admins, team)
-        assign_perm('create_set', team.members, team)
-        return redirect(reverse('users:team', args=(team.id,)))
-    return redirect(reverse('users:create_team'))
+    form = TeamCreationForm()
+    if request.method == 'POST':
+        form = TeamCreationForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                form.instance.members = Group.objects.create(
+                    name='{}_members'.format(form.instance.name))
+                form.instance.admins = Group.objects.create(
+                    name='{}_admins'.format(form.instance.name))
+                form.instance.members.user_set.add(request.user)
+                form.instance.admins.user_set.add(request.user)
+                form.instance.save()
+                assign_perm('user_management', form.instance.admins, form.instance)
+                assign_perm('create_set', form.instance.members, form.instance)
+            return redirect(reverse('users:team', args=(form.instance.id,)))
+    return render(request, 'users/create_team.html', {
+        'form': form,
+    })
 
 
 @login_required
@@ -122,6 +122,7 @@ def view_team(request, team_id):
         'admins': admins,
         'pub_imagesets': pub_imagesets,
         'priv_imagesets': priv_imagesets,
+        'imageset_creation_form': ImageSetCreationForm(),
     })
 
 

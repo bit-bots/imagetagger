@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+    <form method="POST" action="{% url 'images:edit_imageset' form.instance.pk %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_name">{{ form.name.label }}</label>
+            {% render_field form.name class+='form-control' %}
+            {% for error in form.name.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="id_location">{{ form.location.label }}</label>
+            {% render_field form.location class+='form-control' %}
+            {% for error in form.location.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="id_description">{{ form.description.label }}</label>
+            {% render_field form.description class+='form-control' %}
+            {% for error in form.description.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="id_public">{{ form.public.label }}</label>
+            {% render_field form.public %}
+            {% for error in form.public.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="id_image_lock">{{ form.image_lock.label }}</label>
+            {% render_field form.image_lock %}
+            {% for error in form.image_lock.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+        {% endfor %}
+        <input type="submit" value="{% trans 'Update imageset' %}" class="btn btn-primary" />
+    </form>
+{% endblock bodyblock %}

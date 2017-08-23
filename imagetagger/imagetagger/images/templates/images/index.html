@@ -1,4 +1,6 @@
 {% extends 'base/base.html' %}
+{% load widget_tweaks %}
+
 {% block bodyblock %}
 <div class="container-fluid">
     <div class="row">
@@ -36,7 +38,7 @@
                     <p>Create new team:</p>
                     <form method="post" action="{% url 'users:create_team' %}">
                         {% csrf_token %}
-                        <input type="text" placeholder="Teamname" maxlength="20" name="teamname">
+                        {% render_field team_creation_form.name placeholder=team_creation_form.name.label %}
                         <input class="btn btn-primary" type="submit" value="Create">
                     </form>
                 </div>

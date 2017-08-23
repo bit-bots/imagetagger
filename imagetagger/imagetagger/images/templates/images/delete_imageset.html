@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+
+{% block bodyblock %}
+    <form method="POST" action="{% url 'images:delete_imageset' imageset.id %}">
+        {% csrf_token %}
+        {% blocktrans with imageset=imageset.name team=imageset.team.name %}
+        <p>
+            Are you sure that you want to delete the imageset
+            <em>{{ imageset }}</em>
+            of the team
+            <em>{{ team }}</em>?
+        </p>
+        {% endblocktrans %}
+        <a href="{% url 'images:view_imageset' imageset.pk %}" class="btn btn-default">{% trans 'Cancel' %}</a>
+        <input type="submit" class="btn btn-danger" value="{% trans 'Delete imageset' %}" />
+    </form>
+{% endblock bodyblock %}

@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+    <form method="POST" action="{% url 'images:create_imageset' team.id %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_name">{{ form.name.label }}</label>
+            {% render_field form.name class+='form-control' %}
+            {% for error in form.name.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="id_location">{{ form.location.label }}</label>
+            {% render_field form.location class+='form-control' %}
+            {% for error in form.location.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="id_public">{{ form.public.label }}</label>
+            {% render_field form.public %}
+            {% for error in form.public.errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+        {% endfor %}
+        <input type="submit" value="{% trans 'Create imageset' %}" class="btn btn-primary" />
+    </form>
+{% endblock bodyblock %}

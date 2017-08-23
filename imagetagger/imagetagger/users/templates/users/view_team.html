@@ -1,6 +1,8 @@
 {% extends 'base/base.html' %}
-{% block bodyblock %}
 {% load guardian_tags %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
 {% get_obj_perms request.user for team as "team_perms" %}
 <div class="container-fluid">
     <div class="row">
@@ -70,12 +72,18 @@
                 <div class="panel-body">
                     <form method="post" action="{% url 'images:create_imageset' team.id %}">
                         {% csrf_token %}
-                        <label for="name">Name: </label>
-                        <input type="text" id="name" name="name"><br>
-                        <label for="location">Location: </label>
-                        <input type="text" id="location" name="location"><br>
-                        <label for="public">Public: </label>
-                        <input type="checkbox" id="public" name="public"><br>
+                        <div class="form-group">
+                            <label for="id_name">{{ imageset_creation_form.name.label }}</label>
+                            {% render_field imageset_creation_form.name class+='form-control' placeholder=imageset_creation_form.name.label %}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_location">{{ imageset_creation_form.location.label }}</label>
+                            {% render_field imageset_creation_form.location class+='form-control' placeholder=imageset_creation_form.location.label %}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_public">{{ imageset_creation_form.public.label }}</label>
+                            {% render_field imageset_creation_form.public %}
+                        </div>
                         <input class="btn btn-primary" type="submit" value="Create">
                     </form>
                 </div>

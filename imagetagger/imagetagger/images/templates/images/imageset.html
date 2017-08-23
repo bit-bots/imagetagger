@@ -1,5 +1,7 @@
 {% extends 'base/base.html' %}
+{% load i18n %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block taggerimports %}
 
@@ -201,42 +203,42 @@
                                         {% csrf_token %}
                                     <tr>
                                         <td>
-                                            <label for="name_field">Name:</label>
+                                            <label for="id_name">{{ edit_form.name.label }}</label>
                                         </td>
                                         <td>
-                                            <input type="text" id="name_field" name="name" value="{{imageset.name}}">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="location">Location: </label>
-                                        </td>
-                                        <td>
-                                            <input type="text" id="location" name="location" value="{{imageset.location}}">
+                                            {% render_field edit_form.name class+='form-control' %}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="description">Description: </label>
+                                            <label for="id_location">{{ edit_form.location.label }}</label>
                                         </td>
                                         <td>
-                                            <input type="text" id="description" name="description" value="{{imageset.description}}">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="public">Public: </label>
-                                        </td>
-                                        <td>
-                                            <input type="checkbox" id="public" name="public" {% if imageset.public  %} checked="" {% endif %}>
+                                            {% render_field edit_form.location class+='form-control' %}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="image-lock">Image-lock: </label>
+                                            <label for="id_description">{{ edit_form.description.label }}</label>
                                         </td>
                                         <td>
-                                            <input type="checkbox" id="image-lock" name="image-lock" {% if imageset.image_lock  %} checked="" {% endif %}>
+                                            {% render_field edit_form.description class+='form-control' %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="id_public">{{ edit_form.public.label }}</label>
+                                        </td>
+                                        <td>
+                                            {% render_field edit_form.public class+='form-control' %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="image-lock">{{ edit_form.image_lock.label }}</label>
+                                        </td>
+                                        <td>
+                                            {% render_field edit_form.image_lock class+='form-control' %}
                                         </td>
                                     </tr>
                                     <tr>
@@ -246,7 +248,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <button class="btn btn-primary" type="submit">Save changes</button>
+                                            <input class="btn btn-primary" type="submit" value="{% trans 'Save changes' %}" />
                                         </td>
                                     </tr>
                                     </form>
