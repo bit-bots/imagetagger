@@ -202,16 +202,17 @@ def manage_annotations(request, image_set_id):
 @login_required
 def verify(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
-    if request.method == 'POST':  # TODO get shit working
+    if request.method == 'POST':
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
+
         if request.POST['state'] == 'accept':
             state = True
             user_verify(request.user, annotation, state)
-            messages.info(request, "You verified this tag to be true!")
+            messages.success(request, "You verified this tag to be true!")
         elif request.POST['state'] == 'reject':
             state = False
             user_verify(request.user, annotation, state)
-            messages.info(request, "You verified this tag to be false!")
+            messages.success(request, "You verified this tag to be false!")
     annotation = get_object_or_404(Annotation, id=annotation_id)
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
