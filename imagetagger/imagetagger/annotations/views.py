@@ -207,11 +207,11 @@ def verify(request, annotation_id):
         if request.POST['state'] == 'accept':
             state = True
             user_verify(request.user, annotation, state)
-            messages.success(request, "You verified this tag to be true!")
+            messages.success(request, "You verified the last tag to be true!")
         elif request.POST['state'] == 'reject':
             state = False
             user_verify(request.user, annotation, state)
-            messages.success(request, "You verified this tag to be false!")
+            messages.success(request, "You verified the last tag to be false!")
     annotation = get_object_or_404(Annotation, id=annotation_id)
     #checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
