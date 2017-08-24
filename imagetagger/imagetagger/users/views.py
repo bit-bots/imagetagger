@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User, Group
 from django.db import transaction
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -145,14 +146,44 @@ def logout_view(request):
     return redirect(reverse('images:index'))
 
 
+@require_POST
+@login_required
+def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
+    """Add a member to a team."""
+    team = get_object_or_404(Team, id=team_id)
+
+    username = request.POST.get('username')
+
+    if not request.user.has_perm('user_management', team):
+        messages.warning(
+            request, _(
+                'You do not have the permission to add users to the team {}.').format(
+                    team.name))
+        return redirect(reverse('users:team', args=(team_id,)))
+
+    user = User.objects.filter(username=username).first()
+    if not user:
+        messages.warning(request, _('The user {} does not exist.').format(username))
+        return redirect(reverse('users:team', args=(team_id,)))
+
+    if team.members.user_set.filter(pk=user.pk).exists():
+        messages.info(request, _(
+            'The user {} is already a member of the team {}.').format(
+            username, team.name))
+        return redirect(reverse('users:team', args=(team_id,)))
+
+    team.members.user_set.add(user)
+
+    messages.success(request, _(
+        'The user {} has been added to the team successfully.').format(
+        username))
+
+    return redirect(reverse('users:team', args=(team_id,)))
+
+
 @login_required
 def view_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    if request.method == 'POST' and request.user.has_perm('user_management', team):
-        user_to_add = User.objects.filter(username=request.POST['username'])[0]
-        if user_to_add:
-            team.members.user_set.add(user_to_add)
-
     members = team.members.user_set.all()
     is_member = request.user in members
     admins = team.admins.user_set.all()

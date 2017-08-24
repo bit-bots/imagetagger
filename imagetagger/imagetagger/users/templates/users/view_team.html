@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            <h1>Team-profile of {{ team.name }}</h1>
+            <h1>{% blocktrans with team=team.name %}Team Profile of {{ team }}{% endblocktrans %}</h1>
         </div>
     </div>
     <div class="row">
@@ -35,18 +35,16 @@
                         {% if no_admin %}
                             This team has no admin! <a href="{% url 'users:enthrone_user' team.id request.user.id %}">I want to be admin!</a>
                         {% endif %}
-                        {% if "user_management" in team_perms %}
-                            <h3>Add Member:</h3>
-                            <form method="post" action="{% url 'users:team' team.id %}">
-                                {% csrf_token %}
-                                <input type="text" placeholder="username" maxlength="20" name="username"> <input type="submit" value="Add">
-                            </form>
-                        {% endif %}
-                        <hr>
-                        <a href="{% url 'users:leave_team' team.id %}">{% trans 'Leave team' %}</a>
-                        <hr>
                     {% endif %}
-                    <h3>Members:</h3>
+                    <h3>{% trans 'Members' %}</h3>
+                    {% if "user_management" in team_perms %}
+                        <form method="post" action="{% url 'users:add_team_member' team.id %}" class="form-inline">
+                            {% csrf_token %}
+                            <label for="add_username">{% trans 'Add member' %}</label>
+                            <input type="text" placeholder="username" maxlength="20" id="add_username" name="username" class="form-control">
+                            <input type="submit" value="Add" class="btn btn-primary" />
+                        </form>
+                    {% endif %}
                     <table class="team-table">
                         {% for member in memberset %}
                             <tr>
