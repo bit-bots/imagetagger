@@ -140,5 +140,6 @@ div.rightcontent{
 }
 
 .form-inline {
+	margin-left: -0.8em;
 	display: inline;
 }

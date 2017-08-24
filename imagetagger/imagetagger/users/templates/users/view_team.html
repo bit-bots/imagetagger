@@ -40,7 +40,11 @@
                             </ul>
                         {% endif %}
                         {% if admins|length == 0 %}
-                            This team has no admin! <a href="{% url 'users:enthrone_user' team.id request.user.id %}">I want to be admin!</a>
+                            {% trans 'This team has no admin!' %}
+                            <form method="POST" action="{% url 'users:grant_team_admin' team.id request.user.id %}" class="form-inline">
+                                {% csrf_token %}
+                               <input type="submit" value="{% trans 'I want to be admin!' %}" class="btn btn-link" />
+                            </form>
                         {% endif %}
                     {% endif %}
                     <h3>{% trans 'Members' %}</h3>
