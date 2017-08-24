@@ -55,13 +55,17 @@ def annotate(request, image_id):
                 user_verify(request.user, annotation, True)
             else:
                 messages.warning(request, "This tag already exists!")
-        annotation_types = AnnotationType.objects.filter(active=True)  # needed to select the annotation in the drop-down-menu
+
         set_images = Image.objects.filter(image_set=selected_image.image_set)
-        filtered = False
-        if request.method == "POST" and request.POST.get("filter") is not None:
-            filtered = True
+        annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
+        filtered = request.GET.get("selected_annotation_type")
+        if filtered is not None:
             # filter images for missing annotationtype
-            set_images = set_images.exclude(annotation__type_id=request.POST.get("selected_annotation_type"))
+            set_images = set_images.exclude(annotation__type_id=filtered)
+            if not set_images:
+                messages.info(request, 'All images in this set have been tagged with this tag!')
+                set_images = Image.objects.filter(image_set=selected_image.image_set)
+                filtered = None
         set_images = set_images.order_by('id')
 
         # detecting next and last image in the set

@@ -84,7 +84,7 @@
                         <input name="filter" type="submit" value="filter">
             </form>
 
-                {% if filtered %}
+                {% if filtered is not None %}
                     <a href="{{request.path}}" target="_self"> [x] </a>
                 {% endif %}
 

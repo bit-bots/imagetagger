@@ -4,10 +4,10 @@
 function init_navigationbuttons() {
 {% if next_image %}
 $('#next_button').click(function(){
-$('#annotation_form').attr('action', '{% url 'annotations:annotate' next_image.id %}');
+$('#annotation_form').attr('action', '{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
 $('#annotation_form').submit();
 });
-$('#skip_button').click(function(){window.open("{% url 'annotations:annotate' next_image.id %}", "_self");});
+$('#skip_button').click(function(){window.open("{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
 {% else %}
 $('#next_button').attr('disabled', 'true');
 $('#skip_button').attr('disabled', 'true');
@@ -15,10 +15,10 @@ $('#skip_button').attr('disabled', 'true');
 
 {% if last_image %}
 $('#last_button').click(function(){
-$('#annotation_form').attr('action', '{% url 'annotations:annotate' last_image.id %}');
+$('#annotation_form').attr('action', '{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
 $('#annotation_form').submit();
 });
-$('#back_button').click(function(){window.open("{% url 'annotations:annotate' last_image.id %}", "_self");});
+$('#back_button').click(function(){window.open("{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
 {% else %}
 $('#last_button').attr('disabled', 'true');
 $('#back_button').attr('disabled', 'true');
@@ -29,8 +29,8 @@ $('#back_button').attr('disabled', 'true');
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
-            <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="post">
-                        {% csrf_token %}
+            <form id="filter_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="get">
+
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
                         {% include "annotations/annotationtypes.html" %}
@@ -38,8 +38,8 @@ $('#back_button').attr('disabled', 'true');
                         <input name="filter" type="submit" value="filter">
             </form>
 
-                {% if filtered %}
-                    <a href="{{request.get_full_path}}" target="_self"> [x] </a>
+                {% if filtered is not None %}
+                    <a href="{{request.path}}" target="_self"> [x] </a>
                 {% endif %}
 
 
@@ -93,7 +93,7 @@ $('#back_button').attr('disabled', 'true');
                     <h3 class="panel-title">{{selected_image.name}}</h3>
                 </div>
                 <div class="panel-body">
-                    <form id="annotation_form" action="{% url 'annotations:annotate' selected_image.id %}" enctype="multipart/form-data" method="post">
+                    <form id="annotation_form" action="{% url 'annotations:annotate' selected_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}" enctype="multipart/form-data" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
