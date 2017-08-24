@@ -20,9 +20,9 @@
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <form action="" method="post">
+                            <form action="{{ request.get_full_path }}" method="GET">
                                 {% csrf_token %}
-                                <input id="searchbox" type="text" name="searchquery" placeholder="Search for {{mode}}s">
+                                <input id="searchbox" type="text" name="query" placeholder="Search for {{mode}}s">
                                 <button class="btn btn-primary" type="submit">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
                                 </button>

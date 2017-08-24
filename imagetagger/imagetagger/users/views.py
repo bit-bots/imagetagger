@@ -87,8 +87,10 @@ def grant_team_admin(request, team_id, user_id):
 @login_required
 def explore_team(request):
     teams = Team.objects.all()
-    if request.method == 'POST':
-        teams = teams.filter(name__icontains=request.POST['searchquery'])
+
+    query = request.GET.get('query')
+    if query:
+        teams = teams.filter(name__icontains=query)
 
     return render(request, 'base/explore.html', {
         'mode': 'team',
@@ -99,8 +101,10 @@ def explore_team(request):
 @login_required
 def explore_user(request):
     users = User.objects.all()
-    if request.method == 'POST':
-        users = users.filter(username__contains=request.POST['searchquery'])
+
+    query = request.GET.get('query')
+    if query:
+        users = users.filter(username__icontains=query)
 
     return render(request, 'base/explore.html', {
         'mode': 'user',

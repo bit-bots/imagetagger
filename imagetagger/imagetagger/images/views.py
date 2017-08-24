@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -27,13 +28,16 @@ import hashlib
 
 @login_required
 def explore_imageset(request):
-    userteams = Team.objects.filter(members__in=request.user.groups.all())
-    imagesets = ImageSet.objects.filter(team__in=userteams) | ImageSet.objects.filter(public=True)
-    if request.method == 'POST':
-        imagesets = imagesets.filter(name__contains=request.POST['searchquery'])
+    imagesets = ImageSet.objects.select_related('team').order_by(
+        'team__name', 'name').filter(
+        Q(team__members__in=request.user.groups.all()) | Q(public=True))
+
+    query = request.GET.get('query')
+    if query:
+        imagesets = imagesets.filter(name__icontains=query)
 
     return TemplateResponse(request, 'base/explore.html', {
-        'mode': 'imagesets',
+        'mode': 'imageset',
         'imagesets': imagesets,
     })
 
