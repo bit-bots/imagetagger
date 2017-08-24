@@ -69,14 +69,12 @@ def annotate(request, image_id):
         set_images = set_images.order_by('id')
 
         # detecting next and last image in the set
-        next_image = Image.objects.filter(image_set=selected_image.image_set) \
-            .filter(id__gt=selected_image.id).order_by('id')
+        next_image = set_images.filter(id__gt=selected_image.id).order_by('id')
         if len(next_image) == 0:
             next_image = None
         else:
             next_image = next_image[0]
-        last_image = Image.objects.filter(image_set=selected_image.image_set) \
-            .filter(id__lt=selected_image.id).order_by('-id')
+        last_image = set_images.filter(id__lt=selected_image.id).order_by('-id')
         if len(last_image) == 0:
             last_image = None
         else:
