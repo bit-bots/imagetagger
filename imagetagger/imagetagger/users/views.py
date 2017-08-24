@@ -188,19 +188,16 @@ def view_team(request, team_id):
     is_member = request.user in members
     admins = team.admins.user_set.all()
     is_admin = request.user in admins  # The request.user is an admin of the team
-    no_admin = len(admins) == 0  # Team has no admin, so every member can claim the Position
-    imagesets = ImageSet.objects.filter(team=team)
-    pub_imagesets = imagesets.filter(public=True).order_by('id')
-    priv_imagesets = imagesets.filter(public=False).order_by('id')
+    imagesets = ImageSet.objects.filter(team=team).order_by('-public', 'name')
+    if not is_member:
+        imagesets = imagesets.filter(public=True)
     return render(request, 'users/view_team.html', {
         'team': team,
         'memberset': members,
         'is_member': is_member,
         'is_admin': is_admin,
-        'no_admin': no_admin,
         'admins': admins,
-        'pub_imagesets': pub_imagesets,
-        'priv_imagesets': priv_imagesets,
+        'imagesets': imagesets,
         'imageset_creation_form': ImageSetCreationForm(),
     })
 

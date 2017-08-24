@@ -15,14 +15,21 @@
         <div class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    {% if pub_imagesets %}
-                        <h3>Public Imagesets:</h3>
-                        <ul>
-                        {% for imageset in pub_imagesets %}
-                            <li><a href="{% url 'images:view_imageset' imageset.id%}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                    <h3>Imagesets</h3>
+                    <ul>
+                        {% for imageset in imagesets %}
+                            <li>
+                                {% if not imageset.public %}
+                                    <span class="glyphicon glyphicon-lock"></span>
+                                {% endif %}
+                                <a href="{% url 'images:view_imageset' imageset.id%}">
+                                    {{ imageset.name }}
+                                </a>
+                                ({{ imageset.image_count }} images)</li>
+                        {% empty %}
+                            <li><em>{% trans 'no imagesets available' %}</em></li>
                         {% endfor %}
-                        </ul>
-                    {% endif %}
+                    </ul>
                     {% if is_member %}
                         {% if priv_imagesets %}
                             <h3>Private Imagesets:</h3>
@@ -32,7 +39,7 @@
                             {% endfor %}
                             </ul>
                         {% endif %}
-                        {% if no_admin %}
+                        {% if admins|length == 0 %}
                             This team has no admin! <a href="{% url 'users:enthrone_user' team.id request.user.id %}">I want to be admin!</a>
                         {% endif %}
                     {% endif %}
