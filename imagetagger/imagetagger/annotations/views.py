@@ -221,6 +221,7 @@ def verify(request, annotation_id):
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.filter(image__in=set_images)
+
     set_annotations = set_annotations.order_by('id')  # good... hopefully
     #filters the unverified annotations
     unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))

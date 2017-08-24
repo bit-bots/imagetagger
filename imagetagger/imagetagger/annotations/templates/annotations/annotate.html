@@ -45,7 +45,8 @@ $('#back_button').attr('disabled', 'true');
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <a href="{% url 'images:view_imageset' selected_image.image_set.id %}"><u><h3 class="panel-title">{{selected_image.image_set.name}}</h3></u></a>
+                    <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
+                        <u><h3 class="panel-title">{{selected_image.image_set.name}}</h3></u></a>
                 </div>
                 <div class="panel-body">
                     {% for set_image in set_images %}
@@ -119,7 +120,8 @@ $('#back_button').attr('disabled', 'true');
                                 <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0" min="0"></td>
                             </tr>
                             <tr>
-                                <td colspan='2'><input type='checkbox' name='not_in_image' id='not_in_image'><label for='not_in_image'>Not in the image (g)</label></td>
+                                <td colspan='2'><input type='checkbox' name='not_in_image' id='not_in_image'>
+                                    <label for='not_in_image'>Not in the image (g)</label></td>
                             </tr>
                         </table>
                         <input type="hidden" namen="annotate">
@@ -131,7 +133,8 @@ $('#back_button').attr('disabled', 'true');
                         </button>
                         <br>
                         <button type="button" class="btn btn-default" id="last_button">
-                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
+                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
                         </button>
                         <button type="button" class="btn btn-default" id="back_button">
                             <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
@@ -141,7 +144,8 @@ $('#back_button').attr('disabled', 'true');
                             <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
                         </button>
                         <button type="button" class="btn btn-default" id="next_button">
-                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
+                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
                         </button>
                     </form>
                 </div>
