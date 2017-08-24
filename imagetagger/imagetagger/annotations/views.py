@@ -212,15 +212,26 @@ def verify(request, annotation_id):
             state = False
             user_verify(request.user, annotation, state)
             messages.success(request, "You verified the last tag to be false!")
+
     annotation = get_object_or_404(Annotation, id=annotation_id)
+
     #checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
         messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
+
     annotation_type = annotation.__getattribute__('type')
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.filter(image__in=set_images)
+
+    #filtering of annotations for certain annotations types
+    annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
+    filtered = False
+    if request.method == "POST": #and request.POST.get("filter") is not None:
+        filtered = True
+        #filter images for missing annotationtype
+        set_annotations = set_annotations.exclude(type_id=request.POST.get(not "selected_annotation_type"))
 
     set_annotations = set_annotations.order_by('id')  # good... hopefully
     #filters the unverified annotations
@@ -262,7 +273,9 @@ def verify(request, annotation_id):
         'annotation_y': vector['y1'],
         'width': int(vector['x2']) - int(vector['x1']),
         'height': int(vector['y2']) - int(vector['y1']),
-        'annotation_type': annotation_type
+        'annotation_type': annotation_type,
+        'annotation_types': annotation_types,
+        'filtered': filtered
     })
 
 

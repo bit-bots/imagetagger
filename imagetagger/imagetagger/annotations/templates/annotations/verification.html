@@ -75,6 +75,19 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
+            <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="annotation_id" value="{{ annotation.id }}">
+                        annotation type:
+                        {% include "annotations/annotationtypes.html" %}
+
+                        <input name="filter" type="submit" value="filter">
+            </form>
+
+                {% if filtered %}
+                    <a href="{{request.get_full_path}}" target="_self"> [x] </a>
+                {% endif %}
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href="{% url 'annotations:manage_annotations' image.image_set.id %}">
