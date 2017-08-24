@@ -24,7 +24,7 @@ def export_auth(request, export_id):
 @login_required
 def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
-    if request.user.has_perm('annotate', selected_image.image_set) or selected_image.image_set.public:
+    if selected_image.image_set.has_perm('annotate', request.user) or selected_image.image_set.public:
         # here the stuff we got via POST gets put in the DB
         last_annotation_type_id = -1
         if request.method == 'POST' and request.POST.get("annotate") is not None and verify_bounding_box_annotation(request.POST):
@@ -97,7 +97,7 @@ def annotate(request, image_id):
 @login_required
 def edit_annotation(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    if request.user is annotation.user or request.user.has_perm('edit_annotation', annotation.image.image_set):
+    if request.user is annotation.user or annotation.image.image_set.has_perm('edit_annotation', request.user):
         annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
         selected_image = get_object_or_404(Image, id=annotation.image.id)
         set_images = Image.objects.filter(image_set=selected_image.image_set)
@@ -121,7 +121,7 @@ def edit_annotation(request, annotation_id):
 @login_required
 def delete_annotation(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    if request.user.has_perm('delete_annotation', annotation.image.image_set):
+    if annotation.image.image_set.has_perm('delete_annotation', request.user):
         annotation.delete()
         print('deleted annotation ', annotation_id)
     return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
@@ -133,7 +133,7 @@ def edit_annotation_save(request, annotation_id):
     if request.method == 'POST' \
             and verify_bounding_box_annotation(request.POST) \
             and (request.user is annotation.user
-                 or request.user.has_perm('edit_annotation', annotation.image.image_set)):
+                 or annotation.image.image_set.has_perm('edit_annotation', request.user)):
         vector_text = json.dumps({
             'x1': request.POST['x1Field'],
             'y1': request.POST['y1Field'],
@@ -157,7 +157,7 @@ def edit_annotation_save(request, annotation_id):
 @login_required
 def create_export(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
-    if request.user.has_perm('create_export', imageset) or imageset.public:
+    if imageset.has_perm('create_export', request.user) or imageset.public:
         if request.method == 'POST':
             export_format = request.POST['export_format']
             if export_format == 'Bit-Bot AI':

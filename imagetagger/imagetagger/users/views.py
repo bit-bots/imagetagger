@@ -9,12 +9,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.http import require_POST
-from guardian.shortcuts import assign_perm
-
 from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.models import ImageSet
 from imagetagger.users.forms import RegistrationForm, TeamCreationForm
-from .models import Team
+from .models import Team, TeamMembership
 
 
 @login_required
@@ -24,15 +22,8 @@ def create_team(request):
         form = TeamCreationForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                form.instance.members = Group.objects.create(
-                    name='{}_members'.format(form.instance.name))
-                form.instance.admins = Group.objects.create(
-                    name='{}_admins'.format(form.instance.name))
-                form.instance.members.user_set.add(request.user)
-                form.instance.admins.user_set.add(request.user)
                 form.instance.save()
-                assign_perm('user_management', form.instance.admins, form.instance)
-                assign_perm('create_set', form.instance.members, form.instance)
+                form.instance.memberships.create(user=request.user, is_admin=True)
             return redirect(reverse('users:team', args=(form.instance.id,)))
     return render(request, 'users/create_team.html', {
         'form': form,
@@ -51,8 +42,8 @@ def revoke_team_admin(request, team_id, user_id):
                 team.name))
         return redirect(reverse('users:team', args=(team.id,)))
 
-    if request.user.has_perm('user_management', team):
-        team.admins.user_set.remove(user)
+    if team.has_perm('user_management', request.user):
+        team.memberships.filter(user=user).update(is_admin=False)
     else:
         messages.warning(
             request,
@@ -68,14 +59,14 @@ def grant_team_admin(request, team_id, user_id):
     user = get_object_or_404(User, id=user_id)
     team = get_object_or_404(Team, id=team_id)
 
-    if not team.members.user_set.filter(pk=request.user.pk).exists():
+    if not team.members.filter(pk=request.user.pk).exists():
         messages.warning(request, _('You are no member of the team {}.').format(
             team.name))
         return redirect(reverse('users:explore_team'))
 
     # Allow granting of admin privileges any team member if there is no admin
-    if request.user.has_perm('user_management', team) or not team.admins.user_set.exists():
-        team.admins.user_set.add(user)
+    if team.has_perm('user_management', request.user) or not team.admins:
+        team.memberships.filter(user=user).update(is_admin=True)
     else:
         messages.warning(
             request,
@@ -115,26 +106,31 @@ def explore_user(request):
 @login_required
 def leave_team(request, team_id, user_id=None):
     team = get_object_or_404(Team, id=team_id)
+
     user = request.user
     warning = _('You are not in the team.')
 
-    if user_id:
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return redirect(reverse('users:team', args=(team.id,)))
+
+    if user_id and user_id != request.user.pk:
         user = get_object_or_404(User, id=user_id)
         warning = _('The user is not in the team.')
 
-        if not request.user.has_perm('user_management', team):
+        if not team.has_perm('user_management', request.user):
             messages.warning(
                 request,
                 _('You do not have the permission to kick other users from this team.'))
             return redirect(reverse('users:team', args=(team.id,)))
 
-    if not team.members.user_set.filter(pk=user.pk).exists():
+    if not team.members.filter(pk=user.pk).exists():
         messages.warning(request, warning)
         return redirect(reverse('users:team', args=(team.id,)))
 
     if request.method == 'POST':
-        team.members.user_set.remove(user)
-        team.admins.user_set.remove(user)
+        team.memberships.filter(user=user).delete()
         if user == request.user:
             return redirect(reverse('users:explore_team'))
         return redirect(reverse('users:team', args=(team.id,)))
@@ -158,7 +154,7 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
 
     username = request.POST.get('username')
 
-    if not request.user.has_perm('user_management', team):
+    if not team.has_perm('user_management', request.user):
         messages.warning(
             request, _(
                 'You do not have the permission to add users to the team {}.').format(
@@ -170,13 +166,13 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
         messages.warning(request, _('The user {} does not exist.').format(username))
         return redirect(reverse('users:team', args=(team_id,)))
 
-    if team.members.user_set.filter(pk=user.pk).exists():
+    if team.members.filter(pk=user.pk).exists():
         messages.info(request, _(
             'The user {} is already a member of the team {}.').format(
             username, team.name))
         return redirect(reverse('users:team', args=(team_id,)))
 
-    team.members.user_set.add(user)
+    team.memberships.create(user=user)
 
     messages.success(request, _(
         'The user {} has been added to the team successfully.').format(
@@ -188,21 +184,19 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
 @login_required
 def view_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    members = team.members.user_set.all()
+    members = team.members.all()
     is_member = request.user in members
-    admins = team.admins.user_set.all()
-    is_admin = request.user in admins  # The request.user is an admin of the team
+    admins = team.admins
     imagesets = ImageSet.objects.filter(team=team).order_by('-public', 'name')
     if not is_member:
         imagesets = imagesets.filter(public=True)
     return render(request, 'users/view_team.html', {
         'team': team,
-        'memberset': members,
-        'is_member': is_member,
-        'is_admin': is_admin,
+        'members': members,
         'admins': admins,
         'imagesets': imagesets,
         'imageset_creation_form': ImageSetCreationForm(),
+        'team_perms': team.get_perms(request.user),
     })
 
 

@@ -1,10 +1,8 @@
 {% extends 'base/base.html' %}
 {% load i18n %}
-{% load guardian_tags %}
 {% load widget_tweaks %}
 
 {% block bodyblock %}
-{% get_obj_perms request.user for team as "team_perms" %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
@@ -30,23 +28,6 @@
                             <li><em>{% trans 'no imagesets available' %}</em></li>
                         {% endfor %}
                     </ul>
-                    {% if is_member %}
-                        {% if priv_imagesets %}
-                            <h3>Private Imagesets:</h3>
-                            <ul>
-                            {% for imageset in priv_imagesets %}
-                                <li><a href="{% url 'images:view_imageset' imageset.id%}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
-                            {% endfor %}
-                            </ul>
-                        {% endif %}
-                        {% if admins|length == 0 %}
-                            {% trans 'This team has no admin!' %}
-                            <form method="POST" action="{% url 'users:grant_team_admin' team.id request.user.id %}" class="form-inline">
-                                {% csrf_token %}
-                               <input type="submit" value="{% trans 'I want to be admin!' %}" class="btn btn-link" />
-                            </form>
-                        {% endif %}
-                    {% endif %}
                     <h3>{% trans 'Members' %}</h3>
                     {% if "user_management" in team_perms %}
                         <form method="post" action="{% url 'users:add_team_member' team.id %}" class="form-inline">
@@ -57,7 +38,7 @@
                         </form>
                     {% endif %}
                     <table class="team-table">
-                        {% for member in memberset %}
+                        {% for member in members %}
                             <tr>
                                 <td>
                                     <a href="{% url 'users:user' member.id %}">{{member.username}}</a>

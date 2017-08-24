@@ -1,4 +1,7 @@
+from typing import Set
+
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.auth.models import Group
 import os
@@ -39,6 +42,37 @@ class ImageSet(models.Model):
     def image_count(self):
         path = self.root_path()
         return len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+
+    def get_perms(self, user: get_user_model()) -> Set[str]:
+        """Get all permissions of the user."""
+        if self.team.is_admin(user):
+            return {
+                'annotate',
+                'create_export',
+                'delete_annotation',
+                'delete_export',
+                'edit_annotation',
+                'edit_set',
+                'read',
+            }
+        elif self.team.is_member(user):
+            return {
+                'annotate',
+                'create_export',
+                'delete_annotation',
+                'delete_export',
+                'delete_set'
+                'delete_set',
+                'edit_annotation',
+                'edit_set',
+                'read',
+            }
+        return set()
+
+
+    def has_perm(self, permission: str, user: get_user_model()) -> bool:
+        """Check whether user has specified permission."""
+        return permission in self.get_perms(user)
 
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)

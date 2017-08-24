@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
@@ -20,17 +20,15 @@ import os
 import shutil
 import string
 import random
-from guardian.shortcuts import assign_perm
 import zipfile
 import hashlib
-
 
 
 @login_required
 def explore_imageset(request):
     imagesets = ImageSet.objects.select_related('team').order_by(
         'team__name', 'name').filter(
-        Q(team__members__in=request.user.groups.all()) | Q(public=True))
+        Q(team__members=request.user) | Q(public=True))
 
     query = request.GET.get('query')
     if query:
@@ -47,7 +45,7 @@ def index(request):
     team_creation_form = TeamCreationForm()
 
     # needed to show the list of the users imagesets
-    userteams = Team.objects.filter(members__in=request.user.groups.all())
+    userteams = Team.objects.filter(members=request.user)
     imagesets = ImageSet.objects.filter(team__in=userteams).order_by('id')
     return TemplateResponse(
         request, 'images/index.html', {
@@ -61,7 +59,7 @@ def index(request):
 @require_http_methods(["POST", ])
 def upload_image(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
-    if request.method == 'POST' and request.user.has_perm('edit_set', imageset) and not imageset.image_lock:
+    if request.method == 'POST' and imageset.has_perm('edit_set', request.user) and not imageset.image_lock:
         if request.FILES is None:
             return HttpResponseBadRequest('Must have files attached!')
         json_files = []
@@ -151,7 +149,7 @@ def view_image(request, image_id):
     it will return forbidden on if the user is not authenticated
     """
     image = get_object_or_404(Image, id=image_id)
-    if not (image.image_set.public or request.user.has_perm('read', image.image_set)):
+    if not (image.image_set.public or image.image_set.has_perm('read', request.user)):
         return HttpResponseForbidden()
     if settings.USE_NGINX_IMAGE_PROVISION:
         response = HttpResponse()
@@ -166,7 +164,7 @@ def view_image(request, image_id):
 @login_required
 def list_images(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
-    if not (imageset.public or request.user.has_perm('read', imageset)):
+    if not (imageset.public or imageset.has_perm('read', request.user)):
         return HttpResponseForbidden()
     return TemplateResponse(request, 'images/imagelist.txt', {
         'images': imageset.image_set.all()
@@ -179,7 +177,7 @@ def list_images(request, image_set_id):
 @require_http_methods(["DELETE", ])
 def delete_images(request, image_id):
     image = get_object_or_404(Image, id=image_id)
-    if request.user.has_perm('edit_imageset', image.image_set):
+    if image.image_set.has_perm('edit_imageset', request.user):
         os.remove(os.path.join(settings.IMAGE_PATH, image.full_path()))
         image.delete()
         return JsonResponse({'files': [{image.name: True}, ]})
@@ -214,6 +212,7 @@ def view_imageset(request, image_set_id):
         'exports': exports,
         'filtered': filtered,
         'edit_form': ImageSetEditForm(instance=imageset),
+        'imageset_perms': imageset.get_perms(request.user),
     })
 
 
@@ -221,8 +220,9 @@ def view_imageset(request, image_set_id):
 def create_imageset(request, team_id):
     team = get_object_or_404(Team, id=team_id)
 
-    if not request.user.has_perm('create_set', team):
+    if not team.has_perm('create_set', request.user):
         messages.warning(
+            request,
             _('You do not have permission to create image sets in the team {}.').format(
                 team.name))
         return redirect(reverse('users:team', args=(team.id,)))
@@ -242,15 +242,6 @@ def create_imageset(request, team_id):
                 # create a folder to store the images of the set
                 os.makedirs(form.instance.root_path())
 
-                assign_perm('edit_set', team.members, form.instance)
-                assign_perm('delete_set', team.admins, form.instance)
-                assign_perm('edit_annotation', team.members, form.instance)
-                assign_perm('delete_annotation', team.members, form.instance)
-                assign_perm('annotate', team.members, form.instance)
-                assign_perm('read', team.members, form.instance)
-                assign_perm('create_export', team.members, form.instance)
-                assign_perm('delete_export', team.members, form.instance)
-
         messages.success(request, _('The image set was created successfully.'))
         return redirect(reverse('images:view_imageset', args=(form.instance.id,)))
 
@@ -263,7 +254,7 @@ def create_imageset(request, team_id):
 @login_required
 def edit_imageset(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
-    if not request.user.has_perm('edit_set', imageset):
+    if not imageset.has_perm('edit_set', request.user):
         messages.warning(request, _('You do not have permission to edit this imageset.'))
         return redirect(reverse('images:view_imageset', args=(imageset.id,)))
 
@@ -284,7 +275,7 @@ def edit_imageset(request, imageset_id):
 @login_required
 def delete_imageset(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
-    if not request.user.has_perm('delete_set', imageset):
+    if not imageset.has_perm('delete_set', request.user):
         messages.warning(request, _('You do not have permission to delete this imageset.'))
         return redirect(reverse('images:imageset', args=(imageset.pk,)))
 
