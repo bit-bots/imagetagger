@@ -202,7 +202,7 @@ def manage_annotations(request, image_set_id):
 @login_required
 def verify(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
-    if request.method == 'POST':
+    if request.method == 'POST' and request.POST.get("annotation") is not None:
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
         if request.POST['state'] == 'accept':
             state = True
@@ -222,20 +222,22 @@ def verify(request, annotation_id):
     annotation_type = annotation.__getattribute__('type')
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
+
+    #sets everthing without the filter
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.filter(image__in=set_images)
 
     #filtering of annotations for certain annotations types
     annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
     filtered = False
-    if request.method == "POST": #and request.POST.get("filter") is not None:
+    if request.method == "POST" and request.POST.get("filter") is not None:
         filtered = True
         #filter images for missing annotationtype
-        set_annotations = set_annotations.exclude(type_id=request.POST.get(not "selected_annotation_type"))
-
+        set_annotations = set_annotations.filter(type_id=request.POST.get("selected_annotation_type"))
     set_annotations = set_annotations.order_by('id')  # good... hopefully
     #filters the unverified annotations
     unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))
+
     # detecting next and last image in the set
     next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id')
     if len(next_annotation) == 0:
@@ -247,6 +249,7 @@ def verify(request, annotation_id):
         last_annotation = None
     else:
         last_annotation = last_annotation[0]
+
     #detecting next and last unverified image in the set
     next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id')
     if len(next_unverified_annotation) == 0:

@@ -50,11 +50,11 @@ $('#back_button').attr('disabled', 'true');
                 </div>
                 <div class="panel-body">
                     {% for set_image in set_images %}
-                    {% if set_image.id == selected_image.id %}
-                    <b id="selected_image_row">{{set_image.name}}</b><br>
-                    {% else %}
-                    <a href="{% url 'annotations:annotate' set_image.id %}"> {{set_image.name}}</a><br>
-                    {% endif %}
+                        {% if set_image.id == selected_image.id %}
+                            <b id="selected_image_row">{{set_image.name}}</b><br>
+                        {% else %}
+                            <a href="{% url 'annotations:annotate' set_image.id %}"> {{set_image.name}}</a><br>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
