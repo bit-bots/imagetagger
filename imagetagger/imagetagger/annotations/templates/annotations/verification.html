@@ -7,7 +7,7 @@
     function init_navigationbuttons() {
         {% if next_annotation %}
         $('#next_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' next_annotation.id %}');
+            $('#verification_form').attr('action', '{% url 'annotations:verify' next_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
             $('#verification_form').submit();
         });
         {% else %}
@@ -17,7 +17,7 @@
 
         {% if last_annotation %}
         $('#last_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' last_annotation.id %}');
+            $('#verification_form').attr('action', '{% url 'annotations:verify' last_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
             $('#verification_form').submit();
         });
         {% else %}
@@ -27,7 +27,7 @@
 
         {% if next_unverified_annotation %}
         $('#next_unverified_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}');
+            $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
             $('#verification_form').submit();
         });
         $('#accept_button').click(function(){
@@ -59,7 +59,7 @@
 
         {% if last_unverified_annotation %}
         $('#last_unverified_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' last_unverified_annotation.id %}');
+            $('#verification_form').attr('action', '{% url 'annotations:verify' last_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
             $('#verification_form').submit();
         });
         {% else %}
@@ -75,8 +75,8 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
-            <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="post">
-                        {% csrf_token %}
+            <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="get">
+
                         <input type="hidden" name="annotation_id" value="{{ annotation.id }}">
                         annotation type:
                         {% include "annotations/annotationtypes.html" %}
@@ -85,7 +85,7 @@
             </form>
 
                 {% if filtered %}
-                    <a href="{{request.get_full_path}}" target="_self"> [x] </a>
+                    <a href="{{request.path}}" target="_self"> [x] </a>
                 {% endif %}
 
             <div class="panel panel-default">
@@ -114,7 +114,7 @@
         <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <form id='verification_form' enctype="multipart/form-data" method="post" action="">
+                    <form id='verification_form' enctype="multipart/form-data" method="post" action="{% url 'annotations:verify' annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}">
                         {% csrf_token %}
                         <input type='hidden' id='state' name='state' value='blank'>
                         <input type='hidden' id='annotation' name='annotation' value='{{ annotation.id }}'>

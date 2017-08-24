@@ -229,11 +229,14 @@ def verify(request, annotation_id):
 
     #filtering of annotations for certain annotations types
     annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
-    filtered = False
-    if request.method == "POST" and request.POST.get("filter") is not None:
-        filtered = True
+    filtered = request.GET.get("selected_annotation_type")
+    if filtered is not None:
         #filter images for missing annotationtype
-        set_annotations = set_annotations.filter(type_id=request.POST.get("selected_annotation_type"))
+        set_annotations = set_annotations.filter(type_id=filtered)
+        if not set_annotations:
+            messages.info(request, 'There are no tags of this type in this set!')
+            set_annotations = Annotation.objects.filter(image__in=set_images)
+            filtered = None
     set_annotations = set_annotations.order_by('id')  # good... hopefully
     #filters the unverified annotations
     unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))
@@ -270,7 +273,7 @@ def verify(request, annotation_id):
         'last_annotation': last_annotation,
         'last_unverified_annotation': last_unverified_annotation,
         'set_annotations': set_annotations,
-        'first_annotation': set_annotations[0],
+        'first_annotation': set_annotations.first(),
         'unverified_annotations': unverified_annotations,
         'annotation_x': vector['x1'],
         'annotation_y': vector['y1'],
