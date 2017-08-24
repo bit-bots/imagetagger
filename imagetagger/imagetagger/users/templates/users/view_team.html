@@ -43,10 +43,7 @@
                             </form>
                         {% endif %}
                         <hr>
-                        <form method="POST" action="{% url 'users:leave_team' team.id %}">
-                            {% csrf_token %}
-                            <input type="submit" class="btn btn-link" value="{% trans 'Leave team' %}" />
-                        </form>
+                        <a href="{% url 'users:leave_team' team.id %}">{% trans 'Leave team' %}</a>
                         <hr>
                     {% endif %}
                     <h3>Members:</h3>
