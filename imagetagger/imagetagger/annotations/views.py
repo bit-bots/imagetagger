@@ -27,7 +27,7 @@ def annotate(request, image_id):
     if request.user.has_perm('annotate', selected_image.image_set) or selected_image.image_set.public:
         # here the stuff we got via POST gets put in the DB
         last_annotation_type_id = -1
-        if request.method == 'POST' and request.POST.get("image_id") is not None and verify_bounding_box_annotation(request.POST):
+        if request.method == 'POST' and request.POST.get("annotate") is not None and verify_bounding_box_annotation(request.POST):
             vector = {'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']}
             vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
             last_annotation_type_id = request.POST['selected_annotation_type']
