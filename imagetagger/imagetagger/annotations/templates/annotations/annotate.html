@@ -56,7 +56,8 @@ $('#back_button').attr('disabled', 'true');
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6" onload="">
+
             <img id="picture" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
             <hr color="silver" width="100%">
             {% if image_annotations.all %}
@@ -147,4 +148,6 @@ $('#back_button').attr('disabled', 'true');
 </div>
 
 {% endblock %}
+
+
 

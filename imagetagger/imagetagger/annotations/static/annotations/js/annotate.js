@@ -1,23 +1,23 @@
-(function() {
+var selection;
+var image_scale = 0;
+
+$(document).ready(function() {
   var selection;
   var image_scale = 0;
+  var image = $('img#picture');
 
-  $(function () {
-      var image = $('img#picture');
-      if(!image.width > 0) {
-          var image = $('img#picture');
-          image = $('img#picture');
-      }
-      jQuery("#not_in_image").each(function(){
-          if (jQuery(this).is(":checked"))
+    $(function () {
+
+      /*Setzt den Status auf verifiziert wenn das Objekt als nicht im Bild getagt ist*/
+      $("#not_in_image").each(function(){
+          if ($(this).is(":checked"))
               ReturnVal = true;
       });
-      image.on('load', function() {
-          var image = $('img#picture');
-          if(!image_scale > 0) {
-              image = $('img#picture');
-              image_scale =  image.get(0).naturalWidth / image.width();
-          }
+
+
+      /*wenn content geladen setze die variable neu und wenn image_scale nicht größer 0 ist setze die globale variable neu und aktualisiere image_scale*/
+      $( function() {
+
           selection = image.imgAreaSelect({
               instance: true,
               handles: false,
@@ -29,11 +29,13 @@
                   $('#x2Field').val(Math.floor(selection.x2 * image_scale));
                   $('#y2Field').val(Math.floor(selection.y2 * image_scale));
               }
-          })
+          });
+
+          /*läd annotations*/
           if (typeof loadannotation === "function") { //tageditview
-        loadannotation();
-        reload_selection();
-      }
+            loadannotation();
+            reload_selection();
+          }
       });
 
       $('#x1Field')[0].oninput = function () {
@@ -123,23 +125,23 @@
           });
 
       }
-
-
-
   });
 
 
+  //Änderung der Fenstergröße hebt Selektion auf und berechnet scale neu
   $(window).resize(function() {
       selection.cancelSelection();
       image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
   });
 
+  //Wiederherstellung der Selektion
   function reload_selection() {
       selection = $('img#picture').imgAreaSelect({ instance: true, show: true });
       selection.setSelection(Math.round($('#x1Field').val() / image_scale), Math.round($('#y1Field').val() / image_scale), Math.round($('#x2Field').val() / image_scale), Math.round($('#y2Field').val() / image_scale));
       selection.update();
   }
 
+  //Löschen der Selektion
   function reset_selection() {
       $('#x1Field').val(0);
       $('#y1Field').val(0);
@@ -147,4 +149,5 @@
       $('#y2Field').val(0);
       selection.cancelSelection();
   }
-})();
+
+});
