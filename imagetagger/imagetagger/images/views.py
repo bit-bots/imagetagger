@@ -169,8 +169,8 @@ def list_images(request, image_set_id):
     })
 
 
-
 @login_required
+# TODO: bad!!! (fix javascript upload to use csrf for deletion)
 @csrf_exempt
 @require_http_methods(["DELETE", ])
 def delete_images(request, image_id):

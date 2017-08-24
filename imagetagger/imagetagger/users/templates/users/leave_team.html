@@ -1,0 +1,27 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+
+{% block bodyblock %}
+    <form method="POST" action="{% url 'users:leave_team' team.pk user.pk %}">
+        {% csrf_token %}
+        {% if user == request.user %}
+            {% blocktrans with team=team.name %}
+                <p>
+                    Are you sure that you want to leave the team
+                    <em>{{ team }}</em>?
+                </p>
+            {% endblocktrans %}
+        {% else %}
+            {% blocktrans with team=team.name user=user.username %}
+                <p>
+                    Are you sure that you want to kick the user
+                    <em>{{ user }}</em>
+                    from the team
+                    <em>{{ team }}</em>?
+                </p>
+            {% endblocktrans %}
+        {% endif %}
+        <a href="{% url 'users:team' team.pk %}" class="btn btn-default">{% trans 'Cancel' %}</a>
+        <input type="submit" class="btn btn-danger" value="{% if user == request.user %}{% trans 'Leave team' %}{% else %}{% trans 'Kick user' %}{% endif %}" />
+    </form>
+{% endblock bodyblock %}

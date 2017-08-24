@@ -8,6 +8,8 @@ class Team(models.Model):
         verbose_name=_('team name'),
         validators=[MinLengthValidator(3), MaxLengthValidator(30)],
         max_length=100, unique=True)
+    # TODO: this allows inconsistent data as users can be admin of a group without being a member
+    # use a ManyToManyField for members with a through model providing an is_admin property instead
     members = models.ForeignKey(Group,
                                 related_name='members')
     admins = models.ForeignKey(Group,

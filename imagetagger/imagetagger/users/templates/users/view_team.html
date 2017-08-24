@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% load i18n %}
 {% load guardian_tags %}
 {% load widget_tweaks %}
 
@@ -42,25 +43,51 @@
                             </form>
                         {% endif %}
                         <hr>
-                        <a href="{% url 'users:leave_team' team.id %}">leave group</a>
+                        <form method="POST" action="{% url 'users:leave_team' team.id %}">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-link" value="{% trans 'Leave team' %}" />
+                        </form>
                         <hr>
                     {% endif %}
                     <h3>Members:</h3>
-                    <ul>
+                    <table class="team-table">
                         {% for member in memberset %}
-                            <li>
-                                <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
-                                {% if "user_management" in team_perms %}
-                                    <a href="{% url 'users:kick_user' team.id member.id %}"> [kick]</a>
-                                    {% if member in admins %}
-                                        <a href="{% url 'users:dethrone_user' team.id member.id %}"> [dethrone]</a>
+                            <tr>
+                                <td>
+                                    <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
+                                </td>
+                                {% if member == request.user  %}
+                                    <td>
+                                        <a href="{% url 'users:leave_team' team.id member.id %}"> [{% trans 'leave' %}]</a>
+                                    </td>
+                                {% else %}
+                                    {% if "user_management" in team_perms %}
+                                        <td>
+                                            <a href="{% url 'users:leave_team' team.id member.id %}"> [{% trans 'kick' %}]</a>
+                                        </td>
+                                        {% if member in admins %}
+                                            <td>
+                                                <form method="POST" action="{% url 'users:revoke_team_admin' team.id member.id %}" class="form-inline">
+                                                    {% csrf_token %}
+                                                    <input type="submit" value="[{% trans 'revoke admin' %}]" class="btn btn-link" />
+                                                </form>
+                                            </td>
+                                        {% else %}
+                                            <td>
+                                                <form method="POST" action="{% url 'users:grant_team_admin' team.id member.id %}" class="form-inline">
+                                                    {% csrf_token %}
+                                                    <input type="submit" value="[{% trans 'grant admin' %}]" class="btn btn-link" />
+                                                </form>
+                                            </td>
+                                        {% endif %}
                                     {% else %}
-                                        <a href="{% url 'users:enthrone_user' team.id member.id %}"> [enthrone]</a>
+                                        <td></td>
+                                        <td></td>
                                     {% endif %}
                                 {% endif %}
-                            </li>
+                            </tr>
                         {% endfor %}
-                    </ul>
+                    </table>
                 </div>
             </div>
         </div>

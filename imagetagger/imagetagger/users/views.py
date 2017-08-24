@@ -39,20 +39,47 @@ def create_team(request):
 
 
 @login_required
-def dethrone(request, team_id, user_id):
+@require_POST
+def revoke_team_admin(request, team_id, user_id):
     user = get_object_or_404(User, id=user_id)
     team = get_object_or_404(Team, id=team_id)
+
+    if user == request.user:
+        messages.warning(
+            request, _('You can not revoke your own admin privileges.').format(
+                team.name))
+        return redirect(reverse('users:team', args=(team.id,)))
+
     if request.user.has_perm('user_management', team):
         team.admins.user_set.remove(user)
+    else:
+        messages.warning(
+            request,
+            _('You do not have permission to revoke this users admin '
+              'privileges in the team {}.').format(team.name))
+
     return redirect(reverse('users:team', args=(team.id,)))
 
 
 @login_required
-def enthrone(request, team_id, user_id):
+@require_POST
+def grant_team_admin(request, team_id, user_id):
     user = get_object_or_404(User, id=user_id)
     team = get_object_or_404(Team, id=team_id)
-    if request.user.has_perm('user_management', team) or 0 == len(team.admins.user_set.all()):
+
+    if not team.members.user_set.filter(pk=request.user.pk).exists():
+        messages.warning(request, _('You are no member of the team {}.').format(
+            team.name))
+        return redirect(reverse('users:explore_team'))
+
+    # Allow granting of admin privileges any team member if there is no admin
+    if request.user.has_perm('user_management', team) or not team.admins.user_set.exists():
         team.admins.user_set.add(user)
+    else:
+        messages.warning(
+            request,
+            _('You do not have permission to grant this user admin '
+              'privileges in the team {}.').format(team.name))
     return redirect(reverse('users:team', args=(team.id,)))
 
 
@@ -82,14 +109,35 @@ def explore_user(request):
 
 @login_required
 def leave_team(request, team_id, user_id=None):
+    team = get_object_or_404(Team, id=team_id)
+    user = request.user
+    warning = _('You are not in the team.')
+
     if user_id:
         user = get_object_or_404(User, id=user_id)
-    else:
-        user = request.user
-    team = get_object_or_404(Team, id=team_id)
-    team.members.user_set.remove(user)
-    team.admins.user_set.remove(user)
-    return redirect(reverse('users:team', args=(team.id,)))
+        warning = _('The user is not in the team.')
+
+        if not request.user.has_perm('user_management', team):
+            messages.warning(
+                request,
+                _('You do not have the permission to kick other users from this team.'))
+            return redirect(reverse('users:team', args=(team.id,)))
+
+    if not team.members.user_set.filter(pk=user.pk).exists():
+        messages.warning(request, warning)
+        return redirect(reverse('users:team', args=(team.id,)))
+
+    if request.method == 'POST':
+        team.members.user_set.remove(user)
+        team.admins.user_set.remove(user)
+        if user == request.user:
+            return redirect(reverse('users:explore_team'))
+        return redirect(reverse('users:team', args=(team.id,)))
+
+    return render(request, 'users/leave_team.html', {
+        'user': user,
+        'team': team,
+    })
 
 
 def logout_view(request):

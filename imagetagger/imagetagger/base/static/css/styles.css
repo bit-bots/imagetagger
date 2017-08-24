@@ -125,3 +125,16 @@ div.rightcontent{
 	margin-right: 0%;
 	margin-left: 25%;
 }
+
+.team-table td {
+	padding: 0 0.3em 0 0;
+}
+
+.team-table td:nth-of-type(2), .team-table td:nth-of-type(3) {
+	text-align: right;
+    width: 10em;
+}
+
+.form-inline {
+	display: inline;
+}
