@@ -216,6 +216,7 @@ def verify(request, annotation_id):
     #checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
         messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
+    annotation_type = annotation.__getattribute__('type')
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
@@ -260,6 +261,7 @@ def verify(request, annotation_id):
         'annotation_y': vector['y1'],
         'width': int(vector['x2']) - int(vector['x1']),
         'height': int(vector['y2']) - int(vector['y1']),
+        'annotation_type': annotation_type
     })
 
 
