@@ -35,11 +35,13 @@ $('#back_button').attr('disabled', 'true');
                         annotation type:
                         {% include "annotations/annotationtypes.html" %}
 
-                <input type="submit" value="filter">
+                        <input name="filter" type="submit" value="filter">
+            </form>
 
                 {% if filtered %}
                     <a href="{{request.get_full_path}}" target="_self"> [x] </a>
                 {% endif %}
+
 
             <div class="panel panel-default">
                 <div class="panel-heading">

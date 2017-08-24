@@ -189,10 +189,10 @@ def view_imageset(request, image_set_id):
     # the saved exports of the imageset
     exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
     filtered = False
-    if request.method== "POST":
+    if request.method == "POST":
         filtered = True
         # filter images for missing annotationtype
-        images = images.exclude(annotation__type_id= request.POST.get("selected_annotation_type"))
+        images = images.exclude(annotation__type_id=request.POST.get("selected_annotation_type"))
     # a list of annotation types used in the imageset
     annotation_types = set()
     annotations = Annotation.objects.filter(image__in=images)
