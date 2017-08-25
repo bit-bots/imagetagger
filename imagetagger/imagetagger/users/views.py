@@ -1,14 +1,16 @@
-from django.contrib import messages
-from django.contrib.auth import logout, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import logout, login
 from django.contrib.auth.models import User, Group
+from django.contrib import messages
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.http import require_POST
+from imagetagger.annotations.models import Verification
+from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.models import ImageSet
 from imagetagger.users.forms import RegistrationForm, TeamCreationForm
@@ -203,15 +205,15 @@ def view_team(request, team_id):
 @login_required
 def user(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    userteams = Team.objects.filter(members__in=user.groups.all())
+    teams = Team.objects.filter(members=user)
 
-    # TODO: count the points
-    points = 0
+    # TODO: use a database trigger (after migrating to a custom user model for that)
+    points = Verification.objects.filter(verified=True, annotation__user=user).count()
 
     return render(request, 'users/view_user.html', {
         'user': user,
-        'userteams': userteams,
-        'userpoints': points,
+        'teams': teams,
+        'points': points,
     })
 
 

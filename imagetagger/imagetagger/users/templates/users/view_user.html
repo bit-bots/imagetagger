@@ -10,10 +10,10 @@
         <div class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    Points: {{userpoints}}
+                    Points: {{ points }}
                     <h3>Teams:</h3>
                     <ul>
-                        {% for team in userteams %}
+                        {% for team in teams %}
                             <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
                         {% endfor %}
                     </ul>
