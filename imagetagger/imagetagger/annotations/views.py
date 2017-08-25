@@ -227,6 +227,7 @@ def verify(request, annotation_id):
     #filtering of annotations for certain annotations types
     annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
     filtered = request.GET.get("selected_annotation_type")
+    new_filter = request.GET.get("filter")
     if filtered is not None:
         #filter images for missing annotationtype
         set_annotations = set_annotations.filter(type_id=filtered)
@@ -234,6 +235,9 @@ def verify(request, annotation_id):
             messages.info(request, 'There are no tags of this type in this set!')
             set_annotations = Annotation.objects.filter(image__in=set_images)
             filtered = None
+        if new_filter is not None:
+            #sets the current viewed annotation to the one on top of the filtered list
+            annotation = set_annotations[0]
     set_annotations = set_annotations.order_by('id')  # good... hopefully
     #filters the unverified annotations
     unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))
