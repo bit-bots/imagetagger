@@ -11,12 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class Team(models.Model):
-    class Meta:
-        permissions = (
-            ('user_management', 'Manage users'),
-            ('create_set', 'Create imagesets'),
-        )
-
     name = models.CharField(
         verbose_name=_('team name'),
         validators=[MinLengthValidator(3), MaxLengthValidator(30)],

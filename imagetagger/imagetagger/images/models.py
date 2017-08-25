@@ -77,15 +77,3 @@ class ImageSet(models.Model):
 
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)
-
-    class Meta:
-        permissions = (
-            ('edit_set', 'Edit set'),
-            ('delete_set', 'Delete set'),
-            ('edit_annotation', 'Edit annotations in the set'),
-            ('delete_annotation', 'Delete annotations in the set'),
-            ('annotate', 'Create annotations in the set'),
-            ('read', 'Read and download annotations and images'),
-            ('create_export', 'Create export files of the set'),
-            ('delete_export', 'Delete export files of the set'),
-        )
