@@ -7,7 +7,14 @@
     function init_navigationbuttons() {
         {% if next_annotation %}
         $('#next_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' next_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
+            var action_url = '{% url 'annotations:verify' next_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
             $('#verification_form').submit();
         });
         {% else %}
@@ -17,7 +24,14 @@
 
         {% if last_annotation %}
         $('#last_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' last_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
+            var action_url = '{% url 'annotations:verify' last_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
             $('#verification_form').submit();
         });
         {% else %}
@@ -27,39 +41,81 @@
 
         {% if next_unverified_annotation %}
         $('#next_unverified_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
+            var action_url = '{% url 'annotations:verify' next_unverified_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
             $('#verification_form').submit();
         });
         $('#accept_button').click(function(){
-          $('#state').attr('value', 'accept');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-          $('#verification_form').submit();
+            $('#state').attr('value', 'accept');
+            var action_url = '{% url 'annotations:verify' next_unverified_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
+            $('#verification_form').submit();
         });
 
         $('#reject_button').click(function(){
-          $('#state').attr('value', 'reject');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-          $('#verification_form').submit();
+            $('#state').attr('value', 'reject');
+            var action_url = '{% url 'annotations:verify' next_unverified_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
+            $('#verification_form').submit();
         });
 
         {% else %}
         $('#next_unverified_button').attr('disabled', 'true');
         $('#accept_button').click(function(){
-          $('#state').attr('value', 'accept');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' first_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-          $('#verification_form').submit();
+            $('#state').attr('value', 'accept');
+            var action_url = '{% url 'annotations:verify' first_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
+            $('#verification_form').submit();
         });
 
         $('#reject_button').click(function(){
-          $('#state').attr('value', 'reject');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' first_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-          $('#verification_form').submit();
+            $('#state').attr('value', 'reject');
+            var action_url = '{% url 'annotations:verify' first_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
+            $('#verification_form').submit();
         });
         {% endif %}
 
         {% if last_unverified_annotation %}
         $('#last_unverified_button').click(function(){
-            $('#verification_form').attr('action', '{% url 'annotations:verify' last_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
+            var action_url = '{% url 'annotations:verify' last_unverified_annotation.id %}?';
+            {% if filtered is not None %}
+                action_url += '&amp;selected_annotation_type={{ filtered }}';
+            {% endif %}
+            {% if user_veri is not None %}
+                action_url += '&amp;filter_veri={{ user_veri }}';
+            {% endif %}
+            $('#verification_form').attr('action', action_url);
             $('#verification_form').submit();
         });
         {% else %}
@@ -77,15 +133,41 @@
         <div class="col-md-3">
             <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="get">
 
-                        <input type="hidden" name="annotation_id" value="{{ annotation.id }}">
-                        annotation type:
-                        {% include "annotations/annotationtypes.html" %}
+                <input type="hidden" name="annotation_id" value="{{ annotation.id }}">
 
-                        <input name="filter" type="submit" value="filter">
+                {% if user_veri is not None %}
+                    <input type="hidden" name="filter_veri" value="{{ user_veri }}">
+                {% endif %}
 
+                annotation type:
+                {% include "annotations/annotationtypes.html" %}
+
+                <input name="filter" type="submit" value="filter">
 
                 {% if filtered is not None %}
-                    <a href="{{request.path}}" target="_self"> [x] </a>
+                    {% if user_veri is not None %}
+                        <a href="{{request.path}}?filter_veri={{ user_veri }}&filter_button={{ veri_pushed }}" target="_self"> [x] </a>
+                    {% else %}
+                        <a href="{{request.path}}" target="_self"> [x] </a>
+                    {% endif %}
+                {% endif %}
+            </form>
+            <form id="filter_veri__form" action="{{ request.get_full_path }}" enctype="multipart/form-data" method="get">
+
+                <input type="hidden" name="filter_veri" value="True">
+
+                {% if filtered is not None %}
+                    <input type="hidden" name="selected_annotation_type" value="{{ filtered }}">
+                {% endif %}
+
+                <input name="filter_button" type="submit" value="filter already verified tags">
+
+                {% if user_veri is not None %}
+                    {% if filtered is not None %}
+                        <a href="{{request.path}}?selected_annotation_type={{ filtered }}&filter=filter" target="_self"> [x] </a>
+                    {% else %}
+                        <a href="{{request.path}}" target="_self"> [x] </a>
+                    {% endif %}
                 {% endif %}
             </form>
             <div class="panel panel-default">

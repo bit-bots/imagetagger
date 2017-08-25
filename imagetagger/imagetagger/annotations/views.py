@@ -60,6 +60,7 @@ def annotate(request, image_id):
 
         set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
+
         filtered = request.GET.get("selected_annotation_type")
         new_filter = request.GET.get("filter")
         if filtered is not None:
@@ -226,29 +227,52 @@ def verify(request, annotation_id):
     annotation_type = annotation.__getattribute__('type')
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
-
-    #sets everthing without the filter
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.select_related().filter(image__in=set_images)
+    set_annotations = set_annotations.order_by('id')
 
-    #filtering of annotations for certain annotations types
+    #filtering of annotations for certain annotations types and/or ones that the user has already verified
+    user_veri = request.GET.get("filter_veri")
+    veri_pushed = request.GET.get("filter_button")
     annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
     filtered = request.GET.get("selected_annotation_type")
     new_filter = request.GET.get("filter")
-    if filtered is not None:
-        #filter images for missing annotationtype
+    if filtered is not None and user_veri is not None:
+        #filters for both annotation type and not verified by user
+        set_annotations = set_annotations.filter(~Q(verified_by=request.user), type_id=filtered)
+        if not set_annotations:
+            #if there are no search results the search will be resetted
+            messages.info(request, 'There are no unverified tags of this type in this set!')
+            set_annotations = Annotation.objects.filter(image__in=set_images)
+            filtered = None
+            user_veri = None
+        if new_filter is not None or veri_pushed is not None:
+            # sets the current viewed annotation to the one on top of the filtered list
+            annotation = set_annotations[0]
+    elif filtered is not None:
+        #filters annotations for certain types
         set_annotations = set_annotations.filter(type_id=filtered)
         if not set_annotations:
+            #if there are no search results the search will be resetted
             messages.info(request, 'There are no tags of this type in this set!')
             set_annotations = Annotation.objects.filter(image__in=set_images)
             filtered = None
         if new_filter is not None:
-            #sets the current viewed annotation to the one on top of the filtered list
+            # sets the current viewed annotation to the one on top of the filtered list
             annotation = set_annotations[0]
-    set_annotations = set_annotations.order_by('id')  # good... hopefully
-    #filters the unverified annotations
-    unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))
+    elif user_veri is not None:
+        #filters for not verified annotations for user
+        set_annotations = set_annotations.exclude(verified_by=request.user)
+        if not set_annotations:
+            #if there are no search results the search will be resetted
+            messages.info(request, 'There are not unverified tags in this set!')
+            set_annotations = Annotation.objects.filter(image__in=set_images)
+            user_veri = None
+        if veri_pushed is not None:
+            # sets the current viewed annotation to the one on top of the filtered list
+            annotation = set_annotations[0]
 
+    unverified_annotations = set_annotations.exclude(verified_by=request.user)
 
     # TODO: Use one query to fetch all those previous's and next's
 
@@ -276,7 +300,9 @@ def verify(request, annotation_id):
         'height': int(vector['y2']) - int(vector['y1']),
         'annotation_type': annotation_type,
         'annotation_types': annotation_types,
-        'filtered': filtered
+        'filtered': filtered,
+        'user_veri': user_veri,
+        'veri_pushed': veri_pushed
     })
 
 
