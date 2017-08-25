@@ -188,7 +188,7 @@ def download_export(request, export_id):
 
 @login_required
 def manage_annotations(request, image_set_id):
-    userteams = Team.objects.filter(members__in=request.user.groups.all())
+    userteams = Team.objects.filter(members=request.user)
     imagesets = ImageSet.objects.filter(team__in=userteams) | ImageSet.objects.filter(public=True)
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
