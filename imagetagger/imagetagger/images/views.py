@@ -233,17 +233,22 @@ def create_imageset(request, team_id):
         form = ImageSetCreationForm(request.POST)
 
         if form.is_valid():
-            with transaction.atomic():
-                form.instance.team = team
-                form.instance.save()
-                form.instance.path = '{}_{}'.format(team.id, form.instance.id)
-                form.instance.save()
+            if team.image_sets.filter(name=form.cleaned_data.get('name')).exists():
+                form.add_error(
+                    'name',
+                    _('The name is already in use by an imageset of this team.'))
+            else:
+                with transaction.atomic():
+                    form.instance.team = team
+                    form.instance.save()
+                    form.instance.path = '{}_{}'.format(team.id, form.instance.id)
+                    form.instance.save()
 
-                # create a folder to store the images of the set
-                os.makedirs(form.instance.root_path())
+                    # create a folder to store the images of the set
+                    os.makedirs(form.instance.root_path())
 
-        messages.success(request, _('The image set was created successfully.'))
-        return redirect(reverse('images:view_imageset', args=(form.instance.id,)))
+                messages.success(request, _('The image set was created successfully.'))
+                return redirect(reverse('images:view_imageset', args=(form.instance.id,)))
 
     return render(request, 'images/create_imageset.html', {
         'team': team,

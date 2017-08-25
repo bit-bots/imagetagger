@@ -28,12 +28,19 @@ class Image(models.Model):
 
 
 class ImageSet(models.Model):
+    class Meta:
+        unique_together = [
+            'name',
+            'team',
+        ]
+
     path = models.CharField(max_length=100, unique=True, null=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     description = models.TextField(max_length=1000, null=True)
     time = models.DateTimeField(auto_now_add=True)
-    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name='image_sets')
     public = models.BooleanField(default=False)
     image_lock = models.BooleanField(default=False)
 
