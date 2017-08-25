@@ -51,7 +51,7 @@
                             <td><a href='{% url 'annotations:annotate' annotation.image.id %}'>{{ annotation.image.name }}</a></td>
                             <td>{{ annotation.type.name }}</td>
                             <td>{{ annotation.content }}</td>
-                            <td>{{ annotation.verification_count }}</td>
+                            <td>{{ annotation.negative_verifications_count }}</td>
                             <td>{{ annotation.user.username }}</td>
                             <td>{{ annotation.last_editor.username }}</td>
                             <td>

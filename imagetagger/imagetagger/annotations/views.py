@@ -190,10 +190,12 @@ def download_export(request, export_id):
 @login_required
 def manage_annotations(request, image_set_id):
     userteams = Team.objects.filter(members=request.user)
-    imagesets = ImageSet.objects.filter(team__in=userteams) | ImageSet.objects.filter(public=True)
+    imagesets = ImageSet.objects.select_related('team').filter(
+        Q(team__in=userteams) | Q(public=True))
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.filter(image__in=images) \
+    annotations = Annotation.objects.annotate_verification_difference() \
+        .select_related('image', 'user', 'type').filter(image__in=images) \
         .order_by('id')
     return render(request, 'annotations/manage_annotations.html', {
         'selected_image_set': imageset,

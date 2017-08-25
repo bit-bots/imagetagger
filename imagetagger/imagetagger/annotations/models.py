@@ -1,7 +1,28 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Subquery, F, IntegerField, OuterRef
+from django.utils.functional import cached_property
 
 from imagetagger.images.models import Image, ImageSet
+
+
+class AnnotationQuerySet(models.QuerySet):
+    def annotate_verification_difference(self) -> models.QuerySet:
+        return self.annotate(
+            positive_verifications_count=Subquery(
+                Verification.objects.filter(
+                    annotation_id=OuterRef('pk'), verified=False).values(
+                    'annotation_id').annotate(
+                    count=F('pk')).values('count'),
+                output_field=IntegerField()),
+            negative_verifications_count=Subquery(
+                Verification.objects.filter(
+                    annotation_id=OuterRef('pk'), verified=True).values(
+                    'annotation_id').annotate(
+                    count=F('pk')).values('count'),
+                output_field=IntegerField())).annotate(
+            verification_difference=F(
+                'positive_verifications_count') - F('negative_verifications_count'))
 
 
 class Annotation(models.Model):
@@ -21,6 +42,8 @@ class Annotation(models.Model):
     verified_by = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Verification')
     not_in_image = models.BooleanField(default=0)  # if True, the object is definitely not in the image
 
+    objects = models.Manager.from_queryset(AnnotationQuerySet)()
+
     def __str__(self):
         return 'Annotation: {0}'.format(self.type.name)
 
@@ -29,9 +52,6 @@ class Annotation(models.Model):
             return 'Not in image'
         else:
             return self.vector
-
-    def verification_count(self):
-        return (Verification.objects.filter(annotation=self.id).filter(verified=True).count() - Verification.objects.filter(annotation=self.id).filter(verified=False).count())
 
     def owner(self):
         return self.last_editor if self.last_editor else self.user
