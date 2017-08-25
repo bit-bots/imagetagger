@@ -32,13 +32,13 @@
         });
         $('#accept_button').click(function(){
           $('#state').attr('value', 'accept');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}');
+          $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
           $('#verification_form').submit();
         });
 
         $('#reject_button').click(function(){
           $('#state').attr('value', 'reject');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}');
+          $('#verification_form').attr('action', '{% url 'annotations:verify' next_unverified_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
           $('#verification_form').submit();
         });
 
@@ -46,13 +46,13 @@
         $('#next_unverified_button').attr('disabled', 'true');
         $('#accept_button').click(function(){
           $('#state').attr('value', 'accept');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' first_annotation.id %}');
+          $('#verification_form').attr('action', '{% url 'annotations:verify' first_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
           $('#verification_form').submit();
         });
 
         $('#reject_button').click(function(){
           $('#state').attr('value', 'reject');
-          $('#verification_form').attr('action', '{% url 'annotations:verify' first_annotation.id %}');
+          $('#verification_form').attr('action', '{% url 'annotations:verify' first_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
           $('#verification_form').submit();
         });
         {% endif %}
@@ -99,7 +99,7 @@
                             {{ set_annotation.image.name }}: <b id="selected_annotation_row">{{annotation.content}}</b><br>
                         {% else %}
                             {{ set_annotation.image.name }}:
-                                <a href="{% url 'annotations:verify' set_annotation.id %}">{{set_annotation.content}}</a><br>
+                                <a href="{% url 'annotations:verify' set_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}">{{set_annotation.content}}</a><br>
                         {% endif %}
                     {% endfor %}
                 </div>

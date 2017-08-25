@@ -57,6 +57,7 @@ def annotate(request, image_id):
             else:
                 messages.warning(request, "This tag already exists!")
 
+
         set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
         filtered = request.GET.get("selected_annotation_type")
