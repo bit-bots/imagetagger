@@ -10,7 +10,8 @@ from imagetagger.users.models import Team
 
 
 class Image(models.Model):
-    image_set = models.ForeignKey('ImageSet', on_delete=models.CASCADE)
+    image_set = models.ForeignKey(
+        'ImageSet', on_delete=models.CASCADE, related_name='images')
     name = models.CharField(max_length=100)
     filename = models.CharField(max_length=100, unique=True)
     time = models.DateTimeField(auto_now_add=True)

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.db.models.expressions import RawSQL
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -56,7 +57,7 @@ def annotate(request, image_id):
             else:
                 messages.warning(request, "This tag already exists!")
 
-        set_images = Image.objects.filter(image_set=selected_image.image_set)
+        set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
         filtered = request.GET.get("selected_annotation_type")
         if filtered is not None:
@@ -69,16 +70,8 @@ def annotate(request, image_id):
         set_images = set_images.order_by('id')
 
         # detecting next and last image in the set
-        next_image = set_images.filter(id__gt=selected_image.id).order_by('id')
-        if len(next_image) == 0:
-            next_image = None
-        else:
-            next_image = next_image[0]
-        last_image = set_images.filter(id__lt=selected_image.id).order_by('-id')
-        if len(last_image) == 0:
-            last_image = None
-        else:
-            last_image = last_image[0]
+        next_image = set_images.filter(id__gt=selected_image.id).order_by('id').first()
+        last_image = set_images.filter(id__lt=selected_image.id).order_by('id').last()
 
         return render(request, 'annotations/annotate.html', {
             'selected_image': selected_image,
@@ -86,7 +79,8 @@ def annotate(request, image_id):
             'last_image': last_image,
             'set_images': set_images,
             'annotation_types': annotation_types,
-            'image_annotations': Annotation.objects.filter(image=selected_image),
+            'image_annotations': Annotation.objects.filter(
+                image=selected_image).select_related(),
             'last_annotation_type_id': int(last_annotation_type_id),
             'filtered' : filtered,
         })
@@ -215,7 +209,8 @@ def verify(request, annotation_id):
             user_verify(request.user, annotation, state)
             messages.success(request, "You verified the last tag to be false!")
 
-    annotation = get_object_or_404(Annotation, id=annotation_id)
+    annotation = get_object_or_404(
+        Annotation.objects.select_related(), id=annotation_id)
 
     #checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
@@ -227,7 +222,7 @@ def verify(request, annotation_id):
 
     #sets everthing without the filter
     set_images = Image.objects.filter(image_set=image.image_set)
-    set_annotations = Annotation.objects.filter(image__in=set_images)
+    set_annotations = Annotation.objects.select_related().filter(image__in=set_images)
 
     #filtering of annotations for certain annotations types
     annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
@@ -243,29 +238,16 @@ def verify(request, annotation_id):
     #filters the unverified annotations
     unverified_annotations = set_annotations.filter(~Q(verified_by=request.user))
 
-    # detecting next and last image in the set
-    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id')
-    if len(next_annotation) == 0:
-        next_annotation = None
-    else:
-        next_annotation = next_annotation[0]
-    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('-id')
-    if len(last_annotation) == 0:
-        last_annotation = None
-    else:
-        last_annotation = last_annotation[0]
 
-    #detecting next and last unverified image in the set
-    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id')
-    if len(next_unverified_annotation) == 0:
-        next_unverified_annotation = None
-    else:
-        next_unverified_annotation = next_unverified_annotation[0]
-    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('-id')
-    if len(last_unverified_annotation) == 0:
-        last_unverified_annotation = None
-    else:
-        last_unverified_annotation = last_unverified_annotation[0]
+    # TODO: Use one query to fetch all those previous's and next's
+
+    # detecting next and last image in the set
+    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id').first()
+    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('id').last()
+
+    # detecting next and last unverified image in the set
+    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id').first()
+    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('id').last()
 
     return render(request, 'annotations/verification.html', {
         'image': image,

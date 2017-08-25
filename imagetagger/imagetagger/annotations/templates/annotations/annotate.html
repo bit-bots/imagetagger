@@ -63,29 +63,29 @@ $('#back_button').attr('disabled', 'true');
 
             <img id="picture" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
             <hr color="silver" width="100%">
-            {% if image_annotations.all %}
-            <u>Annotations:</u>
             {% for annotation in image_annotations %}
-            <div class="annotation">
-                {{annotation.type.name}}:
-                <div style="float: right;">
-                    <a href="{% url 'annotations:verify' annotation.id%}">
-                        <img src="{% static "symbols/checkmark.png" %}" alt="edit">
-                    </a>
-                    <a href="{% url 'annotations:edit_annotation' annotation.id%}">
-                        <img src="{% static "symbols/pencil.png" %}" alt="edit">
-                    </a>
-                    <a href="{% url 'annotations:delete_annotation' annotation.id%}">
-                        <img src="{% static "symbols/bin.png" %}" alt="delete">
-                    </a>
+                {% if forloop.counter0 == 0 %}
+                    <u>Annotations:</u>
+                {% endif %}
+                <div class="annotation">
+                    {{ annotation.type.name }}:
+                    <div style="float: right;">
+                        <a href="{% url 'annotations:verify' annotation.id%}">
+                            <img src="{% static "symbols/checkmark.png" %}" alt="edit">
+                        </a>
+                        <a href="{% url 'annotations:edit_annotation' annotation.id%}">
+                            <img src="{% static "symbols/pencil.png" %}" alt="edit">
+                        </a>
+                        <a href="{% url 'annotations:delete_annotation' annotation.id%}">
+                            <img src="{% static "symbols/bin.png" %}" alt="delete">
+                        </a>
+                    </div>
+                    <br>
+                    {{annotation.content}}
                 </div>
-                <br>
-                {{annotation.content}}
-            </div>
+            {% empty %}
+                <div class="alert alert-warning" role="alert">No annotations found.</div>
             {% endfor %}
-            {% else %}
-            <div class="alert alert-warning" role="alert">No annotations found.</div>
-            {% endif %}
         </div>
         <div class="col-md-3">
             <div class="panel panel-default">
