@@ -143,3 +143,7 @@ div.rightcontent{
 	margin-left: -0.8em;
 	display: inline;
 }
+
+.align-right {
+	text-align: right;
+}

@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
-from django.db.models import QuerySet
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 

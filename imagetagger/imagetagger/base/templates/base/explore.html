@@ -66,6 +66,13 @@
                                                 <a href="{% url 'users:user' user.id %}">{{user.username}}</a>
                                             </dt>
                                         </td>
+                                        <td class="align-right">
+                                            {% if user.points %}
+                                                {{ user.points }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </dl>

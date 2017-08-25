@@ -4,6 +4,7 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Count, Subquery, OuterRef, IntegerField
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -93,7 +94,11 @@ def explore_team(request):
 
 @login_required
 def explore_user(request):
-    users = User.objects.all()
+    users = User.objects.annotate(points=Subquery(
+        Verification.objects.filter(
+            verified=True, annotation__user_id=OuterRef('pk')).values('annotation__user_id').annotate(
+            count=Count('annotation__user_id')).values('count'),
+        output_field=IntegerField())).all().order_by('points')
 
     query = request.GET.get('query')
     if query:
