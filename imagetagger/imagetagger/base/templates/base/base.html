@@ -2,15 +2,10 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <script type="text/javascript" src="{% static 'scripts/jquery-3.2.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'scripts/bootstrap.min.js' %}"></script>
     <link rel="shortcut icon" type="image/png" href="{% static 'symbols/bitbots-fav.ico' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
     {% block taggerimports %}{% endblock %}
-    <script type="text/javascript">
-    {% block individual_script %}{% endblock %}
-	</script>
     <title>Labeldings 0.8</title>
 </head>
 <body>
@@ -50,5 +45,12 @@
         {% endfor %}
 {% block bodyblock %}{% endblock %}
 </div></div>
+  <script type="text/javascript" src="{% static 'scripts/jquery-3.2.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'scripts/bootstrap.min.js' %}"></script>
+  <script type="text/javascript">
+    {# TODO: This block is deprecated. Should be within additional_js (or, actually, there should not be any inline javascript usage at all!) #}
+    {% block individual_script %}{% endblock individual_script %}
+  </script>
+  {% block additional_js %}{% endblock additional_js %}
 </body>
 </html>

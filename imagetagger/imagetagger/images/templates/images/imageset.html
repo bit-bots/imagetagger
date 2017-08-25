@@ -8,7 +8,9 @@
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
 <link rel="stylesheet" href="{% static 'jQuery-File-Upload/css/jquery.fileupload.css' %}">
 <link rel="stylesheet" href="{% static 'jQuery-File-Upload/css/jquery.fileupload-ui.css' %}">
+{% endblock taggerimports %}
 
+{% block additional_js %}
 <!-- The template to display files available for upload -->
 {% verbatim %}
 <script id="template-upload" type="text/x-tmpl">
@@ -111,7 +113,7 @@
 <!-- The main application script -->
 <script src="{% static 'jQuery-File-Upload/js/main.js' %}"></script>
 <![endif]-->
-{% endblock %}
+{% endblock additional_js %}
 {% block bodyblock %}
 <div class="container-fluid">
     <div class="row">

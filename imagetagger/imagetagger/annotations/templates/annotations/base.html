@@ -4,9 +4,14 @@
 {% block taggerimports %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/imgareaselect-default.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/cursor.css' %}" />
-    <script type="text/javascript" src="{% static 'scripts/jquery.imgareaselect.pack.js' %}"></script>
-    <script type="text/javascript" src="{% static 'annotations/js/annotate.js' %}"></script>
 {% endblock %}
+
+{% block additional_js %}
+  <script type="text/javascript" src="{% static 'scripts/jquery.imgareaselect.pack.js' %}"></script>
+  {% block additional_annotation_js %}
+  {% endblock additional_annotation_js %}
+{% endblock additional_js %}
+
 {% block selectorblock %}
     <div id="crosshair-h" class="hair"></div>
     <div id="crosshair-v" class="hair"></div>

@@ -1,30 +1,33 @@
 {% extends 'annotations/base.html' %}
 {% load static %}
-{% block individual_script %}
-function init_navigationbuttons() {
-{% if next_image %}
-$('#next_button').click(function(){
-$('#annotation_form').attr('action', '{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-$('#annotation_form').submit();
-});
-$('#skip_button').click(function(){window.open("{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
-{% else %}
-$('#next_button').attr('disabled', 'true');
-$('#skip_button').attr('disabled', 'true');
-{% endif %}
+{% block additional_annotation_js %}
+  <script type="text/javascript">
+    function init_navigationbuttons() {
+      {% if next_image %}
+        $('#next_button').click(function(){
+          $('#annotation_form').attr('action', '{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
+          $('#annotation_form').submit();
+        });
+        $('#skip_button').click(function(){window.open("{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
+      {% else %}
+        $('#next_button').attr('disabled', 'true');
+        $('#skip_button').attr('disabled', 'true');
+      {% endif %}
 
-{% if last_image %}
-$('#last_button').click(function(){
-$('#annotation_form').attr('action', '{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-$('#annotation_form').submit();
-});
-$('#back_button').click(function(){window.open("{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
-{% else %}
-$('#last_button').attr('disabled', 'true');
-$('#back_button').attr('disabled', 'true');
-{% endif %}
-}
-{% endblock %}
+      {% if last_image %}
+        $('#last_button').click(function(){
+          $('#annotation_form').attr('action', '{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
+          $('#annotation_form').submit();
+        });
+        $('#back_button').click(function(){window.open("{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
+      {% else %}
+        $('#last_button').attr('disabled', 'true');
+        $('#back_button').attr('disabled', 'true');
+      {% endif %}
+    }
+  </script>
+  <script type="text/javascript" src="{% static 'annotations/js/annotate.js' %}"></script>
+{% endblock additional_annotation_js %}
 {% block bodyblock %}
 <div class="container-fluid">
     <div class="row">
@@ -61,7 +64,7 @@ $('#back_button').attr('disabled', 'true');
         </div>
         <div class="col-md-6" onload="">
 
-            <img id="picture" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
+            <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
             <hr color="silver" width="100%">
             {% for annotation in image_annotations %}
                 {% if forloop.counter0 == 0 %}
@@ -105,19 +108,19 @@ $('#back_button').attr('disabled', 'true');
                             </tr>
                             <tr>
                                 <td>x1</td>
-                                <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="0" min="0"></td>
+                                <td><input id="x1Field" class="Coordinates annotation_value" type="number" name="x1Field" value="0" min="0"></td>
                             </tr>
                             <tr>
                                 <td>y1</td>
-                                <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="0" min="0"></td>
+                                <td><input id="y1Field" class="Coordinates annotation_value" type="number" name="y1Field" value="0" min="0"></td>
                             </tr>
                             <tr>
                                 <td>x2</td>
-                                <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="0" min="0"></td>
+                                <td><input id="x2Field" class="Coordinates annotation_value" type="number" name="x2Field" value="0" min="0"></td>
                             </tr>
                             <tr>
                                 <td>y2</td>
-                                <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="0" min="0"></td>
+                                <td><input id="y2Field" class="Coordinates annotation_value" type="number" name="y2Field" value="0" min="0"></td>
                             </tr>
                             <tr>
                                 <td colspan='2'><input type='checkbox' name='not_in_image' id='not_in_image'>
