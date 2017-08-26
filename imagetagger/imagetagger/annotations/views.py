@@ -4,14 +4,20 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.expressions import RawSQL
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED
 
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification
+from imagetagger.annotations.serializers import AnnotationSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
@@ -26,37 +32,29 @@ def export_auth(request, export_id):
 def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
     if selected_image.image_set.has_perm('annotate', request.user) or selected_image.image_set.public:
+        # TODO: Make sure that integer coordinate values are stored in vector
+
         # here the stuff we got via POST gets put in the DB
         last_annotation_type_id = -1
         if request.method == 'POST' and request.POST.get("annotate") is not None and verify_bounding_box_annotation(request.POST):
             vector = {'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']}
             vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
             last_annotation_type_id = request.POST['selected_annotation_type']
+            annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
             annotation = Annotation(vector=vector_text,
                                     image=get_object_or_404(Image, id=request.POST['image_id']),
-                                    type=get_object_or_404(AnnotationType,
-                                                           id=request.POST['selected_annotation_type']))
+                                    type=annotation_type)
             annotation.user = (request.user if request.user.is_authenticated() else None)
             if 'not_in_image' in request.POST:
                 annotation.not_in_image = 1  # 0 by default
-            #tests for duplicates of same tag type & similiar coordinates (+-5 on every coordinate) on image
-            result = []
-            for annota in Annotation.objects.filter(image=selected_image, type=last_annotation_type_id):
-                anno_vector = json.loads(annota .vector)
-                sum = 0
-                for key, value in anno_vector.items():
-                    if abs(int(value) - int(vector[key])) <= 5:
-                        sum = sum + abs(int(value) - int(vector[key]))
-                    else:
-                        sum = sum + len(vector)*5 +1
-                result.append(sum)
-            if (not any(elem <= len(vector)*5 for elem in result)) or result == []:
+
+            if not Annotation.similar_annotations(
+                    vector, selected_image, annotation_type):
                 annotation.save()
                 # the creator of the annotation verifies it instantly
-                user_verify(request.user, annotation, True)
+                annotation.verify(request.user, True)
             else:
                 messages.warning(request, "This tag already exists!")
-
 
         set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
@@ -150,7 +148,7 @@ def edit_annotation_save(request, annotation_id):
         else:
             annotation.not_in_image = 0
         annotation.save()
-        user_verify(request.user, annotation, True)
+        annotation.verify(request.user, True)
     return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
 
 
@@ -210,11 +208,11 @@ def verify(request, annotation_id):
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
         if request.POST['state'] == 'accept':
             state = True
-            user_verify(request.user, annotation, state)
+            annotation.verify(request.user, state)
             messages.success(request, "You verified the last tag to be true!")
         elif request.POST['state'] == 'reject':
             state = False
-            user_verify(request.user, annotation, state)
+            annotation.verify(request.user, state)
             messages.success(request, "You verified the last tag to be false!")
 
     annotation = get_object_or_404(
@@ -367,13 +365,42 @@ def wf_wolves_export(imageset):
     return ''.join(a), annotation_counter
 
 
-def user_verify(user, annotation, verification_state):
-    if user.is_authenticated():
-        #if verication already exists it'll be updated otherwise a new one will be created
-        if Verification.objects.filter(user=user, annotation=annotation).count() > 0:
-            Verification.objects.filter(user=user, annotation=annotation).update(verified=verification_state)
-        else:
-            Verification(annotation=annotation, user=user, verified=verification_state).save()
-
 def verify_bounding_box_annotation(post_dict):
     return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) >= 1 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) >= 1)
+
+
+@login_required
+@api_view(['POST'])
+def create_annotation(request) -> Response:
+    try:
+        image_id = int(request.data['image_id'])
+        annotation_type_id = int(request.data['annotation_type_id'])
+        vector = request.data['vector']
+        not_in_image = bool(request.data.get('not_in_image', False))
+    except (KeyError, ValueError):
+        raise ParseError
+
+    image = get_object_or_404(Image, pk=image_id)
+    annotation_type = get_object_or_404(AnnotationType, pk=annotation_type_id)
+
+    # TODO: maybe add some way to validate the vector to prevent arbitrary contents
+
+    print(Annotation.similar_annotations(vector, image, annotation_type))
+    if Annotation.similar_annotations(vector, image, annotation_type):
+        return Response({
+            'detail': 'similar annotation exists',
+        })
+
+    # TODO: use JSONB and skip manual json dumping
+    vector_text = json.dumps(vector)
+
+    with transaction.atomic():
+        annotation = Annotation.objects.create(
+            vector=vector_text, image=image, type=annotation_type, user=request.user,
+            not_in_image=not_in_image)
+
+        # Automatically verify for owner
+        annotation.verify(request.user, True)
+
+    serializer = AnnotationSerializer(annotation)
+    return Response(serializer.data, status=HTTP_201_CREATED)

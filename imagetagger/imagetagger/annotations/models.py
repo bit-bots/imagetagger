@@ -1,4 +1,8 @@
+import json
+from typing import Set
+
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Subquery, F, IntegerField, OuterRef
 from django.utils.functional import cached_property
@@ -27,9 +31,14 @@ class AnnotationQuerySet(models.QuerySet):
 
 class Annotation(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
+
+    # TODO: Use JSONB (and store int values as int, not string ...)
     vector = models.CharField(max_length=1000)
+
     closed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
+
+    # TODO: Rename this field (type is a reserved keyword)
     type = models.ForeignKey('AnnotationType', on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name='creator',
@@ -40,7 +49,7 @@ class Annotation(models.Model):
         settings.AUTH_USER_MODEL, related_name='last_editor', null=True,
         on_delete=models.SET_NULL)
     verified_by = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Verification')
-    not_in_image = models.BooleanField(default=0)  # if True, the object is definitely not in the image
+    not_in_image = models.BooleanField(default=False)  # if True, the object is definitely not in the image
 
     objects = models.Manager.from_queryset(AnnotationQuerySet)()
 
@@ -54,7 +63,36 @@ class Annotation(models.Model):
             return self.vector
 
     def owner(self):
+        # TODO: maybe use an owner field populated by a database trigger
         return self.last_editor if self.last_editor else self.user
+
+    def verify(self, user: get_user_model(), verified: bool):
+        """Add or update a verification for an annotation."""
+        if not self.verifications.filter(user=user).update(verified=verified):
+            Verification.objects.create(
+                annotation=self, user=user, verified=verified)
+
+    @staticmethod
+    def similar_annotations(
+            vector: dict, image: Image, annotation_type: 'AnnotationType',
+            max_similarity: int = 5) -> Set['Annotation']:
+        """
+        Test for duplicates of same tag type and similiar coordinates
+        (+-5 on every coordinate) on image.
+
+        :param max_similarity specifies the maximum pixels each coordinate
+            can differ to be regarded as similar.
+        """
+        # TODO: migrate the annotation vector field to JSONB and do the lookup in the database
+        result = set()
+        for annotation in Annotation.objects.filter(image=image, type=annotation_type):
+            if all(
+                    (abs(int(value) - int(vector[key])) <= max_similarity
+                        if key in vector else False)
+                    for key, value in json.loads(annotation.vector).items()):
+                result.add(annotation)
+        return result
+
 
 
 class AnnotationType(models.Model):
@@ -78,7 +116,14 @@ class Export(models.Model):
 
 
 class Verification(models.Model):
-    annotation = models.ForeignKey(Annotation, on_delete=models.CASCADE)
+    class Meta:
+        unique_together = [
+            'annotation',
+            'user',
+        ]
+
+    annotation = models.ForeignKey(
+        Annotation, on_delete=models.CASCADE, related_name='verifications')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     time = models.DateTimeField(auto_now_add=True)
     verified = models.BooleanField(default=0)

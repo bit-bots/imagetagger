@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'widget_tweaks',
     'progressbarupload',
+    'rest_framework',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

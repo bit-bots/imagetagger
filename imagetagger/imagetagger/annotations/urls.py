@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^annotation/edit/(\d+)/save/$', views.edit_annotation_save, name='edit_annotation_save'),
     url(r'^annotation/edit/(\d+)/$', views.edit_annotation, name='edit_annotation'),
     url(r'^verify/(\d+)/$', views.verify, name='verify'),
+    url(r'^api/annotation/create/$', views.create_annotation, name='create_annotation'),
 ]
