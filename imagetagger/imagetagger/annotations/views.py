@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from django.conf import settings
@@ -6,10 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.expressions import RawSQL
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -36,25 +35,38 @@ def annotate(request, image_id):
 
         # here the stuff we got via POST gets put in the DB
         last_annotation_type_id = -1
-        if request.method == 'POST' and request.POST.get("annotate") is not None and verify_bounding_box_annotation(request.POST):
-            vector = {'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']}
-            vector_text = json.dumps({'x1': request.POST['x1Field'], 'y1': request.POST['y1Field'], 'x2': request.POST['x2Field'], 'y2': request.POST['y2Field']})
-            last_annotation_type_id = request.POST['selected_annotation_type']
-            annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
-            annotation = Annotation(vector=vector_text,
-                                    image=get_object_or_404(Image, id=request.POST['image_id']),
-                                    annotation_type=annotation_type)
-            annotation.user = (request.user if request.user.is_authenticated() else None)
-            if 'not_in_image' in request.POST:
-                annotation.not_in_image = 1  # 0 by default
+        if request.method == 'POST' and request.POST.get("annotate") is not None:
+            try:
+                image = get_object_or_404(Image, id=request.POST['image_id'])
+                vector = {
+                    'x1': int(request.POST['x1Field']),
+                    'y1': int(request.POST['y1Field']),
+                    'x2': int(request.POST['x2Field']),
+                    'y2': int(request.POST['y2Field']),
+                }
+                if 'not_in_image' in request.POST:
+                    vector = None
+            except (KeyError, ValueError):
+                return HttpResponseBadRequest()
 
-            if not Annotation.similar_annotations(
-                    vector, selected_image, annotation_type):
-                annotation.save()
-                # the creator of the annotation verifies it instantly
-                annotation.verify(request.user, True)
+            if (vector is not None and
+                    not Annotation.validate_vector(
+                        vector, Annotation.VECTOR_TYPE.BOUNDING_BOX)):
+                messages.warning(request, _('No valid bounding box found.'))
             else:
-                messages.warning(request, "This tag already exists!")
+                last_annotation_type_id = request.POST['selected_annotation_type']
+                annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
+                annotation = Annotation(
+                    vector=vector, image=image, annotation_type=annotation_type,
+                    user=request.user if request.user.is_authenticated() else None)
+
+                if not Annotation.similar_annotations(
+                        vector, selected_image, annotation_type):
+                    annotation.save()
+                    # the creator of the annotation verifies it instantly
+                    annotation.verify(request.user, True)
+                else:
+                    messages.warning(request, "This tag already exists!")
 
         set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
@@ -99,7 +111,6 @@ def edit_annotation(request, annotation_id):
         annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
         selected_image = get_object_or_404(Image, id=annotation.image.id)
         set_images = Image.objects.filter(image_set=selected_image.image_set)
-        vector = json.loads(annotation.vector)
         current_annotation_type_id = annotation.annotation_type.id
         return render(request, 'annotations/edit_annotation.html', {
             'selected_image': selected_image,
@@ -107,10 +118,6 @@ def edit_annotation(request, annotation_id):
             'annotation_types': annotation_types,
             'annotation': annotation,
             'current_annotation_type_id': current_annotation_type_id,
-            'x1': vector['x1'],
-            'y1': vector['y1'],
-            'x2': vector['x2'],
-            'y2': vector['y2'],
         })
     else:
         return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
@@ -128,27 +135,42 @@ def delete_annotation(request, annotation_id):
 @login_required
 def edit_annotation_save(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
-    if request.method == 'POST' \
-            and verify_bounding_box_annotation(request.POST) \
-            and (request.user is annotation.user
-                 or annotation.image.image_set.has_perm('edit_annotation', request.user)):
-        vector_text = json.dumps({
-            'x1': request.POST['x1Field'],
-            'y1': request.POST['y1Field'],
-            'x2': request.POST['x2Field'],
-            'y2': request.POST['y2Field']
-        })
-        annotation.vector = vector_text
-        annotation.last_change_time = datetime.now()
-        annotation.last_editor = (request.user if request.user.is_authenticated() else None)
-        annotation.annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
-        annotation.verified_by.clear()
-        if 'not_in_image' in request.POST:
-            annotation.not_in_image = 1
-        else:
-            annotation.not_in_image = 0
-        annotation.save()
-        annotation.verify(request.user, True)
+    # TODO: Give feedback in case of missing permissions
+    if request.method == 'POST' and (
+                request.user is annotation.user or
+                annotation.image.image_set.has_perm('edit_annotation', request.user)):
+        try:
+            annotation.vector = {
+                'x1': request.POST['x1Field'],
+                'y1': request.POST['y1Field'],
+                'x2': request.POST['x2Field'],
+                'y2': request.POST['y2Field'],
+            }
+            if 'not_in_image' in request.POST:
+                annotation.vector = None
+            annotation.last_change_time = datetime.now()
+            annotation.last_editor = (request.user if request.user.is_authenticated() else None)
+            annotation.annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
+        except (KeyError, ValueError):
+            return HttpResponseBadRequest()
+
+        if not Annotation.validate_vector(annotation.vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+            messages.warning(request, _('No valid bounding box found.'))
+            return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
+
+        if Annotation.similar_annotations(
+                annotation.vector, annotation.image,
+                annotation.annotation_type, exclude={annotation.pk}):
+            messages.info(
+                request,
+                _('A similar annotation already exists. The edited annotation was deleted.'))
+            annotation.delete()
+            return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
+
+        with transaction.atomic():
+            annotation.verified_by.clear()
+            annotation.save()
+            annotation.verify(request.user, True)
     return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
 
 
@@ -224,7 +246,6 @@ def verify(request, annotation_id):
 
     annotation_type = annotation.annotation_type
     image = get_object_or_404(Image, id=annotation.image.id)
-    vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
     set_annotations = Annotation.objects.select_related().filter(image__in=set_images)
     set_annotations = set_annotations.order_by('id')
@@ -293,10 +314,8 @@ def verify(request, annotation_id):
         'set_annotations': set_annotations,
         'first_annotation': set_annotations.first(),
         'unverified_annotations': unverified_annotations,
-        'annotation_x': vector['x1'],
-        'annotation_y': vector['y1'],
-        'width': int(vector['x2']) - int(vector['x1']),
-        'height': int(vector['y2']) - int(vector['y1']),
+        'width': annotation.vector.get('x2', 0) - annotation.vector.get('x1', 0) if annotation.vector else None,
+        'height': annotation.vector.get('y2', 0) - annotation.vector('y1', 0) if annotation.vector else None,
         'annotation_type': annotation_type,
         'annotation_types': annotation_types,
         'filtered': filtered,
@@ -326,12 +345,11 @@ def bitbotai_export(imageset):
                                             annotation_type__name='ball')
     for annotation in annotations:
         annotation_counter += 1
-        vector = json.loads(annotation.vector)
         a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
-                                                 vector['x1'],
-                                                 vector['y1'],
-                                                 vector['x2'],
-                                                 (vector['y2'] + '\n')]))
+                                                 annnotation.vector['x1'],
+                                                 annnotation.vector['y1'],
+                                                 annnotation.vector['x2'],
+                                                 (annnotation.vector['y2'] + '\n')]))
     return ''.join(a), annotation_counter
 
 
@@ -356,18 +374,12 @@ def wf_wolves_export(imageset):
     annotations = Annotation.objects.filter(image__in=images)
     for annotation in annotations:
         annotation_counter += 1
-        vector = json.loads(annotation.vector)
         a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
                                                  annotation.annotation_type.name,
-                                                 vector['x1'],
-                                                 vector['y1'],
-                                                 vector['x2'],
-                                                 (vector['y2'] + '\n')]))
+                                                 annotation.vector['y1'],
+                                                 annotation.vector['x2'],
+                                                 (annotation.vector['y2'] + '\n')]))
     return ''.join(a), annotation_counter
-
-
-def verify_bounding_box_annotation(post_dict):
-    return ('not_in_image' in post_dict) or ((int(post_dict['x2Field']) - int(post_dict['x1Field'])) >= 1 and (int(post_dict['y2Field']) - int(post_dict['y1Field'])) >= 1)
 
 
 @login_required
@@ -377,7 +389,8 @@ def create_annotation(request) -> Response:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
-        not_in_image = bool(request.data.get('not_in_image', False))
+        if 'not_in_image' in request.data:
+            vector = None
     except (KeyError, ValueError):
         raise ParseError
 
@@ -386,20 +399,15 @@ def create_annotation(request) -> Response:
 
     # TODO: maybe add some way to validate the vector to prevent arbitrary contents
 
-    print(Annotation.similar_annotations(vector, image, annotation_type))
     if Annotation.similar_annotations(vector, image, annotation_type):
         return Response({
             'detail': 'similar annotation exists',
         })
 
-    # TODO: use JSONB and skip manual json dumping
-    vector_text = json.dumps(vector)
-
     with transaction.atomic():
         annotation = Annotation.objects.create(
-            vector=vector_text, image=image,
-            annotation_type=annotation_type, user=request.user,
-            not_in_image=not_in_image)
+            vector=text, image=image,
+            annotation_type=annotation_type, user=request.user)
 
         # Automatically verify for owner
         annotation.verify(request.user, True)

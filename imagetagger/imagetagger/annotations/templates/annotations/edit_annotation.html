@@ -5,10 +5,10 @@
   <script type="text/javascript">
     {# TODO: Get rid of this #}
     function loadannotation() {
-      $('#x1Field').val({{ x1 }});
-      $('#y1Field').val({{ y1 }});
-      $('#x2Field').val({{ x2 }});
-      $('#y2Field').val({{ y2 }});
+      $('#x1Field').val({{ annotation.vector.x1 }});
+      $('#y1Field').val({{ annotation.vector.y1 }});
+      $('#x2Field').val({{ annotation.vector.x2 }});
+      $('#y2Field').val({{ annotation.vector.y2 }});
     }
   </script>
   <script type="text/javascript" src="{% static 'annotations/js/annotate.js' %}"></script>
@@ -43,19 +43,19 @@
                               </tr>
                               <tr>
                                   <td>X1</td>
-                                  <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="{{ x1 }}"></td>
+                                  <td><input id="x1Field" class="Coordinates" type="number" name="x1Field" value="{{ annotation.vector.x1 }}"></td>
                               </tr>
                               <tr>
                                   <td>Y1</td>
-                                  <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="{{ y1 }}"></td>
+                                  <td><input id="y1Field" class="Coordinates" type="number" name="y1Field" value="{{ annotation.vector.y1 }}"></td>
                               </tr>
                               <tr>
                                   <td>X2</td>
-                                  <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="{{ x2 }}"></td>
+                                  <td><input id="x2Field" class="Coordinates" type="number" name="x2Field" value="{{ annotation.vector.x2 }}"></td>
                               </tr>
                               <tr>
                                   <td>Y2</td>
-                                  <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="{{ y2 }}"></td>
+                                  <td><input id="y2Field" class="Coordinates" type="number" name="y2Field" value="{{ annotation.vector.y2 }}"></td>
                               </tr>
                               <tr>
                                 <td colspan='2'><input type='checkbox' name='not_in_image'id='not_in_image' {% if annotation.not_in_image == 1 %}checked=""{% endif %}><label for='not_in_image'>Not in the image</label></td>

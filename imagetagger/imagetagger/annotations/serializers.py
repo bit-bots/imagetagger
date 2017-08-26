@@ -9,5 +9,4 @@ class AnnotationSerializer(ModelSerializer):
         fields = (
             'id',
             'vector',
-            'not_in_image',
         )

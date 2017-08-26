@@ -189,7 +189,7 @@
         </div>
         <div class="col-md-6">
             <div class="wrapper">
-                <img id="picture" src="{% url 'images:view_image' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation_x }}" data-y="{{ annotation_y }}" data-width="{{ width }}" data-height="{{ height }}"></br>
+                <img id="picture" src="{% url 'images:view_image' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation.vector.x1 }}" data-y="{{ annotation.vector.y1 }}" data-width="{{ width }}" data-height="{{ height }}"></br>
                 <div id="boundingBox"></div>
             </div>
         </div>
