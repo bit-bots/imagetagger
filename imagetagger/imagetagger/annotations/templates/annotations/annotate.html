@@ -71,7 +71,7 @@
                     <u>Annotations:</u>
                 {% endif %}
                 <div class="annotation">
-                    {{ annotation.type.name }}:
+                    {{ annotation.annotation_type.name }}:
                     <div style="float: right;">
                         <a href="{% url 'annotations:verify' annotation.id%}">
                             <img src="{% static "symbols/checkmark.png" %}" alt="edit">

@@ -43,7 +43,7 @@ def annotate(request, image_id):
             annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
             annotation = Annotation(vector=vector_text,
                                     image=get_object_or_404(Image, id=request.POST['image_id']),
-                                    type=annotation_type)
+                                    annotation_type=annotation_type)
             annotation.user = (request.user if request.user.is_authenticated() else None)
             if 'not_in_image' in request.POST:
                 annotation.not_in_image = 1  # 0 by default
@@ -63,7 +63,7 @@ def annotate(request, image_id):
         new_filter = request.GET.get("filter")
         if filtered is not None:
             # filter images for missing annotationtype
-            set_images = set_images.exclude(annotation__type_id=filtered)
+            set_images = set_images.exclude(annotation__annotation_type_id=filtered)
             if not set_images:
                 messages.info(request, 'All images in this set have been tagged with this tag!')
                 set_images = Image.objects.filter(image_set=selected_image.image_set)
@@ -100,7 +100,7 @@ def edit_annotation(request, annotation_id):
         selected_image = get_object_or_404(Image, id=annotation.image.id)
         set_images = Image.objects.filter(image_set=selected_image.image_set)
         vector = json.loads(annotation.vector)
-        current_annotation_type_id = annotation.type.id
+        current_annotation_type_id = annotation.annotation_type.id
         return render(request, 'annotations/edit_annotation.html', {
             'selected_image': selected_image,
             'set_images': set_images,
@@ -141,7 +141,7 @@ def edit_annotation_save(request, annotation_id):
         annotation.vector = vector_text
         annotation.last_change_time = datetime.now()
         annotation.last_editor = (request.user if request.user.is_authenticated() else None)
-        annotation.type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
+        annotation.annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
         annotation.verified_by.clear()
         if 'not_in_image' in request.POST:
             annotation.not_in_image = 1
@@ -160,7 +160,7 @@ def create_export(request, image_set_id):
             export_format = request.POST['export_format']
             if export_format == 'Bit-Bot AI':
                 export_text, annotation_count = bitbotai_export(imageset)
-                export = Export(type="Bit-BotAI",
+                export = Export(export_type="Bit-BotAI",
                                 image_set=imageset,
                                 user=(request.user if request.user.is_authenticated() else None),
                                 annotation_count=annotation_count,
@@ -168,7 +168,7 @@ def create_export(request, image_set_id):
                 export.save()
             if export_format == 'wf_wolves':
                 export_text, annotation_count = wf_wolves_export(imageset)
-                export = Export(type="WF-Wolves",
+                export = Export(export_type="WF-Wolves",
                                 image_set=imageset,
                                 user=(request.user if request.user.is_authenticated() else None),
                                 annotation_count=annotation_count,
@@ -194,7 +194,7 @@ def manage_annotations(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.annotate_verification_difference() \
-        .select_related('image', 'user', 'type').filter(image__in=images) \
+        .select_related('image', 'user', 'annotation_type').filter(image__in=images) \
         .order_by('id')
     return render(request, 'annotations/manage_annotations.html', {
         'selected_image_set': imageset,
@@ -222,7 +222,7 @@ def verify(request, annotation_id):
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
         messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
 
-    annotation_type = annotation.__getattribute__('type')
+    annotation_type = annotation.annotation_type
     image = get_object_or_404(Image, id=annotation.image.id)
     vector = json.loads(annotation.vector)
     set_images = Image.objects.filter(image_set=image.image_set)
@@ -237,7 +237,8 @@ def verify(request, annotation_id):
     new_filter = request.GET.get("filter")
     if filtered is not None and user_veri is not None:
         #filters for both annotation type and not verified by user
-        set_annotations = set_annotations.filter(~Q(verified_by=request.user), type_id=filtered)
+        set_annotations = set_annotations.filter(
+            ~Q(verified_by=request.user), annotation_type_id=filtered)
         if not set_annotations:
             #if there are no search results the search will be resetted
             messages.info(request, 'There are no unverified tags of this type in this set!')
@@ -249,7 +250,7 @@ def verify(request, annotation_id):
             annotation = set_annotations[0]
     elif filtered is not None:
         #filters annotations for certain types
-        set_annotations = set_annotations.filter(type_id=filtered)
+        set_annotations = set_annotations.filter(annotation_type_id=filtered)
         if not set_annotations:
             #if there are no search results the search will be resetted
             messages.info(request, 'There are no tags of this type in this set!')
@@ -322,7 +323,7 @@ def bitbotai_export(imageset):
         'x2',
         'y2\n']))
     annotations = Annotation.objects.filter(image__in=images,
-                                            type__name='ball')
+                                            annotation_type__name='ball')
     for annotation in annotations:
         annotation_counter += 1
         vector = json.loads(annotation.vector)
@@ -357,7 +358,7 @@ def wf_wolves_export(imageset):
         annotation_counter += 1
         vector = json.loads(annotation.vector)
         a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
-                                                 annotation.type.name,
+                                                 annotation.annotation_type.name,
                                                  vector['x1'],
                                                  vector['y1'],
                                                  vector['x2'],
@@ -396,7 +397,8 @@ def create_annotation(request) -> Response:
 
     with transaction.atomic():
         annotation = Annotation.objects.create(
-            vector=vector_text, image=image, type=annotation_type, user=request.user,
+            vector=vector_text, image=image,
+            annotation_type=annotation_type, user=request.user,
             not_in_image=not_in_image)
 
         # Automatically verify for owner

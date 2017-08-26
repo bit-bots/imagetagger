@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Subquery, F, IntegerField, OuterRef
-from django.utils.functional import cached_property
 
 from imagetagger.images.models import Image, ImageSet
 
@@ -38,8 +37,7 @@ class Annotation(models.Model):
     closed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
 
-    # TODO: Rename this field (type is a reserved keyword)
-    type = models.ForeignKey('AnnotationType', on_delete=models.PROTECT)
+    annotation_type = models.ForeignKey('AnnotationType', on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name='creator',
                              on_delete=models.SET_NULL,
@@ -54,7 +52,7 @@ class Annotation(models.Model):
     objects = models.Manager.from_queryset(AnnotationQuerySet)()
 
     def __str__(self):
-        return 'Annotation: {0}'.format(self.type.name)
+        return 'Annotation: {0}'.format(self.annotation_type.name)
 
     def content(self):
         if self.not_in_image:
@@ -85,7 +83,8 @@ class Annotation(models.Model):
         """
         # TODO: migrate the annotation vector field to JSONB and do the lookup in the database
         result = set()
-        for annotation in Annotation.objects.filter(image=image, type=annotation_type):
+        for annotation in Annotation.objects.filter(
+                    image=image, annotation_type=annotation_type):
             if all(
                     (abs(int(value) - int(vector[key])) <= max_similarity
                         if key in vector else False)
@@ -107,7 +106,7 @@ class Export(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     image_set = models.ForeignKey(ImageSet)
-    type = models.CharField(max_length=50)
+    export_type = models.CharField(max_length=50)
     annotation_count = models.IntegerField(default=0)
     export_text = models.TextField(default='')
 

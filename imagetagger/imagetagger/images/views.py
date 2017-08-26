@@ -46,7 +46,7 @@ def index(request):
 
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members=request.user)
-    imagesets = ImageSet.objects.filter(team__in=userteams).order_by('id')
+    imagesets = ImageSet.objects.select_related().filter(team__in=userteams).order_by('id')
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
@@ -194,11 +194,13 @@ def view_imageset(request, image_set_id):
     if request.method == "POST":
         filtered = True
         # filter images for missing annotationtype
-        images = images.exclude(annotation__type_id=request.POST.get("selected_annotation_type"))
+        images = images.exclude(
+            annotation__annotation_type_id=request.POST.get("selected_annotation_type"))
     # a list of annotation types used in the imageset
     annotation_types = set()
     annotations = Annotation.objects.filter(image__in=images)
-    annotation_types = annotation_types.union([annotation.type for annotation in annotations])
+    annotation_types = annotation_types.union(
+        [annotation.annotation_type for annotation in annotations])
     first_annotation = None
     if len(annotations) > 0:
         first_annotation = annotations[0]

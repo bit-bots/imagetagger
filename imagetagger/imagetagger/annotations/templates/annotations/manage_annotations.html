@@ -49,7 +49,7 @@
                     {% for annotation in annotations %}
                         <tr>
                             <td><a href='{% url 'annotations:annotate' annotation.image.id %}'>{{ annotation.image.name }}</a></td>
-                            <td>{{ annotation.type.name }}</td>
+                            <td>{{ annotation.annotation_type.name }}</td>
                             <td>{{ annotation.content }}</td>
                             <td>
                                 {% if annotation.verifications_difference %}
