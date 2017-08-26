@@ -1,4 +1,5 @@
 {% extends 'annotations/base.html' %}
+{% load i18n %}
 {% load static %}
 {% block additional_annotation_js %}
   <script type="text/javascript">
@@ -26,17 +27,34 @@
       {% endif %}
     }
   </script>
-  <script type="text/javascript" src="{% static 'annotations/js/annotate.js' %}"></script>
+  <script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
 {% endblock additional_annotation_js %}
 {% block bodyblock %}
 <div class="container-fluid">
+  <div id="feedback_annotation_created" class="js_feedback alert alert-success hidden">
+    {% trans 'The annotation was successfully created.' %}
+  </div>
+  <div id="feedback_annotation_exists" class="js_feedback alert alert-info hidden">
+    {% trans 'A similar annotation exists already.' %}
+  </div>
+  <div id="feedback_annotation_invalid" class="js_feedback alert alert-warning hidden">
+    {% trans 'The annotation is invalid.' %}
+  </div>
+  <div id="feedback_connection_error" class="js_feedback alert alert-danger hidden">
+    {% trans 'There was an unhandled error during the connection.' %}
+  </div>
+  <div id="feedback_save_successful" class="js_feedback alert alert-success hidden">
+    {% trans 'The annotation was successfully saved.' %}
+  </div>
     <div class="row">
         <div class="col-md-3">
             <form id="filter_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="get">
 
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
-                        {% include "annotations/annotationtypes.html" %}
+                        <select name="selected_annotation_type">
+                          {% include "annotations/annotationtypes.html" %}
+                        </select>
 
                         <input name="filter" type="submit" value="filter">
 
@@ -66,29 +84,39 @@
 
             <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
             <hr color="silver" width="100%">
-            {% for annotation in image_annotations %}
-                {% if forloop.counter0 == 0 %}
-                    <u>Annotations:</u>
-                {% endif %}
+            <p>
+              <u>Annotations:</u>
+            </p>
+            <div id="existing_annotations">
+              {% for annotation in image_annotations %}
                 <div class="annotation">
-                    {{ annotation.annotation_type.name }}:
-                    <div style="float: right;">
-                        <a href="{% url 'annotations:verify' annotation.id%}">
-                            <img src="{% static "symbols/checkmark.png" %}" alt="edit">
-                        </a>
-                        <a href="{% url 'annotations:edit_annotation' annotation.id%}">
-                            <img src="{% static "symbols/pencil.png" %}" alt="edit">
-                        </a>
-                        <a href="{% url 'annotations:delete_annotation' annotation.id%}">
-                            <img src="{% static "symbols/bin.png" %}" alt="delete">
-                        </a>
-                    </div>
-                    <br>
+                  {{ annotation.annotation_type.name }}:
+                  <div style="float: right;">
+                    <a href="{% url 'annotations:verify' annotation.id%}">
+                      <img src="{% static "symbols/checkmark.png" %}" alt="edit">
+                    </a>
+                    <a href="{% url 'annotations:edit_annotation' annotation.id%}">
+                      <img src="{% static "symbols/pencil.png" %}" alt="edit">
+                    </a>
+                    <a href="{% url 'annotations:delete_annotation' annotation.id%}">
+                      <img src="{% static "symbols/bin.png" %}" alt="delete">
+                    </a>
+                  </div>
+                  <br>
+                  {% if annotation.vector is not None %}
+                    {% for key, value in annotation.vector.items %}
+                      {% if forloop.counter0 > 0 %}
+                        &bull;
+                      {% endif %}
+                      <em>{{ key }}</em>: {{ value }}
+                    {% endfor %}
+                  {% else %}
                     {{annotation.content}}
+                  {% endif %}
                 </div>
-            {% empty %}
-                <div class="alert alert-warning" role="alert">No annotations found.</div>
-            {% endfor %}
+              {% endfor %}
+              <div class="alert alert-warning{% if image_annotations %} hidden{% endif %}">No annotations found.</div>
+            </div>
         </div>
         <div class="col-md-3">
             <div class="panel panel-default">
@@ -100,8 +128,14 @@
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
-                        {% include "annotations/annotationtypes.html" %}
-                        <table border="1">
+                        <select id="annotation_type_id" name="selected_annotation_type">
+                          {% include "annotations/annotationtypes.html" %}
+                        </select>
+                        <p>
+                          <input type='checkbox' name='not_in_image' id='not_in_image'>
+                          <label for='not_in_image'>Not in the image (g)</label>
+                        </p>
+                        <table border="1" id="coordinate_table">
                             <tr>
                                 <td>key</td>
                                 <td>value</td>
@@ -122,31 +156,27 @@
                                 <td>y2</td>
                                 <td><input id="y2Field" class="Coordinates annotation_value" type="number" name="y2Field" value="0" min="0"></td>
                             </tr>
-                            <tr>
-                                <td colspan='2'><input type='checkbox' name='not_in_image' id='not_in_image'>
-                                    <label for='not_in_image'>Not in the image (g)</label></td>
-                            </tr>
                         </table>
                         <input type="hidden" name="annotate">
-                        <button type="submit" class="btn btn-default">
+                        <button type="submit" class="annotate_button btn btn-default" id="save_button">
                             <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Save (v)
                         </button>
-                        <button type="button" class="btn btn-default" id="reset_button">
+                        <button type="button" class="annotate_button btn btn-default" id="reset_button">
                             <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>Reset (r)
                         </button>
                         <br>
-                        <button type="button" class="btn btn-default" id="last_button">
+                        <button type="button" class="annotate_button btn btn-default" id="last_button">
                             <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
                             <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
                         </button>
-                        <button type="button" class="btn btn-default" id="back_button">
+                        <button type="button" class="annotate_button btn btn-default" id="back_button">
                             <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
                         </button>
                         <br>
-                        <button type="button" class="btn btn-default" id="skip_button">
+                        <button type="button" class="annotate_button btn btn-default" id="skip_button">
                             <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
                         </button>
-                        <button type="button" class="btn btn-default" id="next_button">
+                        <button type="button" class="annotate_button btn btn-default" id="next_button">
                             <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
                             <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
                         </button>
@@ -157,6 +187,7 @@
     </div>
 </div>
 
+  <span id="image_id" class="hidden">{{ selected_image.id }}</span>
 {% endblock %}
 
 

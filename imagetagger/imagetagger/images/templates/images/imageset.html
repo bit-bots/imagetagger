@@ -123,7 +123,9 @@
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
-                        {% include "annotations/annotationtypes.html" %}
+                        <select name="selected_annotation_type">
+                          {% include "annotations/annotationtypes.html" %}
+                        </select>
 
                 <input type="submit" value="filter">
 

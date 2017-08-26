@@ -140,7 +140,9 @@
                 {% endif %}
 
                 annotation type:
-                {% include "annotations/annotationtypes.html" %}
+                <select name="selected_annotation_type">
+                  {% include "annotations/annotationtypes.html" %}
+                </select>
 
                 <input name="filter" type="submit" value="filter">
 

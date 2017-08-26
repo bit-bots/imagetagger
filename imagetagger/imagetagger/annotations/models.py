@@ -60,11 +60,11 @@ class Annotation(models.Model):
         """Check whether the annotated object is not in the image."""
         return not self.vector
 
+    @property
     def content(self):
         if self.not_in_image:
             return 'Not in image'
-        else:
-            return self.vector
+        return self.vector
 
     def owner(self):
         # TODO: maybe use an owner field populated by a database trigger

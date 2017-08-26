@@ -1,149 +1,162 @@
 body{
-	font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 a{
-	color: #404040;
+  color: #404040;
 }
 .content{
-	padding-top: 60px;
+  padding-top: 60px;
 }
 .checkbox{
-	border-radius: 3px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	text-align: left;
-	font-size: 15px;
-	width: auto;
+  border-radius: 3px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  text-align: left;
+  font-size: 15px;
+  width: auto;
 }
 div.wrapper{
-	position: relative;
+  position: relative;
 }
 
 #boundingBox{
-	position: absolute;
-	border:2px solid #ff0000;
-	background-color: transparent;
+  position: absolute;
+  border:2px solid #ff0000;
+  background-color: transparent;
 }
 
 div.toolbox{
-	right: 0px;
-	width: 30%;
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	position: fixed;
-	margin-right: 2px;
+  right: 0px;
+  width: 30%;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  position: fixed;
+  margin-right: 2px;
 }
 
 div.imageview{
-	left: 25%;
-	width: 40%;
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	position:absolute;
+  left: 25%;
+  width: 40%;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  position:absolute;
 }
 
 div.leftlist{
-	left: 0px;
-	width: 20%;
-	max-height: 85%;
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	position: fixed;
-	margin-left: 4px;
-	overflow: auto;
+  left: 0px;
+  width: 20%;
+  max-height: 85%;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  position: fixed;
+  margin-left: 4px;
+  overflow: auto;
 }
 
-div.col-md-3:nth-child(1) .panel-body{
-	height: 600px;
-	overflow-y: scroll;
+#image_list {
+  height: 600px;
+  overflow-y: scroll;
 }
 
 div.leftcontent{
-	left: 5px;
-	width: 60%;
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	float: left;
+  left: 5px;
+  width: 60%;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  float: left;
 }
 
 div.annotation{
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	margin-top: 5px;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  margin-top: 5px;
 }
 
 #additional_feature_table{
-	width: 90%;
+  width: 90%;
 }
 div.head{
-	border-bottom-color: silver;
-	border-bottom-width: medium;
-	border-bottom-style: solid;
-	margin: 5px;
-	padding: 4px;
+  border-bottom-color: silver;
+  border-bottom-width: medium;
+  border-bottom-style: solid;
+  margin: 5px;
+  padding: 4px;
 }
 
 div.centerblock{
-	width: 45%;
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	position: absolute;
-	text-align: center;
-	margin-left: 22%;
+  width: 45%;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  position: absolute;
+  text-align: center;
+  margin-left: 22%;
 }
 
 a.bitbot-logo{
-	padding-top: 5px;
+  padding-top: 5px;
 }
 
 div.rightcontent{
-	border-radius: 5px;
-	border-color: silver;
-	border-style: solid;
-	border-width: thin;
-	padding: 5px;
-	text-align: center;
-	margin-right: 0%;
-	margin-left: 25%;
+  border-radius: 5px;
+  border-color: silver;
+  border-style: solid;
+  border-width: thin;
+  padding: 5px;
+  text-align: center;
+  margin-right: 0%;
+  margin-left: 25%;
 }
 
 .team-table {
-	margin-top: 1em;
+  margin-top: 1em;
 }
 
 .team-table td {
-	padding: 0 0.3em 0 0;
+  padding: 0 0.3em 0 0;
 }
 
 .team-table td:nth-of-type(2), .team-table td:nth-of-type(3) {
-	text-align: right;
+  text-align: right;
     width: 10em;
 }
 
 .form-inline {
-	margin-left: -0.8em;
-	display: inline;
+  margin-left: -0.8em;
+  display: inline;
 }
 
 .align-right {
-	text-align: right;
+  text-align: right;
+}
+
+.js_feedback {
+  position: fixed;
+  top: 10em;
+  left: 0;
+  right: 0;
+  width: 50em;
+  margin: auto;
+
+  text-align: center;
+
+  z-index: 1000;
 }

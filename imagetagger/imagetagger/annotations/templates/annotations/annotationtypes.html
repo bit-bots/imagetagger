@@ -1,7 +1,5 @@
-<select name="selected_annotation_type">
-    {% for annotation_type in annotation_types %}
-        <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
-            {{annotation_type.name}}
-        </option>
-    {% endfor %}
-</select>
+{% for annotation_type in annotation_types %}
+  <option value="{{annotation_type.id}}"  {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
+    {{annotation_type.name}}
+  </option>
+{% endfor %}

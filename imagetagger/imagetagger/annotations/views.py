@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification
@@ -389,28 +389,35 @@ def create_annotation(request) -> Response:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
-        if 'not_in_image' in request.data:
-            vector = None
-    except (KeyError, ValueError):
+    except (KeyError, TypeError, ValueError):
+        import traceback
+        traceback.print_exc()
         raise ParseError
 
     image = get_object_or_404(Image, pk=image_id)
     annotation_type = get_object_or_404(AnnotationType, pk=annotation_type_id)
 
-    # TODO: maybe add some way to validate the vector to prevent arbitrary contents
+    if not Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+        return Response({
+            'detail': 'no valid bounding box found.'
+        }, status=HTTP_400_BAD_REQUEST)
 
     if Annotation.similar_annotations(vector, image, annotation_type):
         return Response({
-            'detail': 'similar annotation exists',
+            'detail': 'similar annotation exists.',
         })
 
     with transaction.atomic():
         annotation = Annotation.objects.create(
-            vector=text, image=image,
+            vector=vector, image=image,
             annotation_type=annotation_type, user=request.user)
 
         # Automatically verify for owner
         annotation.verify(request.user, True)
 
-    serializer = AnnotationSerializer(annotation)
-    return Response(serializer.data, status=HTTP_201_CREATED)
+    serializer = AnnotationSerializer(
+        annotation.image.annotations.select_related() \
+            .order_by('annotation_type__name'), many=True)
+    return Response({
+        'annotations': serializer.data,
+    }, status=HTTP_201_CREATED)
