@@ -615,7 +615,7 @@
           $('#reset_button').click();
           break;
         case 86: //'v'
-          $('#annotation_form').submit();
+          $('#save_button').click();
           break;
       }
     });
