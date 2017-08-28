@@ -8,6 +8,7 @@ from django.db import models, connection
 from django.db.models import Subquery, F, IntegerField, OuterRef, QuerySet, Count
 
 from imagetagger.images.models import Image, ImageSet
+from imagetagger.users.models import Team
 
 
 class AnnotationQuerySet(models.QuerySet):
@@ -182,6 +183,7 @@ class Export(models.Model):
     export_type = models.CharField(max_length=50)
     annotation_count = models.IntegerField(default=0)
     export_text = models.TextField(default='')
+    format = models.ForeignKey('ExportFormat', on_delete=models.CASCADE, related_name='exports')
 
     def __str__(self):
         return u'Export: {0}'.format(self.id)
@@ -199,3 +201,15 @@ class Verification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     time = models.DateTimeField(auto_now_add=True)
     verified = models.BooleanField(default=0)
+
+
+class ExportFormat(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+    annotations_types = models.ManyToManyField(AnnotationType)
+    team = models.ForeignKey(Team, on_delete=models.PROTECT, related_name='export_formats')
+    public = models.BooleanField(default=False)
+    base_format = models.TextField()
+    annotation_format = models.TextField()
+
+    def __str__(self):
+        return '{}: {}'.format(self.team.name, self.name)
