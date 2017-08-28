@@ -1,5 +1,7 @@
 (function() {
   const API_BASE_URL = '/annotations/api/';
+  const PRELOAD_BACKWARD = 2;
+  const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
   const FEEDBACK_DISPLAY_TIME = 3000;
 
@@ -11,6 +13,7 @@
   var gImage;
   var gImageCache = {};
   var gImageId;
+  var gImageList;
   var gImageScale = 0;
   var gInitialized = false;
   var gMousepos;
@@ -27,8 +30,9 @@
    * Create an annotation using the form data from the current page.
    *
    * @param event
+   * @param success_callback a function to be executed on success
    */
-  function createAnnotation(event) {
+  function createAnnotation(event, success_callback) {
     if (event !== undefined) {
       // triggered using an event handler
       event.preventDefault();
@@ -73,6 +77,10 @@
         }
 
         resetSelection();
+
+        if (typeof(success_callback) === "function") {
+          success_callback();
+        }
       },
       error: function() {
         $('.annotate_button').prop('disabled', false);
@@ -141,12 +149,19 @@
    * @param imageId
    */
   function displayImage(imageId) {
+    imageId = parseInt(imageId);
+
+    if (gImageList.indexOf(imageId) === -1) {
+      console.log(
+        'skiping request to load image ' + imageId +
+        ' as it is not in current image list.');
+      return;
+    }
     resetSelection();
 
     if (gImageCache[imageId] === undefined) {
       // image is not available in cache. Load it.
       loadImageToCache(imageId);
-
     }
 
     // image is in cache.
@@ -156,6 +171,7 @@
     currentImage.attr('id', '');
     newImage.attr('id', 'image');
     gImageId = imageId;
+    preloadImages();
 
     currentImage.replaceWith(newImage);
     gImage = newImage;
@@ -183,6 +199,21 @@
     gHideFeedbackTimeout = setTimeout(function() {
       $('.js_feedback').addClass('hidden');
     }, FEEDBACK_DISPLAY_TIME);
+  }
+
+  /**
+   * Get the image list from all .annotate_imagE_link within #image_list.
+   */
+  function getImageList() {
+    var imageList = [];
+    $('#image_list').find('.annotate_image_link').each(function(key, elem) {
+      var imageId = parseInt($(elem).data('imageid'));
+      if (imageList.indexOf(imageId) === -1) {
+        imageList.push(imageId);
+      }
+    });
+
+    return imageList;
   }
 
   /**
@@ -275,15 +306,27 @@
    * @param fromHistory
    */
   function loadAnnotateView(imageId, fromHistory) {
+    imageId = parseInt(imageId);
+
+    if (gImageList.indexOf(imageId) === -1) {
+      console.log(
+        'skiping request to load image ' + imageId +
+        ' as it is not in current image list.');
+      return;
+    }
+
+    var noAnnotations = $('#no_annotations');
+    var notInImage = $('#not_in_image');
     var existingAnnotations = $('#existing_annotations');
     var loading = $('#annotations_loading');
     existingAnnotations.addClass('hidden');
+    noAnnotations.addClass('hidden');
+    notInImage.prop('checked', false).change();
     loading.removeClass('hidden');
 
     displayImage(imageId);
 
     $('.annotate_image_link').removeClass('active');
-    console.log('#annotate_image_link_' + imageId);
     $('#annotate_image_link_' + imageId).addClass('active');
 
     if (fromHistory !== true) {
@@ -320,6 +363,15 @@
    * @param imageId
    */
   function loadImageToCache(imageId) {
+    imageId = parseInt(imageId);
+
+    if (gImageList.indexOf(imageId) === -1) {
+      console.log(
+        'skiping request to load image ' + imageId +
+        ' as it is not in current image list.');
+      return;
+    }
+
     if (gImageCache[imageId] !== undefined) {
       // already cached
       return;
@@ -328,6 +380,57 @@
     gImageCache[imageId] = $('<img>');
     gImageCache[imageId].data('imageid', imageId).attr(
       'src', '/images/image_nginx/' + imageId + '/');
+  }
+
+  /**
+   * Load the previous or the next image
+   *
+   * @param offset integer to add to the current image index
+   */
+  function loadAdjacentImage(offset) {
+    var imageIndex = gImageList.indexOf(gImageId);
+    if (imageIndex < 0) {
+      console.log('current image is not referenced from page!');
+      return;
+    }
+
+    imageIndex += offset;
+    while (imageIndex < 0) {
+      imageIndex += imageIndex.length;
+    }
+    while (imageIndex > imageIndex.length) {
+      imageIndex -= imageIndex.length;
+    }
+
+    loadAnnotateView(gImageList[imageIndex]);
+  }
+
+  /**
+   * Preload next and previous images to cache.
+   */
+  function preloadImages() {
+    var keepImages = [];
+    for (var imageId = gImageId - PRELOAD_BACKWARD;
+         imageId <= gImageId + PRELOAD_FORWARD;
+         imageId++) {
+      keepImages.push(imageId);
+      loadImageToCache(imageId);
+    }
+    pruneImageCache(keepImages);
+  }
+
+  /**
+   * Delete all images from cache except for those in Array keep
+   *
+   * @param keep Array of the image ids which should be kept in the cache.
+   */
+  function pruneImageCache(keep) {
+    for (var imageId in gImageCache) {
+      imageId = parseInt(imageId);
+      if (gImageCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
+        delete gImageCache[imageId];
+      }
+    }
   }
 
   /**
@@ -400,6 +503,8 @@
       "Content-Type": 'application/json',
       "X-CSRFTOKEN": gCsrfToken
     };
+    gImageList = getImageList();
+    preloadImages();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
@@ -427,8 +532,28 @@
     handleNotInImageToggle();
 
     // register click events
-    $('#reset_button').click(resetSelection);
     $('#save_button').click(createAnnotation);
+    $('#reset_button').click(resetSelection);
+    $('#last_button').click(function(event) {
+      event.preventDefault();
+      createAnnotation(undefined, function() {
+        loadAdjacentImage(-1);
+      });
+    });
+    $('#back_button').click(function(event) {
+      event.preventDefault();
+      loadAdjacentImage(-1);
+    });
+    $('#skip_button').click(function(event) {
+      event.preventDefault();
+      loadAdjacentImage(1);
+    });
+    $('#next_button').click(function(event) {
+      event.preventDefault();
+      createAnnotation(undefined, function() {
+        loadAdjacentImage(1);
+      });
+    });
     $('.js_feedback').click(function() {
       $(this).addClass('hidden');
     });

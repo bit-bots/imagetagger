@@ -2,31 +2,6 @@
 {% load i18n %}
 {% load static %}
 {% block additional_annotation_js %}
-  <script type="text/javascript">
-    function init_navigationbuttons() {
-      {% if next_image %}
-        $('#next_button').click(function(){
-          $('#annotation_form').attr('action', '{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-          $('#annotation_form').submit();
-        });
-        $('#skip_button').click(function(){window.open("{% url 'annotations:annotate' next_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
-      {% else %}
-        $('#next_button').attr('disabled', 'true');
-        $('#skip_button').attr('disabled', 'true');
-      {% endif %}
-
-      {% if last_image %}
-        $('#last_button').click(function(){
-          $('#annotation_form').attr('action', '{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}');
-          $('#annotation_form').submit();
-        });
-        $('#back_button').click(function(){window.open("{% url 'annotations:annotate' last_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}", "_self");});
-      {% else %}
-        $('#last_button').attr('disabled', 'true');
-        $('#back_button').attr('disabled', 'true');
-      {% endif %}
-    }
-  </script>
   <script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
 {% endblock additional_annotation_js %}
 {% block bodyblock %}
