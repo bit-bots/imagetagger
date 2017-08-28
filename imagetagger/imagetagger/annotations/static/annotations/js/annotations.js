@@ -575,7 +575,7 @@
         loadAdjacentImage(1);
       });
     });
-    $('.js_feedback').click(function() {
+    $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
     });
     $('.annotate_image_link').click(function(event) {
