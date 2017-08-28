@@ -28,9 +28,10 @@
                       </h3>
                   </div>
                   <div class="panel-body">
-                      <form id="annotation_form" action="{% url 'annotations:edit_annotation_save' annotation.id %}" enctype="multipart/form-data" method="post">
-                          {% csrf_token %}
+                      <form id="annotation_form" action="{% url 'annotations:edit_annotation_save' annotation.id%}" enctype="multipart/form-data" method="get">
+
                           <input type="hidden" name="image_id" value="{{ selected_image.id }}">
+                          <input type="hidden" id="prev_view" name="prev_view" value="{{ prev_view }}">
                           <select name="selected_annotation_type">
                               {% for annotation_type in annotation_types %}
                               <option value="{{annotation_type.id}}" {% if annotation_type.id == current_annotation_type_id %} selected {% endif %} >{{annotation_type.name}}</option>
