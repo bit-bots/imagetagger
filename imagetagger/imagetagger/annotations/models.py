@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 from typing import Set, Dict, Union
 
 from django.conf import settings
@@ -32,7 +32,7 @@ class AnnotationQuerySet(models.QuerySet):
 class Annotation(models.Model):
     class VECTOR_TYPE(Enum):
         # TODO: VECTOR_TYPE could be deduced from the annotation type (dynamically, bonus points!)
-        BOUNDING_BOX = auto()
+        BOUNDING_BOX = 1
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='annotations')
     vector = JSONField(null=True)
