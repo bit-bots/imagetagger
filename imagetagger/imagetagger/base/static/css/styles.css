@@ -160,3 +160,14 @@ div.rightcontent{
 
   z-index: 1000;
 }
+
+#image {
+  width: 100%;
+}
+
+.annotate_image_link.active, .annotate_image_link.active:active,
+.annotate_image_link.active:hover {
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}

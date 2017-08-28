@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
 
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification
@@ -391,9 +391,9 @@ def create_annotation(request) -> Response:
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
     except (KeyError, TypeError, ValueError):
-        import traceback
-        traceback.print_exc()
         raise ParseError
+
+    # TODO: There is no permission check here!
 
     image = get_object_or_404(Image, pk=image_id)
     annotation_type = get_object_or_404(AnnotationType, pk=annotation_type_id)
@@ -422,3 +422,23 @@ def create_annotation(request) -> Response:
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_201_CREATED)
+
+
+@login_required
+@api_view(['GET'])
+def load_annotations(request) -> Response:
+    try:
+        image_id = int(request.query_params['image_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    # TODO: There is no permission check here!
+
+    image = get_object_or_404(Image, pk=image_id)
+
+    serializer = AnnotationSerializer(
+        image.annotations.select_related().order_by('annotation_type__name'),
+        many=True)
+    return Response({
+        'annotations': serializer.data,
+    }, status=HTTP_200_OK)

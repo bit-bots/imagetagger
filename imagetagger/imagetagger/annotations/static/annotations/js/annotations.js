@@ -5,21 +5,22 @@
 
   // TODO: Find a solution for url resolvings
 
-  var csrf_token;
-  var headers;
-  var hideFeedbackTimeout;
-  var image;
-  var imageId;
-  var imageScale = 0;
-  var initialized = false;
-  var mousepos;
-  var selection;
+  var gCsrfToken;
+  var gHeaders;
+  var gHideFeedbackTimeout;
+  var gImage;
+  var gImageCache = {};
+  var gImageId;
+  var gImageScale = 0;
+  var gInitialized = false;
+  var gMousepos;
+  var gSelection;
 
   /**
    * Calculate the correct imageScale value.
    */
   function calculateImageScale() {
-    imageScale = image.get(0).naturalWidth / image.width();
+    gImageScale = gImage.get(0).naturalWidth / gImage.width();
   }
 
   /**
@@ -54,11 +55,11 @@
     $('.annotate_button').prop('disabled', true);
     $.ajax(API_BASE_URL + 'annotation/create/', {
       type: 'POST',
-      headers: headers,
+      headers: gHeaders,
       dataType: 'json',
       data: JSON.stringify({
         annotation_type_id: annotationTypeId,
-        image_id: imageId,
+        image_id: gImageId,
         vector: vector
       }),
       success: function(data, textStatus, jqXHR) {
@@ -87,6 +88,16 @@
    */
   function displayExistingAnnotations(annotations) {
     var annotationsHtml = '';
+    var existingAnnotations = $('#existing_annotations');
+    var noAnnotations = $('#no_annotations');
+
+    if (annotations.length === 0) {
+      existingAnnotations.addClass('hidden');
+      noAnnotations.removeClass('hidden');
+      return;
+    }
+
+    noAnnotations.addClass('hidden');
 
     // display new annotations
     for (var i = 0; i < annotations.length; i++) {
@@ -121,7 +132,40 @@
         '</div>';
     }
 
-    $('#existing_annotations').html(annotationsHtml);
+    existingAnnotations.html(annotationsHtml).removeClass('hidden');
+  }
+
+  /**
+   * Display an image from the image cache or the server.
+   *
+   * @param imageId
+   */
+  function displayImage(imageId) {
+    resetSelection();
+
+    if (gImageCache[imageId] === undefined) {
+      // image is not available in cache. Load it.
+      loadImageToCache(imageId);
+
+    }
+
+    // image is in cache.
+    var currentImage = gImage;
+    var newImage = gImageCache[imageId];
+
+    currentImage.attr('id', '');
+    newImage.attr('id', 'image');
+    gImageId = imageId;
+
+    currentImage.replaceWith(newImage);
+    gImage = newImage;
+    initSelection();
+    resetSelection();
+
+    if (currentImage.data('imageid') !== undefined) {
+      // add previous image to cache
+      gImageCache[currentImage.data('imageid')] = currentImage;
+    }
   }
 
   /**
@@ -130,13 +174,13 @@
    * @param elem
    */
   function displayFeedback(elem) {
-    if (hideFeedbackTimeout !== undefined) {
-      clearTimeout(hideFeedbackTimeout);
+    if (gHideFeedbackTimeout !== undefined) {
+      clearTimeout(gHideFeedbackTimeout);
     }
 
     elem.removeClass('hidden');
 
-    hideFeedbackTimeout = setTimeout(function() {
+    gHideFeedbackTimeout = setTimeout(function() {
       $('.js_feedback').addClass('hidden');
     }, FEEDBACK_DISPLAY_TIME);
   }
@@ -166,35 +210,35 @@
   function handleSelection(event) {
     calculateImageScale();
     var cH = $('#crosshair-h'), cV = $('#crosshair-v');
-    var position = image.offset();
+    var position = gImage.offset();
     if (event.pageX > position.left &&
-          event.pageX < position.left + image.width() &&
+          event.pageX < position.left + gImage.width() &&
           event.pageY > position.top &&
-          event.pageY < position.top + image.height()) {
+          event.pageY < position.top + gImage.height()) {
       cH.show();
       cV.show();
-      mousepos.show();
+      gMousepos.show();
 
       cH.css('top', event.pageY + 1);
       cV.css('left', event.pageX + 1);
-      cV.css('height', image.height() - 1);
+      cV.css('height', gImage.height() - 1);
       cV.css('margin-top', position.top);
-      cH.css('width', image.width() - 1);
+      cH.css('width', gImage.width() - 1);
       cH.css('margin-left', position.left);
 
-      mousepos.css({
+      gMousepos.css({
         top: (event.pageY) + 'px',
         left: (event.pageX)  + 'px'
       }, 800);
-      mousepos.text(
-        '(' + Math.round((event.pageX - position.left) * imageScale) + ', ' +
-        Math.round((event.pageY - position.top) * imageScale) + ')');
+      gMousepos.text(
+        '(' + Math.round((event.pageX - position.left) * gImageScale) + ', ' +
+        Math.round((event.pageY - position.top) * gImageScale) + ')');
       event.stopPropagation();
     }
     else{
       cH.hide();
       cV.hide();
-      mousepos.hide();
+      gMousepos.hide();
     }
   }
 
@@ -204,7 +248,7 @@
    * @param event
    */
   function handleResize() {
-    selection.cancelSelection();
+    gSelection.cancelSelection();
     calculateImageScale();
   }
 
@@ -212,33 +256,95 @@
    * Initialize the selection.
    */
   function initSelection() {
-    initialized = true;
+    gInitialized = true;
 
-    selection = image.imgAreaSelect({
+    gSelection = gImage.imgAreaSelect({
       instance: true,
       show: true,
       minHeight: 2,
       minWidth: 2,
       onSelectChange: updateAnnotationFields
     });
-    selection.cancelSelection();
+    gSelection.cancelSelection();
+  }
+
+  /**
+   * Load the annotation view for another image.
+   *
+   * @param imageId
+   * @param fromHistory
+   */
+  function loadAnnotateView(imageId, fromHistory) {
+    var existingAnnotations = $('#existing_annotations');
+    var loading = $('#annotations_loading');
+    existingAnnotations.addClass('hidden');
+    loading.removeClass('hidden');
+
+    displayImage(imageId);
+
+    $('.annotate_image_link').removeClass('active');
+    console.log('#annotate_image_link_' + imageId);
+    $('#annotate_image_link_' + imageId).addClass('active');
+
+    if (fromHistory !== true) {
+      history.pushState({
+        imageId: imageId
+      }, document.title, '/annotations/' + imageId + '/');
+    }
+
+    // Load existing annotations for this image
+    var params = {
+      image_id: imageId
+    };
+    $.ajax(API_BASE_URL + 'annotation/load/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function(data) {
+        loading.addClass('hidden');
+        displayExistingAnnotations(data.annotations);
+
+        resetSelection();
+      },
+      error: function() {
+        loading.addClass('hidden');
+        $('.annotate_button').prop('disabled', false);
+        displayFeedback($('#feedback_connection_error'));
+      }
+    });
+  }
+
+  /**
+   * Load an image to the cache if it is not in it already.
+   *
+   * @param imageId
+   */
+  function loadImageToCache(imageId) {
+    if (gImageCache[imageId] !== undefined) {
+      // already cached
+      return;
+    }
+
+    gImageCache[imageId] = $('<img>');
+    gImageCache[imageId].data('imageid', imageId).attr(
+      'src', '/images/image_nginx/' + imageId + '/');
   }
 
   /**
    * Reload the selection.
    */
   function reloadSelection() {
-    selection = image.imgAreaSelect({
+    gSelection = gImage.imgAreaSelect({
       instance: true,
       show: true
     });
-    selection.setSelection(
-      Math.round($('#x1Field').val() / imageScale),
-      Math.round($('#y1Field').val() / imageScale),
-      Math.round($('#x2Field').val() / imageScale),
-      Math.round($('#y2Field').val() / imageScale)
+    gSelection.setSelection(
+      Math.round($('#x1Field').val() / gImageScale),
+      Math.round($('#y1Field').val() / gImageScale),
+      Math.round($('#x2Field').val() / gImageScale),
+      Math.round($('#y2Field').val() / gImageScale)
     );
-    selection.update();
+    gSelection.update();
   }
 
   /**
@@ -247,8 +353,8 @@
   function resetSelection() {
     $('.annotation_value').val(0);
 
-    if (selection !== undefined) {
-      selection.cancelSelection();
+    if (gSelection !== undefined) {
+      gSelection.cancelSelection();
     }
   }
 
@@ -259,10 +365,10 @@
    * @param selection
    */
   function updateAnnotationFields(img, selection) {
-    $('#x1Field').val(Math.ceil(selection.x1 * imageScale));
-    $('#y1Field').val(Math.ceil(selection.y1 * imageScale));
-    $('#x2Field').val(Math.floor(selection.x2 * imageScale));
-    $('#y2Field').val(Math.floor(selection.y2 * imageScale));
+    $('#x1Field').val(Math.ceil(selection.x1 * gImageScale));
+    $('#y1Field').val(Math.ceil(selection.y1 * gImageScale));
+    $('#x2Field').val(Math.floor(selection.x2 * gImageScale));
+    $('#y2Field').val(Math.floor(selection.y2 * gImageScale));
     $('#not_in_image').prop('checked', false).change();
   }
 
@@ -283,25 +389,26 @@
   }
 
   $(function() {
-    image = $('#image');
-    mousepos = $('#mousepos');
-    mousepos.hide();
+    gImage = $('#image');
+    gMousepos = $('#mousepos');
+    gMousepos.hide();
 
     // get current environment
-    csrf_token = $('[name="csrfmiddlewaretoken"]').first().val();
-    imageId = parseInt($('#image_id').html());
-    headers = {
+    gCsrfToken = $('[name="csrfmiddlewaretoken"]').first().val();
+    gImageId = parseInt($('#image_id').html());
+    gHeaders = {
       "Content-Type": 'application/json',
-      "X-CSRFTOKEN": csrf_token
+      "X-CSRFTOKEN": gCsrfToken
     };
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
     $(window).on('load', initSelection);
 
+    // TODO: Make this as well as the load handler part of initSelection
     setTimeout(function() {
       // Fallback if window load initialization did not succeed
-      if (!initialized) {
+      if (!gInitialized) {
         console.log('fallback solution for selection initialization used!');
         initSelection();
         // TODO: Get rid of this
@@ -319,16 +426,24 @@
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
 
-    $('.js_feedback').click(function() {
-      $(this).addClass('hidden');
-    });
-
     // register click events
     $('#reset_button').click(resetSelection);
     $('#save_button').click(createAnnotation);
+    $('.js_feedback').click(function() {
+      $(this).addClass('hidden');
+    });
+    $('.annotate_image_link').click(function(event) {
+      event.preventDefault();
+      loadAnnotateView($(this).data('imageid'));
+    });
 
     $(document).on('mousemove touchmove', handleSelection);
     $(window).on('resize', handleResize);
+    window.onpopstate = function(event) {
+      if (event.state !== undefined && event.state.imageId !== undefined) {
+        loadAnnotateView(event.state.imageId, true);
+      }
+    };
 
 
     // TODO: this should be done only for the annotate view

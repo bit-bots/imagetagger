@@ -71,18 +71,14 @@
                 </div>
                 <div class="panel-body">
                     {% for set_image in set_images %}
-                        {% if set_image.id == selected_image.id %}
-                            <b id="selected_image_row">{{set_image.name}}</b><br>
-                        {% else %}
-                            <a href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"> {{set_image.name}}</a><br>
-                        {% endif %}
+                      <a id="annotate_image_link_{{ set_image.id }}" href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}" class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}" data-imageid="{{ set_image.id }}"> {{set_image.name}}</a><br>
                     {% endfor %}
                 </div>
             </div>
         </div>
         <div class="col-md-6" onload="">
 
-            <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" width="100%"></br>
+            <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" data-imageid="{{ selected_image.id }}"></br>
             <hr color="silver" width="100%">
             <p>
               <u>Annotations:</u>
@@ -115,8 +111,9 @@
                   {% endif %}
                 </div>
               {% endfor %}
-              <div class="alert alert-warning{% if image_annotations %} hidden{% endif %}">No annotations found.</div>
             </div>
+            <div id="no_annotations" class="alert alert-warning{% if image_annotations %} hidden{% endif %}">{% trans 'No annotations found.' %}</div>
+            <div id="annotations_loading" class="alert alert-info hidden">{% trans 'Loading ...' %}</div>
         </div>
         <div class="col-md-3">
             <div class="panel panel-default">
