@@ -315,7 +315,7 @@ def verify(request, annotation_id):
         'first_annotation': set_annotations.first(),
         'unverified_annotations': unverified_annotations,
         'width': annotation.vector.get('x2', 0) - annotation.vector.get('x1', 0) if annotation.vector else None,
-        'height': annotation.vector.get('y2', 0) - annotation.vector('y1', 0) if annotation.vector else None,
+        'height': annotation.vector.get('y2', 0) - annotation.vector.get('y1', 0) if annotation.vector else None,
         'annotation_type': annotation_type,
         'annotation_types': annotation_types,
         'filtered': filtered,
