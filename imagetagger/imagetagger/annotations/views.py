@@ -221,7 +221,8 @@ def manage_annotations(request, image_set_id):
     return render(request, 'annotations/manage_annotations.html', {
         'selected_image_set': imageset,
         'image_sets': imagesets,
-        'annotations': annotations})
+        'annotations': annotations,
+    })
 
 @login_required
 def verify(request, annotation_id):

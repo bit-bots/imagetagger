@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import JSONField
 from django.db import models, connection
-from django.db.models import Subquery, F, IntegerField, OuterRef, QuerySet
+from django.db.models import Subquery, F, IntegerField, OuterRef, QuerySet, Count
 
 from imagetagger.images.models import Image, ImageSet
 
@@ -17,13 +17,13 @@ class AnnotationQuerySet(models.QuerySet):
                 Verification.objects.filter(
                     annotation_id=OuterRef('pk'), verified=False).values(
                     'annotation_id').annotate(
-                    count=F('pk')).values('count'),
+                    count=Count('pk')).values('count'),
                 output_field=IntegerField()),
             negative_verifications_count=Subquery(
                 Verification.objects.filter(
                     annotation_id=OuterRef('pk'), verified=True).values(
                     'annotation_id').annotate(
-                    count=F('pk')).values('count'),
+                    count=Count('pk')).values('count'),
                 output_field=IntegerField())).annotate(
             verification_difference=F(
                 'positive_verifications_count') - F('negative_verifications_count'))
