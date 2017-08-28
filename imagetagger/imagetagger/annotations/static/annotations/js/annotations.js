@@ -475,9 +475,6 @@
     // link should be (roughly) in the middle of the element
     offset += parseInt(list.height() / 2);
 
-    console.log(gImageId);
-    console.log(offset);
-    console.log(linkTop);
     list.scrollTop(list.scrollTop() + linkTop - offset);
   }
 
