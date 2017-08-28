@@ -304,7 +304,7 @@ def verify(request, annotation_id):
         set_annotations = set_annotations.exclude(verified_by=request.user)
         if not set_annotations:
             #if there are no search results the search will be resetted
-            messages.info(request, 'There are not unverified tags in this set!')
+            messages.info(request, 'There are no unverified tags in this set!')
             set_annotations = Annotation.objects.filter(image__in=set_images)
             user_veri = None
         if veri_pushed is not None:
