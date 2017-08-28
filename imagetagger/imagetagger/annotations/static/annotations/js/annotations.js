@@ -325,6 +325,7 @@
     loading.removeClass('hidden');
 
     displayImage(imageId);
+    scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
     $('#annotate_image_link_' + imageId).addClass('active');
@@ -462,6 +463,25 @@
   }
 
   /**
+   * Scroll image list to make current image visible.
+   */
+  function scrollImageList() {
+    var imageLink = $('#annotate_image_link_' + gImageId);
+    var list = $('#image_list');
+
+    var offset = list.offset().top;
+    var linkTop = imageLink.offset().top;
+
+    // link should be (roughly) in the middle of the element
+    offset += parseInt(list.height() / 2);
+
+    console.log(gImageId);
+    console.log(offset);
+    console.log(linkTop);
+    list.scrollTop(list.scrollTop() + linkTop - offset);
+  }
+
+  /**
    * Update the contents of the annotation values
    *
    * @param img
@@ -505,6 +525,7 @@
     };
     gImageList = getImageList();
     preloadImages();
+    scrollImageList();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
