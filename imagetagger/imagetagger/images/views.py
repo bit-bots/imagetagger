@@ -198,12 +198,10 @@ def view_imageset(request, image_set_id):
             annotation__annotation_type_id=request.POST.get("selected_annotation_type"))
     # a list of annotation types used in the imageset
     annotation_types = set()
-    annotations = Annotation.objects.filter(image__in=images)
+    annotations = Annotation.objects.filter(image__in=images).order_by("id")
     annotation_types = annotation_types.union(
         [annotation.annotation_type for annotation in annotations])
-    first_annotation = None
-    if len(annotations) > 0:
-        first_annotation = annotations[0]
+    first_annotation = annotations.first()
     return render(request, 'images/imageset.html', {
         'images': images,
         'annotationcount': len(annotations),
