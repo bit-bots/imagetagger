@@ -12,7 +12,8 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK, \
+    HTTP_403_FORBIDDEN
 
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification
@@ -395,10 +396,13 @@ def create_annotation(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
-    # TODO: There is no permission check here!
-
     image = get_object_or_404(Image, pk=image_id)
     annotation_type = get_object_or_404(AnnotationType, pk=annotation_type_id)
+
+    if not image.image_set.has_perm('annotate', request.user):
+        return Response({
+            'detail': 'permission for annotating in this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
 
     if not Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
         return Response({
@@ -434,9 +438,12 @@ def load_annotations(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
-    # TODO: There is no permission check here!
-
     image = get_object_or_404(Image, pk=image_id)
+
+    if not image.image_set.has_perm('read', request.user):
+        return Response({
+            'detail': 'permission for reading this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
 
     serializer = AnnotationSerializer(
         image.annotations.select_related().order_by('annotation_type__name'),
