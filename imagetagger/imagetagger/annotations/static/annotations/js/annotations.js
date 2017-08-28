@@ -90,57 +90,105 @@
   }
 
   /**
+   * Delete an annotation.
+   *
+   * @param event
+   * @param annotationId
+   */
+  function deleteAnnotation(event, annotationId) {
+    if (event !== undefined) {
+      // triggered using an event handler
+      event.preventDefault();
+
+      // TODO: Do not use a primitive js confirm
+      if (!confirm('Do you really want to delete the annotation?')) {
+        return;
+      }
+    }
+    $('.js_feedback').stop().addClass('hidden');
+    var params = {
+      annotation_id: annotationId
+    };
+    $.ajax(API_BASE_URL + 'annotation/delete/?' + $.param(params), {
+      type: 'DELETE',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function(data) {
+        displayFeedback($('#feedback_annotation_deleted'));
+        displayExistingAnnotations(data.annotations);
+      },
+      error: function() {
+        $('.annotate_button').prop('disabled', false);
+        displayFeedback($('#feedback_connection_error'));
+      }
+    });
+  }
+
+  /**
    * Display  existing annotations on current page.
    *
    * @param annotations
    */
   function displayExistingAnnotations(annotations) {
-    var annotationsHtml = '';
     var existingAnnotations = $('#existing_annotations');
     var noAnnotations = $('#no_annotations');
 
+    existingAnnotations.addClass('hidden');
+
     if (annotations.length === 0) {
-      existingAnnotations.addClass('hidden');
       noAnnotations.removeClass('hidden');
       return;
     }
 
     noAnnotations.addClass('hidden');
+    existingAnnotations.html('');
 
     // display new annotations
     for (var i = 0; i < annotations.length; i++) {
       var annotation = annotations[i];
 
-      var annotationContent = annotation.content;
+      var newAnnotation = $('<div class="annotation">');
+
       if (annotation.vector !== null) {
-        annotationContent = '';
+        annotation.content = '';
         for (var key in annotation.vector) {
-          if (annotationContent !== '') {
-            annotationContent += ' &bull; ';
+          if (annotation.content !== '') {
+            annotation.content += ' &bull; ';
           }
-          annotationContent += '<em>' + key + '</em>: ' + annotation.vector[key];
+          annotation.content += '<em>' + key + '</em>: ' + annotation.vector[key];
         }
       }
 
-      annotationsHtml += '<div class="annotation">' +
-        annotation.annotation_type.name + ':' +
-        '<div style="float: right;">' +
-        '<a href="/annotations/' + annotation.id + '/verify/">' +
-        '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="edit">' +
-        '</a> ' +
-        '<a href="/annotations/' + annotation.id + '/edit/">' +
-        '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit">' +
-        '</a> ' +
-        '<a href="/annotations/' + annotation.id + '/delete/">' +
-        '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete">' +
-        '</a>' +
-        '</div>' +
-        '<br>' +
-        annotationContent +
-        '</div>';
+      newAnnotation.append(annotation.annotation_type.name + ':');
+
+      var annotationLinks = $('<div style="float: right;">');
+      var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
+      '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="edit">' +
+      '</a>');
+      var editButton = $('<a href="/annotations/' + annotation.id + '/edit/">' +
+      '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit">' +
+      '</a>');
+      var deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
+      '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete">' +
+      '</a>');
+      const annotationId = annotation.id;
+      deleteButton.click(function(event) {
+        deleteAnnotation(event, annotationId);
+      });
+      annotationLinks.append(verifyButton);
+      annotationLinks.append(' ');
+      annotationLinks.append(editButton);
+      annotationLinks.append(' ');
+      annotationLinks.append(deleteButton);
+
+      newAnnotation.append(annotationLinks);
+      newAnnotation.append('<br>');
+      newAnnotation.append(annotation.content);
+
+      existingAnnotations.append(newAnnotation);
     }
 
-    existingAnnotations.html(annotationsHtml).removeClass('hidden');
+    existingAnnotations.removeClass('hidden');
   }
 
   /**
@@ -578,6 +626,14 @@
     $('.annotate_image_link').click(function(event) {
       event.preventDefault();
       loadAnnotateView($(this).data('imageid'));
+    });
+
+    // annotation buttons
+    $('.annotation_delete_button').each(function(key, elem) {
+      elem = $(elem);
+      elem.click(function(event) {
+        deleteAnnotation(event, parseInt(elem.data('annotationid')));
+      });
     });
 
     $(document).on('mousemove touchmove', handleSelection);

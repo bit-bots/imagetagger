@@ -402,6 +402,33 @@ def wf_wolves_export(imageset):
 
 
 @login_required
+@api_view(['DELETE'])
+def api_delete_annotation(request) -> Response:
+    try:
+        annotation_id = int(request.query_params['annotation_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    annotation = get_object_or_404(
+        Annotation.objects.select_related(), pk=annotation_id)
+
+    if not annotation.image.image_set.has_perm('delete_annotation', request.user):
+        return Response({
+            'detail': 'permission for deleting annotations in this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    image = annotation.image
+    annotation.delete()
+
+    serializer = AnnotationSerializer(
+        image.annotations.select_related() \
+            .order_by('annotation_type__name'), many=True)
+    return Response({
+        'annotations': serializer.data,
+    }, status=HTTP_200_OK)
+
+
+@login_required
 @api_view(['POST'])
 def create_annotation(request) -> Response:
     try:

@@ -69,7 +69,6 @@ class ImageSet(models.Model):
                 'create_export',
                 'delete_annotation',
                 'delete_export',
-                'delete_set'
                 'delete_set',
                 'edit_annotation',
                 'edit_set',
