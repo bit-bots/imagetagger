@@ -61,7 +61,9 @@
                                 <td colspan='2'><input type='checkbox' name='not_in_image'id='not_in_image' {% if annotation.not_in_image == 1 %}checked=""{% endif %}><label for='not_in_image'>Not in the image</label></td>
                               </tr>
                           </table>
-                          <input type="submit" value="Save"><input id="reset_button" type="button" value="Reset"><input id="back_button" type="button" value="Back" onclick="window.location='{% url 'annotations:annotate' selected_image.id %}';">
+                          <input type="submit" value="Save">
+                          <input id="reset_button" type="button" value="Reset">
+                          <input id="back_button" type="button" value="Back" onclick="{% if prev_page is not None%} location.href='{{prev_page}}' {% else %} location.href='{% url 'annotations:annotate' selected_image.id %}'{% endif %};">
                       </form>
                   </div>
               </div>

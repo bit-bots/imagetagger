@@ -177,7 +177,7 @@
                     <a href="{% url 'annotations:manage_annotations' image.image_set.id %}">
                         <u><h3 class="panel-title">{{image.image_set.name}}</h3></u></a>
                 </div>
-                <div class="panel-body">
+                <div id="image_list" class="panel-body">
                     {% for set_annotation in set_annotations %}
                         {% if set_annotation.id == annotation.id %}
                             {{ set_annotation.image.name }}: <b id="selected_annotation_row">{{annotation.content}}</b><br>
@@ -202,6 +202,7 @@
                         {% csrf_token %}
                         <input type='hidden' id='state' name='state' value='blank'>
                         <input type='hidden' id='annotation' name='annotation' value='{{ annotation.id }}'>
+
                         <h4>{{ annotation_type }}</h4>
                         <button class="btn btn-success" type='button' id='accept_button'>
                             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> YAY (j)</button>

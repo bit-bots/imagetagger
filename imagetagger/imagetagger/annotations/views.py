@@ -108,6 +108,7 @@ def annotate(request, image_id):
 def edit_annotation(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
     if request.user is annotation.user or annotation.image.image_set.has_perm('edit_annotation', request.user):
+        prev_page = request.META.get('HTTP_REFERER')
         annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
         selected_image = get_object_or_404(Image, id=annotation.image.id)
         set_images = Image.objects.filter(image_set=selected_image.image_set)
@@ -118,6 +119,7 @@ def edit_annotation(request, annotation_id):
             'annotation_types': annotation_types,
             'annotation': annotation,
             'current_annotation_type_id': current_annotation_type_id,
+            'prev_page': prev_page
         })
     else:
         return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
