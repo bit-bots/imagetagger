@@ -171,3 +171,26 @@ div.rightcontent{
   font-weight: bold;
   text-decoration: none;
 }
+
+
+#edit_active {
+  position: absolute;
+  top: 0.7em;
+  left: 0;
+  right: 0;
+  width: 30em;
+  height: 3.5em;
+  margin: auto;
+
+  z-index: 20000;
+}
+
+#edit_active p {
+  float: left;
+}
+
+#edit_active button {
+  float: right;
+
+  margin-top: -0.55em;
+}

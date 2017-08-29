@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import Set, Dict, Union
 
@@ -66,6 +67,10 @@ class Annotation(models.Model):
         if self.not_in_image:
             return 'Not in image'
         return self.vector
+
+    @property
+    def vector_as_json(self) -> str:
+        return json.dumps(self.vector)
 
     def owner(self):
         # TODO: maybe use an owner field populated by a database trigger

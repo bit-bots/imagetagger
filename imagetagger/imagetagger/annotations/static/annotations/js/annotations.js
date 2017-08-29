@@ -1,13 +1,15 @@
 (function() {
   const API_BASE_URL = '/annotations/api/';
+  const FEEDBACK_DISPLAY_TIME = 3000;
   const PRELOAD_BACKWARD = 2;
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
-  const FEEDBACK_DISPLAY_TIME = 3000;
 
   // TODO: Find a solution for url resolvings
 
   var gCsrfToken;
+  var gEditActiveContainer;
+  var gEditedAnnotationId;
   var gHeaders;
   var gHideFeedbackTimeout;
   var gImage;
@@ -28,11 +30,12 @@
 
   /**
    * Create an annotation using the form data from the current page.
+   * If an annotation is currently edited, an update is triggered instead.
    *
    * @param event
-   * @param success_callback a function to be executed on success
+   * @param successCallback a function to be executed on success
    */
-  function createAnnotation(event, success_callback) {
+  function createAnnotation(event, successCallback) {
     if (event !== undefined) {
       // triggered using an event handler
       event.preventDefault();
@@ -55,31 +58,52 @@
       return;
     }
 
+    var action = 'create';
+    var data = {
+      annotation_type_id: annotationTypeId,
+      image_id: gImageId,
+      vector: vector
+    };
+    var editing = false;
+    if (gEditedAnnotationId !== undefined) {
+      // edit instead of create
+      action = 'update';
+      data.annotation_id = gEditedAnnotationId;
+      editing = true;
+    }
+
     $('.js_feedback').stop().addClass('hidden');
     $('.annotate_button').prop('disabled', true);
-    $.ajax(API_BASE_URL + 'annotation/create/', {
+    $.ajax(API_BASE_URL + 'annotation/' + action + '/', {
       type: 'POST',
       headers: gHeaders,
       dataType: 'json',
-      data: JSON.stringify({
-        annotation_type_id: annotationTypeId,
-        image_id: gImageId,
-        vector: vector
-      }),
+      data: JSON.stringify(data),
       success: function(data, textStatus, jqXHR) {
         $('.annotate_button').prop('disabled', false);
 
         if (jqXHR.status === 200) {
-          displayFeedback($('#feedback_annotation_exists'));
+          if (editing) {
+            if (data.detail === 'similar annotation exists.') {
+              displayFeedback($('#feedback_annotation_exists_deleted'));
+              $('#annotation_edit_button_' + gEditedAnnotationId).parent().parent(
+                ).fadeOut().remove();
+            } else {
+              displayFeedback($('#feedback_annotation_updated'));
+              displayExistingAnnotations(data.annotations);
+            }
+          } else {
+            displayFeedback($('#feedback_annotation_exists'));
+          }
         } else if (jqXHR.status === 201) {
           displayFeedback($('#feedback_annotation_created'));
           displayExistingAnnotations(data.annotations);
         }
 
-        resetSelection();
+        resetSelection(true);
 
-        if (typeof(success_callback) === "function") {
-          success_callback();
+        if (typeof(successCallback) === "function") {
+          successCallback();
         }
       },
       error: function() {
@@ -96,6 +120,12 @@
    * @param annotationId
    */
   function deleteAnnotation(event, annotationId) {
+    if (gEditedAnnotationId === annotationId) {
+      // stop editing
+      resetSelection(true);
+      $('#not_in_image').prop('checked', false).change();
+    }
+
     if (event !== undefined) {
       // triggered using an event handler
       event.preventDefault();
@@ -115,7 +145,7 @@
       dataType: 'json',
       success: function(data) {
         displayFeedback($('#feedback_annotation_deleted'));
-        displayExistingAnnotations(data.annotations);
+        $('#annotation_edit_button_' + annotationId).parent().parent().fadeOut().remove();
       },
       error: function() {
         $('.annotate_button').prop('disabled', false);
@@ -147,7 +177,13 @@
     for (var i = 0; i < annotations.length; i++) {
       var annotation = annotations[i];
 
-      var newAnnotation = $('<div class="annotation">');
+      var alertClass = '';
+      if (gEditedAnnotationId === annotation.id) {
+        alertClass = ' alert-info';
+      }
+      var newAnnotation = $(
+        '<div id="annotation_' + annotation.id +
+        '" class="annotation' + alertClass + '">');
 
       if (annotation.vector !== null) {
         annotation.content = '';
@@ -172,6 +208,11 @@
       '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete">' +
       '</a>');
       const annotationId = annotation.id;
+      editButton.attr('id', 'annotation_edit_button_' + annotationId);
+      editButton.click(function(event) {
+        editAnnotation(event, this, annotationId);
+      });
+      editButton.data('vector', annotation.vector);
       deleteButton.click(function(event) {
         deleteAnnotation(event, annotationId);
       });
@@ -250,7 +291,58 @@
   }
 
   /**
-   * Get the image list from all .annotate_imagE_link within #image_list.
+   * Edit an annotation.
+   *
+   * @param event
+   * @param annotationElem the element which stores the edit button of the annotation
+   * @param annotationId
+   */
+  function editAnnotation(event, annotationElem, annotationId) {
+    annotationElem = $(annotationElem);
+
+    gEditedAnnotationId = annotationId;
+    gEditActiveContainer.removeClass('hidden');
+
+    resetSelection();
+
+    if (event !== undefined) {
+      // triggered using an event handler
+      event.preventDefault();
+    }
+    $('.js_feedback').stop().addClass('hidden');
+    var params = {
+      annotation_id: annotationId
+    };
+
+    var annotationData = annotationElem.data('vector');
+    if (annotationData === undefined) {
+      annotationData = annotationElem.data('escapedvector');
+    }
+
+    // highlight currently edited annotation
+    $('.annotation').removeClass('alert-info');
+    annotationElem.parent().parent().addClass('alert-info');
+
+    var notInImage = $('#not_in_image');
+    if (annotationData === null) {
+      // not in image
+      notInImage.prop('checked', true).change();
+      return;
+    }
+
+    notInImage.prop('checked', false).change();
+
+    $('#x1Field').val(annotationData.x1);
+    $('#x2Field').val(annotationData.x2);
+    $('#y1Field').val(annotationData.y1);
+    $('#y2Field').val(annotationData.y2);
+    initSelection();
+
+    reloadSelection();
+  }
+
+  /**
+   * Get the image list from all .annotate_image_link within #image_list.
    */
   function getImageList() {
     var imageList = [];
@@ -354,6 +446,8 @@
    * @param fromHistory
    */
   function loadAnnotateView(imageId, fromHistory) {
+    gEditedAnnotationId = undefined;
+
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
@@ -396,7 +490,7 @@
         loading.addClass('hidden');
         displayExistingAnnotations(data.annotations);
 
-        resetSelection();
+        resetSelection(true);
       },
       error: function() {
         loading.addClass('hidden');
@@ -502,11 +596,17 @@
   /**
    * Delete current selection.
    */
-  function resetSelection() {
+  function resetSelection(abortEdit) {
     $('.annotation_value').val(0);
 
     if (gSelection !== undefined) {
       gSelection.cancelSelection();
+    }
+
+    if (abortEdit === true) {
+      gEditedAnnotationId = undefined;
+      $('.annotation').removeClass('alert-info');
+      gEditActiveContainer.addClass('hidden');
     }
   }
 
@@ -557,6 +657,7 @@
   }
 
   $(function() {
+    gEditActiveContainer = $('#edit_active');
     gImage = $('#image');
     gMousepos = $('#mousepos');
     gMousepos.hide();
@@ -598,8 +699,13 @@
     handleNotInImageToggle();
 
     // register click events
+    $('#cancel_edit_button').click(function() {
+      resetSelection(true);
+    });
     $('#save_button').click(createAnnotation);
-    $('#reset_button').click(resetSelection);
+    $('#reset_button').click(function() {
+      resetSelection(true);
+    });
     $('#last_button').click(function(event) {
       event.preventDefault();
       createAnnotation(undefined, function() {
@@ -629,6 +735,12 @@
     });
 
     // annotation buttons
+    $('.annotation_edit_button').each(function(key, elem) {
+      elem = $(elem);
+      elem.click(function(event) {
+        editAnnotation(event, this, parseInt(elem.data('annotationid')));
+      });
+    });
     $('.annotation_delete_button').each(function(key, elem) {
       elem = $(elem);
       elem.click(function(event) {
@@ -643,7 +755,6 @@
         loadAnnotateView(event.state.imageId, true);
       }
     };
-
 
     // TODO: this should be done only for the annotate view
     $(document).keyup(function(event) {

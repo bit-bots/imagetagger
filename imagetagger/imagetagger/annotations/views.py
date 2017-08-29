@@ -462,7 +462,7 @@ def create_annotation(request) -> Response:
 
     if not Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
         return Response({
-            'detail': 'no valid bounding box found.'
+            'detail': 'the vector is invalid.'
         }, status=HTTP_400_BAD_REQUEST)
 
     if Annotation.similar_annotations(vector, image, annotation_type):
@@ -504,6 +504,57 @@ def load_annotations(request) -> Response:
     serializer = AnnotationSerializer(
         image.annotations.select_related().order_by('annotation_type__name'),
         many=True)
+    return Response({
+        'annotations': serializer.data,
+    }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['POST'])
+def update_annotation(request) -> Response:
+    try:
+        annotation_id = int(request.data['annotation_id'])
+        image_id = int(request.data['image_id'])
+        annotation_type_id = int(request.data['annotation_type_id'])
+        vector = request.data['vector']
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    annotation = get_object_or_404(Annotation, pk=annotation_id)
+    annotation_type = get_object_or_404(AnnotationType, pk=annotation_type_id)
+
+    if annotation.image_id != image_id:
+        raise ParseError('the image id does not match the annotation id.')
+
+    if not annotation.image.image_set.has_perm('edit_annotation', request.user):
+        return Response({
+            'detail': 'permission for updating annotations in this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    if not Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+        return Response({
+            'detail': 'the vector is invalid.'
+        }, status=HTTP_400_BAD_REQUEST)
+
+    if Annotation.similar_annotations(
+            vector, annotation.image, annotation_type, exclude={annotation.id}):
+        annotation.delete()
+        return Response({
+            'detail': 'similar annotation exists.',
+        })
+
+    with transaction.atomic():
+        annotation.vector = vector
+        annotation.last_editor = request.user
+        annotation.save()
+        annotation.annotation_type = annotation_type
+
+        # Automatically verify for owner
+        annotation.verify(request.user, True)
+
+    serializer = AnnotationSerializer(
+        annotation.image.annotations.select_related() \
+            .order_by('annotation_type__name'), many=True)
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
