@@ -208,8 +208,8 @@ class ExportFormat(models.Model):
     annotations_types = models.ManyToManyField(AnnotationType)
     team = models.ForeignKey(Team, on_delete=models.PROTECT, related_name='export_formats')
     public = models.BooleanField(default=False)
-    base_format = models.TextField()
-    annotation_format = models.TextField()
+    base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
+    annotation_format = models.TextField() #used for every annotation in export (coordinates, type, image)
 
     def __str__(self):
         return '{}: {}'.format(self.team.name, self.name)

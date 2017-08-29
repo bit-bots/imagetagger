@@ -16,7 +16,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_2
     HTTP_403_FORBIDDEN
 
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
-    Verification
+    Verification, ExportFormat
 from imagetagger.annotations.serializers import AnnotationSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
@@ -401,6 +401,18 @@ def wf_wolves_export(imageset):
     return ''.join(a), annotation_counter
 
 
+def export_format(export_format_name, imageset):
+    images = Image.objects.filter(image_set=imageset)
+    export_format = ExportFormat.objects.filter(name=export_format_name)
+
+    annotation_export = export_format.annotation_format
+    annotation_counter = 0
+
+
+    base_format = export_format.base_format
+    base_format = base_format.replace('%%content%%', annotation_export)
+
+
 @login_required
 @api_view(['DELETE'])
 def api_delete_annotation(request) -> Response:
@@ -426,6 +438,8 @@ def api_delete_annotation(request) -> Response:
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
+
+
 
 
 @login_required

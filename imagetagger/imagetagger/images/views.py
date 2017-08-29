@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from .models import ImageSet, Image
-from imagetagger.annotations.models import Annotation, Export
+from imagetagger.annotations.models import Annotation, Export, ExportFormat
 from imagetagger.users.models import Team
 import os
 import shutil
@@ -214,6 +214,7 @@ def view_imageset(request, image_set_id):
         'filtered': filtered,
         'edit_form': ImageSetEditForm(instance=imageset),
         'imageset_perms': imageset.get_perms(request.user),
+        'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team=imageset.team))
     })
 
 

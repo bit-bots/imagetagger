@@ -334,8 +334,9 @@
                                 {% endfor %}
                             {% endcomment %}
                         <select name="export_format">
-                            <option value="Bit-Bot AI">Bit-Bot AI</option>
-                            <option value="wf_wolves">WF Wolves</option>
+                            {% for format in export_formats %}
+                                <option value={{ format }}>{{ format.team.name }}/{{ format.name }}</option>
+                            {% endfor %}
                         </select>
                         <input type="submit" value="Export">
                     </form>
