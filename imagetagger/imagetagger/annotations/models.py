@@ -58,6 +58,62 @@ class Annotation(models.Model):
         return 'Annotation: {0}'.format(self.annotation_type.name)
 
     @property
+    def height(self):
+        return self.vector['y2']-self.vector['y1']
+
+    @property
+    def width(self):
+        return self.vector['x2']-self.vector['x1']
+
+    @property
+    def radius(self):
+        return (self.height + self.width)/2
+
+    @property
+    def diameter(self):
+        return self.radius*2
+
+    @property
+    def center(self):
+        xc = self.vector['y1'] + (self.height/2)
+        yc = self.vector['x1'] + (self.width/2)
+        return {'xc': xc, 'yc': yc }
+
+    @property
+    def relative_vector(self):
+        #TODO: currently sets all coordinates to 0, real calculations needed
+        return {'x1': 0, 'x2': 0, 'y1': 0, 'y2': 0}
+
+    @property
+    def relative_center(self):
+        #TODO: currently sets both coordinates to 0, real calculations needed
+        return {'xc': 0, 'yc': 0}
+
+    @property
+    def relative_width(self):
+        #raise NotImplementedError
+        # TODO: real calculations needed
+        return 0
+
+    @property
+    def relative_height(self):
+        #raise NotImplementedError
+        # TODO: real calculations needed
+        return 0
+
+    @property
+    def relative_radius(self):
+        # raise NotImplementedError
+        # TODO: real calculations needed
+        return 0
+
+    @property
+    def relative_diameter(self):
+        # raise NotImplementedError
+        # TODO: real calculations needed
+        return 0
+
+    @property
     def not_in_image(self) -> bool:
         """Check whether the annotated object is not in the image."""
         return not self.vector
@@ -185,7 +241,6 @@ class Export(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     image_set = models.ForeignKey(ImageSet)
-    export_type = models.CharField(max_length=50)
     annotation_count = models.IntegerField(default=0)
     export_text = models.TextField(default='')
     format = models.ForeignKey('ExportFormat', on_delete=models.CASCADE, related_name='exports')
@@ -215,6 +270,7 @@ class ExportFormat(models.Model):
     public = models.BooleanField(default=False)
     base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
     annotation_format = models.TextField() #used for every annotation in export (coordinates, type, image)
+    not_in_image_format = models.TextField()
 
     def __str__(self):
         return '{}: {}'.format(self.team.name, self.name)

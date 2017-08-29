@@ -335,7 +335,7 @@
                             {% endcomment %}
                         <select name="export_format">
                             {% for format in export_formats %}
-                                <option value={{ format }}>{{ format.team.name }}/{{ format.name }}</option>
+                                <option value={{ format.id }}>{{ format.team.name }}/{{ format.name }}</option>
                             {% endfor %}
                         </select>
                         <input type="submit" value="Export">

@@ -197,23 +197,16 @@ def create_export(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if imageset.has_perm('create_export', request.user) or imageset.public:
         if request.method == 'POST':
-            export_format = request.POST['export_format']
-            if export_format == 'Bit-Bot AI':
-                export_text, annotation_count = bitbotai_export(imageset)
-                export = Export(export_type="Bit-BotAI",
-                                image_set=imageset,
-                                user=(request.user if request.user.is_authenticated() else None),
-                                annotation_count=annotation_count,
-                                export_text=export_text)
-                export.save()
-            if export_format == 'wf_wolves':
-                export_text, annotation_count = wf_wolves_export(imageset)
-                export = Export(export_type="WF-Wolves",
-                                image_set=imageset,
-                                user=(request.user if request.user.is_authenticated() else None),
-                                annotation_count=annotation_count,
-                                export_text=export_text)
-                export.save()
+            selected_format = request.POST['export_format']
+            format = get_object_or_404(ExportFormat, id=selected_format)
+            export_text, annotation_count = export_format(format, imageset)
+
+            export = Export(image_set=imageset,
+                            user= request.user,
+                            annotation_count=annotation_count,
+                            export_text=export_text,
+                            format=format)
+            export.save()
     return redirect(reverse('images:view_imageset', args=(image_set_id,)))
 
 
@@ -343,74 +336,43 @@ def verify(request, annotation_id):
     })
 
 
-# helping function to create the Bot-Bot AI export
-def bitbotai_export(imageset):
-    images = Image.objects.filter(image_set=imageset)
-    annotation_counter = 0
-    a = []
-    a.append('# Export of Imageset ' +
-             imageset.name +
-             ' (ball annotations in bounding boxes)\n')
-    a.append('# set[' +
-             imageset.name +
-             ']\n')
-    a.append(settings.EXPORT_SEPARATOR.join([
-        'imagename',
-        'x1',
-        'y1',
-        'x2',
-        'y2\n']))
-    annotations = Annotation.objects.filter(image__in=images,
-                                            annotation_type__name='ball')
-    for annotation in annotations:
-        annotation_counter += 1
-        a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
-                                                 annnotation.vector['x1'],
-                                                 annnotation.vector['y1'],
-                                                 annnotation.vector['x2'],
-                                                 (annnotation.vector['y2'] + '\n')]))
-    return ''.join(a), annotation_counter
-
-
-# helping function to create the Bot-Bot AI export
-def wf_wolves_export(imageset):
-    images = Image.objects.filter(image_set=imageset)
-    annotation_counter = 0
-    a = []
-    a.append('# Export of Imageset ' +
-             imageset.name +
-             ' (all annotations in bounding boxes)\n')
-    a.append('# set[' +
-             imageset.name +
-             ']\n')
-    a.append(settings.EXPORT_SEPARATOR.join([
-        'imagename',
-        'annotationtype',
-        'x1',
-        'y1',
-        'x2',
-        'y2\n']))
-    annotations = Annotation.objects.filter(image__in=images)
-    for annotation in annotations:
-        annotation_counter += 1
-        a.append(settings.EXPORT_SEPARATOR.join([annotation.image.name,
-                                                 annotation.annotation_type.name,
-                                                 annotation.vector['y1'],
-                                                 annotation.vector['x2'],
-                                                 (annotation.vector['y2'] + '\n')]))
-    return ''.join(a), annotation_counter
-
-
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
-    export_format = ExportFormat.objects.filter(name=export_format_name)
+    export_format = export_format_name
 
-    annotation_export = export_format.annotation_format
     annotation_counter = 0
-
-
+    annotations = Annotation.objects.filter(image__in=images)
+    annotation_content= ''
+    for annotation in annotations:
+        annotation_counter += 1
+        if annotation.not_in_image:
+            formatted_annotation = export_format.not_in_image_format
+            placeholders_annos={'%%image': annotation.image.name, '%%type': annotation.annotation_type.name}
+        else:
+            formatted_annotation = export_format.annotation_format
+            placeholders_annos = {'%%image': annotation.image.name, '%%type': annotation.annotation_type.name,
+                            #absolute values
+                            '%%x1': annotation.vector['x1'], '%%x2': annotation.vector['x2'],
+                            '%%y1': annotation.vector['y1'], '%%y2': annotation.vector['y2'],
+                            '%%r': annotation.radius, '%%dia': annotation.diameter,
+                            '%%cx': annotation.center['xc'], '%%cy': annotation.center['yc'],
+                            '%%width': annotation.width, '%%height': annotation.height,
+                            #relative values
+                            '%%x1rel': annotation.relative_vector['x1'], '%%x2rel': annotation.relative_vector['x2'],
+                            '%%y1rel': annotation.relative_vector['y1'],'%%y2rel': annotation.relative_vector['y2'],
+                            '%%rrel': annotation.relative_radius,'%%diarel': annotation.relative_diameter,
+                            '%%cxrel': annotation.relative_center['xc'],'%%cyrel': annotation.relative_center['yc'],
+                            '%%widthrel': annotation.relative_width,'%%heightrel': annotation.relative_height}
+        for key, value in placeholders_annos.items():
+            formatted_annotation = formatted_annotation.replace(key, str(value))
+        annotation_content= annotation_content + formatted_annotation
     base_format = export_format.base_format
-    base_format = base_format.replace('%%content%%', annotation_export)
+    placeholders_base = {'%%content': annotation_content, '%%imageset': imageset.name,
+                        '%%setdescription': imageset.description, '%%team': imageset.team,
+                        '%%setlocation': imageset.location}
+    for key, value in placeholders_base.items():
+        base_format = base_format.replace(key, str(value))
+    return base_format, annotation_counter
 
 
 @login_required
