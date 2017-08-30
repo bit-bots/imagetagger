@@ -33,11 +33,6 @@ $(document).ready(function () {
     });
 });
 
-
-$(window).resize(function() {
-    draw_box();
-});
-
 function draw_box() {
     image_scale = $('img#picture').get(0).naturalWidth / $('img#picture').width();
     $('#boundingBox').css({
@@ -46,3 +41,9 @@ function draw_box() {
         'width': $('img#picture').attr('data-width')/image_scale,
         'height': $('img#picture').attr('data-height')/image_scale}); //todo: calibration
 }
+
+$(window).resize(draw_box);
+
+$(function() {
+  draw_box();
+});
