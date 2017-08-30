@@ -201,3 +201,7 @@ div.rightcontent{
 .bold {
   font-weight: bold;
 }
+
+table#coordinate_table tr td:nth-of-type(1) {
+  width: 3.5em;
+}

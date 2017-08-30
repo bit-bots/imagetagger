@@ -48,6 +48,11 @@
     var annotationTypeId = parseInt($('#annotation_type_id').val());
     var vector = null;
 
+    if (isNaN(annotationTypeId)) {
+      displayFeedback($('#feedback_annotation_type_missing'));
+      return;
+    }
+
     if (!$('#not_in_image').is(':checked')) {
       vector = {
         x1: parseInt($('#x1Field').val()),
@@ -560,13 +565,13 @@
   function loadImageList() {
     var filterElem = $('#filter_annotation_type');
     var filter = filterElem.val();
-    $('#annotation_type_id').val(filter);
     var params = {
       image_set_id: gImageSetId
     };
 
     if (filter !== '' && !isNaN(filter)) {
       params.filter_annotation_type_id = filter;
+      $('#annotation_type_id').val(filter);
     }
 
     console.log(params);

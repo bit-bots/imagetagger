@@ -21,6 +21,9 @@
   <div id="feedback_annotation_invalid" class="js_feedback alert alert-warning hidden">
     {% trans 'The annotation is invalid.' %}
   </div>
+  <div id="feedback_annotation_type_missing" class="js_feedback alert alert-warning hidden">
+    {% trans 'You have to choose a type for the annotation.' %}
+  </div>
   <div id="feedback_connection_error" class="js_feedback alert alert-danger hidden">
     {% trans 'There was an unhandled error during the connection.' %}
   </div>
@@ -110,59 +113,57 @@
                     <form id="annotation_form" action="{% url 'annotations:annotate' selected_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}" enctype="multipart/form-data" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
-                        annotation type:
-                        <select id="annotation_type_id" name="selected_annotation_type">
-                          {% include "annotations/annotationtypes.html" %}
-                        </select>
+                        <p>
+                          <select id="annotation_type_id" name="selected_annotation_type" class="form-control">
+                            <option value="">{% trans 'Annotation Type' %}</option>
+                            {% include "annotations/annotationtypes.html" %}
+                          </select>
+                        </p>
                         <p>
                           <input type='checkbox' name='not_in_image' id='not_in_image'>
                           <label for='not_in_image'>Not in the image (g)</label>
                         </p>
-                        <table border="1" id="coordinate_table">
+                        <table id="coordinate_table">
+                          {% for field in vector_fields %}
                             <tr>
-                                <td>key</td>
-                                <td>value</td>
+                                <td>
+                                  <label for="{{ field }}Field">
+                                    {{ field }}
+                                  </label>
+                                </td>
+                                <td>
+                                  <input id="{{ field }}Field"
+                                         class="Coordinates annotation_value form-control"
+                                         type="number" name="{{ field }}Field" value="0" min="0">
+                                </td>
                             </tr>
-                            <tr>
-                                <td>x1</td>
-                                <td><input id="x1Field" class="Coordinates annotation_value" type="number" name="x1Field" value="0" min="0"></td>
-                            </tr>
-                            <tr>
-                                <td>y1</td>
-                                <td><input id="y1Field" class="Coordinates annotation_value" type="number" name="y1Field" value="0" min="0"></td>
-                            </tr>
-                            <tr>
-                                <td>x2</td>
-                                <td><input id="x2Field" class="Coordinates annotation_value" type="number" name="x2Field" value="0" min="0"></td>
-                            </tr>
-                            <tr>
-                                <td>y2</td>
-                                <td><input id="y2Field" class="Coordinates annotation_value" type="number" name="y2Field" value="0" min="0"></td>
-                            </tr>
+                          {% endfor %}
                         </table>
-                        <input type="hidden" name="annotate">
-                        <button type="submit" class="annotate_button btn btn-default" id="save_button">
+                        <p>
+                          <input type="hidden" name="annotate">
+                          <button type="submit" class="annotate_button btn btn-default" id="save_button">
                             <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Save (v)
-                        </button>
-                        <button type="button" class="annotate_button btn btn-default" id="reset_button">
+                          </button>
+                          <button type="button" class="annotate_button btn btn-default" id="reset_button">
                             <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>Reset (r)
-                        </button>
-                        <br>
-                        <button type="button" class="annotate_button btn btn-default" id="last_button">
+                          </button>
+                          <br>
+                          <button type="button" class="annotate_button btn btn-default" id="last_button">
                             <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
                             <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
-                        </button>
-                        <button type="button" class="annotate_button btn btn-default" id="back_button">
+                          </button>
+                          <button type="button" class="annotate_button btn btn-default" id="back_button">
                             <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
-                        </button>
-                        <br>
-                        <button type="button" class="annotate_button btn btn-default" id="skip_button">
+                          </button>
+                          <br>
+                          <button type="button" class="annotate_button btn btn-default" id="skip_button">
                             <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
-                        </button>
-                        <button type="button" class="annotate_button btn btn-default" id="next_button">
+                          </button>
+                          <button type="button" class="annotate_button btn btn-default" id="next_button">
                             <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
                             <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
-                        </button>
+                          </button>
+                        </p>
                     </form>
                 </div>
             </div>

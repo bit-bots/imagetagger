@@ -102,6 +102,12 @@ def annotate(request, image_id):
                 image=selected_image).select_related(),
             'last_annotation_type_id': int(last_annotation_type_id),
             'filtered' : filtered,
+            'vector_fields': (
+                'x1',
+                'x2',
+                'y1',
+                'y2',
+            ),
         })
     else:
         return redirect(reverse('images:view_imageset', args=(selected_image.image_set.id,)))
