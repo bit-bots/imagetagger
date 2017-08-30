@@ -223,6 +223,7 @@
       editButton.click(function(event) {
         editAnnotation(event, this, annotationId);
       });
+      editButton.data('annotationtypeid', annotation.annotation_type.id);
       editButton.data('vector', annotation.vector);
       deleteButton.click(function(event) {
         deleteAnnotation(event, annotationId);
@@ -377,6 +378,7 @@
     if (annotationData === undefined) {
       annotationData = annotationElem.data('escapedvector');
     }
+    var annotationTypeId = annotationElem.data('annotationtypeid');
 
     // highlight currently edited annotation
     $('.annotation').removeClass('alert-info');
@@ -391,6 +393,7 @@
 
     notInImage.prop('checked', false).change();
 
+    $('#annotation_type_id').val(annotationTypeId);
     $('#x1Field').val(annotationData.x1);
     $('#x2Field').val(annotationData.x2);
     $('#y1Field').val(annotationData.y1);
