@@ -67,6 +67,7 @@
       <button id="cancel_edit_button" class="btn btn-danger">{% trans 'Cancel' %}</button>
     </div>
 
+        <div class="col-md-6">
             <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" data-imageid="{{ selected_image.id }}"></br>
             <hr color="silver" width="100%">
             <p>
