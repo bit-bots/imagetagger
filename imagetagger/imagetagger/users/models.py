@@ -33,6 +33,7 @@ class Team(models.Model):
             return {
                 'create_set',
                 'user_management',
+                'create_exportformat',
             }
         elif self.is_member(user):
             return {

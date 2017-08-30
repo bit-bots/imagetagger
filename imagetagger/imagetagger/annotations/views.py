@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import os
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK, \
     HTTP_403_FORBIDDEN
 
+from imagetagger.annotations.forms import ExportFormatCreationForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
 from imagetagger.annotations.serializers import AnnotationSerializer
@@ -196,7 +198,8 @@ def edit_annotation_save(request, annotation_id):
 def create_export(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if imageset.has_perm('create_export', request.user) or imageset.public:
-        if request.method == 'POST':
+        export = request.POST.get('export')
+        if request.method == 'POST' and export is not None:
             selected_format = request.POST['export_format']
             format = get_object_or_404(ExportFormat, id=selected_format)
             export_text, annotation_count = export_format(format, imageset)
@@ -335,7 +338,7 @@ def verify(request, annotation_id):
         'veri_pushed': veri_pushed
     })
 
-
+#TODO secure that only logged in users can use this
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
@@ -373,6 +376,35 @@ def export_format(export_format_name, imageset):
     for key, value in placeholders_base.items():
         base_format = base_format.replace(key, str(value))
     return base_format, annotation_counter
+
+
+@login_required
+def create_exportformat(request, imageset_id):
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    #TODO: permission for ExportFormats??
+
+    form = ExportFormatCreationForm()
+
+    if request.method == 'POST':
+        form = ExportFormatCreationForm(request.POST)
+
+        if form.is_valid():
+            if ExportFormat.objects.filter(name=form.cleaned_data.get('name')).exists():
+                form.add_error(
+                    'name',
+                    _('The name is already in use by an export format.'))
+            else:
+                with transaction.atomic():
+
+                    form.instance.save()
+
+                messages.success(request, _('The export format was created successfully.'))
+                return redirect(reverse('images:view_imageset', args=(imageset_id,)))
+    print(form.errors)
+    return render(request, 'annotations/create_exportformat.html', {
+        'imageset': imageset,
+        'form': form,
+    })
 
 
 @login_required

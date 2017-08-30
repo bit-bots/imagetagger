@@ -1,0 +1,99 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+    <div class="container">
+        <h2>Create new Exportformat:</h2>
+        <form method="POST" action="{% url 'annotations:create_exportformat' imageset.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_name"><h3>{{ form.name.label }}</h3></label>
+                {% render_field form.name class+='form-control' %}
+                {% for error in form.name.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="id_team"><h3>{{ form.team.label }}</h3></label>
+                {% render_field form.team class+='form-control' %}
+                {% for error in form.team.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="id_annotations_types"><h3>{{ form.annotations_types.label }}</h3></label>
+                {% blocktrans %}
+                    <p>Hold down "Shift" to select more than one.</p>
+                {% endblocktrans %}
+                {% render_field form.annotations_types class+='form-control' %}
+                {% for error in form.annotations_types.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="id_base_format"><h3>{{ form.base_format.label }}</h3></label>
+                {% blocktrans %}
+                    <p>Use the following placeholders to integrate specific details into your Format:</p>
+                    <p><b>%%imageset:</b> name of the imageset </p>
+                    <p><b>%%setdescription:</b> description of the imageset</p>
+                    <p><b>%%team:</b> team of the imageset</p>
+                    <p><b>%%setlocation:</b> location of the imageset</p>
+                    <p><b>%%content:</b> the content of the annotation format and the not in image format</p>
+                {% endblocktrans %}
+                {% render_field form.base_format class+='form-control'%}
+                {% for error in form.base_format.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="id_annotation_format"><h3>{{ form.annotation_format.label }}</h3></label>
+                {% blocktrans %}
+                    <p><b>PLEASE NOTE: The relative values are not functional yet, they will return 0.</b></p>
+                    <p>Use the following placeholders to integrate specific details into your Format:</p>
+                    <p><b>%%image:</b> name of the image</p>
+                    <p><b>%%type:</b>b annotation type</p>
+                    <p><b>%%x1, %%x1rel:</b> x1-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%x2, %%x2rel:</b> x2-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%y1, %%y1rel:</b> y1-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%y2, %%y2rel:</b> y2-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%cx, %%cxrel:</b> x-coordinate of the center of the annotation, absolute or relative value</p>
+                    <p><b>%%cy, %%cyrel:</b> y-coordinate of the center of the annotation, absolute or relative value</p>
+                    <p><b>%%r, %%rrel:</b> radius of the annotation, absolute or relative value</p>
+                    <p><b>%%dia, %%diarel:</b> diameter of the annotation, absolute or relative value</p>
+                    <p><b>%%width, %%widthrel:</b> width of the annotation, absolute or relative value</p>
+                    <p><b>%%height, %%heigthrel:</b> heigth of the annotation, absolute or relative value</p>
+                {% endblocktrans %}
+                {% render_field form.annotation_format class+='form-control'%}
+                {% for error in form.annotation_format.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="id_not_in_image_format"><h3>{{ form.not_in_image_format.label }}</h3></label>
+                {% blocktrans %}
+                    <p>Use the following placeholders to integrate specific details into your Format:</p>
+                    <p><b>%%image:</b> name of the image</p>
+                    <p><b>%%type:</b> type of the image</p>
+                {% endblocktrans %}
+                {% render_field form.not_in_image_format class+='form-control'%}
+                {% for error in form.not_in_image_format.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="id_public">{{ form.public.label }}</label>
+                {% render_field form.public %}
+                {% for error in form.public.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <input type="submit" value="{% trans 'Create Format' %}" class="btn btn-primary" />
+        </form>
+        <p></p>
+    </div>
+{% endblock bodyblock %}

@@ -127,12 +127,12 @@
                           {% include "annotations/annotationtypes.html" %}
                         </select>
 
-                <input type="submit" value="filter">
+                <input name="filter" type="submit" value="filter">
 
                 {% if filtered %}
                     <a href="{{request.get_full_path}}" target="_self"> [x] </a>
                 {% endif %}
-
+            </form>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h2 class="panel-title">Images</h2>
@@ -338,7 +338,11 @@
                                 <option value={{ format.id }}>{{ format.team.name }}/{{ format.name }}</option>
                             {% endfor %}
                         </select>
-                        <input type="submit" value="Export">
+                        <input name= "export" type="submit" value="Export">
+                    <form method="post" action="{% url 'annotations:create_exportformat' imageset.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input name="create_new_format" type="button" value="Create Format" onclick="location.href='{% url 'annotations:create_exportformat' imageset.id %}'">
+                    </form>
                     </form>
                     {% if exports %}
                         <h3>Download exports:</h3>
