@@ -98,7 +98,7 @@ def explore_user(request):
         Verification.objects.filter(
             verified=True, annotation__user_id=OuterRef('pk')).values('annotation__user_id').annotate(
             count=Count('annotation__user_id')).values('count'),
-        output_field=IntegerField())).all().order_by('points')
+        output_field=IntegerField())).all().order_by('points').distinct()
 
     query = request.GET.get('query')
     if query:

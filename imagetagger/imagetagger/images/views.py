@@ -36,7 +36,7 @@ import hashlib
 def explore_imageset(request):
     imagesets = ImageSet.objects.select_related('team').order_by(
         'team__name', 'name').filter(
-        Q(team__members=request.user) | Q(public=True))
+        Q(team__members=request.user) | Q(public=True)).distinct()
 
     query = request.GET.get('query')
     if query:
