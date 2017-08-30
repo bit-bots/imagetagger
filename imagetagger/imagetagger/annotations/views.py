@@ -318,7 +318,10 @@ def verify(request, annotation_id):
     # detecting next and last unverified image in the set
     next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id').first()
     last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('id').last()
-
+    try:
+        filtered = int(filtered)
+    except (ValueError, TypeError):
+        pass
     return render(request, 'annotations/verification.html', {
         'image': image,
         'annotation': annotation,
@@ -335,7 +338,8 @@ def verify(request, annotation_id):
         'annotation_types': annotation_types,
         'filtered': filtered,
         'user_veri': user_veri,
-        'veri_pushed': veri_pushed
+        'veri_pushed': veri_pushed,
+        'last_annotation_type_id': filtered
     })
 
 #TODO secure that only logged in users can use this
