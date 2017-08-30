@@ -1,6 +1,9 @@
 (function() {
-  const API_BASE_URL = '/annotations/api/';
+  const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
+  const API_IMAGES_BASE_URL = '/images/api/';
   const FEEDBACK_DISPLAY_TIME = 3000;
+  const ANNOTATE_URL = '/annotations/%s/';
+  const IMAGE_SET_URL = '/images/imageset/%s/';
   const PRELOAD_BACKWARD = 2;
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
@@ -15,6 +18,7 @@
   var gImage;
   var gImageCache = {};
   var gImageId;
+  var gImageSetId;
   var gImageList;
   var gImageScale = 0;
   var gInitialized = false;
@@ -74,7 +78,7 @@
 
     $('.js_feedback').stop().addClass('hidden');
     $('.annotate_button').prop('disabled', true);
-    $.ajax(API_BASE_URL + 'annotation/' + action + '/', {
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/' + action + '/', {
       type: 'POST',
       headers: gHeaders,
       dataType: 'json',
@@ -91,6 +95,7 @@
             } else {
               displayFeedback($('#feedback_annotation_updated'));
               displayExistingAnnotations(data.annotations);
+              loadImageList();
             }
           } else {
             displayFeedback($('#feedback_annotation_exists'));
@@ -98,6 +103,7 @@
         } else if (jqXHR.status === 201) {
           displayFeedback($('#feedback_annotation_created'));
           displayExistingAnnotations(data.annotations);
+          loadImageList();
         }
 
         resetSelection(true);
@@ -139,7 +145,7 @@
     var params = {
       annotation_id: annotationId
     };
-    $.ajax(API_BASE_URL + 'annotation/delete/?' + $.param(params), {
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/delete/?' + $.param(params), {
       type: 'DELETE',
       headers: gHeaders,
       dataType: 'json',
@@ -271,6 +277,54 @@
       // add previous image to cache
       gImageCache[currentImage.data('imageid')] = currentImage;
     }
+  }
+
+  /**
+   * Display the images of an image list.
+   *
+   * @param imageList
+   */
+  function displayImageList(imageList) {
+    var oldImageList = $('#image_list');
+    var result = $('<div>');
+    var imageContained = false;
+
+    result.addClass('panel-body');
+    oldImageList.html('');
+
+    for (var i = 0; i < imageList.length; i++) {
+      var image = imageList[i];
+
+      var link = $('<a>');
+      link.attr('id', 'annotate_image_link_' + image.id);
+      link.attr('href', ANNOTATE_URL.replace('%s', image.id));
+      link.addClass('annotate_image_link');
+      if (image.id === gImageId) {
+        link.addClass('active');
+        imageContained = true;
+      }
+      link.text(image.name);
+      link.data('imageid', image.id);
+      link.click(function(event) {
+        event.preventDefault();
+        loadAnnotateView($(this).data('imageid'));
+      });
+
+      result.append(link);
+    }
+
+    oldImageList.attr('id', '');
+    result.attr('id', 'image_list');
+    oldImageList.replaceWith(result);
+
+    gImageList = getImageList();
+
+    // load first image if current image is not within image set
+    if (!imageContained) {
+      loadAnnotateView(imageList[0].id);
+    }
+
+    scrollImageList();
   }
 
   /**
@@ -482,7 +536,7 @@
     var params = {
       image_id: imageId
     };
-    $.ajax(API_BASE_URL + 'annotation/load/?' + $.param(params), {
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
       type: 'GET',
       headers: gHeaders,
       dataType: 'json',
@@ -494,6 +548,43 @@
       },
       error: function() {
         loading.addClass('hidden');
+        $('.annotate_button').prop('disabled', false);
+        displayFeedback($('#feedback_connection_error'));
+      }
+    });
+  }
+
+  /**
+   * Load the image list from tye server applying a new filter.
+   */
+  function loadImageList() {
+    var filterElem = $('#filter_annotation_type');
+    var filter = filterElem.val();
+    $('#annotation_type_id').val(filter);
+    var params = {
+      image_set_id: gImageSetId
+    };
+
+    if (filter !== '' && !isNaN(filter)) {
+      params.filter_annotation_type_id = filter;
+    }
+
+    console.log(params);
+
+    $.ajax(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function(data, textStatus, jqXHR) {
+        if (data.image_set.images.length === 0) {
+          // redirect to image set view.
+          displayFeedback($('#feedback_image_set_empty'));
+          filterElem.val('').change();
+          return;
+        }
+        displayImageList(data.image_set.images);
+      },
+      error: function() {
         $('.annotate_button').prop('disabled', false);
         displayFeedback($('#feedback_connection_error'));
       }
@@ -665,6 +756,7 @@
     // get current environment
     gCsrfToken = $('[name="csrfmiddlewaretoken"]').first().val();
     gImageId = parseInt($('#image_id').html());
+    gImageSetId = parseInt($('#image_set_id').html());
     gHeaders = {
       "Content-Type": 'application/json',
       "X-CSRFTOKEN": gCsrfToken
@@ -697,6 +789,7 @@
     });
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
+    $('select#filter_annotation_type').on('change', loadImageList);
 
     // register click events
     $('#cancel_edit_button').click(function() {

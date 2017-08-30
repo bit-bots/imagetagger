@@ -1,4 +1,4 @@
-from rest_framework.serializers import Field, ModelSerializer
+from rest_framework.serializers import ModelSerializer
 
 from .models import Annotation, AnnotationType
 

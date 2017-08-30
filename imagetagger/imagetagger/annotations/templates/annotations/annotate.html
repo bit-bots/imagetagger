@@ -30,37 +30,33 @@
   <div id="feedback_annotation_updated" class="js_feedback alert alert-success hidden">
     {% trans 'The annotation was successfully updated.' %}
   </div>
+  <div id="feedback_image_set_empty" class="js_feedback alert alert-danger hidden">
+    {% trans 'The image set is empty with that filter applied.' %}
+  </div>
     <div class="row">
-        <div class="col-md-3">
-            <form id="filter_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="get">
+      <div class="col-md-3">
+        <select id="filter_annotation_type" class="form-control">
+          <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
+          {% include "annotations/annotationtypes.html" %}
+        </select>
 
-                        <input type="hidden" name="image_id" value="{{ selected_image.id }}">
-                        annotation type:
-                        <select name="selected_annotation_type">
-                          {% include "annotations/annotationtypes.html" %}
-                        </select>
-
-                        <input name="filter" type="submit" value="filter">
-
-
-                {% if filtered is not None %}
-                    <a href="{{request.path}}" target="_self"> [x] </a>
-                {% endif %}
-            </form>
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
-                        <u><h3 class="panel-title">{{selected_image.image_set.name}}</h3></u></a>
-                </div>
-                <div class="panel-body">
-                    {% for set_image in set_images %}
-                      <a id="annotate_image_link_{{ set_image.id }}" href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}" class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}" data-imageid="{{ set_image.id }}"> {{set_image.name}}</a><br>
-                    {% endfor %}
-                </div>
-            </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
+              <h3 class="panel-title"><u>{{selected_image.image_set.name}}</u></h3></a>
+          </div>
+          <div id="image_list" class="panel-body">
+            {% for set_image in set_images %}
+              <a id="annotate_image_link_{{ set_image.id }}"
+                 href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
+                 class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
+                 data-imageid="{{ set_image.id }}">
+                {{set_image.name}}
+              </a>
+            {% endfor %}
+          </div>
         </div>
-        <div class="col-md-6">
+      </div>
     <div id="edit_active" class="alert alert-warning hidden">
       <p>
         {% trans 'You are currently editing an annotation.' %}
@@ -175,6 +171,7 @@
 </div>
 
   <span id="image_id" class="hidden">{{ selected_image.id }}</span>
+  <span id="image_set_id" class="hidden">{{ selected_image.image_set.id }}</span>
 {% endblock %}
 
 

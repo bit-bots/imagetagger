@@ -6,6 +6,7 @@ app_name = 'images'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^image/delete/(\d+)/$', views.delete_images, name='delete_images'),
+    url(r'^image/upload/(\d+)/$', views.upload_image, name='upload_image'),
     url(r'^image/(\d+)/$', views.view_image, name='view_image'),
     url(r'^imagelist/(\d+)/$', views.list_images, name='list_images'),
     # this view will be shadowed by nginx via image_nginx auth and direct access
@@ -16,5 +17,5 @@ urlpatterns = [
     url(r'^imageset/(\d+)/$', views.view_imageset, name='view_imageset'),
     url(r'^imageset/explore/$', views.explore_imageset, name='explore_imageset'),
     url(r'^imageset/imagetagger_dl_script.sh$', views.dl_script, name='dl_script'),
-    url(r'^image/upload/(\d+)/$', views.upload_image, name='upload_image'),
+    url(r'^api/imageset/load/$', views.load_image_set, name='load_image_set'),
 ]

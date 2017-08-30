@@ -76,7 +76,7 @@ def annotate(request, image_id):
         new_filter = request.GET.get("filter")
         if filtered is not None:
             # filter images for missing annotationtype
-            set_images = set_images.exclude(annotation__annotation_type_id=filtered)
+            set_images = set_images.exclude(annotations__annotation_type_id=filtered)
             if not set_images:
                 messages.info(request, 'All images in this set have been tagged with this tag!')
                 set_images = Image.objects.filter(image_set=selected_image.image_set)
@@ -506,6 +506,7 @@ def update_annotation(request) -> Response:
         })
 
     with transaction.atomic():
+        annotation.annotation_type = annotation_type
         annotation.vector = vector
         annotation.last_editor = request.user
         annotation.save()

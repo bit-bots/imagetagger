@@ -10,11 +10,19 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequ
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
+from rest_framework.response import Response
+from rest_framework.serializers import ListSerializer
+from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK
 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
+from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer
 from imagetagger.users.forms import TeamCreationForm
 from .models import ImageSet, Image
-from imagetagger.annotations.models import Annotation, Export, ExportFormat
+from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
+    AnnotationType
+
 from imagetagger.users.models import Team
 import os
 import shutil
@@ -299,3 +307,34 @@ def delete_imageset(request, imageset_id):
 def dl_script(request):
     return TemplateResponse(
         request, 'images/download.sh', content_type='text/plain')
+
+
+@login_required
+@api_view(['GET'])
+def load_image_set(request) -> Response:
+    try:
+        image_set_id = int(request.query_params['image_set_id'])
+        filter_annotation_type_id = request.query_params.get(
+            'filter_annotation_type_id')
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    image_set = get_object_or_404(ImageSet, pk=image_set_id)
+
+    if not image_set.has_perm('read', request.user):
+        return Response({
+            'detail': 'permission for reading this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    serializer = ImageSetSerializer(image_set)
+    serialized_image_set = serializer.data
+    if filter_annotation_type_id:
+        filter_annotation_type = get_object_or_404(
+            AnnotationType, pk=filter_annotation_type_id)
+        # TODO: find a cleaner solution to filter related field set wihtin ImageSet serializer
+        serialized_image_set['images'] = ImageSerializer(
+            image_set.images.exclude(
+                annotations__annotation_type=filter_annotation_type), many=True).data
+    return Response({
+        'image_set': serialized_image_set,
+    }, status=HTTP_200_OK)

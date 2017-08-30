@@ -165,13 +165,16 @@ div.rightcontent{
   width: 100%;
 }
 
+.annotate_image_link {
+  display: block;
+}
+
 .annotate_image_link.active, .annotate_image_link.active:active,
 .annotate_image_link.active:hover {
   color: black;
   font-weight: bold;
   text-decoration: none;
 }
-
 
 #edit_active {
   position: absolute;
@@ -193,4 +196,8 @@ div.rightcontent{
   float: right;
 
   margin-top: -0.55em;
+}
+
+.bold {
+  font-weight: bold;
 }
