@@ -4,7 +4,7 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Count, Subquery, OuterRef, IntegerField
+from django.db.models import Count, F, Subquery, OuterRef, IntegerField
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -98,7 +98,7 @@ def explore_user(request):
         Verification.objects.filter(
             verified=True, annotation__user_id=OuterRef('pk')).values('annotation__user_id').annotate(
             count=Count('annotation__user_id')).values('count'),
-        output_field=IntegerField())).all().order_by('points').distinct()
+        output_field=IntegerField())).all().order_by(F('points').desc(nulls_last=True)).distinct()
 
     query = request.GET.get('query')
     if query:
