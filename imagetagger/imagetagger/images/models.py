@@ -74,6 +74,13 @@ class ImageSet(models.Model):
                 'edit_set',
                 'read',
             }
+        elif self.public:
+            return {
+                'annotate',
+                'delete_annotation',
+                'edit_annotation',
+                'read',
+            }
         return set()
 
 
