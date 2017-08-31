@@ -13,4 +13,5 @@ class ExportFormatCreationForm(forms.ModelForm):
             'base_format',
             'annotation_format',
             'not_in_image_format',
+            'min_verifications'
         ]

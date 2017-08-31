@@ -33,6 +33,13 @@
                 {% endfor %}
             </div>
             <div class="form-group">
+                <label for="id_min_verifications"><h3>Minimum Amount of Verifications needed:</h3></label>
+                {% render_field form.min_verifications %}
+                {% for error in form.min_verifications.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
                 <label for="id_base_format"><h3>{{ form.base_format.label }}</h3></label>
                 {% blocktrans %}
                     <p>Use the following placeholders to integrate specific details into your Format:</p>
@@ -53,6 +60,7 @@
                     <p>Use the following placeholders to integrate specific details into your Format:</p>
                     <p><b>%%image:</b> name of the image</p>
                     <p><b>%%type:</b>b annotation type</p>
+                    <p><b>%%veriamount:</b> the amount of verifications for the annotation</p>
                     <p><b>%%x1, %%relx1:</b> x1-coordinate of the annotation, absolute or relative value</p>
                     <p><b>%%x2, %%relx2:</b> x2-coordinate of the annotation, absolute or relative value</p>
                     <p><b>%%y1, %%rely1:</b> y1-coordinate of the annotation, absolute or relative value</p>
@@ -75,6 +83,7 @@
                     <p>Use the following placeholders to integrate specific details into your Format:</p>
                     <p><b>%%image:</b> name of the image</p>
                     <p><b>%%type:</b> type of the image</p>
+                    <p><b>%%veriamount:</b> the amount of verifications for the annotation</p>
                 {% endblocktrans %}
                 {% render_field form.not_in_image_format class+='form-control'%}
                 {% for error in form.not_in_image_format.errors %}

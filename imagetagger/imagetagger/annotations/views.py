@@ -349,22 +349,27 @@ def verify(request, annotation_id):
         'last_annotation_type_id': filtered
     })
 
+
 #TODO secure that only logged in users can use this
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
 
+    min_verifications = export_format.min_verifications
     annotation_counter = 0
-    annotations = Annotation.objects.filter(image__in=images)
+    annotations = Annotation.objects.annotate_verification_difference().filter(image__in=images, verification_difference__gte=min_verifications)
+
     annotation_content= '\n'
     for annotation in annotations:
         annotation_counter += 1
         if annotation.not_in_image:
             formatted_annotation = export_format.not_in_image_format
-            placeholders_annos={'%%image': annotation.image.name, '%%type': annotation.annotation_type.name}
+            placeholders_annos={'%%image': annotation.image.name, '%%type': annotation.annotation_type.name,
+                                '%%veriamount': annotation.verification_difference}
         else:
             formatted_annotation = export_format.annotation_format
             placeholders_annos = {'%%image': annotation.image.name, '%%type': annotation.annotation_type.name,
+                            '%%veriamount': annotation.verification_difference,
                             #absolute values
                             '%%x1': annotation.vector['x1'], '%%x2': annotation.vector['x2'],
                             '%%y1': annotation.vector['y1'], '%%y2': annotation.vector['y2'],

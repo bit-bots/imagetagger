@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import JSONField
 from django.db import models, connection
 from django.db.models import Subquery, F, IntegerField, OuterRef, QuerySet, Count
+from django.db.models.functions import Coalesce
 
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
@@ -15,18 +16,18 @@ from imagetagger.users.models import Team
 class AnnotationQuerySet(models.QuerySet):
     def annotate_verification_difference(self) -> models.QuerySet:
         return self.annotate(
-            positive_verifications_count=Subquery(
-                Verification.objects.filter(
-                    annotation_id=OuterRef('pk'), verified=False).values(
-                    'annotation_id').annotate(
-                    count=Count('pk')).values('count'),
-                output_field=IntegerField()),
-            negative_verifications_count=Subquery(
+            positive_verifications_count=Coalesce(Subquery(
                 Verification.objects.filter(
                     annotation_id=OuterRef('pk'), verified=True).values(
                     'annotation_id').annotate(
                     count=Count('pk')).values('count'),
-                output_field=IntegerField())).annotate(
+                output_field=IntegerField()), 0),
+            negative_verifications_count=Coalesce(Subquery(
+                Verification.objects.filter(
+                    annotation_id=OuterRef('pk'), verified=False).values(
+                    'annotation_id').annotate(
+                    count=Count('pk')).values('count'),
+                output_field=IntegerField()), 0)).annotate(
             verification_difference=F(
                 'positive_verifications_count') - F('negative_verifications_count'))
 
@@ -271,6 +272,7 @@ class ExportFormat(models.Model):
     base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
     annotation_format = models.TextField() #used for every annotation in export (coordinates, type, image)
     not_in_image_format = models.TextField()
+    min_verifications = models.IntegerField(default=0)
 
     def __str__(self):
         return '{}: {}'.format(self.team.name, self.name)
