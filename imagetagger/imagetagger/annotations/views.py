@@ -236,7 +236,8 @@ def manage_annotations(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.annotate_verification_difference() \
-        .select_related('image', 'user', 'annotation_type').filter(image__in=images) \
+        .select_related('image', 'user', 'last_editor',
+                        'annotation_type').filter(image__in=images) \
         .order_by('id')
     return render(request, 'annotations/manage_annotations.html', {
         'selected_image_set': imageset,
