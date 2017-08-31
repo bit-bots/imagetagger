@@ -356,7 +356,7 @@ def export_format(export_format_name, imageset):
 
     annotation_counter = 0
     annotations = Annotation.objects.filter(image__in=images)
-    annotation_content= ''
+    annotation_content= '\n'
     for annotation in annotations:
         annotation_counter += 1
         if annotation.not_in_image:
@@ -379,7 +379,7 @@ def export_format(export_format_name, imageset):
                             '%%relwidth': annotation.relative_width,'%%relheight': annotation.relative_height}
         for key, value in placeholders_annos.items():
             formatted_annotation = formatted_annotation.replace(key, str(value))
-        annotation_content= annotation_content + formatted_annotation
+        annotation_content= annotation_content + formatted_annotation + '\n'
     base_format = export_format.base_format
     placeholders_base = {'%%content': annotation_content, '%%imageset': imageset.name,
                         '%%setdescription': imageset.description, '%%team': imageset.team,
