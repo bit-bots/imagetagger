@@ -195,7 +195,7 @@ def delete_images(request, image_id):
 def view_imageset(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     # images the imageset contains
-    images = Image.objects.filter(image_set=imageset).order_by('id')
+    images = Image.objects.filter(image_set=imageset).order_by('name')
     # the saved exports of the imageset
     exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
     filtered = False
@@ -329,13 +329,17 @@ def load_image_set(request) -> Response:
 
     serializer = ImageSetSerializer(image_set)
     serialized_image_set = serializer.data
+        # TODO: find a cleaner solution to order related field set wihtin ImageSet serializer
+    serialized_image_set['images'] = ImageSerializer(
+        image_set.images.order_by('name'), many=True).data
     if filter_annotation_type_id:
         filter_annotation_type = get_object_or_404(
             AnnotationType, pk=filter_annotation_type_id)
         # TODO: find a cleaner solution to filter related field set wihtin ImageSet serializer
         serialized_image_set['images'] = ImageSerializer(
             image_set.images.exclude(
-                annotations__annotation_type=filter_annotation_type), many=True).data
+                annotations__annotation_type=filter_annotation_type).order_by(
+                'name'), many=True).data
     return Response({
         'image_set': serialized_image_set,
     }, status=HTTP_200_OK)
