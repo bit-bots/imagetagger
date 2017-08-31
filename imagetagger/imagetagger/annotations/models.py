@@ -81,37 +81,37 @@ class Annotation(models.Model):
 
     @property
     def relative_vector(self):
-        #TODO: currently sets all coordinates to 0, real calculations needed
-        return {'x1': 0, 'x2': 0, 'y1': 0, 'y2': 0}
+        x1rel = self.vector['x1']/self.image.width
+        x2rel = self.vector['x2']/self.image.width
+        y1rel = self.vector['y1']/self.image.height
+        y2rel = self.vector['y2']/self.image.height
+        return {'x1': x1rel, 'x2': x2rel, 'y1': y1rel, 'y2': y2rel}
 
     @property
     def relative_center(self):
-        #TODO: currently sets both coordinates to 0, real calculations needed
-        return {'xc': 0, 'yc': 0}
+        xc_rel = self.center['xc']/self.image.width
+        yc_rel = self.center['yc']/self.image.height
+        return {'xc': xc_rel, 'yc': yc_rel}
 
     @property
     def relative_width(self):
-        #raise NotImplementedError
-        # TODO: real calculations needed
-        return 0
+        rel_width = self.width/self.image.width
+        return rel_width
 
     @property
     def relative_height(self):
-        #raise NotImplementedError
-        # TODO: real calculations needed
-        return 0
+        rel_height = self.height/self.image.height
+        return rel_height
 
     @property
     def relative_radius(self):
-        # raise NotImplementedError
-        # TODO: real calculations needed
-        return 0
+        rel_rad_w = self.radius/self.image.width
+        rel_rad_h = self.radius/self.image.height
+        return (rel_rad_h + rel_rad_w)/2
 
     @property
     def relative_diameter(self):
-        # raise NotImplementedError
-        # TODO: real calculations needed
-        return 0
+        return self.relative_radius*2
 
     @property
     def not_in_image(self) -> bool:

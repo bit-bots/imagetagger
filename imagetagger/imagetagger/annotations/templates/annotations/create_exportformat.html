@@ -50,20 +50,19 @@
             <div class="form-group">
                 <label for="id_annotation_format"><h3>{{ form.annotation_format.label }}</h3></label>
                 {% blocktrans %}
-                    <p><b>PLEASE NOTE: The relative values are not functional yet, they will return 0.</b></p>
                     <p>Use the following placeholders to integrate specific details into your Format:</p>
                     <p><b>%%image:</b> name of the image</p>
                     <p><b>%%type:</b>b annotation type</p>
-                    <p><b>%%x1, %%x1rel:</b> x1-coordinate of the annotation, absolute or relative value</p>
-                    <p><b>%%x2, %%x2rel:</b> x2-coordinate of the annotation, absolute or relative value</p>
-                    <p><b>%%y1, %%y1rel:</b> y1-coordinate of the annotation, absolute or relative value</p>
-                    <p><b>%%y2, %%y2rel:</b> y2-coordinate of the annotation, absolute or relative value</p>
-                    <p><b>%%cx, %%cxrel:</b> x-coordinate of the center of the annotation, absolute or relative value</p>
-                    <p><b>%%cy, %%cyrel:</b> y-coordinate of the center of the annotation, absolute or relative value</p>
-                    <p><b>%%r, %%rrel:</b> radius of the annotation, absolute or relative value</p>
-                    <p><b>%%dia, %%diarel:</b> diameter of the annotation, absolute or relative value</p>
-                    <p><b>%%width, %%widthrel:</b> width of the annotation, absolute or relative value</p>
-                    <p><b>%%height, %%heigthrel:</b> heigth of the annotation, absolute or relative value</p>
+                    <p><b>%%x1, %%relx1:</b> x1-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%x2, %%relx2:</b> x2-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%y1, %%rely1:</b> y1-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%y2, %%rely2:</b> y2-coordinate of the annotation, absolute or relative value</p>
+                    <p><b>%%cx, %%relcx:</b> x-coordinate of the center of the annotation, absolute or relative value</p>
+                    <p><b>%%cy, %%relcy:</b> y-coordinate of the center of the annotation, absolute or relative value</p>
+                    <p><b>%%rad, %%relrad:</b> radius of the annotation, absolute or relative value</p>
+                    <p><b>%%dia, %%reldia:</b> diameter of the annotation, absolute or relative value</p>
+                    <p><b>%%width, %%relwidth:</b> width of the annotation, absolute or relative value</p>
+                    <p><b>%%height, %%relheight:</b> heigth of the annotation, absolute or relative value</p>
                 {% endblocktrans %}
                 {% render_field form.annotation_format class+='form-control'%}
                 {% for error in form.annotation_format.errors %}

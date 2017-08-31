@@ -368,15 +368,15 @@ def export_format(export_format_name, imageset):
                             #absolute values
                             '%%x1': annotation.vector['x1'], '%%x2': annotation.vector['x2'],
                             '%%y1': annotation.vector['y1'], '%%y2': annotation.vector['y2'],
-                            '%%r': annotation.radius, '%%dia': annotation.diameter,
+                            '%%rad': annotation.radius, '%%dia': annotation.diameter,
                             '%%cx': annotation.center['xc'], '%%cy': annotation.center['yc'],
                             '%%width': annotation.width, '%%height': annotation.height,
                             #relative values
-                            '%%x1rel': annotation.relative_vector['x1'], '%%x2rel': annotation.relative_vector['x2'],
-                            '%%y1rel': annotation.relative_vector['y1'],'%%y2rel': annotation.relative_vector['y2'],
-                            '%%rrel': annotation.relative_radius,'%%diarel': annotation.relative_diameter,
-                            '%%cxrel': annotation.relative_center['xc'],'%%cyrel': annotation.relative_center['yc'],
-                            '%%widthrel': annotation.relative_width,'%%heightrel': annotation.relative_height}
+                            '%%relx1': annotation.relative_vector['x1'], '%%relx2': annotation.relative_vector['x2'],
+                            '%%rely1': annotation.relative_vector['y1'],'%%rely2': annotation.relative_vector['y2'],
+                            '%%relrad': annotation.relative_radius,'%%reldia': annotation.relative_diameter,
+                            '%%relcx': annotation.relative_center['xc'],'%%relcy': annotation.relative_center['yc'],
+                            '%%relwidth': annotation.relative_width,'%%relheight': annotation.relative_height}
         for key, value in placeholders_annos.items():
             formatted_annotation = formatted_annotation.replace(key, str(value))
         annotation_content= annotation_content + formatted_annotation

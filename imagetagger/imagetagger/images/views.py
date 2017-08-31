@@ -15,6 +15,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.serializers import ListSerializer
 from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK
+from PIL import Image as PIL_Image
 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer
@@ -103,13 +104,23 @@ def upload_image(request, imageset_id):
                         fchecksum = fchecksum.digest()
                         #Tests for duplicats in imageset
                         if Image.objects.filter(checksum=fchecksum, image_set=imageset).count() == 0:
+
                             img_fname = (''.join(shortname) + '_' +
                                          ''.join(
                                              random.choice(
                                                  string.ascii_uppercase + string.ascii_lowercase + string.digits)
                                              for _ in range(6)) + extension)
+                            with PIL_Image.open(os.path.join(imageset.root_path(), 'tmp', filename)) as image:
+                                width, height = image.size
                             shutil.move(os.path.join(imageset.root_path(), 'tmp', filename), os.path.join(imageset.root_path(), img_fname))
-                            Image(name=filename, image_set=imageset, filename=img_fname, checksum=fchecksum).save()
+                            new_image = Image(name=filename,
+                                              image_set=imageset,
+                                              filename=img_fname,
+                                              checksum=fchecksum,
+                                              width = width,
+                                              height = height
+                                              )
+                            new_image.save()
                         else:
                             os.remove(os.path.join(imageset.root_path(), 'tmp', filename))
                             duplicat_count = duplicat_count + 1

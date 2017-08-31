@@ -2,3 +2,4 @@ Django
 django-progressbarupload
 djangorestframework
 django-widget-tweaks
+Pillow
