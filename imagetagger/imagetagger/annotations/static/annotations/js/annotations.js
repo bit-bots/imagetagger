@@ -23,6 +23,7 @@
   var gImageScale = 0;
   var gInitialized = false;
   var gMousepos;
+  var gRestoreSelection;
   var gSelection;
 
   /**
@@ -38,8 +39,9 @@
    *
    * @param event
    * @param successCallback a function to be executed on success
+   * @param markForRestore
    */
-  function createAnnotation(event, successCallback) {
+  function createAnnotation(event, successCallback, markForRestore) {
     if (event !== undefined) {
       // triggered using an event handler
       event.preventDefault();
@@ -65,6 +67,10 @@
     if (!validate_vector(vector)) {
       displayFeedback($('#feedback_annotation_invalid'));
       return;
+    }
+
+    if (markForRestore === true) {
+      gRestoreSelection = vector;
     }
 
     var action = 'create';
@@ -535,6 +541,7 @@
     var link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
     $('#active_image_name').text(link.text());
+    restoreSelection(false);
 
     if (fromHistory !== true) {
       history.pushState({
@@ -554,7 +561,11 @@
         loading.addClass('hidden');
         displayExistingAnnotations(data.annotations);
 
-        resetSelection(true);
+        if (gRestoreSelection !== undefined) {
+          restoreSelection();
+        } else {
+          resetSelection(true);
+        }
       },
       error: function() {
         loading.addClass('hidden');
@@ -710,6 +721,29 @@
   }
 
   /**
+   * Restore the selection.
+   */
+  function restoreSelection(reset) {
+    if (!$('#keep_selection').prop('checked')) {
+      return;
+    }
+    if (gRestoreSelection !== undefined) {
+      if (gRestoreSelection === null) {
+        notInImage.prop('checked', true);
+      } else {
+        $('#x1Field').val(gRestoreSelection.x1);
+        $('#x2Field').val(gRestoreSelection.x2);
+        $('#y1Field').val(gRestoreSelection.y1);
+        $('#y2Field').val(gRestoreSelection.y2);
+        reloadSelection();
+      }
+    }
+    if (reset !== false) {
+      gRestoreSelection = undefined;
+    }
+  }
+
+  /**
    * Scroll image list to make current image visible.
    */
   function scrollImageList() {
@@ -814,7 +848,7 @@
       event.preventDefault();
       createAnnotation(undefined, function() {
         loadAdjacentImage(-1);
-      });
+      }, true);
     });
     $('#back_button').click(function(event) {
       event.preventDefault();
@@ -828,7 +862,7 @@
       event.preventDefault();
       createAnnotation(undefined, function() {
         loadAdjacentImage(1);
-      });
+      }, true);
     });
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
