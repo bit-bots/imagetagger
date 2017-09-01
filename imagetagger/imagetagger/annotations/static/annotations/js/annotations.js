@@ -532,7 +532,9 @@
     scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
-    $('#annotate_image_link_' + imageId).addClass('active');
+    var link = $('#annotate_image_link_' + imageId);
+    link.addClass('active');
+    $('#active_image_name').text(link.text());
 
     if (fromHistory !== true) {
       history.pushState({
