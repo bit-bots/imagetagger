@@ -124,47 +124,59 @@
                           <input type='checkbox' name='not_in_image' id='not_in_image'>
                           <label for='not_in_image'>Not in the image (g)</label>
                         </p>
-                        <table id="coordinate_table">
+                        <div class="row" id="coordinate_table">
                           {% for field in vector_fields %}
-                            <tr>
-                                <td>
-                                  <label for="{{ field }}Field">
-                                    {{ field }}
-                                  </label>
-                                </td>
-                                <td>
-                                  <input id="{{ field }}Field"
-                                         class="Coordinates annotation_value form-control"
-                                         type="number" name="{{ field }}Field" value="0" min="0">
-                                </td>
-                            </tr>
+                            <div class="col-md-1">
+                              <label for="{{ field }}Field">
+                                  {{ field }}
+                              </label>
+                            </div>
+                            <div class="col-md-11">
+                                <input id="{{ field }}Field"
+                                       class="Coordinates annotation_value form-control"
+                                       type="number" name="{{ field }}Field" value="0" min="0">
+                            </div>
+                            <div class="col-sm-12"></div>
                           {% endfor %}
-                        </table>
-                        <p>
+                        </div>
+                        <br>
+                        <div class="row ">
                           <input type="hidden" name="annotate">
-                          <button type="submit" class="annotate_button btn btn-default" id="save_button">
-                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Save (v)
-                          </button>
-                          <button type="button" class="annotate_button btn btn-default" id="reset_button">
-                            <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>Reset (r)
-                          </button>
-                          <br>
-                          <button type="button" class="annotate_button btn btn-default" id="last_button">
-                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
-                          </button>
-                          <button type="button" class="annotate_button btn btn-default" id="back_button">
-                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
-                          </button>
-                          <br>
-                          <button type="button" class="annotate_button btn btn-default" id="skip_button">
-                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
-                          </button>
-                          <button type="button" class="annotate_button btn btn-default" id="next_button">
-                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
-                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
-                          </button>
-                        </p>
+                          <div class="col-md-6">
+                            <button type="submit" class="annotate_button btn btn-default btn-block" id="save_button">
+                                <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Save (v)
+                            </button>
+                          </div>
+                          <div class="col-md-6">
+                            <button type="button" class="annotate_button btn btn-default btn-block" id="reset_button">
+                                <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>Reset (r)
+                            </button>
+                          </div>
+                          <div class="col-sm-12"><p></p></div>
+                          <div class="col-md-6">
+                            <button type="button" class="annotate_button btn btn-default btn-block" id="last_button">
+                                <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                                <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
+                            </button>
+                          </div>
+                          <div class="col-md-6">
+                            <button type="button" class="annotate_button btn btn-default btn-block" id="back_button">
+                                <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
+                            </button>
+                          </div>
+                          <div class="col-sm-12"><p></p></div>
+                          <div class="col-md-6">
+                            <button type="button" class="annotate_button btn btn-default btn-block" id="skip_button">
+                                <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
+                            </button>
+                          </div>
+                          <div class="col-md-6">
+                            <button type="button" class="annotate_button btn btn-default btn-block" id="next_button">
+                                <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
+                            </button>
+                          </div>
+                        </div>
                     </form>
                 </div>
             </div>
