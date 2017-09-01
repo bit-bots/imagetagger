@@ -798,6 +798,9 @@
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
     $('select#filter_annotation_type').on('change', loadImageList);
+    $('select').on('change', function() {
+      document.activeElement.blur();
+    });
 
     // register click events
     $('#cancel_edit_button').click(function() {
