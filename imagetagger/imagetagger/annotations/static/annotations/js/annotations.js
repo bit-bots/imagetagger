@@ -579,8 +579,6 @@
       $('#annotation_type_id').val(filter);
     }
 
-    console.log(params);
-
     $.ajax(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
       type: 'GET',
       headers: gHeaders,
