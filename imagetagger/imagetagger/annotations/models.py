@@ -244,7 +244,7 @@ class Export(models.Model):
     image_set = models.ForeignKey(ImageSet)
     annotation_count = models.IntegerField(default=0)
     export_text = models.TextField(default='')
-    format = models.ForeignKey('ExportFormat', on_delete=models.CASCADE, related_name='exports')
+    format = models.ForeignKey('ExportFormat', on_delete=models.PROTECT, related_name='exports')
 
     def __str__(self):
         return u'Export: {0}'.format(self.id)
