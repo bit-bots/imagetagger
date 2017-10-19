@@ -186,7 +186,7 @@ def list_images(request, image_set_id):
     if not (imageset.public or imageset.has_perm('read', request.user)):
         return HttpResponseForbidden()
     return TemplateResponse(request, 'images/imagelist.txt', {
-        'images': imageset.image_set.all()
+        'images': imageset.images.all()
     })
 
 
