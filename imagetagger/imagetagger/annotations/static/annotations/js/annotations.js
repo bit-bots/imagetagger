@@ -632,7 +632,7 @@
 
     gImageCache[imageId] = $('<img>');
     gImageCache[imageId].data('imageid', imageId).attr(
-      'src', '/images/image_nginx/' + imageId + '/');
+      'src', '/images/image/' + imageId + '/');
   }
 
   /**
