@@ -23,6 +23,11 @@
                 {% block navblock %}{% endblock %}
                 {% if request.user.is_authenticated %}
                     <li><a href="{% url 'images:explore_imageset' %}">Explore</a></li>
+                {% endif %}
+                {% if USE_IMPRINT %}
+                    <li><a href="{{ IMPRINT_URL }}">{{ IMPRINT_NAME }}</a></li>
+                {% endif %}
+                {% if request.user.is_authenticated %}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">

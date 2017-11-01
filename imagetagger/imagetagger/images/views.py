@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -234,7 +235,8 @@ def view_imageset(request, image_set_id):
         'filtered': filtered,
         'edit_form': ImageSetEditForm(instance=imageset),
         'imageset_perms': imageset.get_perms(request.user),
-        'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team=imageset.team))
+        'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team=imageset.team)),
+        'upload_notice': settings.UPLOAD_NOTICE
     })
 
 

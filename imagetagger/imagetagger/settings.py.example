@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'imagetagger.base.context_processors.imprint_data',
             ],
         },
     },
@@ -155,3 +156,8 @@ IMAGE_EXTENSION = {
     '.jpg',
 }
 USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance
+
+USE_IMPRINT = False
+IMPRINT_NAME = ''
+IMPRINT_URL = ''
+UPLOAD_NOTICE = 'By uploading images to this tool you accept that the images get published under creative commons license and confirm that you have the permission to do so.'

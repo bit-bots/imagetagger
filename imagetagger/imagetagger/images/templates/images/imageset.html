@@ -123,11 +123,11 @@
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         annotation type:
-                        <select name="selected_annotation_type">
+                        <select name="selected_annotation_type" class="form-control">
                           {% include "annotations/annotationtypes.html" %}
                         </select>
 
-                <input name="filter" type="submit" value="filter">
+                <input name="filter" type="submit" value="filter" class="btn btn-primary">
 
                 {% if filtered %}
                     <a href="{{request.get_full_path}}" target="_self"> [x] </a>
@@ -258,7 +258,10 @@
                             </table>
                         </div>
                         {% if not imageset.image_lock %}
-                        Upload new images: <br>
+                        <h3>
+                            Upload new images:
+                        </h3>
+                        {{ upload_notice|safe }}
                         <div >
                             <form id="fileupload" action="{% url 'images:upload_image' imageset.id %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
