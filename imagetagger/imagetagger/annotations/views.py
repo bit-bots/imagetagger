@@ -112,11 +112,6 @@ def annotate(request, image_id):
     else:
         return redirect(reverse('images:view_imageset', args=(selected_image.image_set.id,)))
 
-def types(request):
-    typelist = AnnotationType.objects.filter(active=True).order_by('name')
-    return render(request, 'annotations/types.html', {
-        'annotation_types': typelist,
-    })
 
 @login_required
 def edit_annotation(request, annotation_id):

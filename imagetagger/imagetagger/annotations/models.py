@@ -233,7 +233,6 @@ class Annotation(models.Model):
 class AnnotationType(models.Model):
     name = models.CharField(max_length=20, unique=True)
     active = models.BooleanField(default=True)
-    description = models.TextField(default='')
 
     def __str__(self):
         return u'AnnotationType: {0}'.format(self.name)
