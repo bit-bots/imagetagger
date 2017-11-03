@@ -26,7 +26,8 @@ def create_team(request):
         if form.is_valid():
             with transaction.atomic():
                 form.instance.save()
-                form.instance.memberships.create(user=request.user, is_admin=True)
+                form.instance.memberships.create(user=request.user,
+                                                 is_admin=True)
             return redirect(reverse('users:team', args=(form.instance.id,)))
     return render(request, 'users/create_team.html', {
         'form': form,
@@ -96,9 +97,12 @@ def explore_team(request):
 def explore_user(request):
     users = User.objects.annotate(points=Subquery(
         Verification.objects.filter(
-            verified=True, annotation__user_id=OuterRef('pk')).values('annotation__user_id').annotate(
-            count=Count('annotation__user_id')).values('count'),
-        output_field=IntegerField())).all().order_by(F('points').desc(nulls_last=True)).distinct()
+            verified=True,
+            annotation__user_id=OuterRef('pk'))
+        .values('annotation__user_id')
+        .annotate(count=Count('annotation__user_id'))
+        .values('count'), output_field=IntegerField())).all()\
+        .order_by(F('points').desc(nulls_last=True)).distinct()
 
     query = request.GET.get('query')
     if query:
@@ -164,13 +168,14 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
     if not team.has_perm('user_management', request.user):
         messages.warning(
             request, _(
-                'You do not have the permission to add users to the team {}.').format(
-                    team.name))
+                'You do not have the permission to add users to the team {}.')
+            .format(team.name))
         return redirect(reverse('users:team', args=(team_id,)))
 
     user = User.objects.filter(username=username).first()
     if not user:
-        messages.warning(request, _('The user {} does not exist.').format(username))
+        messages.warning(request, _('The user {} does not exist.')
+                         .format(username))
         return redirect(reverse('users:team', args=(team_id,)))
 
     if team.members.filter(pk=user.pk).exists():
@@ -181,9 +186,9 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
 
     team.memberships.create(user=user)
 
-    messages.success(request, _(
-        'The user {} has been added to the team successfully.').format(
-        username))
+    messages.success(request,
+                     _('The user {} has been added to the team successfully.')
+                     .format(username))
 
     return redirect(reverse('users:team', args=(team_id,)))
 
@@ -213,7 +218,8 @@ def user(request, user_id):
     teams = Team.objects.filter(members=user)
 
     # TODO: use a database trigger (after migrating to a custom user model for that)
-    points = Verification.objects.filter(verified=True, annotation__user=user).count()
+    points = Verification.objects.filter(verified=True, annotation__user=user)\
+        .count()
 
     return render(request, 'users/view_user.html', {
         'user': user,
@@ -232,7 +238,8 @@ def login_view(request):
 
     if request.method == 'POST':
         if request.POST.get('login') is not None:
-            authentication_form = AuthenticationForm(request=request, data=request.POST)
+            authentication_form = AuthenticationForm(request=request,
+                                                     data=request.POST)
             if authentication_form.is_valid():
                 login(request, authentication_form.user_cache)
                 return redirect(reverse('images:index'))
@@ -241,14 +248,16 @@ def login_view(request):
             registration_form = RegistrationForm(request.POST)
 
             if registration_form.is_valid():
-                if User.objects.filter(username=registration_form.instance.username).exists():
+                if User.objects.filter(
+                        username=registration_form.instance.username).exists():
                     registration_form.add_error(
                         'username',
                         _('A user with that username or email address exists.'))
                 else:
                     User.objects.create_user(**registration_form.cleaned_data)
                     registration_success = True
-                    messages.success(request, _('Your account was successfully created.'))
+                    messages.success(request,
+                                     _('Your account was successfully created.'))
 
     return render(request, 'users/login.html', {
         'authentication_form': authentication_form,

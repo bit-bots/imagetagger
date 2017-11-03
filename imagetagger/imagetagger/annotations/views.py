@@ -262,7 +262,7 @@ def verify(request, annotation_id):
     annotation = get_object_or_404(
         Annotation.objects.select_related(), id=annotation_id)
 
-    #checks if user has already verified this tag
+    # checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
         messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
 
@@ -272,18 +272,19 @@ def verify(request, annotation_id):
     set_annotations = Annotation.objects.select_related().filter(image__in=set_images)
     set_annotations = set_annotations.order_by('id')
 
-    #filtering of annotations for certain annotations types and/or ones that the user has already verified
+    # filtering of annotations for certain annotations types
+    # and/or ones that the user has already verified
     user_veri = request.GET.get("filter_veri")
     veri_pushed = request.GET.get("filter_button")
     annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
     filtered = request.GET.get("selected_annotation_type")
     new_filter = request.GET.get("filter")
     if filtered is not None and user_veri is not None:
-        #filters for both annotation type and not verified by user
+        # filters for both annotation type and not verified by user
         set_annotations = set_annotations.filter(
             ~Q(verified_by=request.user), annotation_type_id=filtered)
         if not set_annotations:
-            #if there are no search results the search will be resetted
+            # if there are no search results the search will be resetted
             messages.info(request, 'There are no unverified tags of this type in this set!')
             set_annotations = Annotation.objects.filter(image__in=set_images)
             filtered = None
@@ -292,10 +293,10 @@ def verify(request, annotation_id):
             # sets the current viewed annotation to the one on top of the filtered list
             annotation = set_annotations[0]
     elif filtered is not None:
-        #filters annotations for certain types
+        # filters annotations for certain types
         set_annotations = set_annotations.filter(annotation_type_id=filtered)
         if not set_annotations:
-            #if there are no search results the search will be resetted
+            # if there are no search results the search will be resetted
             messages.info(request, 'There are no tags of this type in this set!')
             set_annotations = Annotation.objects.filter(image__in=set_images)
             filtered = None
@@ -303,10 +304,10 @@ def verify(request, annotation_id):
             # sets the current viewed annotation to the one on top of the filtered list
             annotation = set_annotations[0]
     elif user_veri is not None:
-        #filters for not verified annotations for user
+        # filters for not verified annotations for user
         set_annotations = set_annotations.exclude(verified_by=request.user)
         if not set_annotations:
-            #if there are no search results the search will be resetted
+            # if there are no search results the search will be resetted
             messages.info(request, 'There are no unverified tags in this set!')
             set_annotations = Annotation.objects.filter(image__in=set_images)
             user_veri = None
@@ -350,7 +351,7 @@ def verify(request, annotation_id):
     })
 
 
-#TODO secure that only logged in users can use this
+# TODO secure that only logged in users can use this
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
@@ -368,27 +369,41 @@ def export_format(export_format_name, imageset):
                                 '%%veriamount': annotation.verification_difference}
         else:
             formatted_annotation = export_format.annotation_format
-            placeholders_annos = {'%%image': annotation.image.name, '%%type': annotation.annotation_type.name,
-                            '%%veriamount': annotation.verification_difference,
-                            #absolute values
-                            '%%x1': annotation.vector['x1'], '%%x2': annotation.vector['x2'],
-                            '%%y1': annotation.vector['y1'], '%%y2': annotation.vector['y2'],
-                            '%%rad': annotation.radius, '%%dia': annotation.diameter,
-                            '%%cx': annotation.center['xc'], '%%cy': annotation.center['yc'],
-                            '%%width': annotation.width, '%%height': annotation.height,
-                            #relative values
-                            '%%relx1': annotation.relative_vector['x1'], '%%relx2': annotation.relative_vector['x2'],
-                            '%%rely1': annotation.relative_vector['y1'],'%%rely2': annotation.relative_vector['y2'],
-                            '%%relrad': annotation.relative_radius,'%%reldia': annotation.relative_diameter,
-                            '%%relcx': annotation.relative_center['xc'],'%%relcy': annotation.relative_center['yc'],
-                            '%%relwidth': annotation.relative_width,'%%relheight': annotation.relative_height}
+            placeholders_annos = {
+                '%%image': annotation.image.name,
+                '%%type': annotation.annotation_type.name,
+                '%%veriamount': annotation.verification_difference,
+                # absolute values
+                '%%x1': annotation.vector['x1'],
+                '%%x2': annotation.vector['x2'],
+                '%%y1': annotation.vector['y1'],
+                '%%y2': annotation.vector['y2'],
+                '%%rad': annotation.radius,
+                '%%dia': annotation.diameter,
+                '%%cx': annotation.center['xc'],
+                '%%cy': annotation.center['yc'],
+                '%%width': annotation.width,
+                '%%height': annotation.height,
+                # relative values
+                '%%relx1': annotation.relative_vector['x1'],
+                '%%relx2': annotation.relative_vector['x2'],
+                '%%rely1': annotation.relative_vector['y1'],
+                '%%rely2': annotation.relative_vector['y2'],
+                '%%relrad': annotation.relative_radius,
+                '%%reldia': annotation.relative_diameter,
+                '%%relcx': annotation.relative_center['xc'],
+                '%%relcy': annotation.relative_center['yc'],
+                '%%relwidth': annotation.relative_width,
+                '%%relheight': annotation.relative_height}
         for key, value in placeholders_annos.items():
             formatted_annotation = formatted_annotation.replace(key, str(value))
-        annotation_content= annotation_content + formatted_annotation + '\n'
+        annotation_content = annotation_content + formatted_annotation + '\n'
     base_format = export_format.base_format
-    placeholders_base = {'%%content': annotation_content, '%%imageset': imageset.name,
-                        '%%setdescription': imageset.description, '%%team': imageset.team,
-                        '%%setlocation': imageset.location}
+    placeholders_base = {'%%content': annotation_content,
+                         '%%imageset': imageset.name,
+                         '%%setdescription': imageset.description,
+                         '%%team': imageset.team,
+                         '%%setlocation': imageset.location}
     for key, value in placeholders_base.items():
         base_format = base_format.replace(key, str(value))
     return base_format, annotation_counter
@@ -397,7 +412,7 @@ def export_format(export_format_name, imageset):
 @login_required
 def create_exportformat(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
-    #TODO: permission for ExportFormats??
+    # TODO: permission for ExportFormats??
 
     form = ExportFormatCreationForm()
 
