@@ -121,3 +121,27 @@ a.bitbot-logo{
 table#coordinate_table tr td:nth-of-type(1) {
   width: 3.5em;
 }
+
+/* Sticky footer styles (from http://holdirbootstrap.de/examples/sticky-footer-navbar/sticky-footer-navbar.css)
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+
+.container .text-muted {
+  margin: 20px 0;
+}
