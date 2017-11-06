@@ -20,6 +20,7 @@
                             <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
                         {% endfor %}
                     </ul>
+                    Additional public imagesets, not belonging to any of your teams, can be found in the <a href="{% url 'images:explore_imageset' %}">explore view</a> .
                 </div>
             </div>
         </div>
