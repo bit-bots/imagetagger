@@ -342,8 +342,9 @@ def delete_imageset(request, imageset_id):
 
 
 def dl_script(request):
-    return TemplateResponse(
-        request, 'images/download.sh', content_type='text/plain')
+    return TemplateResponse(request, 'images/download.sh', context={
+        'base_url': settings.DOWNLOAD_BASE_URL,
+        }, content_type='text/plain')
 
 
 @login_required

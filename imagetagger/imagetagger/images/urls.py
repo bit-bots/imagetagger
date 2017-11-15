@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^image/upload/(\d+)/$', views.upload_image, name='upload_image'),
     url(r'^image/(\d+)/$', views.view_image, name='view_image'),
     url(r'^imagelist/(\d+)/$', views.list_images, name='list_images'),
+    url(r'^imagelist/$', views.list_images, name='dl_list_images'),
     url(r'^imageset/(\d+)/create/$', views.create_imageset, name='create_imageset'),
     url(r'^imageset/(\d+)/delete/$', views.delete_imageset, name='delete_imageset'),
     url(r'^imageset/(\d+)/edit/$', views.edit_imageset, name='edit_imageset'),
