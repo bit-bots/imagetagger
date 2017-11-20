@@ -55,18 +55,9 @@ class ImageSet(models.Model):
 
     def get_perms(self, user: get_user_model()) -> Set[str]:
         """Get all permissions of the user."""
+        perms = set()
         if self.team.is_admin(user):
-            return {
-                'annotate',
-                'create_export',
-                'delete_annotation',
-                'delete_export',
-                'edit_annotation',
-                'edit_set',
-                'read',
-            }
-        elif self.team.is_member(user):
-            return {
+            perms.update({
                 'annotate',
                 'create_export',
                 'delete_annotation',
@@ -75,15 +66,25 @@ class ImageSet(models.Model):
                 'edit_annotation',
                 'edit_set',
                 'read',
-            }
-        elif self.public:
-            return {
+            })
+        if self.team.is_member(user):
+            perms.update({
+                'annotate',
+                'create_export',
+                'delete_annotation',
+                'delete_export',
+                'edit_annotation',
+                'edit_set',
+                'read',
+            })
+        if self.public:
+            perms.update({
                 'annotate',
                 'delete_annotation',
                 'edit_annotation',
                 'read',
-            }
-        return set()
+            })
+        return perms
 
 
     def has_perm(self, permission: str, user: get_user_model()) -> bool:
