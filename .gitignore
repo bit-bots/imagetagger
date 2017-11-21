@@ -1,6 +1,10 @@
+# rope
+.ropeproject
+
 *.swp
 *.swo
-settings.py
+# settings.py
+
 # ---> Python
 # Byte-compiled / optimized / DLL files
 __pycache__/
