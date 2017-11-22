@@ -162,10 +162,12 @@
                                     <td>Name</td>
                                     <td>{{imageset.name}}</td>
                                 </tr>
-                                <tr>
-                                    <td>Team</td>
-                                    <td><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a></td>
-                                </tr>
+                                {% if imageset.team %}
+                                    <tr>
+                                        <td>Team</td>
+                                        <td><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a></td>
+                                    </tr>
+                                {% endif %}
                                 <tr>
                                     <td>Location</td>
                                     <td>{{imageset.location}}</td>

@@ -11,6 +11,11 @@
                     <em>{{ team }}</em>?
                 </p>
             {% endblocktrans %}
+            {% if last %}
+                <p class="text-danger">
+                    You are the last member of the team! When you leave, the team gets deleted and all imagesets owned by it will be public!
+                </p>
+            {% endif %}
         {% else %}
             {% blocktrans with team=team.name user=user.username %}
                 <p>

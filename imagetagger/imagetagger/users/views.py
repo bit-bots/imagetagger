@@ -142,6 +142,12 @@ def leave_team(request, team_id, user_id=None):
 
     if request.method == 'POST':
         team.memberships.filter(user=user).delete()
+        if team.memberships.count() is 0:
+            for imageset in ImageSet.objects.filter(team=team):
+                imageset.public = True
+                imageset.image_lock = True
+                imageset.save()
+            team.delete()
         if user == request.user:
             return redirect(reverse('users:explore_team'))
         return redirect(reverse('users:team', args=(team.id,)))
@@ -149,6 +155,7 @@ def leave_team(request, team_id, user_id=None):
     return render(request, 'users/leave_team.html', {
         'user': user,
         'team': team,
+        'last': team.memberships.count() is 1,
     })
 
 

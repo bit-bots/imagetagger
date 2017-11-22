@@ -42,7 +42,7 @@ class ImageSet(models.Model):
     description = models.TextField(max_length=1000, null=True)
     time = models.DateTimeField(auto_now_add=True)
     team = models.ForeignKey(
-        Team, on_delete=models.PROTECT, related_name='image_sets')
+        Team, on_delete=models.SET_NULL, related_name='image_sets', null=True, blank=True)
     public = models.BooleanField(default=False)
     image_lock = models.BooleanField(default=False)
 
@@ -56,27 +56,28 @@ class ImageSet(models.Model):
     def get_perms(self, user: get_user_model()) -> Set[str]:
         """Get all permissions of the user."""
         perms = set()
-        if self.team.is_admin(user):
-            perms.update({
-                'annotate',
-                'create_export',
-                'delete_annotation',
-                'delete_export',
-                'delete_set',
-                'edit_annotation',
-                'edit_set',
-                'read',
-            })
-        if self.team.is_member(user):
-            perms.update({
-                'annotate',
-                'create_export',
-                'delete_annotation',
-                'delete_export',
-                'edit_annotation',
-                'edit_set',
-                'read',
-            })
+        if self.team is not None:
+            if self.team.is_admin(user):
+                perms.update({
+                    'annotate',
+                    'create_export',
+                    'delete_annotation',
+                    'delete_export',
+                    'delete_set',
+                    'edit_annotation',
+                    'edit_set',
+                    'read',
+                })
+            if self.team.is_member(user):
+                perms.update({
+                    'annotate',
+                    'create_export',
+                    'delete_annotation',
+                    'delete_export',
+                    'edit_annotation',
+                    'edit_set',
+                    'read',
+                })
         if self.public:
             perms.update({
                 'annotate',
@@ -85,7 +86,6 @@ class ImageSet(models.Model):
                 'read',
             })
         return perms
-
 
     def has_perm(self, permission: str, user: get_user_model()) -> bool:
         """Check whether user has specified permission."""
