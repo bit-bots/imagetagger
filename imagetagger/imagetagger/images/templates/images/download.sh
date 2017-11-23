@@ -1,5 +1,8 @@
 #! /bin/bash
-
+if [[ -z $1 ]]; then
+    echo "No imageset specified!"
+    exit 1
+fi
 echo "Please enter Username and Password for the imagetagger. This script will download into the current directory"
 read -p "User: " USER
 read -s -p "Password: " PASSWD
@@ -19,7 +22,7 @@ else
     exit 1
 fi
 # Download images
-images=`wget -nv --keep-session-cookies --save-cookies ${TMP}/cookie --load-cookies ${TMP}/cookie ${BASEURL}{% url 'images:dl_list_images' %}$1/ -O -`
+images=`wget -nv --keep-session-cookies --save-cookies ${TMP}/cookie --load-cookies ${TMP}/cookie ${BASEURL}/images/imagelist/$1/ -O -`
 for image in ${images}
   do
     image=`echo ${image} | tail -1`
