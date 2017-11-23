@@ -766,10 +766,10 @@
    * @param selection
    */
   function updateAnnotationFields(img, selection) {
-    $('#x1Field').val(Math.ceil(selection.x1 * gImageScale));
-    $('#y1Field').val(Math.ceil(selection.y1 * gImageScale));
-    $('#x2Field').val(Math.floor(selection.x2 * gImageScale));
-    $('#y2Field').val(Math.floor(selection.y2 * gImageScale));
+    $('#x1Field').val(Math.round(selection.x1 * gImageScale));
+    $('#y1Field').val(Math.round(selection.y1 * gImageScale));
+    $('#x2Field').val(Math.round(selection.x2 * gImageScale));
+    $('#y2Field').val(Math.round(selection.y2 * gImageScale));
     $('#not_in_image').prop('checked', false).change();
   }
 
