@@ -26,7 +26,5 @@ class ImageSetEditForm(forms.ModelForm):
 
 
 class LabelUploadForm(forms.Form):
-    class Meta:
-        file = forms.FileField()
-        verify = forms.CheckboxInput()
-        verify.initial = False
+    file = forms.FileField()
+    verify = forms.BooleanField(required=None)

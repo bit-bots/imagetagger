@@ -317,9 +317,11 @@
                         or:<br>
                         image name|annotation type|not in image<br>&nbsp;<br>
                         One annotation per line. The annotation type has to exist in the imagetagger too.
-                        <form action="{% url  %}" method="POST">
+                        <form action="{% url 'images:label_upload' imageset.id %}" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
-                        </form>
+                            {{ label_upload_form }}<br>
+                        <input type="submit" class="btn btn-primary" value="Upload labels">
+                    </form>
                     </div>
                 </div>
             </div>

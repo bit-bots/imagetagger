@@ -11,7 +11,6 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequ
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
-from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -25,7 +24,7 @@ from imagetagger.users.forms import TeamCreationForm
 from .models import ImageSet, Image
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
-    AnnotationType
+    AnnotationType, Verification
 
 from imagetagger.users.models import Team
 import os
@@ -34,7 +33,6 @@ import string
 import random
 import zipfile
 import hashlib
-import uuid
 
 
 @login_required
@@ -255,7 +253,8 @@ def view_imageset(request, image_set_id):
         'edit_form': ImageSetEditForm(instance=imageset),
         'imageset_perms': imageset.get_perms(request.user),
         'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team=imageset.team)),
-        'upload_notice': settings.UPLOAD_NOTICE
+        'label_upload_form': LabelUploadForm(),
+        'upload_notice': settings.UPLOAD_NOTICE,
     })
 
 
@@ -350,18 +349,60 @@ def label_upload(request, imageset_id):
     if not imageset.has_perm('annotate', request.user):
         messages.warning(request,
                          _('You do not have permission to upload the annotations to this set.'))
-        return redirect(reverse('images:imageset', args=(imageset_id,)))
+        return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
+    images = Image.objects.filter(image_set=imageset)
     if request.method == 'POST':
-        form = LabelUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            fs = FileSystemStorage()
-            annotation = Annotation()
+        error_count = 0
+        similar_count = 0
+        verify = 'verify' in request.POST.keys()
+        for line in request.FILES['file']:
+            dec_line = line.decode().replace('\n', '')
+            line_frags = dec_line.split('|')
+            image = images.filter(name=line_frags[0])
+            if image.exists():
+                image = image[0]
+                annotation_type = AnnotationType.objects.filter(name=line_frags[1])
+                if annotation_type.exists():
+                    annotation_type = annotation_type[0]
+                    vector = False
+                    if line_frags[2] == 'not in image':
+                        vector = None
+                    elif int(line_frags[2]) and int(line_frags[3]) and int(line_frags[4]) and int(line_frags[5]):
+                        vector = {
+                            'x1': int(line_frags[2]),
+                            'y1': int(line_frags[3]),
+                            'x2': int(line_frags[4]),
+                            'y2': int(line_frags[5]),
+                        }
+                    if Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+                        if not Annotation.similar_annotations(vector, image, annotation_type):
+                            annotation = Annotation()
+                            annotation.annotation_type = annotation_type
+                            annotation.image = image
+                            annotation.user = request.user
+                            annotation.vector = vector
+                            annotation.save()
+                            if verify:
+                                verification = Verification()
+                                verification.user = request.user
+                                verification.annotation = annotation
+                                verification.verified = True
+                                verification.save()
+                        else:
+                            similar_count += 1
+                    else:
+                        error_count += 1
+                else:
+                    error_count += 1
 
-
-    return render(request, 'images/delete_imageset.html', {
-        'imageset': imageset,
-    })
+            else:
+                error_count += 1
+        messages.warning(
+            request,
+            _('The label upload ended with {} errors and {} similar existing labels.')
+            .format(error_count, similar_count))
+    return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
 
 def dl_script(request):
@@ -404,6 +445,5 @@ def load_image_set(request) -> Response:
         'image_set': serialized_image_set,
     }, status=HTTP_200_OK)
 
-def handle_label_upload(imageset: ImageSet, uploadfile, verify):
-    filename = imageset.root_path() + 'labelupload' + uuid.uuid4().hex[:10]
-    with open(filename, 'wb+') as filestream:
+
+
