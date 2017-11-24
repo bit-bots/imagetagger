@@ -166,5 +166,7 @@ DOWNLOAD_BASE_URL = '' # the URL where the imagetagger is hosted e.g. https://im
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
+UPLOAD_FS_GROUP = 33  # www-data on debian
+
 ## Test mail functionality by printing mails to console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

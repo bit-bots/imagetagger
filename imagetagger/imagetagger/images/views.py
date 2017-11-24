@@ -102,8 +102,8 @@ def upload_image(request, imageset_id):
                     if extension.lower() in settings.IMAGE_EXTENSION:
                         # creates a checksum for image
                         fchecksum = hashlib.sha512()
-                        with open(os.path.join(imageset.root_path(), 'tmp',
-                                               filename), 'rb') as fil:
+                        file_path = os.path.join(imageset.root_path(), 'tmp', filename)
+                        with open(file_path, 'rb') as fil:
                             while True:
                                 buf = fil.read(10000)
                                 if not buf:
@@ -119,14 +119,11 @@ def upload_image(request, imageset_id):
                                              random.choice(
                                                  string.ascii_uppercase + string.ascii_lowercase + string.digits)
                                              for _ in range(6)) + extension)
-                            with PIL_Image.open(os.path.join(
-                                    imageset.root_path(), 'tmp',
-                                    filename)) as image:
+                            with PIL_Image.open(file_path) as image:
                                 width, height = image.size
-                            shutil.move(os.path.join(imageset.root_path(),
-                                                     'tmp', filename),
-                                        os.path.join(imageset.root_path(),
-                                                     img_fname))
+                            file_new_path = os.path.join(imageset.root_path(), img_fname)
+                            shutil.move(file_path, file_new_path)
+                            shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
                             new_image = Image(name=filename,
                                               image_set=imageset,
                                               filename=img_fname,
@@ -159,6 +156,7 @@ def upload_image(request, imageset_id):
                     with open(image.path(), 'wb') as out:
                         for chunk in f.chunks():
                             out.write(chunk)
+                    shutil.chown(image.path(), group=settings.UPLOAD_FS_GROUP)
                 else:
                     messages.warning(request, "This image already exists in this set!")
             json_files.append({'name': f.name,
@@ -287,7 +285,9 @@ def create_imageset(request, team_id):
                     form.instance.save()
 
                     # create a folder to store the images of the set
-                    os.makedirs(form.instance.root_path())
+                    folder_path = form.instance.root_path()
+                    os.makedirs(folder_path)
+                    shutil.chown(folder_path, group=settings.UPLOAD_FS_GROUP)
 
                 messages.success(request,
                                  _('The image set was created successfully.'))
