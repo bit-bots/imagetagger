@@ -23,3 +23,10 @@ class ImageSetEditForm(forms.ModelForm):
             'public',
             'image_lock',
         ]
+
+
+class LabelUploadForm(forms.Form):
+    class Meta:
+        file = forms.FileField()
+        verify = forms.CheckboxInput()
+        verify.initial = False

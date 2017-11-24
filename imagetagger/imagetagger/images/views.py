@@ -11,6 +11,7 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequ
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
+from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -22,6 +23,7 @@ from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer
 from imagetagger.users.forms import TeamCreationForm
 from .models import ImageSet, Image
+from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType
 
@@ -32,6 +34,7 @@ import string
 import random
 import zipfile
 import hashlib
+import uuid
 
 
 @login_required
@@ -341,6 +344,26 @@ def delete_imageset(request, imageset_id):
     })
 
 
+@login_required
+def label_upload(request, imageset_id):
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if not imageset.has_perm('annotate', request.user):
+        messages.warning(request,
+                         _('You do not have permission to upload the annotations to this set.'))
+        return redirect(reverse('images:imageset', args=(imageset_id,)))
+
+    if request.method == 'POST':
+        form = LabelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            fs = FileSystemStorage()
+            annotation = Annotation()
+
+
+    return render(request, 'images/delete_imageset.html', {
+        'imageset': imageset,
+    })
+
+
 def dl_script(request):
     return TemplateResponse(request, 'images/download.sh', context={
         'base_url': settings.DOWNLOAD_BASE_URL,
@@ -380,3 +403,7 @@ def load_image_set(request) -> Response:
     return Response({
         'image_set': serialized_image_set,
     }, status=HTTP_200_OK)
+
+def handle_label_upload(imageset: ImageSet, uploadfile, verify):
+    filename = imageset.root_path() + 'labelupload' + uuid.uuid4().hex[:10]
+    with open(filename, 'wb+') as filestream:

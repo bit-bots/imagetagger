@@ -309,6 +309,17 @@
                             </form>
                         </div>
                         {% endif %}
+                        <h3>
+                            Upload existing Labels
+                        </h3>
+                        Here you can upload existing labels as a text file in the following format:<br>
+                        image name|annotation type|x1|y1|x2|y2<br>
+                        or:<br>
+                        image name|annotation type|not in image<br>&nbsp;<br>
+                        One annotation per line. The annotation type has to exist in the imagetagger too.
+                        <form action="{% url  %}" method="POST">
+                            {% csrf_token %}
+                        </form>
                     </div>
                 </div>
             </div>
