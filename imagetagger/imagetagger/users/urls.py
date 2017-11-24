@@ -1,12 +1,10 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 
 from . import views
 
 
 app_name = 'users'
 urlpatterns = [
-    url(r'^login/$', views.login_view, name='login'),
-    url(r'^logout/', views.logout_view, name='logout'),
     url(r'^team/(\d+)/$', views.view_team, name='team'),
     url(r'^team/create/$', views.create_team, name='create_team'),
     url(r'^team/explore/$', views.explore_team, name='explore_team'),

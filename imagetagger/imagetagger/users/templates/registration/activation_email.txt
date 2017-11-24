@@ -1,0 +1,4 @@
+You have requested an account for {{ site.name }}
+
+Please click the following link to finish the registration:
+https://{{ site.domain }}{% url 'registration_activate' activation_key %}

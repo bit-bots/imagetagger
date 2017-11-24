@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Create a new user</h2>
+                </div>
+                <div class="panel-body">
+                    <form action="{% url 'registration_register' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_username">{{ form.username.label }}</label>
+                            {% render_field form.username class+='form-control' %}
+                            {% for error in form.username.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_password1">{{ form.password1.label }}</label>
+                            {% render_field form.password1 class+='form-control' %}
+                            {% for error in form.password1.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_password2">{{ form.password2.label }}</label>
+                            {% render_field form.password2 class+='form-control' %}
+                            {% for error in form.password2.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_email">{{ form.email.label }}</label>
+                            {% render_field form.email class+='form-control' %}
+                            {% for error in form.email.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.non_field_errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                        <input class="btn btn-default" type="submit" name="registration" value="{% trans 'Create' %}">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock bodyblock %}

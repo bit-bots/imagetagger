@@ -159,11 +159,6 @@ def leave_team(request, team_id, user_id=None):
     })
 
 
-def logout_view(request):
-    logout(request)
-    return redirect(reverse('images:index'))
-
-
 @require_POST
 @login_required
 def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
@@ -232,42 +227,4 @@ def user(request, user_id):
         'user': user,
         'teams': teams,
         'points': points,
-    })
-
-
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect(reverse('images:index'))
-
-    authentication_form = AuthenticationForm()
-    registration_form = RegistrationForm()
-    registration_success = False
-
-    if request.method == 'POST':
-        if request.POST.get('login') is not None:
-            authentication_form = AuthenticationForm(request=request,
-                                                     data=request.POST)
-            if authentication_form.is_valid():
-                login(request, authentication_form.user_cache)
-                return redirect(reverse('images:index'))
-        else:
-            # registration
-            registration_form = RegistrationForm(request.POST)
-
-            if registration_form.is_valid():
-                if User.objects.filter(
-                        username=registration_form.instance.username).exists():
-                    registration_form.add_error(
-                        'username',
-                        _('A user with that username or email address exists.'))
-                else:
-                    User.objects.create_user(**registration_form.cleaned_data)
-                    registration_success = True
-                    messages.success(request,
-                                     _('Your account was successfully created.'))
-
-    return render(request, 'users/login.html', {
-        'authentication_form': authentication_form,
-        'registration_form': registration_form,
-        'registration_success': registration_success,
     })
