@@ -14,7 +14,7 @@ IFS=','
 echo ""
 # Login
 CSRF=`wget -nv --keep-session-cookies --save-cookies ${TMP}/cookie ${BASEURL} -O - | grep csrfmiddlewaretoken | tail -n 1 | sed -E "s/.*value='(.*)' .*/\1/g"`
-wget -nv --referer ${BASEURL}{% url 'users:login' %} --keep-session-cookies --save-cookies ${TMP}/cookie --load-cookies ${TMP}/cookie --post-data "username=${USER}&password=${PASSWD}&csrfmiddlewaretoken=$CSRF&login" $BASEURL{% url 'users:login' %} -O - >/dev/null
+wget -nv --referer ${BASEURL}{% url 'login' %} --keep-session-cookies --save-cookies ${TMP}/cookie --load-cookies ${TMP}/cookie --post-data "username=${USER}&password=${PASSWD}&csrfmiddlewaretoken=$CSRF&login" $BASEURL{% url 'users:login' %} -O - >/dev/null
 if grep --quiet sessionid ${TMP}/cookie; then
     echo "Login success"
 else
