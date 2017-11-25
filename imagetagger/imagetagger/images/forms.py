@@ -23,3 +23,8 @@ class ImageSetEditForm(forms.ModelForm):
             'public',
             'image_lock',
         ]
+
+
+class LabelUploadForm(forms.Form):
+    file = forms.FileField()
+    verify = forms.BooleanField(required=None)

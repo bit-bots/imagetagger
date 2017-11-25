@@ -29,9 +29,10 @@
                                 <ul class="dropdown-menu">
                                     {% if request.user.is_authenticated %}
                                         <li><a href="{% url 'users:user' user.id %}">Profile</a> </li>
-                                        <li><a href="{% url 'users:logout' %}">Logout</a></li>
+                                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                                        <li><a href="{% url 'password_change' %}">Change Password</a></li>
                                     {% else %}
-                                        <li><a href="{% url 'users:login' %}">Login</a></li>
+                                        <li><a href="{% url 'login' %}">Login</a></li>
                                     {% endif %}
                                 </ul>
                             </li>

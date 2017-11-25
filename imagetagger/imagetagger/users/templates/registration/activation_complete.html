@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h1 class="panel-title">{% trans 'Registration' %}</h1>
+                </div>
+                <div class="panel-body">
+                    <p>Registration Complete</p>
+                    <p><a href="{% url 'login' %}">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock bodyblock %}

@@ -3,3 +3,4 @@ djangorestframework
 django-widget-tweaks
 Pillow
 psycopg2
+django-registration

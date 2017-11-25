@@ -13,6 +13,13 @@
         <div class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-body">
+                    {% if not team.admins and request.user in members %}
+                        Your team has no admin!
+                        <form method="POST" action="{% url 'users:grant_team_admin' team.id request.user.id %}">
+                            {% csrf_token %}
+                            <input type="submit" value="I want to become admin!" class="btn btn-link" />
+                        </form>
+                    {% endif %}
                     <h3>Imagesets</h3>
                     <ul>
                         {% for imageset in imagesets %}
@@ -41,6 +48,9 @@
                         {% for member in members %}
                             <tr>
                                 <td>
+                                    {% if member in team.admins %}
+                                        <span class="glyphicon glyphicon-king"></span>
+                                    {% endif %}
                                     <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
                                 </td>
                                 {% if member == request.user  %}
