@@ -25,7 +25,7 @@ SECRET_KEY = '9x)d3h#dczqi^4zupz6d_s(jmtsm1cdjgkt4fb=w)%4$!^cyn6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -80,11 +80,12 @@ WSGI_APPLICATION = 'imagetagger.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': '127.0.0.1',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'imagetagger',
         'PASSWORD': 'imagetagger',
         'USER': 'imagetagger',
+        'HOST': 'db',
+        'PORT': 5432
     }
 }
 

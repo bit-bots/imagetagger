@@ -1,4 +1,4 @@
-version: '1.0.0'
+version: '3'
 
 services:
   db:
@@ -6,27 +6,16 @@ services:
       POSTGRES_DB: imagetagger
       POSTGRES_USER: imagetagger
       POSTGRES_PASSWORD: imagetagger
-    restart: always
+    # restart: always
     image: postgres:9.5
-    expose:
-      - "5432"
-  redis:
-    restart: always
-    image: redis:3.2
-    expose:
-      - "6379"
-  app:
+  web:
     environment:
       DATABASE_URL: postgres://imagetagger:imagetagger@db/imagetagger
-      REDIS_URL: redis://redis
-      PROJ_NAME: imagetagger
-      DJANGO_MANAGEPY_MIGRATE: on
-      DJANGO_MANAGEPY_COLLECTSTATIC: off
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    links:
-      - db:db
-      - redis:redis
+    build: .
+    command: python3 /imagetagger/imagetagger/manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/imagetagger
     ports:
-      - "8000:8000"
+      - "8080:8080"
+    depends_on:
+      - db

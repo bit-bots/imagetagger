@@ -9,11 +9,11 @@ done
 >&2 echo "Postgres is up - continuing"
 
 if [ "x$DJANGO_MANAGEPY_MIGRATE" = 'xon' ]; then
-    python3 $PROJ_NAME/manage.py migrate --noinput
-Fi
+    python3 /srv/imagetagger/manage.py migrate --noinput
+fi
 
 if [ "x$DJANGO_MANAGEPY_COLLECTSTATIC" = 'xon' ]; then
-    python3 $PROJ_NAME/manage.py collectstatic --noinput
+    python3 /srv/imagetagger/manage.py collectstatic --noinput
 fi
 
 exec "$@"
