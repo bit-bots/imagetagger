@@ -16,6 +16,7 @@ For a short overview of the functions please have a look at the following poster
 * label export
 * image preloading for labeling
 * label verification
+* upload of existing labels
 
 
 ## Planned Features
@@ -24,4 +25,3 @@ For a short overview of the functions please have a look at the following poster
 * collections of filtered images from multiple imagesets
 * API to allow automated labeling
 * more comprehensive rights management
-* upload of existing labels

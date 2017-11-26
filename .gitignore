@@ -69,6 +69,5 @@ target/
 .idea
 db.sqlite3
 
-
 imagetagger/data
 imagetagger/images
