@@ -1,0 +1,6 @@
+language: bash
+services: docker
+
+script:
+  - docker-compose up --build -d
+  - docker-compose up

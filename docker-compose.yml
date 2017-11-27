@@ -8,10 +8,16 @@ services:
       POSTGRES_PASSWORD: imagetagger
     # restart: always
     image: postgres:9.5
+    expose:
+      - "5432"
   web:
     environment:
       DATABASE_URL: postgres://imagetagger:imagetagger@db/imagetagger
-    build: .
+      DJANGO_MANAGEPY_MIGRATE: "on"
+      DJANGO_MANAGEPY_COLLECTSTATIC: "off"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     command: python3 /imagetagger/imagetagger/manage.py runserver 0.0.0.0:8080
     volumes:
       - .:/imagetagger
