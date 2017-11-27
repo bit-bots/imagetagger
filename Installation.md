@@ -1,4 +1,5 @@
 # Installation
+## Run on local machine
 
 1. install required python packages.
 
@@ -37,3 +38,17 @@ python3 imagetagger/manage.py migrate
 ```
 python3 imagetagger/manage.py runserver
 ```
+
+## Run in Docker
+Just build image and run it:
+
+```
+# build
+docker-compose up --build -d
+# run
+docker-compose up
+```
+
+Then you can look at [http://localhost:8080/](http://localhost:8080/) for imagetagger.
+
+Note that it's necessary to turn on `DJANGO_MANAGEPY_MIGRATE` flag for initialization and migration. Once it's done, you could turn it off.

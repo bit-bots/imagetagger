@@ -8,9 +8,12 @@ set -e
 
 # >&2 echo "Postgres is up - continuing"
 
-if [ "x$DJANGO_INIT" = 'xon' ]; then
-    cp /imagetagger/imagetagger/settings.py.docker /imagetagger/imagetagger/settings.py
+if [ "x$DJANGO_MANAGEPY_MIGRATE" = 'xon' ]; then
     python /imagetagger/imagetagger/manage.py migrate --noinput
+fi
+
+if [ "x$DJANGO_MANAGEPY_COLLECTSTATIC" = 'xon' ]; then
+    python /imagetagger/imagetagger/manage.py collectstatic --noinput
 fi
 
 exec "$@"
