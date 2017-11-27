@@ -4,7 +4,7 @@
 ############################################################
 
 # use python 3 as base image
-FROM python:3.6.3-alpine
+FROM python:3
 
 # some environment variables
 ENV PYTHONUNBUFFERED 1
@@ -16,6 +16,6 @@ WORKDIR /imagetagger
 # copy source code
 ADD . /imagetagger/
 
-RUN pip3 install --no-cache-dir -r /imagetagger/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT ["/imagetagger/docker-entrypoint.sh"]

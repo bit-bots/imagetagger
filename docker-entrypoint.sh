@@ -9,11 +9,11 @@ set -e
 # >&2 echo "Postgres is up - continuing"
 
 if [ "x$DJANGO_MANAGEPY_MIGRATE" = 'xon' ]; then
-    python3 /imagetagger/imagetagger/manage.py migrate --noinput
+    python /imagetagger/imagetagger/manage.py migrate --noinput
 fi
 
 if [ "x$DJANGO_MANAGEPY_COLLECTSTATIC" = 'xon' ]; then
-    python3 /imagetagger/imagetagger/manage.py collectstatic --noinput
+    python /imagetagger/imagetagger/manage.py collectstatic --noinput
 fi
 
 exec "$@"

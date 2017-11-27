@@ -7,13 +7,13 @@ services:
       POSTGRES_USER: imagetagger
       POSTGRES_PASSWORD: imagetagger
     # restart: always
-    image: postgres:9.5
+    image: postgres
     expose:
       - "5432"
   web:
     environment:
       DATABASE_URL: postgres://imagetagger:imagetagger@db/imagetagger
-      DJANGO_MANAGEPY_MIGRATE: "on"
+      DJANGO_MANAGEPY_MIGRATE: "off"
       DJANGO_MANAGEPY_COLLECTSTATIC: "off"
     build:
       context: .
