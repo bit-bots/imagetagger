@@ -264,6 +264,9 @@
                             Upload new images:
                         </h3>
                         {{ upload_notice|safe }}
+                            <br>
+                            &nbsp;<br>
+                            Upload images as single files or as zip file with the images in its root directory (recommended).
                         <div >
                             <form id="fileupload" action="{% url 'images:upload_image' imageset.id %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
