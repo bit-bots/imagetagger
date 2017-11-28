@@ -360,16 +360,19 @@ def export_format(export_format_name, imageset):
     annotation_counter = 0
     annotations = Annotation.objects.annotate_verification_difference().filter(image__in=images, verification_difference__gte=min_verifications)
 
-    annotation_content= '\n'
+    annotation_content = '\n'
     for annotation in annotations:
         annotation_counter += 1
         if annotation.not_in_image:
             formatted_annotation = export_format.not_in_image_format
-            placeholders_annos={'%%image': annotation.image.name, '%%type': annotation.annotation_type.name,
+            placeholders_annos={'%%imageset': imageset.name,
+                                '%%image': annotation.image.name,
+                                '%%type': annotation.annotation_type.name,
                                 '%%veriamount': annotation.verification_difference}
         else:
             formatted_annotation = export_format.annotation_format
             placeholders_annos = {
+                '%%imageset': imageset.name,
                 '%%image': annotation.image.name,
                 '%%type': annotation.annotation_type.name,
                 '%%veriamount': annotation.verification_difference,
