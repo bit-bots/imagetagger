@@ -24,6 +24,13 @@
                     {% endfor %}
                 </div>
                 <div class="form-group">
+                    <label for="id_public"><h3>{{ form.public.label }}: </h3></label>
+                    {% render_field form.public %}
+                    {% for error in form.public.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
                     <label for="id_annotations_types"><h3>{{ form.annotations_types.label }}</h3></label>
                     {% blocktrans %}
                         <p>Hold down "Shift" to select more than one.</p>
@@ -115,13 +122,6 @@
                     {% endblocktrans %}
                     {% render_field form.not_in_image_format class+='form-control'%}
                     {% for error in form.not_in_image_format.errors %}
-                        <div class="alert alert-warning">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <div class="form-group">
-                    <label for="id_public">{{ form.public.label }}</label>
-                    {% render_field form.public %}
-                    {% for error in form.public.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
