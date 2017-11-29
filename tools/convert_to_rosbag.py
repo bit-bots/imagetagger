@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+import argparse
 import os
 
 import cv2
@@ -15,14 +16,6 @@ from cv_bridge import CvBridge
 from humanoid_league_msgs.msg import BallInImage, BallsInImage, LineSegmentInImage, LineInformationInImage, PostInImage, GoalPartsInImage, BarInImage
 from sensor_msgs.msg import Image
 import std_msgs.msg
-
-"""
-This script creates a rosbag file out of images and labels which are exported from the Hamburg Bit-Bots imagetagger. 
-Please call the script by providing a path to the folder which contains the images. If not it will search in the 
-current directory. The label file has to be called labels.yaml and be located in the same folder.
-Second argument is an optional path and name for the bag file. If it is not provided, the bag will be saved in the 
-current directory with a default name.  
-"""
 
 
 def create_img_msg(img_path, seq, stamp):
@@ -79,16 +72,44 @@ def create_goal_msg(post_msgs, bar_msgs, seq, stamp):
 ###
 ### Parse arguments
 ###
-arguments = sys.argv
-if len(sys.argv) > 1:
-    directory = arguments[1]
-else:
-    directory = os.getcwd()
-if len(sys.argv) > 2:
-    bag_path = arguments[2]
-else:
-    time_str = time.strftime("%Y%m%d-%H%M%S")
-    bag_path = os.getcwd() + "/" + time_str + ".bag"
+
+parser = argparse.ArgumentParser(prog="convert_to_rosbag", description="This script creates a rosbag file out of "
+                                                                       "images and labels which are exported from the "
+                                                                       "Hamburg Bit-Bots imagetagger. Please call the "
+                                                                       "script by providing a path to the folder "
+                                                                       "which contains the images. If not it will "
+                                                                       "search in the current directory. The label "
+                                                                       "file has to be called labels.yaml and be "
+                                                                       "located in the same folder. Second argument "
+                                                                       "is an optional path and name for the bag "
+                                                                       "file. If it is not provided, the bag will be "
+                                                                       "saved in the current directory with a default "
+                                                                       "name. ")
+parser.add_argument('directory', nargs='?', default=os.getcwd(),
+                    help='Directory path were images and labels.yaml are located. If none is provided, the current '
+                         'working dir will be used.')
+parser.add_argument('bag_path', nargs='?', default=os.getcwd() + "/" + time.strftime("%Y%m%d-%H%M%S") + ".bag",
+                    help="Path and name of the bagfile. If none is provided a file will be generated in the current "
+                         "working dir.")
+parser.add_argument('-i', dest='image', action='store_true',
+                    help='Activates export of images.')
+parser.add_argument('-b', dest='ball', action='store_true',
+                    help='Activates export of balls.')
+parser.add_argument('-g', dest='goal', action='store_true',
+                    help='Activates export of goal related labels.')
+args = parser.parse_args()
+directory = args.directory
+bag_path = args.bag_path
+
+if not args.image:
+    print("Export of images not activated.")
+
+if not args.ball:
+    print("Export of balls not activated.")
+
+if not args.goal:
+    print("Export of goals not activated.")
+
 
 ###
 ### Read label yaml file
@@ -115,28 +136,31 @@ for img in content:
     sys.stdout.write("\rWriting image number " + str(seq))
     sys.stdout.flush()
     stamp = rospy.Time.from_sec(time.time())
-    img_msg = create_img_msg(directory + "/" + img["name"], seq, stamp)
-    bag.write("/image", img_msg)
+    if args.image:
+        img_msg = create_img_msg(directory + "/" + img["name"], seq, stamp)
+        bag.write("/image", img_msg)
     labels = img["labels"]
     ball_msgs = []
     post_msgs = []
     bar_msgs = []
     for label in labels:
-        if label["type"] == "ball":
+        if label["type"] == "ball" and args.ball:
             ball_msg = create_ball_msg(label)
             bag.write("/ball_in_image", ball_msg)
             ball_msgs.append(ball_msg)
-        elif label["type"] == "post":
+        elif label["type"] == "post" and args.goal:
             post_msg = create_post_msg(label)
             #bag.write("/post_in_image", post_msg)
             post_msgs.append(post_msg)
-        elif label["type"] == "bar":
+        elif label["type"] == "bar" and args.goal:
             bar_msg = create_bar_msg(label)
             bar_msgs.append(bar_msg)
-    balls_msg = create_balls_msg(ball_msgs, seq, stamp)
-    bag.write("/ball_candidates", balls_msg)
-    goal_parts_msg = create_goal_msg(post_msgs, bar_msgs, seq, stamp)
-    bag.write("/goal_parts_in_image", goal_parts_msg)
+    if args.ball:
+        balls_msg = create_balls_msg(ball_msgs, seq, stamp)
+        bag.write("/ball_candidates", balls_msg)
+    if args.goal:
+        goal_parts_msg = create_goal_msg(post_msgs, bar_msgs, seq, stamp)
+        bag.write("/goal_parts_in_image", goal_parts_msg)
     seq += 1
 
 bag.flush()
