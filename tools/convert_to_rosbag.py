@@ -13,7 +13,8 @@ import rospy
 import yaml
 from cv_bridge import CvBridge
 
-from humanoid_league_msgs.msg import BallInImage, BallsInImage, LineSegmentInImage, LineInformationInImage, PostInImage, GoalPartsInImage, BarInImage
+from humanoid_league_msgs.msg import BallInImage, BallsInImage, LineSegmentInImage, LineInformationInImage, PostInImage, \
+    GoalPartsInImage, BarInImage
 from sensor_msgs.msg import Image
 import std_msgs.msg
 
@@ -28,11 +29,15 @@ def create_img_msg(img_path, seq, stamp):
 
 def create_ball_msg(ball_label):
     msg = BallInImage()
-    msg.center.x = float(ball_label["x"])
-    msg.center.y = float(ball_label["y"])
-    msg.diameter = float(ball_label["dia"])
-    msg.confidence = 1.0
+    if float(ball_label["x"]) != 0:
+        msg.center.x = float(ball_label["x"])
+        msg.center.y = float(ball_label["y"])
+        msg.diameter = float(ball_label["dia"])
+        msg.confidence = 1.0
+    else:
+        msg.confidence = 0.0
     return msg
+
 
 def create_balls_msg(ball_msgs, seq, stamp):
     msg = BallsInImage()
@@ -44,21 +49,29 @@ def create_balls_msg(ball_msgs, seq, stamp):
 
 def create_post_msg(post_label):
     msg = PostInImage()
-    msg.confidence = 1.0
-    msg.foot_point.x = float(post_label["x"])
-    msg.foot_point.y = float(post_label["y"])
-    msg.width = int(post_label["width"])
+    if float(post_label["x"]) != 0:
+        msg.confidence = 1.0
+        msg.foot_point.x = float(post_label["x"])
+        msg.foot_point.y = float(post_label["y"])
+        msg.width = int(post_label["width"])
+    else:
+        msg.confidence = 0.0
     return msg
+
 
 def create_bar_msg(bar_label):
     msg = BarInImage()
-    msg.confidence = 1.0
-    msg.width = int(bar_label["width"])
-    msg.left_point.x = float(bar_label["lx"])
-    msg.left_point.y = float(bar_label["ly"])
-    msg.right_point.x = float(bar_label["rx"])
-    msg.right_point.y = float(bar_label["ry"])
+    if float(bar_label["x"]) != 0:
+        msg.confidence = 1.0
+        msg.width = int(bar_label["width"])
+        msg.left_point.x = float(bar_label["lx"])
+        msg.left_point.y = float(bar_label["ly"])
+        msg.right_point.x = float(bar_label["rx"])
+        msg.right_point.y = float(bar_label["ry"])
+    else:
+        msg.confidence = 0.0
     return msg
+
 
 def create_goal_msg(post_msgs, bar_msgs, seq, stamp):
     msg = GoalPartsInImage()
@@ -110,7 +123,6 @@ if not args.ball:
 if not args.goal:
     print("Export of goals not activated.")
 
-
 ###
 ### Read label yaml file
 ###
@@ -150,7 +162,7 @@ for img in content:
             ball_msgs.append(ball_msg)
         elif label["type"] == "post" and args.goal:
             post_msg = create_post_msg(label)
-            #bag.write("/post_in_image", post_msg)
+            # bag.write("/post_in_image", post_msg)
             post_msgs.append(post_msg)
         elif label["type"] == "bar" and args.goal:
             bar_msg = create_bar_msg(label)
