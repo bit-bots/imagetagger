@@ -167,10 +167,10 @@ for img in content:
         elif label["type"] == "bar" and args.goal:
             bar_msg = create_bar_msg(label)
             bar_msgs.append(bar_msg)
-    if args.ball:
+    if len(ball_msgs) > 0 and args.ball:
         balls_msg = create_balls_msg(ball_msgs, seq, stamp)
         bag.write("/ball_candidates", balls_msg)
-    if args.goal:
+    if (len(post_msgs) > 0 or len(bar_msgs) > 0) and args.goal:
         goal_parts_msg = create_goal_msg(post_msgs, bar_msgs, seq, stamp)
         bag.write("/goal_parts_in_image", goal_parts_msg)
     seq += 1
