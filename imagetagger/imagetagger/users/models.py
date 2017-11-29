@@ -20,7 +20,7 @@ class Team(models.Model):
     website = models.CharField(max_length=100, default='')
 
     def __str__(self):
-        return u'{0}'.format(self.name)
+        return u'Team: {0}'.format(self.name)
 
     @cached_property
     def admins(self) -> Set:
