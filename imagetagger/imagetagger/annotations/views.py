@@ -375,7 +375,7 @@ def export_format(export_format_name, imageset):
                             '%%imageset': imageset.name,
                             '%%imagewidth': annotation.image.width,
                             '%%imageheight': annotation.image.height,
-                            '%%image': image.name,
+                            '%%imagename': image.name,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                         }
@@ -385,7 +385,7 @@ def export_format(export_format_name, imageset):
                             '%%imageset': imageset.name,
                             '%%imagewidth': image.width,
                             '%%imageheight': image.height,
-                            '%%image': image.name,
+                            '%%imagename': image.name,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                             # absolute values
@@ -421,7 +421,7 @@ def export_format(export_format_name, imageset):
                     '%%imageset': imageset.name,
                     '%%imagewidth': image.width,
                     '%%imageheight': image.height,
-                    '%%image': image.name,
+                    '%%imagename': image.name,
                     '%%annotations': annotation_content,
                     '%%annoamount': annotations.count(),
                 }
@@ -442,7 +442,7 @@ def export_format(export_format_name, imageset):
                     '%%imageset': imageset.name,
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
-                    '%%image': annotation.image.name,
+                    '%%imagename': annotation.image.name,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                 }
@@ -452,7 +452,7 @@ def export_format(export_format_name, imageset):
                     '%%imageset': imageset.name,
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
-                    '%%image': annotation.image.name,
+                    '%%imagename': annotation.image.name,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                     # absolute values
