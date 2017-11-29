@@ -33,7 +33,7 @@
                 <div class="form-group">
                     <label for="id_annotations_types"><h3>{{ form.annotations_types.label }}</h3></label>
                     {% blocktrans %}
-                        <p>Hold down "Shift" to select more than one.</p>
+                        <p>Hold down "Ctl" to select more than one.</p>
                     {% endblocktrans %}
                     {% render_field form.annotations_types class+='form-control' %}
                     {% for error in form.annotations_types.errors %}
@@ -47,6 +47,7 @@
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
+                <hr>
                 <div class="form-group">
                     <label for="id_base_format"><h3>{{ form.base_format.label }}</h3></label>
                     {% blocktrans %}
@@ -63,6 +64,7 @@
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
+                <hr>
                 <div class="form-group">
                     <label for="id_image_aggregation"><h3>Group annotations by images: </h3></label>
                     {% render_field form.image_aggregation|append_attr:'id:img_agg' %}
@@ -73,8 +75,8 @@
                         <p>Use the following placeholders to integrate specific details into your Format:</p>
                         <p><b>%%imagename:</b> name of the image </p>
                         <p><b>%%imagewidth:</b> width of the image</p>
-                        <p><b>%%imageheight:</b> height of the imageset </p>
-                        <p><b>%%imageset:</b> name of the imageset </p>
+                        <p><b>%%imageheight:</b> height of the image</p>
+                        <p><b>%%imageset:</b> name of the imageset</p>
                         <p><b>%%annoamount:</b> number of annotations for the image </p>
                         <p><b>%%annotations:</b> the content of the annotation format and the not in image format</p>
                     {% endblocktrans %}
@@ -83,6 +85,7 @@
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
+                <hr>
                 <div class="form-group">
                     <label for="id_annotation_format"><h3>{{ form.annotation_format.label }}</h3></label>
                     {% blocktrans %}
@@ -109,15 +112,16 @@
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
+                <hr>
                 <div class="form-group">
                     <label for="id_not_in_image_format"><h3>{{ form.not_in_image_format.label }}</h3></label>
                     {% blocktrans %}
                         <p>Use the following placeholders to integrate specific details into your Format:</p>
                         <p><b>%%imagename:</b> name of the image</p>
                         <p><b>%%imagewidth:</b> width of the image</p>
-                        <p><b>%%imageheight:</b> height of the imageset </p>
+                        <p><b>%%imageheight:</b> height of the image</p>
                         <p><b>%%imageset:</b> name of the imageset </p>
-                        <p><b>%%type:</b> type of the image</p>
+                        <p><b>%%type:</b> type of the annotation</p>
                         <p><b>%%veriamount:</b> the amount of verifications for the annotation</p>
                     {% endblocktrans %}
                     {% render_field form.not_in_image_format class+='form-control'%}
