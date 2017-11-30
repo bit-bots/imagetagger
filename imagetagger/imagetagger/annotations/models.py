@@ -270,9 +270,11 @@ class ExportFormat(models.Model):
     team = models.ForeignKey(Team, on_delete=models.PROTECT, related_name='export_formats')
     public = models.BooleanField(default=False)
     base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
+    image_format = models.TextField(null=True, blank=True, default=None)
     annotation_format = models.TextField() #used for every annotation in export (coordinates, type, image)
     not_in_image_format = models.TextField()
     min_verifications = models.IntegerField(default=0)
+    image_aggregation = models.BooleanField(default=False)
 
     def __str__(self):
         return '{}: {}'.format(self.team.name, self.name)

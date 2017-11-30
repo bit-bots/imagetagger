@@ -358,52 +358,138 @@ def export_format(export_format_name, imageset):
 
     min_verifications = export_format.min_verifications
     annotation_counter = 0
-    annotations = Annotation.objects.annotate_verification_difference().filter(image__in=images, verification_difference__gte=min_verifications)
 
-    annotation_content= '\n'
-    for annotation in annotations:
-        annotation_counter += 1
-        if annotation.not_in_image:
-            formatted_annotation = export_format.not_in_image_format
-            placeholders_annos={'%%image': annotation.image.name, '%%type': annotation.annotation_type.name,
-                                '%%veriamount': annotation.verification_difference}
-        else:
-            formatted_annotation = export_format.annotation_format
-            placeholders_annos = {
-                '%%image': annotation.image.name,
-                '%%type': annotation.annotation_type.name,
-                '%%veriamount': annotation.verification_difference,
-                # absolute values
-                '%%x1': annotation.vector['x1'],
-                '%%x2': annotation.vector['x2'],
-                '%%y1': annotation.vector['y1'],
-                '%%y2': annotation.vector['y2'],
-                '%%rad': annotation.radius,
-                '%%dia': annotation.diameter,
-                '%%cx': annotation.center['xc'],
-                '%%cy': annotation.center['yc'],
-                '%%width': annotation.width,
-                '%%height': annotation.height,
-                # relative values
-                '%%relx1': annotation.relative_vector['x1'],
-                '%%relx2': annotation.relative_vector['x2'],
-                '%%rely1': annotation.relative_vector['y1'],
-                '%%rely2': annotation.relative_vector['y2'],
-                '%%relrad': annotation.relative_radius,
-                '%%reldia': annotation.relative_diameter,
-                '%%relcx': annotation.relative_center['xc'],
-                '%%relcy': annotation.relative_center['yc'],
-                '%%relwidth': annotation.relative_width,
-                '%%relheight': annotation.relative_height}
-        for key, value in placeholders_annos.items():
-            formatted_annotation = formatted_annotation.replace(key, str(value))
-        annotation_content = annotation_content + formatted_annotation + '\n'
+    if export_format_name.image_aggregation:
+        image_content = '\n'
+        for image in images:
+            annotations = Annotation.objects.annotate_verification_difference()\
+                .filter(image=image,
+                        verification_difference__gte=min_verifications)
+            if annotations:
+                annotation_content = ''
+                for annotation in annotations:
+                    annotation_counter += 1
+                    if annotation.not_in_image:
+                        formatted_annotation = export_format.not_in_image_format
+                        placeholders_annotation = {
+                            '%%imageset': imageset.name,
+                            '%%imagewidth': annotation.image.width,
+                            '%%imageheight': annotation.image.height,
+                            '%%imagename': image.name,
+                            '%%type': annotation.annotation_type.name,
+                            '%%veriamount': annotation.verification_difference,
+                        }
+                    else:
+                        formatted_annotation = export_format.annotation_format
+                        placeholders_annotation = {
+                            '%%imageset': imageset.name,
+                            '%%imagewidth': image.width,
+                            '%%imageheight': image.height,
+                            '%%imagename': image.name,
+                            '%%type': annotation.annotation_type.name,
+                            '%%veriamount': annotation.verification_difference,
+                            # absolute values
+                            '%%x1': annotation.vector['x1'],
+                            '%%x2': annotation.vector['x2'],
+                            '%%y1': annotation.vector['y1'],
+                            '%%y2': annotation.vector['y2'],
+                            '%%rad': annotation.radius,
+                            '%%dia': annotation.diameter,
+                            '%%cx': annotation.center['xc'],
+                            '%%cy': annotation.center['yc'],
+                            '%%width': annotation.width,
+                            '%%height': annotation.height,
+                            # relative values
+                            '%%relx1': annotation.relative_vector['x1'],
+                            '%%relx2': annotation.relative_vector['x2'],
+                            '%%rely1': annotation.relative_vector['y1'],
+                            '%%rely2': annotation.relative_vector['y2'],
+                            '%%relrad': annotation.relative_radius,
+                            '%%reldia': annotation.relative_diameter,
+                            '%%relcx': annotation.relative_center['xc'],
+                            '%%relcy': annotation.relative_center['yc'],
+                            '%%relwidth': annotation.relative_width,
+                            '%%relheight': annotation.relative_height,
+                        }
+                    for key, value in placeholders_annotation.items():
+                        formatted_annotation = formatted_annotation\
+                            .replace(key, str(value))
+                    annotation_content += formatted_annotation + '\n'
+
+                formatted_image = export_format.image_format
+                placeholders_image = {
+                    '%%imageset': imageset.name,
+                    '%%imagewidth': image.width,
+                    '%%imageheight': image.height,
+                    '%%imagename': image.name,
+                    '%%annotations': annotation_content,
+                    '%%annoamount': annotations.count(),
+                }
+                for key, value in placeholders_image.items():
+                    formatted_image = formatted_image.replace(key, str(value))
+                image_content += formatted_image + '\n'
+        formatted_content = image_content
+    else:
+        annotations = Annotation.objects.annotate_verification_difference()\
+            .filter(image__in=images,
+                    verification_difference__gte=min_verifications)
+        annotation_content = '\n'
+        for annotation in annotations:
+            annotation_counter += 1
+            if annotation.not_in_image:
+                formatted_annotation = export_format.not_in_image_format
+                placeholders_annotation = {
+                    '%%imageset': imageset.name,
+                    '%%imagewidth': annotation.image.width,
+                    '%%imageheight': annotation.image.height,
+                    '%%imagename': annotation.image.name,
+                    '%%type': annotation.annotation_type.name,
+                    '%%veriamount': annotation.verification_difference,
+                }
+            else:
+                formatted_annotation = export_format.annotation_format
+                placeholders_annotation = {
+                    '%%imageset': imageset.name,
+                    '%%imagewidth': annotation.image.width,
+                    '%%imageheight': annotation.image.height,
+                    '%%imagename': annotation.image.name,
+                    '%%type': annotation.annotation_type.name,
+                    '%%veriamount': annotation.verification_difference,
+                    # absolute values
+                    '%%x1': annotation.vector['x1'],
+                    '%%x2': annotation.vector['x2'],
+                    '%%y1': annotation.vector['y1'],
+                    '%%y2': annotation.vector['y2'],
+                    '%%rad': annotation.radius,
+                    '%%dia': annotation.diameter,
+                    '%%cx': annotation.center['xc'],
+                    '%%cy': annotation.center['yc'],
+                    '%%width': annotation.width,
+                    '%%height': annotation.height,
+                    # relative values
+                    '%%relx1': annotation.relative_vector['x1'],
+                    '%%relx2': annotation.relative_vector['x2'],
+                    '%%rely1': annotation.relative_vector['y1'],
+                    '%%rely2': annotation.relative_vector['y2'],
+                    '%%relrad': annotation.relative_radius,
+                    '%%reldia': annotation.relative_diameter,
+                    '%%relcx': annotation.relative_center['xc'],
+                    '%%relcy': annotation.relative_center['yc'],
+                    '%%relwidth': annotation.relative_width,
+                    '%%relheight': annotation.relative_height,
+                }
+            for key, value in placeholders_annotation.items():
+                formatted_annotation = formatted_annotation.replace(key, str(value))
+            annotation_content = annotation_content + formatted_annotation + '\n'
+        formatted_content = annotation_content
     base_format = export_format.base_format
-    placeholders_base = {'%%content': annotation_content,
-                         '%%imageset': imageset.name,
-                         '%%setdescription': imageset.description,
-                         '%%team': imageset.team,
-                         '%%setlocation': imageset.location}
+    placeholders_base = {
+        '%%content': formatted_content,
+        '%%imageset': imageset.name,
+        '%%setdescription': imageset.description,
+        '%%team': imageset.team.name,
+        '%%setlocation': imageset.location,
+    }
     for key, value in placeholders_base.items():
         base_format = base_format.replace(key, str(value))
     return base_format, annotation_counter
@@ -431,7 +517,6 @@ def create_exportformat(request, imageset_id):
 
                 messages.success(request, _('The export format was created successfully.'))
                 return redirect(reverse('images:view_imageset', args=(imageset_id,)))
-    print(form.errors)
     return render(request, 'annotations/create_exportformat.html', {
         'imageset': imageset,
         'form': form,

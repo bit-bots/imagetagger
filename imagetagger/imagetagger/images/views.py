@@ -152,12 +152,20 @@ def upload_image(request, imageset_id):
                     fname = ('_'.join(fname[:-1]) + '_' +
                              ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
                                      for _ in range(6)) + '.' + fname[-1])
-                    image = Image(name=f.name, image_set=imageset, filename=fname, checksum=fchecksum)
-                    image.save()
+                    image = Image(
+                        name=f.name,
+                        image_set=imageset,
+                        filename=fname,
+                        checksum=fchecksum)
                     with open(image.path(), 'wb') as out:
                         for chunk in f.chunks():
                             out.write(chunk)
                     shutil.chown(image.path(), group=settings.UPLOAD_FS_GROUP)
+                    with PIL_Image.open(image.path()) as image_file:
+                        width, height = image_file.size
+                    image.height = height
+                    image.width = width
+                    image.save()
                 else:
                     messages.warning(request, "This image already exists in this set!")
             json_files.append({'name': f.name,
