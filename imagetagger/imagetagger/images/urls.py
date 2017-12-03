@@ -6,6 +6,7 @@ app_name = 'images'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^image/delete/(\d+)/$', views.delete_images, name='delete_images'),
+    url(r'^image/setfree/(\d+)/$', views.set_free, name = 'setfree_imageset'),
     url(r'^image/upload/(\d+)/$', views.upload_image, name='upload_image'),
     url(r'^image/(\d+)/$', views.view_image, name='view_image'),
     url(r'^imagelist/(\d+)/$', views.list_images, name='list_images'),

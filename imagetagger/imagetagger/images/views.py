@@ -350,6 +350,22 @@ def delete_imageset(request, imageset_id):
         'imageset': imageset,
     })
 
+@login_required
+def set_free(request,imageset_id):
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if not imageset.has_perm('delete_set', request.user):
+        messages.warning(request, ('You do not have permission to free this imageset'))
+        return redirect(reverse('images:imageset', args=(imageset.pk,)))
+
+    if request.method == 'POST':
+        imageset.public = True
+        imageset.team = None
+        imageset.image_lock = True
+        imageset.save()
+        return redirect(reverse('images:view_imageset', args=(imageset_id,)))
+    return render(request, 'images/setfree_imageset.html', {
+        'imageset': imageset,
+    })
 
 @login_required
 def label_upload(request, imageset_id):
