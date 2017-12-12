@@ -240,11 +240,17 @@ class AnnotationType(models.Model):
 
 class Export(models.Model):
     time = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    image_set = models.ForeignKey(ImageSet)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             blank=True)
+    image_set = models.ForeignKey(ImageSet,
+                                  on_delete=models.CASCADE)
     annotation_count = models.IntegerField(default=0)
     export_text = models.TextField(default='')
-    format = models.ForeignKey('ExportFormat', on_delete=models.PROTECT, related_name='exports')
+    format = models.ForeignKey('ExportFormat',
+                               on_delete=models.PROTECT,
+                               related_name='exports')
 
     def __str__(self):
         return u'Export: {0}'.format(self.id)
@@ -259,7 +265,9 @@ class Verification(models.Model):
 
     annotation = models.ForeignKey(
         Annotation, on_delete=models.CASCADE, related_name='verifications')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.SET_NULL,
+                             null=True)
     time = models.DateTimeField(auto_now_add=True)
     verified = models.BooleanField(default=0)
 
@@ -267,7 +275,8 @@ class Verification(models.Model):
 class ExportFormat(models.Model):
     name = models.CharField(max_length=20, unique=True)
     annotations_types = models.ManyToManyField(AnnotationType)
-    team = models.ForeignKey(Team, on_delete=models.PROTECT, related_name='export_formats')
+    team = models.ForeignKey(Team, on_delete=models.PROTECT,
+                             related_name='export_formats')
     public = models.BooleanField(default=False)
     base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
     image_format = models.TextField(null=True, blank=True, default=None)
