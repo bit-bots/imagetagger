@@ -248,12 +248,13 @@ class Export(models.Model):
                                   on_delete=models.CASCADE)
     annotation_count = models.IntegerField(default=0)
     export_text = models.TextField(default='')
+    filename = models.TextField(default='')
     format = models.ForeignKey('ExportFormat',
                                on_delete=models.PROTECT,
                                related_name='exports')
 
     def __str__(self):
-        return u'Export: {0}'.format(self.id)
+        return u'Export: {0}({1})'.format(self.id, self.filename)
 
 
 class Verification(models.Model):
@@ -281,6 +282,7 @@ class ExportFormat(models.Model):
     base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
     image_format = models.TextField(null=True, blank=True, default=None)
     annotation_format = models.TextField() #used for every annotation in export (coordinates, type, image)
+    name_format = models.CharField(default='export_%%exportid.txt', max_length=200)
     not_in_image_format = models.TextField()
     min_verifications = models.IntegerField(default=0)
     image_aggregation = models.BooleanField(default=False)
