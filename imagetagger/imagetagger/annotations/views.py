@@ -208,7 +208,7 @@ def create_export(request, image_set_id):
         if request.method == 'POST' and export is not None:
             selected_format = request.POST['export_format']
             format = get_object_or_404(ExportFormat, id=selected_format)
-            export_text, annotation_count = export_format(format, imageset)
+            export_text, annotation_count, export_filename = export_format(format, imageset)
 
             export = Export(image_set=imageset,
                             user= request.user,
@@ -216,6 +216,9 @@ def create_export(request, image_set_id):
                             export_text=export_text,
                             format=format)
             export.save()
+            export.filename = export_filename.replace('%%exportid', str(export.id))
+            export.save()
+
     return redirect(reverse('images:view_imageset', args=(image_set_id,)))
 
 
@@ -355,6 +358,15 @@ def verify(request, annotation_id):
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
+    file_name = export_format.name_format
+
+    placeholders_filename = {
+        '%%imageset': imageset.name,
+        '%%team': imageset.team.name,
+        '%%setlocation': imageset.location,
+    }
+    for key, value in placeholders_filename.items():
+                        file_name = file_name.replace(key, str(value))
 
     min_verifications = export_format.min_verifications
     annotation_counter = 0
@@ -492,7 +504,7 @@ def export_format(export_format_name, imageset):
     }
     for key, value in placeholders_base.items():
         base_format = base_format.replace(key, str(value))
-    return base_format, annotation_counter
+    return base_format, annotation_counter, file_name
 
 
 @login_required
