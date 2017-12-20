@@ -227,7 +227,7 @@ def download_export(request, export_id):
     db_export = get_object_or_404(Export, id=export_id)
     export = db_export.export_text
     response = HttpResponse(export, content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename="' + export_id + '_export.txt"'
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(db_export.filename)
     return response
 
 
