@@ -68,7 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'imagetagger.base.context_processors.imprint_data',
+                'imagetagger.base.context_processors.base_data',
             ],
         },
     },
@@ -170,3 +170,4 @@ UPLOAD_FS_GROUP = 33  # www-data on debian
 
 ## Test mail functionality by printing mails to console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+TOOLS_ENABLED = True
