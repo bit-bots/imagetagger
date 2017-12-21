@@ -1,0 +1,67 @@
+{% extends 'base/base.html' %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h1>Tools</h1>
+            {% for tool in tools %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <p class="panel-title">{{ tool.name }}</p>
+                            </div>
+                            <div class="panel-body">
+                                {% if tool.team %}
+                                    <p>
+                                        <b>
+                                            Team:
+                                        </b>
+                                        <a href="{% url 'users:team' tool.team.id %}">
+                                            tool.team.name
+                                        </a>
+                                    </p>
+                                {% endif %}
+                                {%  if tool.creator %}
+                                    <p>
+                                        <b>
+                                            Creator:
+                                        </b>
+                                        <a href="{% url 'users:user' tool.creator.id %}">
+                                            tool.creator.name
+                                        </a>
+                                    </p>
+                                {% endif %}
+                                <p>{{ tool.description }}</p>
+                                <p class="right">
+                                    <b>
+                                        <a href="{% url 'tools:download' tool.id %}">
+                                            Download
+                                        </a>
+                                    </b>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <p class="panel-title">
+                        Upload tool
+                    </p>
+                </div>
+                <div class="panel-body">
+                    <form method="POST" enctype="multipart/form-data" action="">
+                        <input class="btn btn-primary" value="Upload">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
