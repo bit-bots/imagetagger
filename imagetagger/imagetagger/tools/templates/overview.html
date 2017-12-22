@@ -66,8 +66,30 @@
                     </p>
                 </div>
                 <div class="panel-body">
-                    <form method="POST" enctype="multipart/form-data" action="{% url tools:create %}">
+                    <form method="POST" enctype="multipart/form-data" action="{% url 'tools:create' %}">
+                        {% csrf_token %}
+                        <label for="id_name"><h3>{{ form.name.label }}</h3></label>
+                        {% render_field form.name class+='form-control' %}
+                        {% for error in form.name.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                        {% endfor %}
+                        <label for="id_description"><h3>{{ form.description.label }}</h3></label>
+                        {% render_field form.description class+='form-control' %}
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                        {% endfor %}
+                        <label for="id_public"><h3>{{ form.public.label }}</h3></label>
+                        {% render_field form.public class+='form-control' %}
+                        {% for error in form.public.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                        {% endfor %}
+                        <label for="id_file"><h3>{{ form.file.label }}</h3></label>
+                        {% render_field form.file class+='form-control' %}
+                        {% for error in form.file.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                        {% endfor %}
                         <input class="btn btn-primary pull-right" type="submit" value="Upload">
+
                     </form>
                 </div>
             </div>

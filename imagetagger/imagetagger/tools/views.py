@@ -7,8 +7,8 @@ from django.shortcuts import redirect
 from django.db import transaction
 from django.db.models import Q
 from django.template.response import TemplateResponse
-from imagetagger.tools.models import Tool
-from imagetagger.tools.forms import ToolUploadForm
+from .models import Tool
+from .forms import ToolUploadForm
 import os
 
 
@@ -26,6 +26,7 @@ def overview(request):
         Q(team__members=request.user) | Q(public=True)).distinct()
     return TemplateResponse(request, 'overview.html', {
         'tools': tools,
+        'form' : ToolUploadForm(),
     })
 
 
@@ -35,6 +36,7 @@ def create_tool(request):
     if request.method == 'POST':
         form = ToolUploadForm(request.POST)
         if form.is_valid():
+            print('valid')
             with transaction.atomic():
                 tool = form.instance.save()
             tool.filename = '{}_{}'.format(tool.id,
@@ -44,7 +46,14 @@ def create_tool(request):
             with open(os.path.join(settings.TOOLS_PATH, tool.filename), 'w+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
+            messages.success(request, _('The export format was created successfully.'))
             return redirect(reverse('tools:overview'))
+    print('invalid')
+    form = ToolUploadForm()
+    return render(request, 'overview.html', {
+        'form': form,
+    })
+
 
 
 @tools_enabled
