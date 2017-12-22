@@ -7,6 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.db import transaction
 from django.db.models import Q
 from django.template.response import TemplateResponse
+from django.contrib import messages
 from .models import Tool
 from .forms import ToolUploadForm
 import os
@@ -36,7 +37,6 @@ def create_tool(request):
     if request.method == 'POST':
         form = ToolUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            print('valid')
             with transaction.atomic():
                 tool = form.instance
                 tool.save()
@@ -47,8 +47,10 @@ def create_tool(request):
             with open(os.path.join(settings.TOOLS_PATH, tool.filename), 'wb+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
-            # messages.success(request, _('The export format was created successfully.'))
+            messages.success(request, 'The tool was successfully uploaded')
             return redirect(reverse('tools:overview'))
+
+    messages.error(request, 'There was an error with your upload. You can only upload files up to 2 MiB')
     return redirect(reverse('tools:overview'))
 
 
