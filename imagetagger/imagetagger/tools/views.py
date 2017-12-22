@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.urls import reverse
-from django.http import Http404
-from django.shortcuts import redirect
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect, get_object_or_404
 from django.db import transaction
 from django.db.models import Q
 from django.template.response import TemplateResponse
@@ -68,4 +68,16 @@ def delete_tool(request, tool_id):
 @tools_enabled
 @login_required
 def download_tool(request, tool_id):
-    pass
+    tool = get_object_or_404(Tool, id=tool_id)
+    if tool.has_perm('download_tool', request.user):
+        file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type="application")
+                response['Content-Disposition'] = 'inline; filename=' + tool.filename
+                return response
+        else:
+            message.error('There was an error accessing the tool')
+    else:
+        message.error('You do not have the permission to download the tool!')
+    return redirect(reverse('tools:overview'))
