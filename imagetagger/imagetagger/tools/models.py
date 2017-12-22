@@ -1,6 +1,9 @@
-from django.db import models
+from typing import Set
+
 from imagetagger.users.models import Team
+from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 
 class Tool(models.Model):
@@ -22,6 +25,40 @@ class Tool(models.Model):
     @property
     def internal_filename(self):
         return '{0}_{1}'.format(self.id, self.name)
+
+    def get_perms(self, user: get_user_model()) -> Set[str]:
+        """Get all permissions of the user."""
+        perms = set()
+        if self.creator is not None and self.creator is user:
+            perms.update({
+                'edit_tool',
+                'delete_tool',
+                'download_tool',
+                'see_tool',
+            })
+        if self.team is not None:
+            if self.team.is_admin(user):
+                perms.update({
+                    'edit_tool',
+                    'delete_tool',
+                    'download_tool',
+                    'see_tool',
+                })
+            if self.team.is_member(user):
+                perms.update({
+                    'download_tool',
+                    'see_tool',
+                })
+        if self.public:
+            perms.update({
+                'download_tool',
+                'see_tool',
+            })
+        return perms
+
+    def has_perm(self, permission: str, user: get_user_model()) -> bool:
+        """Check whether user has specified permission."""
+        return permission in self.get_perms(user)
 
 
 class ToolVote(models.Model):
