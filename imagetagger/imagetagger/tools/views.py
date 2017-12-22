@@ -56,11 +56,49 @@ def create_tool(request):
     return redirect(reverse('tools:overview'))
 
 
-
 @tools_enabled
 @login_required
 def edit_tool(request, tool_id):
-    pass
+    if request.method == 'POST':
+        tool = get_object_or_404(Tool, id=tool_id)
+        changed_name = False
+        changed_description = False
+        changed_public = False
+        changed_file = False
+        public = 'public' in request.POST.keys()
+        if tool.name != request.POST['name']:
+            tool.name = request.POST['name']
+            changed_name = True
+        if tool.description != request.POST['description']:
+            tool.description = request.POST['description']
+            changed_description = True
+        if tool.public != public:
+            tool.public = public
+            changed_public = True
+        file_form = FileUploadForm(request.POST, request.FILES)
+        print(file_form.errors)
+        if file_form.is_valid():
+            changed_file = True
+            file_name = os.path.join(settings.TOOLS_PATH, tool.filename)
+            os.remove(file_name)
+            with open(file_name, 'wb+') as f:
+                for chunk in request.FILES['file']:
+                    f.write(chunk)
+        tool.save()
+        msg = 'changed'
+        if changed_name:
+            msg += ' name'
+        if changed_description:
+            msg += ' description'
+        if changed_public:
+            msg += ' public status'
+        if changed_file:
+            msg += ' file'
+        if not (changed_public or changed_description or changed_file or changed_name):
+            msg += ' nothing'
+        msg += ' in the tool'
+        messages.warning(request, msg)
+        return redirect(reverse('tools:overview'))
 
 
 @tools_enabled
