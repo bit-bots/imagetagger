@@ -124,7 +124,7 @@ def download_tool(request, tool_id):
         if os.path.exists(file_path):
             with open(file_path, 'rb') as fh:
                 response = HttpResponse(fh.read(), content_type="application")
-                response['Content-Disposition'] = 'inline; filename=' + tool.filename
+                response['Content-Disposition'] = 'attachment; filename=' + tool.filename
                 return response
         else:
             messages.error(request, 'There was an error accessing the tool')
