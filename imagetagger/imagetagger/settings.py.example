@@ -172,3 +172,4 @@ UPLOAD_FS_GROUP = 33  # www-data on debian
 ## Test mail functionality by printing mails to console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TOOLS_ENABLED = True
+TOOLS_PATH = os.path.join(BASE_DIR, 'tools')

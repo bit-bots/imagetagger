@@ -66,8 +66,8 @@
                     </p>
                 </div>
                 <div class="panel-body">
-                    <form method="POST" enctype="multipart/form-data" action="">
-                        <input class="btn btn-primary" value="Upload">
+                    <form method="POST" enctype="multipart/form-data" action="{% url tools:create %}">
+                        <input class="btn btn-primary pull-right" type="submit" value="Upload">
                     </form>
                 </div>
             </div>
