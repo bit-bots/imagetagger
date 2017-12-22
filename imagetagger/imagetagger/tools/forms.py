@@ -16,6 +16,7 @@ class ToolUploadForm(forms.ModelForm):
     class Meta:
         model = Tool
         fields = [
+            'team',
             'name',
             'description',
             'public',

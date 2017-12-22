@@ -28,7 +28,7 @@
                                         <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ tool.id }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
                                     {% endif %}
                                 </div>
-                                <h4>{{ tool.name }}</h4>
+                                <h4>{% if not tool.public %}<span class="glyphicon glyphicon-lock" aria-hidden="true"></span>{% endif %}{{ tool.name }}</h4>
                             </div>
                             <div class="panel-body">
                                 {% if tool.team %}
@@ -52,7 +52,7 @@
                                     </p>
                                 {% endif %}
                                 <p>{{ tool.description }}</p>
-                                    <a class="btn btn-default pull-right" href="{% url 'tools:download' tool.id %}">
+                                    <a class="btn btn-primary pull-right" href="{% url 'tools:download' tool.id %}">
                                         Download <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
                                     </a>
                             </div>
@@ -71,23 +71,32 @@
                 <div class="panel-body">
                     <form method="POST" enctype="multipart/form-data" action="{% url 'tools:create' %}">
                         {% csrf_token %}
-                        <label for="id_name"><h3>{{ form.name.label }}</h3></label>
+                        <label for="id_name"><h4>{{ form.name.label }}: </h4></label>
                         {% render_field form.name class+='form-control' %}
                         {% for error in form.name.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                         {% endfor %}
-                        <label for="id_description"><h3>{{ form.description.label }}</h3></label>
+                        <br>
+                        <label for="id_description"><h4>{{ form.description.label }}: </h4></label>
                         {% render_field form.description class+='form-control' %}
                         {% for error in form.description.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                         {% endfor %}
-                        <label for="id_public"><h3>{{ form.public.label }}</h3></label>
-                        {% render_field form.public class+='form-control' %}
+                        <br>
+                        <label for="id_team"><h4>{{ form.team.label }}: </h4></label>
+                        {% render_field form.team %}
+                        {% for error in form.team.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                        {% endfor %}
+                        <br>
+                        <label for="id_public"><h4>{{ form.public.label }}: </h4></label>
+                        {% render_field form.public %}
                         {% for error in form.public.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                         {% endfor %}
-                        <label for="id_file"><h3>{{ form.file.label }}</h3></label>
-                        {% render_field form.file class+='form-control' %}
+                        <br>
+                        <label for="id_file"><h4>{{ form.file.label }}: </h4></label>
+                        {% render_field form.file %}
                         {% for error in form.file.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                         {% endfor %}
