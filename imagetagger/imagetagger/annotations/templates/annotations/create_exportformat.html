@@ -10,7 +10,7 @@
             <form method="POST" action="{% url 'annotations:create_exportformat' imageset.id %}">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_name"><h3>{{ form.name.label }}</h3></label>
+                    <label for="id_name"><h3>{{ form.name.label }}</h3> of the export format</label>
                     {% render_field form.name class+='form-control' %}
                     {% for error in form.name.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
@@ -21,6 +21,18 @@
                     {% render_field form.team class+='form-control' %}
                     {% for error in form.team.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="id_name_format"><h3>{{ form.name_format.label }}</h3>for the export file name</label>
+                    <p>Use the following placeholders to integrate specific details into your Format:</p>
+                    <p><b>%%imageset:</b> name of the imageset </p>
+                    <p><b>%%team:</b> team of the imageset</p>
+                    <p><b>%%setlocation:</b> location of the imageset</p>
+                    <p><b>%%exportid:</b> id of the export (guaranteed to be unique for each export)</p>
+                    {% render_field form.name_format class+='form-control' %}
+                    {% for error in form.name_format.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
                 <div class="form-group">
