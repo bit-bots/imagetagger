@@ -104,14 +104,15 @@ def edit_tool(request, tool_id):
 @tools_enabled
 @login_required
 def delete_tool(request, tool_id):
-    tool = get_object_or_404(Tool, id=tool_id)
-    if tool.has_perm('delete_tool', request.user):
-        file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        tool.delete()
-    else:
-        messages.error(request, 'You do not have the permission to delete the tool!')
+    if request.method == 'POST':
+        tool = get_object_or_404(Tool, id=tool_id)
+        if tool.has_perm('delete_tool', request.user):
+            file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            tool.delete()
+        else:
+            messages.error(request, 'You do not have the permission to delete the tool!')
     return redirect(reverse('tools:overview'))
 
 
