@@ -29,7 +29,7 @@ class Tool(models.Model):
     def get_perms(self, user: get_user_model()) -> Set[str]:
         """Get all permissions of the user."""
         perms = set()
-        if self.creator is not None and self.creator is user:
+        if self.creator is not None and self.creator.id is user.id:
             perms.update({
                 'edit_tool',
                 'delete_tool',
@@ -57,7 +57,7 @@ class Tool(models.Model):
         return perms
 
     def has_perm(self, permission: str, user: get_user_model()) -> bool:
-        """Check whether user has specified permission."""
+        """Check whether user has a specified permission."""
         return permission in self.get_perms(user)
 
 

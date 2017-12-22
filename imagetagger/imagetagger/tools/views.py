@@ -24,7 +24,7 @@ def tools_enabled(in_function):
 def overview(request):
     tools = Tool.objects.select_related('team').order_by(
         'name').filter(
-        Q(team__members=request.user) | Q(public=True)).distinct()
+        Q(creator=request.user) | Q(team__members=request.user) | Q(public=True)).distinct()
     return TemplateResponse(request, 'overview.html', {
         'tools': tools,
         'form' : ToolUploadForm(),
@@ -39,6 +39,7 @@ def create_tool(request):
         if form.is_valid():
             with transaction.atomic():
                 tool = form.instance
+                tool.creator = request.user
                 tool.save()
             tool.filename = '{}_{}'.format(tool.id,
                                            request.FILES['file'].name)
@@ -48,6 +49,7 @@ def create_tool(request):
                 for chunk in request.FILES['file']:
                     f.write(chunk)
             messages.success(request, 'The tool was successfully uploaded')
+            tool.save()
             return redirect(reverse('tools:overview'))
 
     messages.error(request, 'There was an error with your upload. You can only upload files up to 2 MiB')
