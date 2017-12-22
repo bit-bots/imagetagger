@@ -88,6 +88,8 @@
                         {% for error in form.file.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                         {% endfor %}
+                        <br>
+                        <p>{{ tool_upload_notice | safe}}</p>
                         <input class="btn btn-primary pull-right" type="submit" value="Upload">
 
                     </form>

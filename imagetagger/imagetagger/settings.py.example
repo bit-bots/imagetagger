@@ -173,3 +173,4 @@ UPLOAD_FS_GROUP = 33  # www-data on debian
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TOOLS_ENABLED = True
 TOOLS_PATH = os.path.join(BASE_DIR, 'tools')
+TOOL_UPLOAD_NOTICE = ''
