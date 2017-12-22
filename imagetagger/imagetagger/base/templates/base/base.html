@@ -22,6 +22,9 @@
                         {% block navblock %}{% endblock %}
                         {% if request.user.is_authenticated %}
                             <li><a href="{% url 'images:explore_imageset' %}">Explore</a></li>
+                            {% if TOOLS_ENABLED %}
+                                <li><a href="{% url 'tools:overview' %}">Tools</a></li>
+                            {% endif %}
                         {% endif %}
                         {% if request.user.is_authenticated %}
                             <li class="dropdown">

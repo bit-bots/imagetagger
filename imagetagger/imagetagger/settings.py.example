@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'imagetagger.base',
     'imagetagger.images',
     'imagetagger.users',
+    'imagetagger.tools',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
