@@ -71,7 +71,7 @@ def delete_tool(request, tool_id):
             os.remove(file_path)
         tool.delete()
     else:
-        message.error('You do not have the permission to delete the tool!')
+        messages.error('You do not have the permission to delete the tool!')
     return redirect(reverse('tools:overview'))
 
 
@@ -87,7 +87,7 @@ def download_tool(request, tool_id):
                 response['Content-Disposition'] = 'inline; filename=' + tool.filename
                 return response
         else:
-            message.error('There was an error accessing the tool')
+            messages.error('There was an error accessing the tool')
     else:
-        message.error('You do not have the permission to download the tool!')
+        messages.error('You do not have the permission to download the tool!')
     return redirect(reverse('tools:overview'))
