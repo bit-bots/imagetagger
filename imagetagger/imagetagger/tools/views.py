@@ -34,25 +34,22 @@ def overview(request):
 @login_required
 def create_tool(request):
     if request.method == 'POST':
-        form = ToolUploadForm(request.POST)
+        form = ToolUploadForm(request.POST, request.FILES)
         if form.is_valid():
             print('valid')
             with transaction.atomic():
-                tool = form.instance.save()
+                tool = form.instance
+                tool.save()
             tool.filename = '{}_{}'.format(tool.id,
                                            request.FILES['file'].name)
             if not os.path.isdir(settings.TOOLS_PATH):
                 os.makedirs(settings.TOOLS_PATH)
-            with open(os.path.join(settings.TOOLS_PATH, tool.filename), 'w+') as f:
+            with open(os.path.join(settings.TOOLS_PATH, tool.filename), 'wb+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
-            messages.success(request, _('The export format was created successfully.'))
+            # messages.success(request, _('The export format was created successfully.'))
             return redirect(reverse('tools:overview'))
-    print('invalid')
-    form = ToolUploadForm()
-    return render(request, 'overview.html', {
-        'form': form,
-    })
+    return redirect(reverse('tools:overview'))
 
 
 
