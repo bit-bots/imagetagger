@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import Http404
 from django.db.models import Q
+from django.template.response import TemplateResponse
 from imagetagger.tools.models import Tool
 
 
@@ -18,7 +19,9 @@ def overview(request):
     tools = Tool.objects.select_related('team').order_by(
         'name').filter(
         Q(team__members=request.user) | Q(public=True)).distinct()
-    pass
+    return TemplateResponse(request, 'overview.html', {
+        'tools': tools,
+    })
 
 
 @tools_enabled
