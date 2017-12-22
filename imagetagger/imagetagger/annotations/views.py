@@ -500,8 +500,6 @@ def create_exportformat(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     # TODO: permission for ExportFormats??
 
-    form = ExportFormatCreationForm()
-
     if request.method == 'POST':
         form = ExportFormatCreationForm(request.POST)
 
@@ -517,6 +515,8 @@ def create_exportformat(request, imageset_id):
 
                 messages.success(request, _('The export format was created successfully.'))
                 return redirect(reverse('images:view_imageset', args=(imageset_id,)))
+
+    form = ExportFormatCreationForm()
     return render(request, 'annotations/create_exportformat.html', {
         'imageset': imageset,
         'form': form,
