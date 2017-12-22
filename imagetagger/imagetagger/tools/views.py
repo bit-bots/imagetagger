@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.template.response import TemplateResponse
 from django.contrib import messages
 from .models import Tool
-from .forms import ToolUploadForm
+from .forms import ToolUploadForm, FileUploadForm
 import os
 
 
@@ -25,9 +25,15 @@ def overview(request):
     tools = Tool.objects.select_related('team').order_by(
         'name').filter(
         Q(creator=request.user) | Q(team__members=request.user) | Q(public=True)).distinct()
+    delete_tools = [tool.id for tool in tools if tool.has_perm('delete_tool', request.user)]
+    edit_tools = [tool.id for tool in tools if tool.has_perm('edit_tool', request.user)]
     return TemplateResponse(request, 'overview.html', {
         'tools': tools,
-        'form' : ToolUploadForm(),
+        'edit_tools': edit_tools,
+        'delete_tools': delete_tools,
+        'form': ToolUploadForm(),
+        'file_form': FileUploadForm(),
+        'tool_upload_notice': settings.TOOL_UPLOAD_NOTICE,
     })
 
 

@@ -21,9 +21,12 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <div class="btn-group pull-right">
-                                    <a href="#" class="btn btn-default"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a>
-                                    <a href="#" class="btn btn-default"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
-                                    <a href="#" class="btn btn-default"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                                    {% if tool.id in edit_tools %}
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editModal{{ tool.id }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>
+                                    {% endif %}
+                                    {% if tool.id in delete_tools %}
+                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ tool.id }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                                    {% endif %}
                                 </div>
                                 <h4>{{ tool.name }}</h4>
                             </div>
@@ -98,4 +101,64 @@
         </div>
     </div>
 </div>
+{% for tool in tools %}
+    {% if tool.id in delete_tools %}
+        <!-- Modal  -->
+        <!-- stolen from https://getbootstrap.com/docs/3.3/javascript/#modals -->
+        <div class="modal fade" id="deleteModal{{ tool.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Delete {{ tool.name }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        Do you really want to delete {{ tool.name }}?
+                    </div>
+                    <div class="modal-footer">
+                        <form method="POST" action="{% url 'tools:delete' tool.id %}" >
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if tool.id in edit_tools %}
+        <!-- Modal  -->
+        <!-- stolen from https://getbootstrap.com/docs/3.3/javascript/#modals -->
+        <div class="modal fade" id="editModal{{ tool.id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Edit {{ tool.name }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{% url 'tools:edit' tool.id %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <label for="id_name"><h4>Name: </h4></label>
+                            <input type="text" name="name" maxlength="100" class="form-control" required id="id_name" value="{{ tool.name }}"/>
+                            <br>
+                            <label for="id_description"><h4>Description: </h4></label>
+                            <textarea name="description" cols="40" rows="10" class="form-control" required id="id_description" value="{{ tool.description }}">{{ tool.description }}</textarea>
+                            <br>
+                            <label for="id_public"><h4>Public: </h4></label>
+                            <input type="checkbox" name="public" id="id_public" {%  if tool.public %} checked {% endif %}/>
+                            <br>
+                            <label for="id_file"><h4>File: </h4></label>
+                            {% render_field file_form.file %}
+                    </div>
+                    <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
 {% endblock %}
