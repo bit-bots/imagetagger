@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 
 class Tool(models.Model):
     name = models.CharField(max_length=100)
-    filename = models.CharField(max_length=255)
+    filename = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True)
     public = models.BooleanField(default=False)
