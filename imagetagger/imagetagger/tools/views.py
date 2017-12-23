@@ -85,9 +85,11 @@ def edit_tool(request, tool_id):
         print(file_form.errors)
         if file_form.is_valid():
             changed_file = True
-            file_name = os.path.join(settings.TOOLS_PATH, tool.filename)
-            os.remove(file_name)
-            with open(file_name, 'wb+') as f:
+            old_file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
+            tool.filename = request.FILES['file'].name
+            file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
+            os.remove(old_file_path)
+            with open(file_path, 'wb+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
         tool.save()
