@@ -25,5 +25,5 @@ class ToolUploadForm(forms.ModelForm):
 
 
 class FileUploadForm(forms.Form):
-    file = forms.FileField(max_length=250, required=True, validators=[file_size])
+    file = forms.FileField(max_length=250, required=False, validators=[file_size])
 
