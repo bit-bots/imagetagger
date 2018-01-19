@@ -41,7 +41,7 @@
    * @param successCallback a function to be executed on success
    * @param markForRestore
    */
-  function createAnnotation(event, successCallback, markForRestore) {
+  function createAnnotation(event, successCallback, markForRestore, reload_list) {
     if (event !== undefined) {
       // triggered using an event handler
       event.preventDefault();
@@ -106,7 +106,9 @@
             } else {
               displayFeedback($('#feedback_annotation_updated'));
               displayExistingAnnotations(data.annotations);
-              loadImageList();
+              if (reload_list === true) {
+                  loadImageList();
+              }
             }
           } else {
             displayFeedback($('#feedback_annotation_exists'));
@@ -114,7 +116,9 @@
         } else if (jqXHR.status === 201) {
           displayFeedback($('#feedback_annotation_created'));
           displayExistingAnnotations(data.annotations);
-          loadImageList();
+          if (reload_list === true) {
+              loadImageList();
+          }
         }
 
         resetSelection(true);
@@ -849,7 +853,7 @@
       event.preventDefault();
       createAnnotation(undefined, function() {
         loadAdjacentImage(-1);
-      }, true);
+      }, true, true);
     });
     $('#back_button').click(function(event) {
       event.preventDefault();
@@ -863,7 +867,7 @@
       event.preventDefault();
       createAnnotation(undefined, function() {
         loadAdjacentImage(1);
-      }, true);
+      }, true, true);
     });
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
