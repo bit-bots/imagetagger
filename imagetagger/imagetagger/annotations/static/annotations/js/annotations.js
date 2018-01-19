@@ -729,7 +729,8 @@
     }
     if (gRestoreSelection !== undefined) {
       if (gRestoreSelection === null) {
-        notInImage.prop('checked', true);
+        $('#not_in_image').prop('checked', true);
+        $('#coordinate_table').hide();
       } else {
         $('#x1Field').val(gRestoreSelection.x1);
         $('#x2Field').val(gRestoreSelection.x2);
