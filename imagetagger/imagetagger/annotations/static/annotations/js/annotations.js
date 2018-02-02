@@ -26,6 +26,13 @@
   var gRestoreSelection;
   var gSelection;
 
+  // the color for the annotations to be drawn
+  var gAnnotationColor = '#ff00ff';
+
+  // save the current annotations of the image, so we can draw and hide the
+  // TODO cache annotations
+  var gCurrentAnnotations;
+
   /**
    * Calculate the correct imageScale value.
    */
@@ -95,6 +102,9 @@
       dataType: 'json',
       data: JSON.stringify(data),
       success: function(data, textStatus, jqXHR) {
+        // update current annotations
+        gCurrentAnnotations = data.annotations;
+
         $('.annotate_button').prop('disabled', false);
 
         if (jqXHR.status === 200) {
@@ -109,6 +119,7 @@
               if (reload_list === true) {
                   loadImageList();
               }
+              drawExistingAnnotations();
             }
           } else {
             displayFeedback($('#feedback_annotation_exists'));
@@ -119,6 +130,7 @@
           if (reload_list === true) {
               loadImageList();
           }
+          drawExistingAnnotations();
         }
 
         resetSelection(true);
@@ -165,6 +177,17 @@
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
+        // remove the annotation from current annotations
+        // do not load the annotations from the server again
+        for (var annotation in gCurrentAnnotations) {
+          var id = gCurrentAnnotations[annotation].id;
+          if (id === annotationId) {
+            delete gCurrentAnnotations[annotation];
+          }
+        }
+        // redraw the annotations
+        drawExistingAnnotations();
+
         displayFeedback($('#feedback_annotation_deleted'));
         $('#annotation_edit_button_' + annotationId).parent().parent().fadeOut().remove();
       },
@@ -252,6 +275,50 @@
     }
 
     existingAnnotations.removeClass('hidden');
+  }
+
+  function drawExistingAnnotations() {
+    if (gCurrentAnnotations.length === 0 || !$('#draw_annotations').prop('checked')) {
+        return;
+    }
+
+    clearBoundingBoxes();
+
+    // clear all boxes
+    var boundingBoxes = document.getElementById('boundingBoxes');
+
+    var annotationType = parseInt($('#annotation_type_id').val());
+
+    for (var a in gCurrentAnnotations) {
+
+      var annotation = gCurrentAnnotations[a];
+      if (annotation.annotation_type.id !== annotationType) {
+        continue;
+      }
+      if (annotation.vector === null) {
+          continue;
+      }
+
+      var boundingBox = document.createElement('div');
+      boundingBox.setAttribute('id', 'boundingBox');
+      $(boundingBox).css({
+          'top': annotation.vector.y1/gImageScale,
+          'left': annotation.vector.x1/gImageScale + parseFloat($('img#image').parent().css('padding-left')),
+          'width': (annotation.vector.x2 - annotation.vector.x1)/gImageScale,
+          'height': (annotation.vector.y2 - annotation.vector.y1)/gImageScale,
+          'border': '2px solid',
+          'borderColor': gAnnotationColor});
+
+      boundingBoxes.appendChild(boundingBox);
+    }
+  }
+
+  function clearBoundingBoxes() {
+    var boundingBoxes = document.getElementById('boundingBoxes');
+
+    while (boundingBoxes.firstChild) {
+      boundingBoxes.removeChild(boundingBoxes.firstChild);
+    }
   }
 
   /**
@@ -446,6 +513,19 @@
   }
 
   /**
+   * Handle toggle of the draw annotations checkbox.
+   *
+   * @param event
+   */
+  function handleShowAnnotationsToggle(event) {
+    if ($('#draw_annotations').is(':checked')) {
+      drawExistingAnnotations();
+    } else {
+      clearBoundingBoxes();
+    }
+  }
+
+  /**
    * Handle a selection using the mouse.
    *
    * @param event
@@ -493,6 +573,7 @@
   function handleResize() {
     gSelection.cancelSelection();
     calculateImageScale();
+    drawExistingAnnotations();
   }
 
   /**
@@ -553,7 +634,7 @@
       }, document.title, '/annotations/' + imageId + '/');
     }
 
-    // Load existing annotations for this image
+    // load existing annotations for this image
     var params = {
       image_id: imageId
     };
@@ -562,8 +643,11 @@
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
+        // save the current annotations
+        gCurrentAnnotations = data.annotations;
         loading.addClass('hidden');
         displayExistingAnnotations(data.annotations);
+        drawExistingAnnotations();
 
         if (gRestoreSelection !== undefined) {
           restoreSelection();
@@ -794,6 +878,30 @@
     return vector.x2 - vector.x1 >= 1 && vector.y2 - vector.y1 >= 1
   }
 
+  /**
+   * Handle the selection change of the annotation type.
+   */
+
+  function handleAnnotationTypeChange() {
+    var annotationTypeId = parseInt($('#annotation_type_id').val());
+
+    var params = {
+      image_id: gImageId
+    };
+
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function(data) {
+        gCurrentAnnotations = data.annotations;
+        drawExistingAnnotations();
+      },
+      error: function() {
+      }
+    });
+  }
+
   $(function() {
     gEditActiveContainer = $('#edit_active');
     gImage = $('#image');
@@ -840,6 +948,8 @@
     $('select').on('change', function() {
       document.activeElement.blur();
     });
+    $('#draw_annotations').on('change', handleShowAnnotationsToggle);
+    $('select#annotation_type_id').on('change', handleAnnotationTypeChange);
 
     // register click events
     $('#cancel_edit_button').click(function() {

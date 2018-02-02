@@ -69,6 +69,7 @@
 
         <div class="col-md-6">
             <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" data-imageid="{{ selected_image.id }}"></br>
+            <div id="boundingBoxes"></div>
             <hr color="silver" width="100%">
             <p>
               <u>Annotations:</u>
@@ -119,6 +120,10 @@
                             <option value="">{% trans 'Annotation Type' %}</option>
                             {% include "annotations/annotationtypes.html" %}
                           </select>
+                        </p>
+                        <p>
+                          <input type='checkbox' id='draw_annotations' name="draw_annotations" checked>
+                          <label for='draw_annotations'>Draw annotations of selected type</label>
                         </p>
                         <p>
                           <input type='checkbox' id='keep_selection' name="keep_selection" checked>
