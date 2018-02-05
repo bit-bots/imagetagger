@@ -278,11 +278,11 @@
   }
 
   function drawExistingAnnotations() {
+    clearBoundingBoxes();
+
     if (gCurrentAnnotations.length === 0 || !$('#draw_annotations').prop('checked')) {
         return;
     }
-
-    clearBoundingBoxes();
 
     // clear all boxes
     var boundingBoxes = document.getElementById('boundingBoxes');
