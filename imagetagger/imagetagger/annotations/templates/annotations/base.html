@@ -4,6 +4,8 @@
 {% block taggerimports %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/imgareaselect-default.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/cursor.css' %}" />
+    {% block additional_annotation_css %}
+    {% endblock additional_annotation_css %}
 {% endblock %}
 
 {% block additional_js %}

@@ -1,6 +1,11 @@
 {% extends 'annotations/base.html' %}
 {% load i18n %}
 {% load static %}
+
+{% block additional_annotation_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'annotations/css/bounding_boxes.css' %}" />
+{% endblock additional_annotation_css %}
+
 {% block additional_annotation_js %}
   <script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
 {% endblock additional_annotation_js %}

@@ -1,0 +1,7 @@
+#boundingBoxes {
+    pointer-events: none;
+}
+
+#boundingBox {
+    border: 2px solid #ff00ff;
+}

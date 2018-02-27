@@ -26,9 +26,6 @@
   var gRestoreSelection;
   var gSelection;
 
-  // the color for the annotations to be drawn
-  var gAnnotationColor = '#ff00ff';
-
   // save the current annotations of the image, so we can draw and hide the
   // TODO cache annotations
   var gCurrentAnnotations;
@@ -305,9 +302,7 @@
           'top': annotation.vector.y1/gImageScale,
           'left': annotation.vector.x1/gImageScale + parseFloat($('img#image').parent().css('padding-left')),
           'width': (annotation.vector.x2 - annotation.vector.x1)/gImageScale,
-          'height': (annotation.vector.y2 - annotation.vector.y1)/gImageScale,
-          'border': '2px solid',
-          'borderColor': gAnnotationColor});
+          'height': (annotation.vector.y2 - annotation.vector.y1)/gImageScale});
 
       boundingBoxes.appendChild(boundingBox);
     }
