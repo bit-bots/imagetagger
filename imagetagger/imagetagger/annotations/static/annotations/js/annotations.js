@@ -26,6 +26,11 @@
   var gRestoreSelection;
   var gSelection;
 
+  var gMouseDownX;
+  var gMouseDownY;
+  var gMouseUpX;
+  var gMouseUpY;
+
   // save the current annotations of the image, so we can draw and hide the
   // TODO cache annotations
   var gCurrentAnnotations;
@@ -355,6 +360,10 @@
       // add previous image to cache
       gImageCache[currentImage.data('imageid')] = currentImage;
     }
+
+    // reattach listeners for mouse events
+    $('img').on('mousedown', handleMouseDown);
+    $('img').on('mouseup', handleMouseUp);
   }
 
   /**
@@ -897,6 +906,153 @@
     });
   }
 
+  function handleMouseDown(event) {
+    if (!$('#draw_annotations').is(':checked'))
+      return;
+
+    var position = gImage.offset();
+    if (event.pageX > position.left && event.pageX < position.left + gImage.width() &&
+            event.pageY > position.top && event.pageY < position.top + gImage.height())
+    {
+      gMouseDownX = Math.round((event.pageX - position.left) * gImageScale);
+      gMouseDownY = Math.round((event.pageY - position.top) * gImageScale);
+    }
+  }
+
+  function handleMouseUp(event) {
+    if (!$('#draw_annotations').is(':checked'))
+      return;
+
+    var position = gImage.offset();
+    if (event.pageX > position.left && event.pageX < position.left + gImage.width() &&
+            event.pageY > position.top && event.pageY < position.top + gImage.height())
+    {
+      gMouseUpX = Math.round((event.pageX - position.left) * gImageScale);
+      gMouseUpY = Math.round((event.pageY - position.top) * gImageScale);
+
+      // check if we have a click and not a selection
+      if (gMouseDownX === gMouseUpX && gMouseDownY === gMouseUpY)
+      {
+        // get current annotation type id
+        var annotationType = parseInt($('#annotation_type_id').val());
+
+        // array with all matching annotations
+        var matchingAnnotations = [];
+
+        for (var a in gCurrentAnnotations)
+        {
+          var annotation = gCurrentAnnotations[a];
+          if (annotation.annotation_type.id !== annotationType)
+            continue;
+          if (annotation.vector === null)
+            continue;
+
+          var left = annotation.vector.x1;
+          var right = annotation.vector.x2;
+          var top = annotation.vector.y1;
+          var bottom = annotation.vector.y2;
+
+          // check if we clicked inside that annotation
+          if (gMouseDownX >= left && gMouseDownX <= right && gMouseDownY >= top && gMouseDownY <= bottom)
+          {
+            matchingAnnotations.push(annotation);
+          }
+        }
+
+        // no matches
+        if (matchingAnnotations.length === 0)
+          return;
+
+        annotation = matchingAnnotations[0];
+
+        // a single match
+        if (matchingAnnotations.length === 1)
+        {
+           // get the id of the corresponding edit button
+          edit_button_id = '#annotation_edit_button_' + annotation.id;
+           // trigger click event
+          $(edit_button_id).click();
+        }
+        // multiple matches
+        else
+        {
+          // if we have multiple matching annotations, we have the following descending criteria:
+          // 1. prefer annotation lying inside another one completely
+          // 2. prefer annotation, which left border is to the left of another ones
+          // 3. prefer annotation, which top border is above another ones
+          for (var a1 in matchingAnnotations)
+          {
+            var annotation1 = matchingAnnotations[a1];
+
+            if (annotation.id === annotation1.id)
+              continue;
+
+            if (inside(annotation1, annotation))
+            {
+              annotation = annotation1;
+              continue;
+            }
+
+            if (inside(annotation, annotation1))
+            {
+              continue;
+            }
+
+            if (leftOf(annotation1, annotation))
+            {
+              annotation = annotation1;
+              continue;
+            }
+
+            if (leftOf(annotation, annotation1))
+            {
+              continue;
+            }
+
+            if (above(annotation1, annotation))
+            {
+              annotation = annotation1;
+              continue;
+            }
+
+            if (above(annotation, annotation1))
+            {
+              continue;
+            }
+          }
+          // get the id of the corresponding edit button
+          edit_button_id = '#annotation_edit_button_' + annotation.id;
+          // trigger click event
+          $(edit_button_id).click();
+        }
+      }
+     }
+  }
+
+  // checks if annotation a1 is inside annotation a2
+  function inside(a1, a2) {
+    return a1.vector.x1 >= a2.vector.x1 && a1.vector.y1 >= a2.vector.y1 &&
+           a1.vector.x2 <= a2.vector.x2 && a1.vector.y2 <= a2.vector.y2;
+  }
+
+  // checks if the left border of annotation a1 is to the left of the left border of annotation a2
+  function leftOf(a1, a2) {
+    return a1.vector.x1 < a2.vector.x1;
+  }
+
+  // checks if the top border of annotation a1 is above the top border of annotation a2
+  function above(a1, a2) {
+    return a1.vector.y1 < a2.vector.y1;
+  }
+
+  // handle DEL key press
+  function handleDelete(event) {
+    if (gEditedAnnotationId === undefined)
+      return;
+
+    deleteAnnotation(event, gEditedAnnotationId);
+  }
+
   $(function() {
     gEditActiveContainer = $('#edit_active');
     gImage = $('#image');
@@ -1004,6 +1160,10 @@
       }
     };
 
+    // attach listeners for mouse events
+    $('img').on('mousedown', handleMouseDown);
+    $('img').on('mouseup', handleMouseUp);
+
     // TODO: this should be done only for the annotate view
     $(document).keyup(function(event) {
       switch (event.keyCode){
@@ -1028,6 +1188,9 @@
           break;
         case 86: //'v'
           $('#save_button').click();
+          break;
+        case 46: //'DEL'
+          handleDelete(event);
           break;
       }
     });
