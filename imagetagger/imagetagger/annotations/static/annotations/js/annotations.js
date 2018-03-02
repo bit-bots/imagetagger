@@ -31,6 +31,9 @@
   var gMouseUpX;
   var gMouseUpY;
 
+  // a threshold for editing an annotation if you select a small rectangle
+  var gSelectionThreshold = 5;
+
   // save the current annotations of the image, so we can draw and hide the
   // TODO cache annotations
   var gCurrentAnnotations;
@@ -362,8 +365,10 @@
     }
 
     // reattach listeners for mouse events
-    $('img').on('mousedown', handleMouseDown);
-    $('img').on('mouseup', handleMouseUp);
+    $('img').on('mousedown.annotation_edit', handleMouseDown);
+    $('img').on('mouseup.annotation_edit', handleMouseUp);
+    // we have to bind the mouse up event globally to also catch mouseup on small selections
+    $(document).on('mouseup.annotation_edit', handleMouseUp);
   }
 
   /**
@@ -930,8 +935,9 @@
       gMouseUpX = Math.round((event.pageX - position.left) * gImageScale);
       gMouseUpY = Math.round((event.pageY - position.top) * gImageScale);
 
-      // check if we have a click and not a selection
-      if (gMouseDownX === gMouseUpX && gMouseDownY === gMouseUpY)
+      // check if we have a click or a small selection
+      if (Math.abs(gMouseDownX - gMouseUpX) <= gSelectionThreshold &&
+          Math.abs(gMouseDownY - gMouseUpY) <= gSelectionThreshold)
       {
         // get current annotation type id
         var annotationType = parseInt($('#annotation_type_id').val());
@@ -1161,8 +1167,10 @@
     };
 
     // attach listeners for mouse events
-    $('img').on('mousedown', handleMouseDown);
-    $('img').on('mouseup', handleMouseUp);
+    $('img').on('mousedown.annotation_edit', handleMouseDown);
+    $('img').on('mouseup.annotation_edit', handleMouseUp);
+    // we have to bind the mouse up event globally to also catch mouseup on small selections
+    $(document).on('mouseup.annotation_edit', handleMouseUp);
 
     // TODO: this should be done only for the annotate view
     $(document).keyup(function(event) {
