@@ -246,6 +246,13 @@ def view_imageset(request, image_set_id):
         image__in=images).order_by("id")
     annotation_types = annotation_types.union(
         [annotation.annotation_type for annotation in annotations])
+    annotation_type_count = sorted(list(
+        map(
+            lambda at: (at.name,
+                        annotations.filter(annotation_type=at).count()),
+            annotation_types)),
+        key=lambda at_tuple: at_tuple[1],
+        reverse=True)
     first_annotation = annotations.first()
     return render(request, 'images/imageset.html', {
         'images': images,
@@ -253,6 +260,7 @@ def view_imageset(request, image_set_id):
         'imageset': imageset,
         'annotationtypes': annotation_types,
         'annotation_types': annotation_types,
+        'annotation_type_count': annotation_type_count,
         'first_annotation': first_annotation,
         'exports': exports,
         'filtered': filtered,

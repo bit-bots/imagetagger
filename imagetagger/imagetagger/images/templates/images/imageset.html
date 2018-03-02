@@ -182,7 +182,16 @@
                                 </tr>
                                 <tr>
                                     <td>Annotation count</td>
-                                    <td>{{annotationcount}}</td>
+                                    <td>
+                                        {{annotationcount}}<br>
+                                        <ul>
+                                            {% for atc in annotation_type_count %}
+                                                <li>
+                                                    {{ atc.0}}: {{ atc.1 }}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Download</td>
