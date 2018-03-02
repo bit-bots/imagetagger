@@ -198,7 +198,15 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
 @login_required
 def view_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    members = team.members.all()
+    members = team.members.all().annotate(points=Subquery(
+        Verification.objects.filter(
+            verified=True,
+            annotation__user_id=OuterRef('pk'))
+        .values('annotation__user_id')
+        .annotate(count=Count('annotation__user_id'))
+        .values('count'), output_field=IntegerField())).all()\
+        .order_by(F('points').desc(nulls_last=True)).distinct()
+
     is_member = request.user in members
     admins = team.admins
     imagesets = ImageSet.objects.filter(team=team).order_by('-public', 'name')

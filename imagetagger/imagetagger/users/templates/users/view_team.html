@@ -53,6 +53,13 @@
                                     {% endif %}
                                     <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
                                 </td>
+                                <td>
+                                    {% if member.points %}
+                                        {{member.points}}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </td>
                                 {% if member == request.user  %}
                                     <td>
                                         <a href="{% url 'users:leave_team' team.id member.id %}"> [{% trans 'leave' %}]</a>
