@@ -260,12 +260,10 @@
                                                 <a class="btn btn-danger" href="{% url 'images:delete_imageset' imageset.id %}">Delete Set</a>
                                             {% endif %}
                                         </td>
-                                        <td>
+                                        <td class="align-right">
                                             {% if "delete_set" in imageset_perms %}
                                                 <a class="btn btn-warning" href="{%url 'images:setfree_imageset' imageset.id %}">Set Free</a>
                                             {% endif %}
-                                        </td>
-                                        <td>
                                             <input class="btn btn-primary" type="submit" value="{% trans 'Save changes' %}" />
                                         </td>
                                     </tr>
@@ -274,6 +272,7 @@
                             </table>
                         </div>
                         {% if not imageset.image_lock %}
+                        <hr>
                         <h3>
                             Upload new images:
                         </h3>
@@ -326,6 +325,7 @@
                             </form>
                         </div>
                         {% endif %}
+                        <hr>
                         <h3>
                             Upload existing Labels
                         </h3>
