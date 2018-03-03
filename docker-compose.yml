@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  db:
+    environment:
+      POSTGRES_DB: imagetagger
+      POSTGRES_USER: imagetagger
+      POSTGRES_PASSWORD: imagetagger
+    # restart: always
+    image: postgres
+    expose:
+      - "5432"
+  web:
+    environment:
+      DATABASE_URL: postgres://imagetagger:imagetagger@db/imagetagger
+      DJANGO_MANAGEPY_MIGRATE: "off"
+      DJANGO_MANAGEPY_COLLECTSTATIC: "off"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python3 /imagetagger/imagetagger/manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/imagetagger
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db

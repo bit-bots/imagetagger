@@ -1,6 +1,17 @@
+# docker
+categories.json
+confusables.json
+
+# trash on macOS
+.DS_Store
+
+# rope
+.ropeproject
+
 *.swp
 *.swo
 settings.py
+
 # ---> Python
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -64,7 +75,6 @@ target/
 .pyenv
 .idea
 db.sqlite3
-
 
 imagetagger/data
 imagetagger/images
