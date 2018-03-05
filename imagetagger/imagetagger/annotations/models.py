@@ -76,9 +76,9 @@ class Annotation(models.Model):
 
     @property
     def center(self):
-        xc = self.vector['y1'] + (self.height/2)
-        yc = self.vector['x1'] + (self.width/2)
-        return {'xc': xc, 'yc': yc }
+        yc = self.vector['y1'] + (self.height/2)
+        xc = self.vector['x1'] + (self.width/2)
+        return {'xc': xc, 'yc': yc}
 
     @property
     def relative_vector(self):
