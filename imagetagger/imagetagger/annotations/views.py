@@ -376,7 +376,8 @@ def export_format(export_format_name, imageset):
         for image in images:
             annotations = Annotation.objects.annotate_verification_difference()\
                 .filter(image=image,
-                        verification_difference__gte=min_verifications)
+                        verification_difference__gte=min_verifications,
+                        annotation_type__in=export_format.annotations_types.all())
             if annotations:
                 annotation_content = ''
                 for annotation in annotations:
@@ -444,7 +445,8 @@ def export_format(export_format_name, imageset):
     else:
         annotations = Annotation.objects.annotate_verification_difference()\
             .filter(image__in=images,
-                    verification_difference__gte=min_verifications)
+                    verification_difference__gte=min_verifications,
+                    annotation_type__in=export_format.annotations_types.all())
         annotation_content = '\n'
         for annotation in annotations:
             annotation_counter += 1
@@ -523,12 +525,12 @@ def create_exportformat(request, imageset_id):
             else:
                 with transaction.atomic():
 
-                    form.instance.save()
+                    form.save()
 
                 messages.success(request, _('The export format was created successfully.'))
                 return redirect(reverse('images:view_imageset', args=(imageset_id,)))
-
-    form = ExportFormatCreationForm()
+    else:
+        form = ExportFormatCreationForm()
     return render(request, 'annotations/create_exportformat.html', {
         'imageset': imageset,
         'form': form,
