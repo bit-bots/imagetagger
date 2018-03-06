@@ -192,7 +192,7 @@ def view_image(request, image_id):
     it will return forbidden on if the user is not authenticated
     """
     image = get_object_or_404(Image, id=image_id)
-    if not (image.image_set.public or image.image_set.has_perm('read', request.user)):
+    if not image.image_set.has_perm('read', request.user):
         return HttpResponseForbidden()
     if settings.USE_NGINX_IMAGE_PROVISION:
         response = HttpResponse()
@@ -207,7 +207,7 @@ def view_image(request, image_id):
 @login_required
 def list_images(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
-    if not (imageset.public or imageset.has_perm('read', request.user)):
+    if not imageset.has_perm('read', request.user):
         return HttpResponseForbidden()
     return TemplateResponse(request, 'images/imagelist.txt', {
         'images': imageset.images.all()

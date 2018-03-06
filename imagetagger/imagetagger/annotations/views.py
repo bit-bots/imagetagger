@@ -33,7 +33,7 @@ def export_auth(request, export_id):
 @login_required
 def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
-    if selected_image.image_set.has_perm('annotate', request.user) or selected_image.image_set.public:
+    if selected_image.image_set.has_perm('annotate', request.user):
         # TODO: Make sure that integer coordinate values are stored in vector
 
         # here the stuff we got via POST gets put in the DB
@@ -203,7 +203,7 @@ def edit_annotation_save(request, annotation_id):
 @login_required
 def create_export(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
-    if imageset.has_perm('create_export', request.user) or imageset.public:
+    if imageset.has_perm('create_export', request.user):
         export = request.POST.get('export')
         if request.method == 'POST' and export is not None:
             selected_format = request.POST['export_format']
@@ -253,6 +253,9 @@ def verify(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
     if request.method == 'POST' and request.POST.get("annotation") is not None:
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
+        if not annotation.image.image_set.has_perm('verify', request.user):
+            messages.warning(request, "You have no permission to verify this tag!")
+            return HttpResponseForbidden
         if request.POST['state'] == 'accept':
             state = True
             annotation.verify(request.user, state)
