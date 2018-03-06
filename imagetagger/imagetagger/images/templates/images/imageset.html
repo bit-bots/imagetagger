@@ -355,16 +355,18 @@
             {% endif %}
         </div>
         <div class="col-md-3">
-            {% if first_annotation %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h2 class="panel-title">Annotation management</h2>
+        {%  if "annotate" in imageset_perms %}
+                {% if first_annotation %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h2 class="panel-title">Annotation management</h2>
+                        </div>
+                        <div class="panel-body">
+                            <li><a href="{% url 'annotations:manage_annotations' imageset.id %}">Manage annotations</a></li>
+                            <li><a href="{% url 'annotations:verify' first_annotation.id %}">Verify annotations</a></li>
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        <li><a href="{% url 'annotations:manage_annotations' imageset.id %}">Manage annotations</a></li>
-                        <li><a href="{% url 'annotations:verify' first_annotation.id %}">Verify annotations</a></li>
-                    </div>
-                </div>
+                {% endif %}
             {% endif %}
             <div class="panel panel-default">
                 <div class="panel-heading">

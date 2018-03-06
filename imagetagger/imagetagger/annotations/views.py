@@ -255,7 +255,7 @@ def verify(request, annotation_id):
         annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
         if not annotation.image.image_set.has_perm('verify', request.user):
             messages.warning(request, "You have no permission to verify this tag!")
-            return HttpResponseForbidden
+            return HttpResponseForbidden()
         if request.POST['state'] == 'accept':
             state = True
             annotation.verify(request.user, state)
@@ -267,6 +267,9 @@ def verify(request, annotation_id):
 
     annotation = get_object_or_404(
         Annotation.objects.select_related(), id=annotation_id)
+    if not annotation.image.image_set.has_perm('verify', request.user):
+        messages.warning(request, "You have no permission to verify this tag!")
+        return HttpResponseForbidden()
 
     # checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
