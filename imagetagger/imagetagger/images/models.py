@@ -44,6 +44,7 @@ class ImageSet(models.Model):
     team = models.ForeignKey(
         Team, on_delete=models.SET_NULL, related_name='image_sets', null=True, blank=True)
     public = models.BooleanField(default=False)
+    public_collaboration = models.BooleanField(default=False)
     image_lock = models.BooleanField(default=False)
 
     def root_path(self):
@@ -59,6 +60,7 @@ class ImageSet(models.Model):
         if self.team is not None:
             if self.team.is_admin(user):
                 perms.update({
+                    'verify',
                     'annotate',
                     'create_export',
                     'delete_annotation',
@@ -70,6 +72,7 @@ class ImageSet(models.Model):
                 })
             if self.team.is_member(user):
                 perms.update({
+                    'verify',
                     'annotate',
                     'create_export',
                     'delete_annotation',
@@ -80,11 +83,16 @@ class ImageSet(models.Model):
                 })
         if self.public:
             perms.update({
-                'annotate',
-                'delete_annotation',
-                'edit_annotation',
                 'read',
+                'create_export',
             })
+            if self.public_collaboration:
+                perms.update({
+                    'verify',
+                    'annotate',
+                    'delete_annotation',
+                    'edit_annotation',
+                })
         return perms
 
     def has_perm(self, permission: str, user: get_user_model()) -> bool:

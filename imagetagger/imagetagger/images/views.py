@@ -229,6 +229,8 @@ def delete_images(request, image_id):
 @login_required
 def view_imageset(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
+    if not imageset.has_perm('read', request.user):
+        return HttpResponseForbidden
     # images the imageset contains
     images = Image.objects.filter(image_set=imageset).order_by('name')
     # the saved exports of the imageset
@@ -362,7 +364,8 @@ def delete_imageset(request, imageset_id):
 def set_free(request,imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     if not imageset.has_perm('delete_set', request.user):
-        messages.warning(request, ('You do not have permission to free this imageset'))
+        messages.warning(request,
+                         _('You do not have permission to release this imageset'))
         return redirect(reverse('images:imageset', args=(imageset.pk,)))
 
     if request.method == 'POST':
