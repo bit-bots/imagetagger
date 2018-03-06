@@ -110,6 +110,8 @@
 <script src="{% static 'jQuery-File-Upload/js/jquery.fileupload-validate.js' %}"></script>
 <!-- The File Upload user interface plugin -->
 <script src="{% static 'jQuery-File-Upload/js/jquery.fileupload-ui.js' %}"></script>
+<!-- An additional form script -->
+<script src="{% static 'scripts/pub_coll.js' %}"></script>
 <!-- The main application script -->
 <script src="{% static 'jQuery-File-Upload/js/main.js' %}"></script>
 <![endif]-->
@@ -240,10 +242,18 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="id_public">{{ edit_form.public.label }}</label>
+                                            <label for="id_public">{{ edit_form.public.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span></label>
                                         </td>
                                         <td>
                                             {% render_field edit_form.public class+='form-control' %}
+                                        </td>
+                                    </tr>
+                                    <tr id="public_collaboration_row">
+                                        <td>
+                                            <label for="id_public_collaboration">{{ edit_form.public_collaboration.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span> </label>
+                                        </td>
+                                        <td>
+                                            {% render_field edit_form.public_collaboration class+='form-control' %}
                                         </td>
                                     </tr>
                                     <tr>

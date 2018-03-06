@@ -1,6 +1,12 @@
 {% extends 'base/base.html' %}
 {% load i18n %}
+{% load static %}
 {% load widget_tweaks %}
+
+{% block additional_js %}
+    <!-- An additional form script -->
+    <script src="{% static 'scripts/pub_coll.js' %}"></script>
+{% endblock additional_js %}
 
 {% block bodyblock %}
 <div class="container-fluid">
@@ -113,8 +119,13 @@
                                 {% render_field imageset_creation_form.location class+='form-control' placeholder=imageset_creation_form.location.label %}
                             </div>
                             <div class="form-group">
-                                <label for="id_public">{{ imageset_creation_form.public.label }}</label>
+                                <label for="id_public">{{ imageset_creation_form.public.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span></label>
                                 {% render_field imageset_creation_form.public %}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_public_collaboration">
+                                    {{ imageset_creation_form.public_collaboration.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span> </label>
+                                {% render_field imageset_creation_form.public_collaboration %}
                             </div>
                             <input class="btn btn-primary" type="submit" value="Create">
                         </form>

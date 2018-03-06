@@ -62,6 +62,7 @@ docs/_build/
 target/
 
 .pyenv
+.venv
 .idea
 db.sqlite3
 

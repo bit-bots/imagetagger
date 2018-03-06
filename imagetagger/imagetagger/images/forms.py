@@ -10,6 +10,7 @@ class ImageSetCreationForm(forms.ModelForm):
             'name',
             'location',
             'public',
+            'public_collaboration',
         ]
 
 
@@ -21,6 +22,7 @@ class ImageSetEditForm(forms.ModelForm):
             'location',
             'description',
             'public',
+            'public_collaboration',
             'image_lock',
         ]
 
