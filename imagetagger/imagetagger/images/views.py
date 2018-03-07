@@ -230,7 +230,8 @@ def delete_images(request, image_id):
 def view_imageset(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if not imageset.has_perm('read', request.user):
-        return HttpResponseForbidden()
+        messages.warning(request, 'you do not have the permission to access this imageset')
+        return redirect(reverse('images:index'))
     # images the imageset contains
     images = Image.objects.filter(image_set=imageset).order_by('name')
     # the saved exports of the imageset

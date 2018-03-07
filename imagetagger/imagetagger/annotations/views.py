@@ -269,7 +269,8 @@ def verify(request, annotation_id):
         Annotation.objects.select_related(), id=annotation_id)
     if not annotation.image.image_set.has_perm('verify', request.user):
         messages.warning(request, "You have no permission to verify this tag!")
-        return HttpResponseForbidden()
+        return redirect(
+            reverse('images:view_imageset', args=(annotation.image.image_set.id,)))
 
     # checks if user has already verified this tag
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
