@@ -33,43 +33,47 @@ def export_auth(request, export_id):
 @login_required
 def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
-    if selected_image.image_set.has_perm('annotate', request.user):
+    imageset_perms = selected_image.image_set.get_perms(request.user)
+    if 'read' in imageset_perms:
         # TODO: Make sure that integer coordinate values are stored in vector
 
         # here the stuff we got via POST gets put in the DB
         last_annotation_type_id = -1
         if request.method == 'POST' and request.POST.get("annotate") is not None:
-            try:
-                image = get_object_or_404(Image, id=request.POST['image_id'])
-                vector = {
-                    'x1': int(request.POST['x1Field']),
-                    'y1': int(request.POST['y1Field']),
-                    'x2': int(request.POST['x2Field']),
-                    'y2': int(request.POST['y2Field']),
-                }
-                if 'not_in_image' in request.POST:
-                    vector = None
-            except (KeyError, ValueError):
-                return HttpResponseBadRequest()
+            if 'annotate' in imageset_perms:
+                try:
+                    image = get_object_or_404(Image, id=request.POST['image_id'])
+                    vector = {
+                        'x1': int(request.POST['x1Field']),
+                        'y1': int(request.POST['y1Field']),
+                        'x2': int(request.POST['x2Field']),
+                        'y2': int(request.POST['y2Field']),
+                    }
+                    if 'not_in_image' in request.POST:
+                        vector = None
+                except (KeyError, ValueError):
+                    return HttpResponseBadRequest()
 
-            if (vector is not None and
-                    not Annotation.validate_vector(
-                        vector, Annotation.VECTOR_TYPE.BOUNDING_BOX)):
-                messages.warning(request, _('No valid bounding box found.'))
-            else:
-                last_annotation_type_id = request.POST['selected_annotation_type']
-                annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
-                annotation = Annotation(
-                    vector=vector, image=image, annotation_type=annotation_type,
-                    user=request.user if request.user.is_authenticated() else None)
-
-                if not Annotation.similar_annotations(
-                        vector, selected_image, annotation_type):
-                    annotation.save()
-                    # the creator of the annotation verifies it instantly
-                    annotation.verify(request.user, True)
+                if (vector is not None and
+                        not Annotation.validate_vector(
+                            vector, Annotation.VECTOR_TYPE.BOUNDING_BOX)):
+                    messages.warning(request, _('No valid bounding box found.'))
                 else:
-                    messages.warning(request, "This tag already exists!")
+                    last_annotation_type_id = request.POST['selected_annotation_type']
+                    annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
+                    annotation = Annotation(
+                        vector=vector, image=image, annotation_type=annotation_type,
+                        user=request.user if request.user.is_authenticated() else None)
+
+                    if not Annotation.similar_annotations(
+                            vector, selected_image, annotation_type):
+                        annotation.save()
+                        # the creator of the annotation verifies it instantly
+                        annotation.verify(request.user, True)
+                    else:
+                        messages.warning(request, "This tag already exists!")
+            else:
+                messages.warning(request, 'you do not have the permission to annotate in this imageset!')
 
         set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
@@ -94,6 +98,7 @@ def annotate(request, image_id):
 
         return render(request, 'annotations/annotate.html', {
             'selected_image': selected_image,
+            'imageset_perms': imageset_perms,
             'next_image': next_image,
             'last_image': last_image,
             'set_images': set_images,
