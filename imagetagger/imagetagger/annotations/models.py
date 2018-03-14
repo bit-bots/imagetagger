@@ -11,6 +11,7 @@ from django.db.models.functions import Coalesce
 
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
+from imagetagger.annotations.fields import NonStrippingTextField
 
 
 class AnnotationQuerySet(models.QuerySet):
@@ -279,11 +280,11 @@ class ExportFormat(models.Model):
     team = models.ForeignKey(Team, on_delete=models.PROTECT,
                              related_name='export_formats')
     public = models.BooleanField(default=False)
-    base_format = models.TextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
-    image_format = models.TextField(null=True, blank=True, default=None)
-    annotation_format = models.TextField() #used for every annotation in export (coordinates, type, image)
+    base_format = NonStrippingTextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
+    image_format = NonStrippingTextField(null=True, blank=True, default=None)
+    annotation_format = NonStrippingTextField() #used for every annotation in export (coordinates, type, image)
+    not_in_image_format = NonStrippingTextField()
     name_format = models.CharField(default='export_%%exportid.txt', max_length=200)
-    not_in_image_format = models.TextField()
     min_verifications = models.IntegerField(default=0)
     image_aggregation = models.BooleanField(default=False)
 
