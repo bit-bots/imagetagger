@@ -248,13 +248,13 @@
 
       var annotationLinks = $('<div style="float: right;">');
       var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
-      '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="edit">' +
+      '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="verify" class="annotation_verify_button">' +
       '</a>');
       var editButton = $('<a href="/annotations/' + annotation.id + '/edit/">' +
-      '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit">' +
+      '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit" class="annotation_edit_button">' +
       '</a>');
       var deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
-      '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete">' +
+      '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete" class="annotation_delete_button">' +
       '</a>');
       const annotationId = annotation.id;
       editButton.attr('id', 'annotation_edit_button_' + annotationId);
