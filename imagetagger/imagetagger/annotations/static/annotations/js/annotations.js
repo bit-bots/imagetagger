@@ -25,6 +25,7 @@
   var gMousepos;
   var gRestoreSelection;
   var gSelection;
+  var gMoveSelectionStepsize  = 5;
 
   var gMouseDownX;
   var gMouseDownY;
@@ -1058,6 +1059,78 @@
 
     deleteAnnotation(event, gEditedAnnotationId);
   }
+  function moveSelectionUp() {
+    y1 = $('#y1Field').val();
+    y2 = $('#y2Field').val();
+    // calculate value +/- stepsize (times stepsize to account for differing image sizes)
+    newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueY1 < 0){
+      newValueY1 = 0;
+      newValueY2 = $('#y2Field').val(); }
+    if (newValueY2 > Math.round(gImage.height()*gImageScale)){
+      newValueY2 = Math.ceil(gImage.height()*gImageScale);
+      newValueY1 =  $('#y1Field').val();
+       }
+    // update values
+    $('#y1Field').val(newValueY1);
+    $('#y2Field').val(newValueY2);
+    reloadSelection();
+  }
+  function moveSelectionDown() {
+    // calculate value +/- stepsize times stepsize to account for differing image sizes
+    newValueY1 = Math.round(parseInt($('#y1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    newValueY2 = Math.round(parseInt($('#y2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueY1 < 0){
+      newValueY1 = 0;
+      newValueY2 = $('#y2Field').val(); }
+    if (newValueY2 > Math.round(gImage.height()*gImageScale)){
+      newValueY2 = Math.ceil(gImage.height()*gImageScale);
+      newValueY1 =  $('#y1Field').val();
+       }
+    // update values
+    $('#y1Field').val(newValueY1);
+    $('#y2Field').val(newValueY2);
+    reloadSelection();
+  }
+
+  function moveSelectionRight() {
+    // calculate value +/- stepsize times stepsize to account for differing image sizes
+    newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueX1 < 0){
+      newValueX1 = 0;
+      newValueX2 = $('#x2Field').val(); }
+    if (newValueX2 > Math.round(gImage.width()*gImageScale)){
+      newValueX2 = Math.ceil(gImage.width()*gImageScale);
+      newValueX1 =  $('#x1Field').val();
+       }
+    // update values
+    $('#x1Field').val(newValueX1);
+    $('#x2Field').val(newValueX2);
+    reloadSelection();
+  }
+  function moveSelectionLeft() {
+    // calculate value +/- stepsize times stepsize to account for differing image sizes
+    newValueX1 = Math.round(parseInt($('#x1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    newValueX2 = Math.round(parseInt($('#x2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueX1 < 0){
+      newValueX1 = 0;
+      newValueX2 = $('#x2Field').val(); }
+    if (newValueX2 > Math.round(gImage.width()*gImageScale)){
+      newValueX2 = Math.ceil(gImage.width()*gImageScale);
+      newValueX1 =  $('#x1Field').val();
+       }
+    // update values
+    $('#x1Field').val(newValueX1);
+    $('#x2Field').val(newValueX2);
+    reloadSelection();
+  }
+
 
   $(function() {
     gEditActiveContainer = $('#edit_active');
@@ -1199,6 +1272,18 @@
           break;
         case 46: //'DEL'
           handleDelete(event);
+          break;
+        case 73: //i
+          moveSelectionUp();
+          break;
+        case 75: //k
+          moveSelectionDown();
+          break;
+        case 76: //l
+          moveSelectionRight();
+          break;
+        case 74: //j
+          moveSelectionLeft();
           break;
       }
     });
