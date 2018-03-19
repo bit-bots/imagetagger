@@ -117,22 +117,28 @@
                                 </table>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="30score">
-                                <table class="team-table">
-                                    {% for member in members_30 %}
-                                        <tr>
-                                            <td>
-                                                <a href="{% url 'users:user' member.id %}">{{member.username}}&nbsp;&nbsp;&nbsp;&nbsp;</a>
-                                            </td>
-                                            <td>
-                                                {% if member.points %}
-                                                    {{member.points}}
-                                                {% else %}
-                                                    0
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </table>
+                                {% if members_30 %}
+                                    <table class="team-table">
+                                        {% for member in members_30 %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{% url 'users:user' member.id %}">{{member.username}}&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                                </td>
+                                                <td>
+                                                    {% if member.points %}
+                                                        {{member.points}}
+                                                    {% else %}
+                                                        0
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                {% else %}
+                                    <p>
+                                        No highscore to show.
+                                    </p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

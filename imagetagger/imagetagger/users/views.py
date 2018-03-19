@@ -215,7 +215,7 @@ def view_team(request, team_id):
             annotation__time__gte=timezone.now() - datetime.timedelta(days=30))
         .values('annotation__user_id')
         .annotate(count=Count('annotation__user_id'))
-        .values('count'), output_field=IntegerField())).all()\
+        .values('count'), output_field=IntegerField())).filter(points__gt=0)\
         .order_by(F('points').desc(nulls_last=True)).distinct()
 
     is_member = request.user in members
