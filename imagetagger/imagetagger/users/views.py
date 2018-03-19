@@ -208,13 +208,11 @@ def view_team(request, team_id):
         .annotate(count=Count('annotation__user_id'))
         .values('count'), output_field=IntegerField())).all()\
         .order_by(F('points').desc(nulls_last=True)).distinct()
-    annotations_30 = Annotation.objects.filter(
-        time__gte=timezone.now() - datetime.timedelta(days=30))
     members_30 = team.members.all().annotate(points=Subquery(
         Verification.objects.filter(
             verified=True,
             annotation__user_id=OuterRef('pk'),
-            annotation__in=annotations_30)
+            annotation__time__gte=timezone.now() - datetime.timedelta(days=30))
         .values('annotation__user_id')
         .annotate(count=Count('annotation__user_id'))
         .values('count'), output_field=IntegerField())).all()\
