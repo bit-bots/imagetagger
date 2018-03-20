@@ -35,6 +35,11 @@
                         </div>
                         <div class="form-group">
                             <label for="id_email">{{ form.email.label }}</label>
+                            <p>
+                                Please enter a valid email adress.
+                                It will be used to validate your account.
+                                Without the activation link, you can not use the Imagetagger.
+                            </p>
                             {% render_field form.email class+='form-control' %}
                             {% for error in form.email.errors %}
                                 <p class="text-danger">{{ error }}</p>
