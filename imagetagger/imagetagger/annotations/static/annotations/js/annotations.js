@@ -25,7 +25,7 @@
   var gMousepos;
   var gRestoreSelection;
   var gSelection;
-  var gMoveSelectionStepsize  = 5;
+  var gMoveSelectionStepsize  = 2;
 
   var gMouseDownX;
   var gMouseDownY;
@@ -597,7 +597,8 @@
       show: true,
       minHeight: 2,
       minWidth: 2,
-      onSelectChange: updateAnnotationFields
+      onSelectChange: updateAnnotationFields,
+      resizeMargin: 3
     });
     gSelection.cancelSelection();
   }
