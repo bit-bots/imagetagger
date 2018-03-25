@@ -27,20 +27,101 @@
                         </form>
                     {% endif %}
                     <h3>Imagesets</h3>
-                    <ul>
-                        {% for imageset in imagesets %}
-                            <li>
-                                {% if not imageset.public %}
-                                    <span class="glyphicon glyphicon-lock"></span>
-                                {% endif %}
-                                <a href="{% url 'images:view_imageset' imageset.id%}">
-                                    {{ imageset.name }}
-                                </a>
-                                ({{ imageset.image_count }} images)</li>
-                        {% empty %}
-                            <li><em>{% trans 'no imagesets available' %}</em></li>
-                        {% endfor %}
-                    </ul>
+                    <div>
+                        {% if imagesets %}
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active">
+                                    <a href="#alphabetically" aria-controls="alphabetically" role="tab" data-toggle="tab">
+                                        A-Z
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="#date" aria-controls="date" role="tab" data-toggle="tab">
+                                        By Date
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="#size" aria-controls="size" role="tab" data-toggle="tab">
+                                       By Size
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="#test" aria-controls="test" role="tab" data-toggle="tab">
+                                        Test Sets
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="alphabetically">
+                                    <ul>
+                                        {% for imageset in imagesets %}
+                                            <li>
+                                                {% if not imageset.public %}
+                                                    <span class="glyphicon glyphicon-lock"></span>
+                                                {% endif %}
+                                                <a href="{% url 'images:view_imageset' imageset.id%}">
+                                                    {{ imageset.name }}
+                                                </a>
+                                                ({{ imageset.image_count }} images)</li>
+                                        {% empty %}
+                                            {% trans 'no imagesets available' %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="date">
+                                    <ul>
+                                        {% for imageset in date_imagesets %}
+                                            <li>
+                                                {% if not imageset.public %}
+                                                    <span class="glyphicon glyphicon-lock"></span>
+                                                {% endif %}
+                                                <a href="{% url 'images:view_imageset' imageset.id%}">
+                                                    {{ imageset.name }}
+                                                </a>
+                                                ({{ imageset.image_count }} images)</li>
+                                        {% empty %}
+                                            {% trans 'no imagesets available' %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="size">
+                                    <ul>
+                                        {% for imageset in size_imagesets %}
+                                            <li>
+                                                {% if not imageset.public %}
+                                                    <span class="glyphicon glyphicon-lock"></span>
+                                                {% endif %}
+                                                <a href="{% url 'images:view_imageset' imageset.id%}">
+                                                    {{ imageset.name }}
+                                                </a>
+                                                ({{ imageset.image_count }} images)</li>
+                                        {% empty %}
+                                            {% trans 'no imagesets available' %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="test">
+                                    <ul>
+                                        {% for imageset in test_imagesets %}
+                                            <li>
+                                                {% if not imageset.public %}
+                                                    <span class="glyphicon glyphicon-lock"></span>
+                                                {% endif %}
+                                                <a href="{% url 'images:view_imageset' imageset.id%}">
+                                                    {{ imageset.name }}
+                                                </a>
+                                                ({{ imageset.image_count }} images)</li>
+                                        {% empty %}
+                                            Here, all imagesets with the word 'test' in the name are listed.<br>
+                                            {% trans 'no test imagesets available' %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% else %}
+                            {% trans 'no imagesets available' %}
+                        {% endif %}
+                    </div>
                     <h3>{% trans 'Members' %}</h3>
                     {% if "user_management" in team_perms %}
                         <p>

@@ -229,6 +229,9 @@ def view_team(request, team_id):
         'members_30': members_30,
         'admins': admins,
         'imagesets': imagesets,
+        'date_imagesets': imagesets.order_by('-time'),
+        'size_imagesets': sorted(imagesets, key=lambda i: -i.image_count()),
+        'test_imagesets': imagesets.filter(name__icontains='test'),
         'imageset_creation_form': ImageSetCreationForm(),
         'team_perms': team.get_perms(request.user),
     })
