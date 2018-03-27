@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.shortcuts import render
 
 urlpatterns = [
     url(r'^user/', include('django.contrib.auth.urls')),
@@ -26,3 +27,13 @@ urlpatterns = [
     url(r'^users/', include('imagetagger.users.urls')),
     url(r'^tools/', include('imagetagger.tools.urls')),
 ]
+
+
+def handler500(request):
+    """500 error handler which includes ``request`` in the context.
+
+    Templates: `500.html`
+    Context: None
+    """
+    return render(request, '500.html', status=500)
+
