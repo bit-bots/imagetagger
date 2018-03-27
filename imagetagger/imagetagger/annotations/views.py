@@ -124,9 +124,12 @@ def edit_annotation(request, annotation_id):
     if request.user is annotation.user or annotation.image.image_set.has_perm('edit_annotation', request.user):
         prev_page = request.META.get('HTTP_REFERER')
         prev_view = 0
-        if 'verify' in prev_page:
-            prev_view = 1
-        elif 'manage' in prev_page:
+        if prev_page:
+            if 'verify' in prev_page:
+                prev_view = 1
+            elif 'manage' in prev_page:
+                prev_view = 2
+        else:
             prev_view = 2
 
         annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu

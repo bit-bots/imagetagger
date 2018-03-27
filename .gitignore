@@ -70,3 +70,6 @@ db.sqlite3
 imagetagger/data
 imagetagger/images
 imagetagger/tools
+
+categories.json
+confusables.json
