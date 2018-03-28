@@ -69,11 +69,11 @@ class Annotation(models.Model):
 
     @property
     def radius(self):
-        return (self.height + self.width)/2
+        return self.diameter / 2
 
     @property
     def diameter(self):
-        return self.radius*2
+        return (self.height + self.width) / 2
 
     @property
     def center(self):
