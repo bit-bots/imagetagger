@@ -242,7 +242,9 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="id_public">{{ edit_form.public.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span></label>
+                                            <label for="id_public">{{ edit_form.public.label }}
+                                                <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span>
+                                            </label>
                                         </td>
                                         <td>
                                             {% render_field edit_form.public class+='form-control' %}
@@ -250,7 +252,9 @@
                                     </tr>
                                     <tr id="public_collaboration_row">
                                         <td>
-                                            <label for="id_public_collaboration">{{ edit_form.public_collaboration.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span> </label>
+                                            <label for="id_public_collaboration">{{ edit_form.public_collaboration.label }}
+                                                <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span>
+                                            </label>
                                         </td>
                                         <td>
                                             {% render_field edit_form.public_collaboration class+='form-control' %}
@@ -258,7 +262,9 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="image-lock">{{ edit_form.image_lock.label }}</label>
+                                            <label for="image-lock">{{ edit_form.image_lock.label }}
+                                                <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Prevents the upload of new pictures to the set"></span>
+                                            </label>
                                         </td>
                                         <td>
                                             {% render_field edit_form.image_lock class+='form-control' %}
