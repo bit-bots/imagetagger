@@ -285,6 +285,7 @@
 
   function drawExistingAnnotations() {
     clearBoundingBoxes();
+    calculateImageScale();
 
     if (gCurrentAnnotations.length === 0 || !$('#draw_annotations').prop('checked')) {
         return;
