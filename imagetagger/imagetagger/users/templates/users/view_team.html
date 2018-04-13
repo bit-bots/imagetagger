@@ -259,6 +259,30 @@
                 </div>
             </div>
         {% endif %}
+        <!-- check if permission needed to create/edit/delete export format maybe/at appropriate places -->
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                       <h3 class="panel-title">Export formats</h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul>
+                            {% for format in export_formats %}
+                                <li>
+                                    {% if not format.public %}
+                                        <span class="glyphicon glyphicon-lock"></span>
+                                    {% endif %}
+                                        <!-- wenn Ansicht möglich <a href=""> -->
+                                            {{ format.name }}
+                                        <!-- </a> -->
+                                </li>
+                                {% empty %}
+                                    {% trans 'no export formats available' %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
     </div>
 </div>
 {% endblock %}
