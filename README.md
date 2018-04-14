@@ -17,11 +17,11 @@ For a short overview of the functions please have a look at the following poster
 * image preloading for labeling
 * label verification
 * upload of existing labels
+* tools exchange
 
 
 ## Planned Features
 
 * image preloading for label verifiication
+* additional label classes to bounding-boxes
 * collections of filtered images from multiple imagesets
-* API to allow automated labeling
-* more comprehensive rights management
