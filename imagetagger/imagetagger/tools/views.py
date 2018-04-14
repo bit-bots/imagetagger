@@ -42,7 +42,7 @@ def overview(request):
 def create_tool(request):
     if request.method == 'POST':
         form = ToolUploadForm(request.POST, request.FILES)
-        if form.is_valid():
+        if form.is_valid() and request.user in form.instance.members:
             with transaction.atomic():
                 tool = form.instance
                 tool.creator = request.user
