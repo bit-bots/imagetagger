@@ -37,6 +37,9 @@ class Annotation(models.Model):
     class VECTOR_TYPE(Enum):
         # TODO: VECTOR_TYPE could be deduced from the annotation type (dynamically, bonus points!)
         BOUNDING_BOX = 1
+        LINE = 2
+        MULTI_LINE = 3
+        POLYGON = 4
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='annotations')
     vector = JSONField(null=True)
@@ -217,6 +220,8 @@ class Annotation(models.Model):
                 return False
         if vector_type == Annotation.VECTOR_TYPE.BOUNDING_BOX:
             return Annotation._validate_bounding_box(vector)
+        if vector_type == Annotation.VECTOR_TYPE.LINE:
+            return Annotation._validate_line(vector)
 
         # No valid vector type given.
         return False
@@ -228,6 +233,15 @@ class Annotation(models.Model):
             vector.get('x1', float('inf')) >= 1) and (
             vector.get('y2', float('-inf')) -
             vector.get('y1', float('inf')) >= 1
+        )
+
+    @staticmethod
+    def _validate_line(vector: dict) -> bool:
+        return (
+            vector.get('x2', float('inf')) is not
+            vector.get('x1', float('inf')) and
+            vector.get('y2', float('inf')) is not
+            vector.get('y1', float('inf'))
         )
 
 
