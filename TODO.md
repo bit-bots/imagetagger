@@ -10,3 +10,5 @@ this stuff to ```master```.
 * label editing
 * the tool has to change according to the selected type
 * other stuff
+* import/export stuff
+* annotation similarity
