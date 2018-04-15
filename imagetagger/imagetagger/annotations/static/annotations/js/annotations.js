@@ -1133,6 +1133,14 @@
     reloadSelection();
   }
 
+  function selectAnnotationType(annotationTypeNumber) {
+    var annotationTypeId = '#annotation_type_' + annotationTypeNumber;
+    var option = $(annotationTypeId);
+    if(option.length) {
+      $('#annotation_type_id').val(option.val());
+    }
+  }
+
 
   $(function() {
     gEditActiveContainer = $('#edit_active');
@@ -1286,6 +1294,36 @@
           break;
         case 74: //j
           moveSelectionLeft();
+          break;
+        case 48: //0
+          selectAnnotationType(10);
+          break;
+        case 49: //1
+          selectAnnotationType(1);
+          break;
+        case 50: //2
+          selectAnnotationType(2);
+          break;
+        case 51: //3
+          selectAnnotationType(3);
+          break;
+        case 52: //4
+          selectAnnotationType(4);
+          break;
+        case 53: //5
+          selectAnnotationType(5);
+          break;
+        case 54: //6
+          selectAnnotationType(6);
+          break;
+        case 55: //7
+          selectAnnotationType(7);
+          break;
+        case 56: //8
+          selectAnnotationType(8);
+          break;
+        case 57: //9
+          selectAnnotationType(9);
           break;
       }
     });
