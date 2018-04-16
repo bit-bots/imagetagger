@@ -31,6 +31,7 @@
   var gMouseDownY;
   var gMouseUpX;
   var gMouseUpY;
+  var gShiftDown;
 
   // a threshold for editing an annotation if you select a small rectangle
   var gSelectionThreshold = 5;
@@ -1132,6 +1133,53 @@
     $('#x2Field').val(newValueX2);
     reloadSelection();
   }
+  function increaseSelectionSizeUp() {
+    y1 = $('#y1Field').val();
+    // calculate value +/- stepsize (times stepsize to account for differing image sizes)
+    newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueY1 < 0){
+      newValueY1 = 0;
+    }
+
+    // update values
+    $('#y1Field').val(newValueY1);
+    reloadSelection();
+  }
+  function increaseSelectionSizeDown() {
+    // calculate value +/- stepsize times stepsize to account for differing image sizes
+    newValueY2 = Math.round(parseInt($('#y2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueY2 > Math.round(gImage.height()*gImageScale)){
+      newValueY2 = Math.ceil(gImage.height()*gImageScale);
+       }
+    // update values
+    $('#y2Field').val(newValueY2);
+    reloadSelection();
+  }
+  function increaseSelectionSizeRight() {
+    // calculate value +/- stepsize times stepsize to account for differing image sizes
+    newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+
+    if (newValueX2 > Math.round(gImage.width()*gImageScale)){
+      newValueX2 = Math.ceil(gImage.width()*gImageScale);
+       }
+    // update values
+    $('#x2Field').val(newValueX2);
+    reloadSelection();
+  }
+  function increaseSelectionSizeLeft() {
+    // calculate value +/- stepsize times stepsize to account for differing image sizes
+    newValueX1 = Math.round(parseInt($('#x1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
+    if (newValueX1 < 0) {
+        newValueX1 = 0;
+    }
+    // update values
+    $('#x1Field').val(newValueX1);
+    reloadSelection();
+  }
 
   function selectAnnotationType(annotationTypeNumber) {
     var annotationTypeId = '#annotation_type_' + annotationTypeNumber;
@@ -1255,9 +1303,46 @@
     // we have to bind the mouse up event globally to also catch mouseup on small selections
     $(document).on('mouseup.annotation_edit', handleMouseUp);
 
+    $(document).keydown(function(event) {
+      switch (event.keyCode){
+        case 16: // Shift
+          gShiftDown = true;
+          break;
+        case 73: //i
+          if(gShiftDown) {
+            increaseSelectionSizeUp();
+            break;
+          }
+          moveSelectionUp();
+          break;
+        case 75: //k
+          if(gShiftDown) {
+            increaseSelectionSizeDown();
+            break;
+          }
+          moveSelectionDown();
+          break;
+        case 76: //l
+          if(gShiftDown) {
+            increaseSelectionSizeRight();
+            break;
+          }
+          moveSelectionRight();
+          break;
+        case 74: //j
+          if(gShiftDown) {
+            increaseSelectionSizeLeft();
+            break;
+          }
+          moveSelectionLeft();
+          break;
+      }})
     // TODO: this should be done only for the annotate view
     $(document).keyup(function(event) {
       switch (event.keyCode){
+        case 16: // Shift
+              gShiftDown = false;
+              break;
         case 70: //f
           $('#next_button').click();
           break;
@@ -1282,18 +1367,6 @@
           break;
         case 46: //'DEL'
           handleDelete(event);
-          break;
-        case 73: //i
-          moveSelectionUp();
-          break;
-        case 75: //k
-          moveSelectionDown();
-          break;
-        case 76: //l
-          moveSelectionRight();
-          break;
-        case 74: //j
-          moveSelectionLeft();
           break;
         case 48: //0
           selectAnnotationType(10);
