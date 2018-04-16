@@ -1336,6 +1336,36 @@
           }
           moveSelectionLeft();
           break;
+        case 48: //0
+          selectAnnotationType(10);
+          break;
+        case 49: //1
+          selectAnnotationType(1);
+          break;
+        case 50: //2
+          selectAnnotationType(2);
+          break;
+        case 51: //3
+          selectAnnotationType(3);
+          break;
+        case 52: //4
+          selectAnnotationType(4);
+          break;
+        case 53: //5
+          selectAnnotationType(5);
+          break;
+        case 54: //6
+          selectAnnotationType(6);
+          break;
+        case 55: //7
+          selectAnnotationType(7);
+          break;
+        case 56: //8
+          selectAnnotationType(8);
+          break;
+        case 57: //9
+          selectAnnotationType(9);
+          break;
       }})
     // TODO: this should be done only for the annotate view
     $(document).keyup(function(event) {
@@ -1367,36 +1397,6 @@
           break;
         case 46: //'DEL'
           handleDelete(event);
-          break;
-        case 48: //0
-          selectAnnotationType(10);
-          break;
-        case 49: //1
-          selectAnnotationType(1);
-          break;
-        case 50: //2
-          selectAnnotationType(2);
-          break;
-        case 51: //3
-          selectAnnotationType(3);
-          break;
-        case 52: //4
-          selectAnnotationType(4);
-          break;
-        case 53: //5
-          selectAnnotationType(5);
-          break;
-        case 54: //6
-          selectAnnotationType(6);
-          break;
-        case 55: //7
-          selectAnnotationType(7);
-          break;
-        case 56: //8
-          selectAnnotationType(8);
-          break;
-        case 57: //9
-          selectAnnotationType(9);
           break;
       }
     });
