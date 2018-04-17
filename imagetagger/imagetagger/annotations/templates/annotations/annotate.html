@@ -27,7 +27,8 @@
 {% endblock additional_annotation_css %}
 
 {% block additional_annotation_js %}
-  <script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
+<script type="text/javascript" src="{% static 'annotations/js/boundingboxes.js' %}"></script>
+<script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
 {% endblock additional_annotation_js %}
 {% block bodyblock %}
 <div class="container-fluid">
@@ -94,6 +95,7 @@
 
         <div class="col-md-6">
             <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" data-imageid="{{ selected_image.id }}"></br>
+            <canvas id="image-canvas" class="hidden">Unable to load canvas for picture {{selected_image.name}}!</canvas>
             <div id="boundingBoxes"></div>
             <hr color="silver" width="100%">
             <p>

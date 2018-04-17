@@ -1,3 +1,19 @@
+globals = {
+  image: {},
+  imageScale: 1,
+  editedAnnotationsId: 0,
+  editActiveContainer: {},
+  restoreSelection: undefined,
+  moveSelectionStepSize: 2
+};
+
+/**
+ * Calculate the correct imageScale value.
+ */
+function calculateImageScale() {
+  globals.imageScale = globals.image.get(0).naturalWidth / globals.image.width();
+}
+
 (function() {
   const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
   const API_IMAGES_BASE_URL = '/images/api/';
@@ -11,21 +27,13 @@
   // TODO: Find a solution for url resolvings
 
   var gCsrfToken;
-  var gEditActiveContainer;
-  var gEditedAnnotationId;
   var gHeaders;
   var gHideFeedbackTimeout;
-  var gImage;
   var gImageCache = {};
   var gImageId;
   var gImageSetId;
   var gImageList;
-  var gImageScale = 0;
-  var gInitialized = false;
   var gMousepos;
-  var gRestoreSelection;
-  var gSelection;
-  var gMoveSelectionStepsize  = 2;
 
   var gMouseDownX;
   var gMouseDownY;
@@ -40,12 +48,7 @@
   // TODO cache annotations
   var gCurrentAnnotations;
 
-  /**
-   * Calculate the correct imageScale value.
-   */
-  function calculateImageScale() {
-    gImageScale = gImage.get(0).naturalWidth / gImage.width();
-  }
+  var tool = new BoundingBoxes();
 
   /**
    * Create an annotation using the form data from the current page.
@@ -78,13 +81,13 @@
       }
     }
 
-    if (!validate_vector(vector)) {
+    if (!tool.validate_vector(vector)) {
       displayFeedback($('#feedback_annotation_invalid'));
       return;
     }
 
     if (markForRestore === true) {
-      gRestoreSelection = vector;
+      globals.restoreSelection = vector;
     }
 
     var action = 'create';
@@ -94,10 +97,10 @@
       vector: vector
     };
     var editing = false;
-    if (gEditedAnnotationId !== undefined) {
+    if (globals.editedAnnotationsId !== undefined) {
       // edit instead of create
       action = 'update';
-      data.annotation_id = gEditedAnnotationId;
+      data.annotation_id = globals.editedAnnotationsId;
       editing = true;
     }
 
@@ -118,7 +121,7 @@
           if (editing) {
             if (data.detail === 'similar annotation exists.') {
               displayFeedback($('#feedback_annotation_exists_deleted'));
-              $('#annotation_edit_button_' + gEditedAnnotationId).parent().parent(
+              $('#annotation_edit_button_' + globals.editedAnnotationsId).parent().parent(
                 ).fadeOut().remove();
             } else {
               displayFeedback($('#feedback_annotation_updated'));
@@ -126,7 +129,7 @@
               if (reload_list === true) {
                   loadImageList();
               }
-              drawExistingAnnotations();
+              tool.drawExistingAnnotations(gCurrentAnnotations);
             }
           } else {
             displayFeedback($('#feedback_annotation_exists'));
@@ -137,10 +140,10 @@
           if (reload_list === true) {
               loadImageList();
           }
-          drawExistingAnnotations();
+          tool.drawExistingAnnotations(gCurrentAnnotations);
         }
 
-        resetSelection(true);
+        tool.resetSelection(true);
 
         if (typeof(successCallback) === "function") {
           successCallback();
@@ -160,9 +163,9 @@
    * @param annotationId
    */
   function deleteAnnotation(event, annotationId) {
-    if (gEditedAnnotationId === annotationId) {
+    if (globals.editedAnnotationsId === annotationId) {
       // stop editing
-      resetSelection(true);
+      tool.resetSelection(true);
       $('#not_in_image').prop('checked', false).change();
     }
 
@@ -193,7 +196,7 @@
           }
         }
         // redraw the annotations
-        drawExistingAnnotations();
+        tool.drawExistingAnnotations(gCurrentAnnotations);
 
         displayFeedback($('#feedback_annotation_deleted'));
         $('#annotation_edit_button_' + annotationId).parent().parent().fadeOut().remove();
@@ -229,7 +232,7 @@
       var annotation = annotations[i];
 
       var alertClass = '';
-      if (gEditedAnnotationId === annotation.id) {
+      if (globals.editedAnnotationsId === annotation.id) {
         alertClass = ' alert-info';
       }
       var newAnnotation = $(
@@ -284,49 +287,6 @@
     existingAnnotations.removeClass('hidden');
   }
 
-  function drawExistingAnnotations() {
-    clearBoundingBoxes();
-    calculateImageScale();
-
-    if (gCurrentAnnotations.length === 0 || !$('#draw_annotations').prop('checked')) {
-        return;
-    }
-
-    // clear all boxes
-    var boundingBoxes = document.getElementById('boundingBoxes');
-
-    var annotationType = parseInt($('#annotation_type_id').val());
-
-    for (var a in gCurrentAnnotations) {
-
-      var annotation = gCurrentAnnotations[a];
-      if (annotation.annotation_type.id !== annotationType) {
-        continue;
-      }
-      if (annotation.vector === null) {
-          continue;
-      }
-
-      var boundingBox = document.createElement('div');
-      boundingBox.setAttribute('id', 'boundingBox');
-      $(boundingBox).css({
-          'top': annotation.vector.y1/gImageScale,
-          'left': annotation.vector.x1/gImageScale + parseFloat($('img#image').parent().css('padding-left')),
-          'width': (annotation.vector.x2 - annotation.vector.x1)/gImageScale,
-          'height': (annotation.vector.y2 - annotation.vector.y1)/gImageScale});
-
-      boundingBoxes.appendChild(boundingBox);
-    }
-  }
-
-  function clearBoundingBoxes() {
-    var boundingBoxes = document.getElementById('boundingBoxes');
-
-    while (boundingBoxes.firstChild) {
-      boundingBoxes.removeChild(boundingBoxes.firstChild);
-    }
-  }
-
   /**
    * Display an image from the image cache or the server.
    *
@@ -341,7 +301,7 @@
         ' as it is not in current image list.');
       return;
     }
-    resetSelection();
+    tool.resetSelection();
 
     if (gImageCache[imageId] === undefined) {
       // image is not available in cache. Load it.
@@ -349,7 +309,7 @@
     }
 
     // image is in cache.
-    var currentImage = gImage;
+    var currentImage = globals.image;
     var newImage = gImageCache[imageId];
 
     currentImage.attr('id', '');
@@ -358,9 +318,9 @@
     preloadImages();
 
     currentImage.replaceWith(newImage);
-    gImage = newImage;
-    initSelection();
-    resetSelection();
+    globals.image = newImage;
+    tool.initSelection();
+    tool.resetSelection();
 
     if (currentImage.data('imageid') !== undefined) {
       // add previous image to cache
@@ -449,10 +409,10 @@
   function editAnnotation(event, annotationElem, annotationId) {
     annotationElem = $(annotationElem);
 
-    gEditedAnnotationId = annotationId;
-    gEditActiveContainer.removeClass('hidden');
+    globals.editedAnnotationsId = annotationId;
+    globals.editActiveContainer.removeClass('hidden');
 
-    resetSelection();
+    tool.resetSelection();
 
     if (event !== undefined) {
       // triggered using an event handler
@@ -487,9 +447,9 @@
     $('#x2Field').val(annotationData.x2);
     $('#y1Field').val(annotationData.y1);
     $('#y2Field').val(annotationData.y2);
-    initSelection();
+    tool.initSelection();
 
-    reloadSelection();
+    tool.reloadSelection();
   }
 
   /**
@@ -517,7 +477,7 @@
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
-      resetSelection();
+      tool.resetSelection();
       coordinate_table.hide();
     } else {
       coordinate_table.show();
@@ -531,9 +491,9 @@
    */
   function handleShowAnnotationsToggle(event) {
     if ($('#draw_annotations').is(':checked')) {
-      drawExistingAnnotations();
+      tool.drawExistingAnnotations(gCurrentAnnotations);
     } else {
-      clearBoundingBoxes();
+      tool.clearBoundingBoxes();
     }
   }
 
@@ -545,20 +505,20 @@
   function handleSelection(event) {
     calculateImageScale();
     var cH = $('#crosshair-h'), cV = $('#crosshair-v');
-    var position = gImage.offset();
+    var position = globals.image.offset();
     if (event.pageX > position.left &&
-          event.pageX < position.left + gImage.width() &&
+          event.pageX < position.left + globals.image.width() &&
           event.pageY > position.top &&
-          event.pageY < position.top + gImage.height()) {
+          event.pageY < position.top + globals.image.height()) {
       cH.show();
       cV.show();
       gMousepos.show();
 
       cH.css('top', event.pageY + 1);
       cV.css('left', event.pageX + 1);
-      cV.css('height', gImage.height() - 1);
+      cV.css('height', globals.image.height() - 1);
       cV.css('margin-top', position.top);
-      cH.css('width', gImage.width() - 1);
+      cH.css('width', globals.image.width() - 1);
       cH.css('margin-left', position.left);
 
       gMousepos.css({
@@ -566,8 +526,8 @@
         left: (event.pageX)  + 'px'
       }, 800);
       gMousepos.text(
-        '(' + Math.round((event.pageX - position.left) * gImageScale) + ', ' +
-        Math.round((event.pageY - position.top) * gImageScale) + ')');
+        '(' + Math.round((event.pageX - position.left) * globals.imageScale) + ', ' +
+        Math.round((event.pageY - position.top) * globals.imageScale) + ')');
       event.stopPropagation();
     }
     else{
@@ -583,26 +543,9 @@
    * @param event
    */
   function handleResize() {
-    gSelection.cancelSelection();
+    tool.cancelSelection();
     calculateImageScale();
-    drawExistingAnnotations();
-  }
-
-  /**
-   * Initialize the selection.
-   */
-  function initSelection() {
-    gInitialized = true;
-
-    gSelection = gImage.imgAreaSelect({
-      instance: true,
-      show: true,
-      minHeight: 2,
-      minWidth: 2,
-      onSelectChange: updateAnnotationFields,
-      resizeMargin: 3
-    });
-    gSelection.cancelSelection();
+    tool.drawExistingAnnotations(gCurrentAnnotations);
   }
 
   /**
@@ -612,7 +555,7 @@
    * @param fromHistory
    */
   function loadAnnotateView(imageId, fromHistory) {
-    gEditedAnnotationId = undefined;
+    globals.editedAnnotationsId = undefined;
 
     imageId = parseInt(imageId);
 
@@ -639,7 +582,7 @@
     var link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
     $('#active_image_name').text(link.text());
-    restoreSelection(false);
+    tool.restoreSelection(false);
 
     if (fromHistory !== true) {
       history.pushState({
@@ -660,12 +603,12 @@
         gCurrentAnnotations = data.annotations;
         loading.addClass('hidden');
         displayExistingAnnotations(data.annotations);
-        drawExistingAnnotations();
+        tool.drawExistingAnnotations(gCurrentAnnotations);
 
-        if (gRestoreSelection !== undefined) {
-          restoreSelection();
+        if (globals.restoreSelection !== undefined) {
+          tool.restoreSelection();
         } else {
-          resetSelection(true);
+          tool.resetSelection(true);
         }
       },
       error: function() {
@@ -748,6 +691,7 @@
       return;
     }
 
+    console.log(imageIndex + " " + gImageList + " " + gImageId + " " + offset);
     imageIndex += offset;
     while (imageIndex < 0) {
       imageIndex += imageIndex.length;
@@ -787,63 +731,6 @@
     }
   }
 
-  /**
-   * Reload the selection.
-   */
-  function reloadSelection() {
-    gSelection = gImage.imgAreaSelect({
-      instance: true,
-      show: true
-    });
-    gSelection.setSelection(
-      Math.round($('#x1Field').val() / gImageScale),
-      Math.round($('#y1Field').val() / gImageScale),
-      Math.round($('#x2Field').val() / gImageScale),
-      Math.round($('#y2Field').val() / gImageScale)
-    );
-    gSelection.update();
-  }
-
-  /**
-   * Delete current selection.
-   */
-  function resetSelection(abortEdit) {
-    $('.annotation_value').val(0);
-
-    if (gSelection !== undefined) {
-      gSelection.cancelSelection();
-    }
-
-    if (abortEdit === true) {
-      gEditedAnnotationId = undefined;
-      $('.annotation').removeClass('alert-info');
-      gEditActiveContainer.addClass('hidden');
-    }
-  }
-
-  /**
-   * Restore the selection.
-   */
-  function restoreSelection(reset) {
-    if (!$('#keep_selection').prop('checked')) {
-      return;
-    }
-    if (gRestoreSelection !== undefined) {
-      if (gRestoreSelection === null) {
-        $('#not_in_image').prop('checked', true);
-        $('#coordinate_table').hide();
-      } else {
-        $('#x1Field').val(gRestoreSelection.x1);
-        $('#x2Field').val(gRestoreSelection.x2);
-        $('#y1Field').val(gRestoreSelection.y1);
-        $('#y2Field').val(gRestoreSelection.y2);
-        reloadSelection();
-      }
-    }
-    if (reset !== false) {
-      gRestoreSelection = undefined;
-    }
-  }
 
   /**
    * Scroll image list to make current image visible.
@@ -859,36 +746,6 @@
     offset += parseInt(list.height() / 2);
 
     list.scrollTop(list.scrollTop() + linkTop - offset);
-  }
-
-  /**
-   * Update the contents of the annotation values
-   *
-   * @param img
-   * @param selection
-   */
-  function updateAnnotationFields(img, selection) {
-    $('#x1Field').val(Math.round(selection.x1 * gImageScale));
-    $('#y1Field').val(Math.round(selection.y1 * gImageScale));
-    $('#x2Field').val(Math.round(selection.x2 * gImageScale));
-    $('#y2Field').val(Math.round(selection.y2 * gImageScale));
-    $('#not_in_image').prop('checked', false).change();
-  }
-
-  /**
-   * Validate a vector.
-   *
-   * @param vector
-   */
-  function validate_vector(vector) {
-    // TODO: support different vector types
-
-    if (vector === null) {
-      // not in image
-      return true;
-    }
-
-    return vector.x2 - vector.x1 >= 1 && vector.y2 - vector.y1 >= 1
   }
 
   /**
@@ -908,7 +765,7 @@
       dataType: 'json',
       success: function(data) {
         gCurrentAnnotations = data.annotations;
-        drawExistingAnnotations();
+        tool.drawExistingAnnotations(gCurrentAnnotations);
       },
       error: function() {
       }
@@ -919,12 +776,12 @@
     if (!$('#draw_annotations').is(':checked'))
       return;
 
-    var position = gImage.offset();
-    if (event.pageX > position.left && event.pageX < position.left + gImage.width() &&
-            event.pageY > position.top && event.pageY < position.top + gImage.height())
+    var position = globals.image.offset();
+    if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
+            event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
-      gMouseDownX = Math.round((event.pageX - position.left) * gImageScale);
-      gMouseDownY = Math.round((event.pageY - position.top) * gImageScale);
+      gMouseDownX = Math.round((event.pageX - position.left) * globals.imageScale);
+      gMouseDownY = Math.round((event.pageY - position.top) * globals.imageScale);
     }
   }
 
@@ -932,12 +789,12 @@
     if (!$('#draw_annotations').is(':checked'))
       return;
 
-    var position = gImage.offset();
-    if (event.pageX > position.left && event.pageX < position.left + gImage.width() &&
-            event.pageY > position.top && event.pageY < position.top + gImage.height())
+    var position = globals.image.offset();
+    if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
+            event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
-      gMouseUpX = Math.round((event.pageX - position.left) * gImageScale);
-      gMouseUpY = Math.round((event.pageY - position.top) * gImageScale);
+      gMouseUpX = Math.round((event.pageX - position.left) * globals.imageScale);
+      gMouseUpY = Math.round((event.pageY - position.top) * globals.imageScale);
 
       // check if we have a click or a small selection
       if (Math.abs(gMouseDownX - gMouseUpX) <= gSelectionThreshold &&
@@ -1057,136 +914,10 @@
 
   // handle DEL key press
   function handleDelete(event) {
-    if (gEditedAnnotationId === undefined)
+    if (globals.editedAnnotationsId === undefined)
       return;
 
-    deleteAnnotation(event, gEditedAnnotationId);
-  }
-  function moveSelectionUp() {
-    y1 = $('#y1Field').val();
-    y2 = $('#y2Field').val();
-    // calculate value +/- stepsize (times stepsize to account for differing image sizes)
-    newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueY1 < 0){
-      newValueY1 = 0;
-      newValueY2 = $('#y2Field').val(); }
-    if (newValueY2 > Math.round(gImage.height()*gImageScale)){
-      newValueY2 = Math.ceil(gImage.height()*gImageScale);
-      newValueY1 =  $('#y1Field').val();
-       }
-    // update values
-    $('#y1Field').val(newValueY1);
-    $('#y2Field').val(newValueY2);
-    reloadSelection();
-  }
-  function moveSelectionDown() {
-    // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueY1 = Math.round(parseInt($('#y1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    newValueY2 = Math.round(parseInt($('#y2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueY1 < 0){
-      newValueY1 = 0;
-      newValueY2 = $('#y2Field').val(); }
-    if (newValueY2 > Math.round(gImage.height()*gImageScale)){
-      newValueY2 = Math.ceil(gImage.height()*gImageScale);
-      newValueY1 =  $('#y1Field').val();
-       }
-    // update values
-    $('#y1Field').val(newValueY1);
-    $('#y2Field').val(newValueY2);
-    reloadSelection();
-  }
-
-  function moveSelectionRight() {
-    // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueX1 < 0){
-      newValueX1 = 0;
-      newValueX2 = $('#x2Field').val(); }
-    if (newValueX2 > Math.round(gImage.width()*gImageScale)){
-      newValueX2 = Math.ceil(gImage.width()*gImageScale);
-      newValueX1 =  $('#x1Field').val();
-       }
-    // update values
-    $('#x1Field').val(newValueX1);
-    $('#x2Field').val(newValueX2);
-    reloadSelection();
-  }
-  function moveSelectionLeft() {
-    // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueX1 = Math.round(parseInt($('#x1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    newValueX2 = Math.round(parseInt($('#x2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueX1 < 0){
-      newValueX1 = 0;
-      newValueX2 = $('#x2Field').val(); }
-    if (newValueX2 > Math.round(gImage.width()*gImageScale)){
-      newValueX2 = Math.ceil(gImage.width()*gImageScale);
-      newValueX1 =  $('#x1Field').val();
-       }
-    // update values
-    $('#x1Field').val(newValueX1);
-    $('#x2Field').val(newValueX2);
-    reloadSelection();
-  }
-  function increaseSelectionSizeUp() {
-    y1 = $('#y1Field').val();
-    // calculate value +/- stepsize (times stepsize to account for differing image sizes)
-    newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueY1 < 0){
-      newValueY1 = 0;
-    }
-
-    // update values
-    $('#y1Field').val(newValueY1);
-    reloadSelection();
-  }
-  function decreaseSelectionSizeDown() {
-    // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueY1 = Math.round(parseInt($('#y1Field').val()));
-    newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueY2 < 0){
-      newValueY2 = 1;
-       }
-    if (newValueY2 <= newValueY1) {
-      newValueY2 = newValueY1 + Math.round(Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    }
-    // update values
-    $('#y2Field').val(newValueY2);
-    reloadSelection();
-  }
-  function increaseSelectionSizeRight() {
-    // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-
-    if (newValueX2 > Math.round(gImage.width()*gImageScale)){
-      newValueX2 = Math.ceil(gImage.width()*gImageScale);
-       }
-    // update values
-    $('#x2Field').val(newValueX2);
-    reloadSelection();
-  }
-  function decreaseSelectionSizeLeft() {
-    // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    newValueX2 = Math.round(parseInt($('#x2Field').val()));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueX1 < 0) {
-        newValueX1 = 0;
-    }
-    if (newValueX1 >= newValueX2){
-      newValueX1 = newValueX2 - 1;
-    }
-    // update values
-    $('#x1Field').val(newValueX1);
-    reloadSelection();
+    deleteAnnotation(event, globals.editedAnnotationsId);
   }
 
   function selectAnnotationType(annotationTypeNumber) {
@@ -1199,8 +930,8 @@
 
 
   $(function() {
-    gEditActiveContainer = $('#edit_active');
-    gImage = $('#image');
+    globals.editActiveContainer = $('#edit_active');
+    globals.image = $('#image');
     gMousepos = $('#mousepos');
     gMousepos.hide();
 
@@ -1218,25 +949,25 @@
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
-    $(window).on('load', initSelection);
+    $(window).on('load', tool.initSelection);
 
     // TODO: Make this as well as the load handler part of initSelection
     setTimeout(function() {
       // Fallback if window load initialization did not succeed
-      if (!gInitialized) {
+      if (!tool.initialized) {
         console.log('fallback solution for selection initialization used!');
-        initSelection();
+        tool.initSelection();
         // TODO: Get rid of this
         // This is used to load an existing annotation in the edit view
         if (typeof loadannotation === "function") {
           loadannotation();
-          reloadSelection();
+          tool.reloadSelection();
         }
       }
     }, 1000);
 
     $('.annotation_value').on('input', function() {
-      reloadSelection();
+      tool.reloadSelection();
     });
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
@@ -1249,11 +980,11 @@
 
     // register click events
     $('#cancel_edit_button').click(function() {
-      resetSelection(true);
+      tool.resetSelection(true);
     });
     $('#save_button').click(createAnnotation);
     $('#reset_button').click(function() {
-      resetSelection(true);
+      tool.resetSelection(true);
     });
     $('#last_button').click(function(event) {
       event.preventDefault();
@@ -1318,31 +1049,31 @@
           break;
         case 73: //i
           if(gShiftDown) {
-            increaseSelectionSizeUp();
+            tool.increaseSelectionSizeUp();
             break;
           }
-          moveSelectionUp();
+          tool.moveSelectionUp();
           break;
         case 75: //k
           if(gShiftDown) {
-            decreaseSelectionSizeDown();
+            tool.decreaseSelectionSizeDown();
             break;
           }
-          moveSelectionDown();
+          tool.moveSelectionDown();
           break;
         case 76: //l
           if(gShiftDown) {
-            increaseSelectionSizeRight();
+            tool.increaseSelectionSizeRight();
             break;
           }
-          moveSelectionRight();
+          tool.moveSelectionRight();
           break;
         case 74: //j
           if(gShiftDown) {
-            decreaseSelectionSizeLeft();
+            tool.decreaseSelectionSizeLeft();
             break;
           }
-          moveSelectionLeft();
+          tool.moveSelectionLeft();
           break;
         case 48: //0
           selectAnnotationType(10);
@@ -1413,13 +1144,13 @@
     // This is used to load an existing annotation in the edit view
     if (typeof loadannotation === "function") {
       loadannotation();
-      reloadSelection();
+      tool.reloadSelection();
     }
 
     // TODO: Get rid of this
     if (typeof init_navigationbuttons === "function") {
       init_navigationbuttons();
-      reloadSelection();
+      tool.reloadSelection();
     }
   });
 })();
