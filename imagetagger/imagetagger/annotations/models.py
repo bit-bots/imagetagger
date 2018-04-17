@@ -34,12 +34,6 @@ class AnnotationQuerySet(models.QuerySet):
 
 
 class Annotation(models.Model):
-    class VECTOR_TYPE(Enum):
-        # TODO: VECTOR_TYPE could be deduced from the annotation type (dynamically, bonus points!)
-        BOUNDING_BOX = 1
-        LINE = 2
-        MULTI_LINE = 3
-        POLYGON = 4
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='annotations')
     vector = JSONField(null=True)
@@ -201,9 +195,25 @@ class Annotation(models.Model):
             }), query_params)
             return cursor.fetchone() is not None
 
-    @staticmethod
-    def validate_vector(vector: Union[dict, None],
-                        vector_type: 'Annotation.VECTOR_TYPE') -> bool:
+
+class AnnotationType(models.Model):
+    class VECTOR_TYPE():
+        BOUNDING_BOX = 1
+        POINT = 2
+        LINE = 3
+        MULTI_LINE = 4
+        POLYGON = 5
+
+    name = models.CharField(max_length=20, unique=True)
+    active = models.BooleanField(default=True)
+    vector_type = models.IntegerField(default=VECTOR_TYPE.BOUNDING_BOX)
+    # Number of required nodes (in polygon and multiline) 0->unspecified
+    node_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return u'AnnotationType: {0}'.format(self.name)
+
+    def validate_vector(self, vector: Union[dict, None]) -> bool:
         """
         Validate a vector. Returns whether the vector is valid.
         Necessary type casts are done in-place within the dictionary.
@@ -213,21 +223,21 @@ class Annotation(models.Model):
             return True
         if not isinstance(vector, dict):
             return False
+        # converting vector elements to integers
         for key, value in vector.items():
             try:
                 vector[key] = int(value)
             except ValueError:
                 return False
-        if vector_type == Annotation.VECTOR_TYPE.BOUNDING_BOX:
-            return Annotation._validate_bounding_box(vector)
-        if vector_type == Annotation.VECTOR_TYPE.LINE:
-            return Annotation._validate_line(vector)
+        if self.vector_type == AnnotationType.VECTOR_TYPE.BOUNDING_BOX:
+            return self._validate_bounding_box(vector)
+        if self.vector_type == AnnotationType.VECTOR_TYPE.LINE:
+            return self._validate_line(vector)
 
         # No valid vector type given.
         return False
 
-    @staticmethod
-    def _validate_bounding_box(vector: dict) -> bool:
+    def _validate_bounding_box(self, vector: dict) -> bool:
         return (
             vector.get('x2', float('-inf')) -
             vector.get('x1', float('inf')) >= 1) and (
@@ -235,22 +245,13 @@ class Annotation(models.Model):
             vector.get('y1', float('inf')) >= 1
         )
 
-    @staticmethod
-    def _validate_line(vector: dict) -> bool:
+    def _validate_line(self, vector: dict) -> bool:
         return (
             vector.get('x2', float('inf')) is not
             vector.get('x1', float('inf')) and
             vector.get('y2', float('inf')) is not
             vector.get('y1', float('inf'))
         )
-
-
-class AnnotationType(models.Model):
-    name = models.CharField(max_length=20, unique=True)
-    active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return u'AnnotationType: {0}'.format(self.name)
 
 
 class Export(models.Model):

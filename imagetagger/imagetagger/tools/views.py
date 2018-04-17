@@ -82,7 +82,6 @@ def edit_tool(request, tool_id):
             tool.public = public
             changed_public = True
         file_form = FileUploadForm(request.POST, request.FILES)
-        print(file_form.errors)
         if file_form.is_valid() and 'file' in request.FILES.keys():
             changed_file = True
             old_file_path = os.path.join(settings.TOOLS_PATH, tool.filename)

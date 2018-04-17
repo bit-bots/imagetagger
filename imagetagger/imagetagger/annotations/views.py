@@ -54,13 +54,12 @@ def annotate(request, image_id):
                 except (KeyError, ValueError):
                     return HttpResponseBadRequest()
 
+                annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
                 if (vector is not None and
-                        not Annotation.validate_vector(
-                            vector, Annotation.VECTOR_TYPE.BOUNDING_BOX)):
+                        not annotation_type.validate_vector(vector)):
                     messages.warning(request, _('No valid bounding box found.'))
                 else:
                     last_annotation_type_id = request.POST['selected_annotation_type']
-                    annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
                     annotation = Annotation(
                         vector=vector, image=image, annotation_type=annotation_type,
                         user=request.user if request.user.is_authenticated() else None)
@@ -106,7 +105,7 @@ def annotate(request, image_id):
             'image_annotations': Annotation.objects.filter(
                 image=selected_image).select_related(),
             'last_annotation_type_id': int(last_annotation_type_id),
-            'filtered' : filtered,
+            'filtered': filtered,
             'vector_fields': (
                 'x1',
                 'x2',
@@ -188,7 +187,7 @@ def edit_annotation_save(request, annotation_id):
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
 
-        if not Annotation.validate_vector(annotation.vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+        if not annotation.annotation_type.validate_vector(annotation.vector):
             messages.warning(request, _('No valid bounding box found.'))
             return redirect(go_to)
 
@@ -599,9 +598,10 @@ def create_annotation(request) -> Response:
             'detail': 'permission for annotating in this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
 
-    if not Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+    if not annotation_type.validate_vector(vector):
+        print(vector)
         return Response({
-            'detail': 'the vector is invalid.'
+            'detail': 'the vector is invalid.',
         }, status=HTTP_400_BAD_REQUEST)
 
     if Annotation.similar_annotations(vector, image, annotation_type):
@@ -670,7 +670,7 @@ def update_annotation(request) -> Response:
             'detail': 'permission for updating annotations in this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
 
-    if not Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+    if not annotation_type.validate_vector(vector):
         return Response({
             'detail': 'the vector is invalid.'
         }, status=HTTP_400_BAD_REQUEST)

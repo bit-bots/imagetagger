@@ -412,7 +412,7 @@ def label_upload(request, imageset_id):
                             'x2': int(line_frags[4]),
                             'y2': int(line_frags[5]),
                         }
-                    if Annotation.validate_vector(vector, Annotation.VECTOR_TYPE.BOUNDING_BOX):
+                    if annotation_type.validate_vector(vector):
                         if not Annotation.similar_annotations(vector, image, annotation_type):
                             annotation = Annotation()
                             annotation.annotation_type = annotation_type

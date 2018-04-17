@@ -17,7 +17,7 @@ class Image(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     checksum = models.BinaryField()
     width = models.IntegerField(default=800)
-    height= models.IntegerField(default=600)
+    height = models.IntegerField(default=600)
 
     def path(self):
         return os.path.join(self.image_set.root_path(), self.filename)
