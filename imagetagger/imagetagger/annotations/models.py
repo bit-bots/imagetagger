@@ -233,6 +233,8 @@ class AnnotationType(models.Model):
             return self._validate_bounding_box(vector)
         if self.vector_type == AnnotationType.VECTOR_TYPE.LINE:
             return self._validate_line(vector)
+        if self.vector_type == AnnotationType.VECTOR_TYPE.POINT:
+            return self._validate_point(vector)
 
         # No valid vector type given.
         return False
@@ -253,6 +255,11 @@ class AnnotationType(models.Model):
             vector.get('y1', float('inf'))
         )
 
+    def _validate_point(self, vector: dict) -> bool:
+        return (
+            'x1' in vector and
+            'y1' in vector
+        )
 
 class Export(models.Model):
     time = models.DateTimeField(auto_now_add=True)
