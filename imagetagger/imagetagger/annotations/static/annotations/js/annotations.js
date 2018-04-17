@@ -144,6 +144,7 @@ function calculateImageScale() {
         }
 
         tool.resetSelection(true);
+        globals.editedAnnotationsId = undefined;
 
         if (typeof(successCallback) === "function") {
           successCallback();
@@ -200,6 +201,7 @@ function calculateImageScale() {
 
         displayFeedback($('#feedback_annotation_deleted'));
         $('#annotation_edit_button_' + annotationId).parent().parent().fadeOut().remove();
+        globals.editedAnnotationsId = undefined;
       },
       error: function() {
         $('.annotate_button').prop('disabled', false);
@@ -691,7 +693,6 @@ function calculateImageScale() {
       return;
     }
 
-    console.log(imageIndex + " " + gImageList + " " + gImageId + " " + offset);
     imageIndex += offset;
     while (imageIndex < 0) {
       imageIndex += imageIndex.length;
