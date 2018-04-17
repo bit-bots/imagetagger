@@ -1,7 +1,7 @@
 globals = {
   image: {},
   imageScale: 1,
-  editedAnnotationsId: 0,
+  editedAnnotationsId: undefined,
   editActiveContainer: {},
   restoreSelection: undefined,
   moveSelectionStepSize: 2
