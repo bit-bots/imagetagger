@@ -9,6 +9,8 @@ class AnnotationTypeSerializer(ModelSerializer):
         fields = (
             'id',
             'name',
+            'vector_type',
+            'node_count',
         )
 
 
