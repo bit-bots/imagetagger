@@ -235,6 +235,8 @@ class AnnotationType(models.Model):
             return self._validate_line(vector)
         if self.vector_type == AnnotationType.VECTOR_TYPE.POINT:
             return self._validate_point(vector)
+        if self.vector_type == AnnotationType.VECTOR_TYPE.POLYGON:
+            return self._validate_polygon(vector)
 
         # No valid vector type given.
         return False
@@ -244,22 +246,33 @@ class AnnotationType(models.Model):
             vector.get('x2', float('-inf')) -
             vector.get('x1', float('inf')) >= 1) and (
             vector.get('y2', float('-inf')) -
-            vector.get('y1', float('inf')) >= 1
-        )
+            vector.get('y1', float('inf')) >= 1) and \
+            len(vector.keys()) is 4
 
     def _validate_line(self, vector: dict) -> bool:
         return (
             vector.get('x2', float('inf')) is not
             vector.get('x1', float('inf')) and
             vector.get('y2', float('inf')) is not
-            vector.get('y1', float('inf'))
+            vector.get('y1', float('inf')) and
+            len(vector.keys()) is 4
         )
 
     def _validate_point(self, vector: dict) -> bool:
+        return 'x1' in vector and 'y1' in vector and len(vector.keys()) is 2
+
+    def _validate_polygon(self, vector: dict) -> bool:
         return (
-            'x1' in vector and
-            'y1' in vector
+            vector.get('x2', float('inf')) is not
+            vector.get('x1', float('inf')) and
+            vector.get('y2', float('inf')) is not
+            vector.get('y1', float('inf')) and
+            (
+                self.node_count is 0 or
+                self.node_count is int(len(vector) // 2)
+            )
         )
+
 
 class Export(models.Model):
     time = models.DateTimeField(auto_now_add=True)
