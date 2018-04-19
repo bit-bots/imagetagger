@@ -3,13 +3,13 @@
 class BoundingBoxes {
   constructor() {
     this.initialized = false;
-    this.selection = {};
+    this.selection = undefined;
     if (globals.image === '') {
       globals.image = $('#image');
     }
   }
   drawExistingAnnotations(annotations) {
-    this.clearBoundingBoxes();
+    this.clear();
     calculateImageScale();
 
     if (annotations.length === 0 || !$('#draw_annotations').prop('checked')) {
@@ -44,7 +44,7 @@ class BoundingBoxes {
     }
   }
 
-  clearBoundingBoxes() {
+  clear() {
     var boundingBoxes = document.getElementById('boundingBoxes');
 
     while (boundingBoxes.firstChild) {
@@ -96,11 +96,9 @@ class BoundingBoxes {
       this.selection.cancelSelection();
     }
 
-    if (abortEdit === true) {
-      globals.editedAnnotationId = undefined;
-      $('.annotation').removeClass('alert-info');
-      globals.editActiveContainer.addClass('hidden');
-    }
+    globals.editedAnnotationId = undefined;
+    $('.annotation').removeClass('alert-info');
+    globals.editActiveContainer.addClass('hidden');
   }
 
   /**
@@ -277,7 +275,9 @@ class BoundingBoxes {
     this.reloadSelection();
   }
   cancelSelection() {
-    this.selection.cancelSelection();
+    if (this.selection) {
+      this.selection.cancelSelection();
+    }
   }
 
   /**
@@ -292,5 +292,8 @@ class BoundingBoxes {
     $('#x2Field').val(Math.round(selection.x2 * globals.imageScale));
     $('#y2Field').val(Math.round(selection.y2 * globals.imageScale));
     $('#not_in_image').prop('checked', false).change();
+  }
+  reset() {
+    this.clear();
   }
 }

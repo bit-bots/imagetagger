@@ -48,7 +48,45 @@ function calculateImageScale() {
   // TODO cache annotations
   var gCurrentAnnotations;
 
-  var tool = new BoundingBoxes();
+  var tool;
+
+  function initTool() {
+    setTool();
+    tool.initSelection();
+    let index = gImageList.indexOf(gImageId);
+    loadAnnotateView(gImageList[index]);
+  }
+
+  function setTool() {
+    if (tool) {
+      tool.resetSelection();
+      tool.cancelSelection();
+      tool.initSelection();
+      tool.reset();
+      delete tool;
+    }
+    let selected_annotation = $('#annotation_type_id').children(':selected').data();
+    let vector_type = selected_annotation.vectorType;
+    let node_count = selected_annotation.nodeCount;
+    switch (vector_type) {
+      case 1: // Bounding Box
+        tool = new BoundingBoxes();
+        $('#image_canvas').addClass('hidden');
+        break;
+      case 2: // Point, fallthrough
+      case 3: // Line, fallthrough
+      case 4: // Multiline, fallthrough
+      case 5: // Polygon
+        $('#image_canvas').removeClass('hidden').attr('width', $('#image').width()).attr('height', $('#image').height());
+        tool = new Canvas($('#image_canvas'), vector_type, node_count);
+        break;
+      default:
+        tool = new BoundingBoxes();
+        $('#image_canvas').addClass('hidden');
+    }
+    console.log("Using tool " + tool.constructor.name);
+
+  }
 
   /**
    * Create an annotation using the form data from the current page.
@@ -143,8 +181,10 @@ function calculateImageScale() {
           tool.drawExistingAnnotations(gCurrentAnnotations);
         }
 
+        globals.editedAnnotationId = undefined;
+        $('.annotation').removeClass('alert-info');
+        globals.editActiveContainer.addClass('hidden');
         tool.resetSelection(true);
-        globals.editedAnnotationsId = undefined;
 
         if (typeof(successCallback) === "function") {
           successCallback();
@@ -188,14 +228,7 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
-        // remove the annotation from current annotations
-        // do not load the annotations from the server again
-        for (var annotation in gCurrentAnnotations) {
-          var id = gCurrentAnnotations[annotation].id;
-          if (id === annotationId) {
-            delete gCurrentAnnotations[annotation];
-          }
-        }
+        gCurrentAnnotations = data.annotations;
         // redraw the annotations
         tool.drawExistingAnnotations(gCurrentAnnotations);
 
@@ -303,7 +336,6 @@ function calculateImageScale() {
         ' as it is not in current image list.');
       return;
     }
-    tool.resetSelection();
 
     if (gImageCache[imageId] === undefined) {
       // image is not available in cache. Load it.
@@ -409,6 +441,7 @@ function calculateImageScale() {
    * @param annotationId
    */
   function editAnnotation(event, annotationElem, annotationId) {
+    // TODO: change tool if necessary
     annotationElem = $(annotationElem);
 
     globals.editedAnnotationsId = annotationId;
@@ -451,7 +484,7 @@ function calculateImageScale() {
     $('#y2Field').val(annotationData.y2);
     tool.initSelection();
 
-    tool.reloadSelection();
+    tool.reloadSelection(annotationId);
   }
 
   /**
@@ -604,13 +637,13 @@ function calculateImageScale() {
         // save the current annotations
         gCurrentAnnotations = data.annotations;
         loading.addClass('hidden');
-        displayExistingAnnotations(data.annotations);
+        displayExistingAnnotations(gCurrentAnnotations);
         tool.drawExistingAnnotations(gCurrentAnnotations);
 
         if (globals.restoreSelection !== undefined) {
           tool.restoreSelection();
         } else {
-          tool.resetSelection(true);
+          tool.resetSelection();
         }
       },
       error: function() {
@@ -754,8 +787,6 @@ function calculateImageScale() {
    */
 
   function handleAnnotationTypeChange() {
-    var annotationTypeId = parseInt($('#annotation_type_id').val());
-
     var params = {
       image_id: gImageId
     };
@@ -766,6 +797,7 @@ function calculateImageScale() {
       dataType: 'json',
       success: function(data) {
         gCurrentAnnotations = data.annotations;
+        setTool();
         tool.drawExistingAnnotations(gCurrentAnnotations);
       },
       error: function() {
@@ -950,14 +982,16 @@ function calculateImageScale() {
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
-    $(window).on('load', tool.initSelection);
+    $(window).on('load', function() {
+      initTool();
+    }());
 
     // TODO: Make this as well as the load handler part of initSelection
     setTimeout(function() {
       // Fallback if window load initialization did not succeed
       if (!tool.initialized) {
         console.log('fallback solution for selection initialization used!');
-        tool.initSelection();
+        initTool();
         // TODO: Get rid of this
         // This is used to load an existing annotation in the edit view
         if (typeof loadannotation === "function") {
@@ -965,7 +999,7 @@ function calculateImageScale() {
           tool.reloadSelection();
         }
       }
-    }, 1000);
+    }, 2000);
 
     $('.annotation_value').on('input', function() {
       tool.reloadSelection();
