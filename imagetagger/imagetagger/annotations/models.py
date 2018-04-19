@@ -336,16 +336,18 @@ class AnnotationType(models.Model):
         return 'x1' in vector and 'y1' in vector and len(vector.keys()) is 2
 
     def _validate_polygon(self, vector: dict) -> bool:
-        return (
-            vector.get('x2', float('inf')) is not
-            vector.get('x1', float('inf')) and
-            vector.get('y2', float('inf')) is not
-            vector.get('y1', float('inf')) and
-            (
-                self.node_count is 0 or
-                self.node_count is int(len(vector) // 2)
-            )
-        )
+        if len(vector) < 6:
+            return False  # A polygon vector has to have at least 3 nodes
+        if not (self.node_count is 0 or
+                self.node_count is int(len(vector) // 2)):
+            return False
+        for i in range(1, len(vector) + 1):
+            for j in range(1, len(vector) + 1):
+                if i is not j and \
+                    (vector['x' + str(i)] is vector['x' + str(j)] or
+                     vector['y' + str(i)] is vector['y' + str(j)]):
+                    return False
+        return True
 
 
 class Export(models.Model):

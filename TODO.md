@@ -4,7 +4,7 @@ TODO
 The following TODOs have to be implemented and tested before we merge
 this stuff to ```master```.
 
-* annotation types need a Field for their tool type.
+* ~~annotation types need a Field for their tool type.~~
 * the label representation has to be adapted
 * verification stuff (drawing of the annotation)
 * label editing
