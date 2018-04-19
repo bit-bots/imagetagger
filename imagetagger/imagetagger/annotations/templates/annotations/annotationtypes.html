@@ -1,5 +1,5 @@
 {% for annotation_type in annotation_types %}
-  <option value="{{annotation_type.id}}" {% if forloop.counter <= 10 %} id="annotation_type_{{ forloop.counter }}"{% endif %} data-vector-type="{{ annotation_type.vector_type }}" {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
+  <option value="{{annotation_type.id}}" {% if forloop.counter <= 10 %} id="annotation_type_{{ forloop.counter }}"{% endif %} data-vector-type="{{ annotation_type.vector_type }}" data-node-count="{{ annotation_type.node_count }}" {% if annotation_type.id == last_annotation_type_id %} selected {% endif %} >
     {{annotation_type.name}}{% if forloop.counter <= 10 %} ({{ forloop.counter }}){% endif %}
   </option>
 {% endfor %}
