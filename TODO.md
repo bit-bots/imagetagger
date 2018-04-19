@@ -12,3 +12,4 @@ this stuff to ```master```.
 * other stuff
 * import/export stuff
 * annotation similarity
+    * formatting of annotations has to be consistent (which point is which?)

@@ -166,6 +166,7 @@ class Annotation(models.Model):
 
         # vector type specific stuff
         if annotation_type.vector_type is AnnotationType.VECTOR_TYPE.BOUNDING_BOX:
+            # TODO: make sure, the vector format (point 1 upper left) is consistent
             query = '''
             SELECT
                 (1)
@@ -191,6 +192,42 @@ class Annotation(models.Model):
                     'min_y2': vector.get('y2', 0) - max_similarity,
                     'max_y2': vector.get('y2', 0) + max_similarity,
                 }
+            if exclude:
+                query += ' AND a.id NOT IN %(exclude)s'
+                query_params['exclude'] = tuple(exclude)
+
+            with connection.cursor() as cursor:
+                cursor.execute(query.format(**{
+                    'Annotation': Annotation._meta.db_table,
+                }), query_params)
+                return cursor.fetchone() is not None
+        if annotation_type.vector_type is AnnotationType.VECTOR_TYPE.LINE:
+            # TODO: make sure, the vector format (point 1 left, upper) is consistent
+            query = '''
+            SELECT
+                (1)
+            FROM
+              {Annotation} a
+            WHERE
+              a.annotation_type_id=%(annotation_type_id)s AND
+              a.image_id=%(image_id)s AND
+              (vector->>'x1')::INT BETWEEN %(min_x1)s AND %(max_x1)s AND
+              (vector->>'x2')::INT BETWEEN %(min_x2)s AND %(max_x2)s AND
+              (vector->>'y1')::INT BETWEEN %(min_y1)s AND %(max_y1)s AND
+              (vector->>'y2')::INT BETWEEN %(min_y2)s AND %(max_y2)s
+            '''
+            query_params = {
+                'annotation_type_id': annotation_type.pk,
+                'image_id': image.pk,
+                'min_x1': vector.get('x1', 0) - max_similarity,
+                'max_x1': vector.get('x1', 0) + max_similarity,
+                'min_x2': vector.get('x2', 0) - max_similarity,
+                'max_x2': vector.get('x2', 0) + max_similarity,
+                'min_y1': vector.get('y1', 0) - max_similarity,
+                'max_y1': vector.get('y1', 0) + max_similarity,
+                'min_y2': vector.get('y2', 0) - max_similarity,
+                'max_y2': vector.get('y2', 0) + max_similarity,
+            }
             if exclude:
                 query += ' AND a.id NOT IN %(exclude)s'
                 query_params['exclude'] = tuple(exclude)
@@ -230,6 +267,7 @@ class Annotation(models.Model):
                 }), query_params)
                 return cursor.fetchone() is not None
         return False
+        # no similarity-check for polygons and multi-lines right now
 
 
 class AnnotationType(models.Model):
