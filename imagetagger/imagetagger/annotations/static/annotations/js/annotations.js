@@ -1148,17 +1148,14 @@
   }
   function decreaseSelectionSizeDown() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueY1 = Math.round(parseInt($('#y1Field').val()));
-    newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueY2 < 0){
-      newValueY2 = 1;
-       }
+    newValueY1 = Math.round(parseInt($('#y1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+    newValueY2 = Math.round(parseInt($('#y2Field').val()));
+
     if (newValueY2 <= newValueY1) {
-      newValueY2 = newValueY1 + Math.round(Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+      newValueY1 = newValueY2 + 1;
     }
     // update values
-    $('#y2Field').val(newValueY2);
+    $('#y1Field').val(newValueY1);
     reloadSelection();
   }
   function increaseSelectionSizeRight() {
@@ -1175,17 +1172,14 @@
   }
   function decreaseSelectionSizeLeft() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1,(gMoveSelectionStepsize * gImageScale)));
-    newValueX2 = Math.round(parseInt($('#x2Field').val()));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueX1 < 0) {
-        newValueX1 = 0;
-    }
+    newValueX1 = Math.round(parseInt($('#x1Field').val()));
+    newValueX2 = Math.round(parseInt($('#x2Field').val()) - Math.max(1,(gMoveSelectionStepsize * gImageScale)));
+
     if (newValueX1 >= newValueX2){
-      newValueX1 = newValueX2 - 1;
+      newValueX2 = newValueX1 + 1;
     }
     // update values
-    $('#x1Field').val(newValueX1);
+    $('#x2Field').val(newValueX2);
     reloadSelection();
   }
 
