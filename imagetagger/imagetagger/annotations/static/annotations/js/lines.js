@@ -256,23 +256,26 @@ class Canvas {
           if (self.currentDrawing) {
             self.currentDrawing.remove();
           }
+          self.inline = true;
           switch (self.vector_type) {
             case 2: // Point
-              self.drawPointMouse();
+              self.drawPoint({x1: mousex, y1: mousey}, true);
               break;
             case 3: // Line
-              self.drawLineMouse();
+              self.drawLine({x1: mousex, y1: mousey}, 0, true);
               break;
             case 5: // Polygon
               if (self.node_count === 0) {
-                self.drawArbitraryPolygonMouse();
+                self.drawArbitraryPolygon({x1: mousex, y1: mousey}, true, false);
               } else {
-                self.drawArbitraryPolygonMouse();
+                self.drawPolygon({x1: mousex, y1: mousey}, true, self.node_count, false);
               }
               break;
             default:
               console.log("No appropriate drawing found for vector type " + self.vector_type);
+              self.inline = false;
           }
+          self.currentDrawing.setDragCursor(false);
         }
       }
     }).mousedown(function () {
@@ -296,6 +299,8 @@ class Canvas {
     return false;
   }
 
+  /** ---- Layer operations ---- */
+
   addLayer(l) {
     this.canvas.addLayer(l).drawLayers();
   }
@@ -315,30 +320,6 @@ class Canvas {
     });
   }
 
-  drawPointMouse() {
-    this.inline = true;
-    this.drawPoint({x1: mousex, y1: mousey}, true);
-    this.currentDrawing.setDragCursor(false);
-  }
-
-  drawLineMouse() {
-    this.inline = true;
-    this.drawLine({x1: mousex, y1: mousey}, 0, true);
-    this.currentDrawing.setDragCursor(false);
-  }
-
-  drawPolygonMouse(numberOfPoints) {
-    this.inline = true;
-    this.drawPolygon({x1: mousex, y1: mousey}, true, numberOfPoints, false);
-    this.currentDrawing.setDragCursor(false);
-  }
-
-  drawArbitraryPolygonMouse() {
-    this.inline = true;
-    this.drawArbitraryPolygon({x1: mousex, y1: mousey}, true, false);
-    this.currentDrawing.setDragCursor(false);
-  }
-
   /** ---- Public methods ---- **/
 
   clear() {
@@ -349,7 +330,7 @@ class Canvas {
 
   reset() {
     this.clear();
-    $('body').off('click');
+    $('body').off('click').off('mousemove').off('mousedown');
   }
 
   drawPoint(points, id, mutable) {
@@ -412,7 +393,6 @@ class Canvas {
   }
 
   updateAnnotationFields(drawing) {
-    // TODO: should also change on drag
     $('#x1Field').val(Math.round(drawing.x1 * globals.imageScale));
     $('#y1Field').val(Math.round(drawing.y1 * globals.imageScale));
     $('#x2Field').val(Math.round(drawing.x2 * globals.imageScale));
@@ -486,8 +466,7 @@ class Canvas {
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   decreaseSelectionSizeLeft() {}
-  decreaseSelectionSizeRight() {}
-  decreaseSelectionSizeUp() {}
   decreaseSelectionSizeDown() {}
-
+  increaseSelectionSizeRight() {}
+  increaseSelectionSizeUp() {}
 }
