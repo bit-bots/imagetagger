@@ -69,6 +69,7 @@ class Drawing {
       closed: true
     });
     this.setDragCursor(true);
+    this.parent.updateAnnotationFields(this.parent.getLayer(this.name));
   }
   /** Return the points of the drawing as a JS object
    * with the properties x1, y1, x2, y2, ...
@@ -162,11 +163,16 @@ class Drawing {
 class Point extends Drawing {
   constructor(parent, point, id, mutable) {
     super(parent, point, id, mutable);
+    this.type = "point";
     this.close();
   }
 }
 
 class Line extends Drawing {
+  constructor(parent, point, id, mutable) {
+    super(parent, point, id, mutable);
+    this.type = "line";
+  }
   addPoint(x, y) {
     this.pointCounter++;
     if (this.pointCounter === 2) {
@@ -182,10 +188,12 @@ class Polygon extends Drawing {
    */
   constructor(parent, points, id, mutable, numberOfPoints) {
     super(parent, points, id, mutable);
+    this.type = "polygon";
     this.nop = numberOfPoints;
   }
   addPoint(x, y) {
     super.addPoint(x, y);
+    this.parent.updateAnnotationFields(this.parent.getLayer(this.name));
     if (this.pointCounter >= this.nop) {
       this.close();
     }
@@ -197,6 +205,10 @@ class Polygon extends Drawing {
  * Clicking on the first point will finish the drawing.
  */
 class ArbitraryPolygon extends Drawing {
+  constructor(parent, point, id, mutable) {
+    super(parent, point, id, mutable);
+    this.type = "polygon";
+  }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
     if (Math.abs(firstPoint[0] - mousex) < threshold &&
@@ -234,6 +246,7 @@ class Canvas {
         self.updateAnnotationFields(self.getLayer(self.currentDrawing.name));
       }
     }).click(function (event) {
+      console.log(self.inline, self.currentDrawing, self.locked, self.mutable);
       mousex = event.pageX - self.offset.left;
       mousey = event.pageY - self.offset.top;
       if (self.inline && self.currentDrawing) {
@@ -259,17 +272,18 @@ class Canvas {
           self.inline = true;
           switch (self.vector_type) {
             case 2: // Point
-              self.drawPoint({x1: mousex, y1: mousey}, true);
+              self.drawPoint({x1: mousex, y1: mousey}, 0, true);
               break;
             case 3: // Line
               self.drawLine({x1: mousex, y1: mousey}, 0, true);
               break;
             case 5: // Polygon
               if (self.node_count === 0) {
-                self.drawArbitraryPolygon({x1: mousex, y1: mousey}, true, false);
+                self.drawArbitraryPolygon({x1: mousex, y1: mousey}, 0, true, false);
               } else {
-                self.drawPolygon({x1: mousex, y1: mousey}, true, self.node_count, false);
+                self.drawPolygon({x1: mousex, y1: mousey}, 0, true, self.node_count, false);
               }
+              console.log("Polygon", self.node_count);
               break;
             default:
               console.log("No appropriate drawing found for vector type " + self.vector_type);
@@ -393,11 +407,32 @@ class Canvas {
   }
 
   updateAnnotationFields(drawing) {
-    $('#x1Field').val(Math.round(drawing.x1 * globals.imageScale));
-    $('#y1Field').val(Math.round(drawing.y1 * globals.imageScale));
-    $('#x2Field').val(Math.round(drawing.x2 * globals.imageScale));
-    $('#y2Field').val(Math.round(drawing.y2 * globals.imageScale));
     $('#not_in_image').prop('checked', false).change();
+    // Add missing fields
+    let i = 1;
+    for (; drawing.hasOwnProperty("x" + i); i++) {
+      if (!$('#x' + i + 'Field').length) {
+        $('#coordinate_table').append(this.getTag("x" + i)).append(this.getTag("y" + i));
+      }
+    }
+    // Remove unnecessary fields
+    for (; $('#x' + i + 'Field').length; i++) {
+      $('#x' + i + 'Box').remove();
+      $('#y' + i + 'Box').remove();
+    }
+    for (let j = 1; drawing.hasOwnProperty("x" + j); j++) {
+      $('#x' + j + 'Field').val(Math.round(drawing["x" + j] * globals.imageScale));
+      $('#y' + j + 'Field').val(Math.round(drawing["y" + j] * globals.imageScale));
+    }
+  }
+
+  getTag(field) {
+    return '<div id="' + field + 'Box"><div class="col-xs-2" style="max-width: 3em">' +
+              '<label for="' + field + 'Field">' + field + '</label>' +
+              '</div><div class="col-xs-10">' +
+              '<input id="' + field + 'Field" class="Coordinates annotation_value form-control"' +
+              'type="number" name="' + field + 'Field" value="0" min="0">' +
+              '</div><div class="col-xs-12"></div></div>';
   }
 
   getDrawingById(id) {

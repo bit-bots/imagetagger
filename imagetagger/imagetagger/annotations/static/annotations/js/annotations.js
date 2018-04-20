@@ -70,6 +70,11 @@ function calculateImageScale() {
     let node_count = selected_annotation.nodeCount;
     switch (vector_type) {
       case 1: // Bounding Box
+        // Remove unnecessary number fields
+        for (let i = 3; $('#x' + i + 'Field').length; i++) {
+          $('#x' + i + 'Box').remove();
+          $('#y' + i + 'Box').remove();
+        }
         tool = new BoundingBoxes();
         $('#image_canvas').addClass('hidden');
         break;
@@ -111,11 +116,10 @@ function calculateImageScale() {
     }
 
     if (!$('#not_in_image').is(':checked')) {
-      vector = {
-        x1: parseInt($('#x1Field').val()),
-        x2: parseInt($('#x2Field').val()),
-        y1: parseInt($('#y1Field').val()),
-        y2: parseInt($('#y2Field').val())
+      vector = {};
+      for (let i = 1; $('#x' + i + 'Field').length; i++) {
+        vector["x" + i] = parseInt($('#x' + i + 'Field').val());
+        vector["y" + i] = parseInt($('#y' + i + 'Field').val());
       }
     }
 
@@ -134,6 +138,7 @@ function calculateImageScale() {
       image_id: gImageId,
       vector: vector
     };
+    console.log(data);
     var editing = false;
     if (globals.editedAnnotationsId !== undefined) {
       // edit instead of create
