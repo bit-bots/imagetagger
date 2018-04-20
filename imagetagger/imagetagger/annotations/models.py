@@ -341,8 +341,8 @@ class AnnotationType(models.Model):
         if not (self.node_count is 0 or
                 self.node_count is int(len(vector) // 2)):
             return False
-        for i in range(1, len(vector) + 1):
-            for j in range(1, len(vector) + 1):
+        for i in range(1, int(len(vector) // 2) + 1):
+            for j in range(1, int(len(vector) // 2) + 1):
                 if i is not j and \
                     (vector['x' + str(i)] is vector['x' + str(j)] or
                      vector['y' + str(i)] is vector['y' + str(j)]):
