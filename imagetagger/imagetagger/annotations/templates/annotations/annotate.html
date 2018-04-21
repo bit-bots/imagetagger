@@ -123,7 +123,7 @@
                       <a href="{% url 'annotations:verify' annotation.id%}">
                         <img src="{% static "symbols/checkmark.png" %}" alt="verify" class="annotation_verify_button" data-annotationid="{{ annotation.id }}">
                       </a>
-                      <a href="{% url 'annotations:edit_annotation' annotation.id%}" class="annotation_edit_button" id="annotation_edit_button_{{ annotation.id }}" data-annotationid="{{ annotation.id }}" data-annotationtypeid="{{ annotation.annotation_type_id }}" data-escapedvector="{{ annotation.vector_as_json }}">
+                      <a href="#" class="annotation_edit_button" id="annotation_edit_button_{{ annotation.id }}" data-annotationid="{{ annotation.id }}" data-annotationtypeid="{{ annotation.annotation_type_id }}" data-escapedvector="{{ annotation.vector_as_json }}">
                         <img src="{% static "symbols/pencil.png" %}" alt="edit">
                       </a>
                       <a href="{% url 'annotations:delete_annotation' annotation.id%}" class="annotation_delete_button" data-annotationid="{{ annotation.id }}">

@@ -57,7 +57,7 @@ function calculateImageScale() {
     loadAnnotateView(gImageList[index]);
   }
 
-  function setTool() {
+  function setTool(callback) {
     if (tool) {
       tool.resetSelection();
       tool.cancelSelection();
@@ -68,6 +68,7 @@ function calculateImageScale() {
     let selected_annotation = $('#annotation_type_id').children(':selected').data();
     let vector_type = selected_annotation.vectorType;
     let node_count = selected_annotation.nodeCount;
+    let annotationTypeId = parseInt($('#annotation_type_id').children(':selected').val());
     switch (vector_type) {
       case 1: // Bounding Box
         // Remove unnecessary number fields
@@ -83,14 +84,19 @@ function calculateImageScale() {
       case 4: // Multiline, fallthrough
       case 5: // Polygon
         $('#image_canvas').removeClass('hidden').attr('width', $('#image').width()).attr('height', $('#image').height());
-        tool = new Canvas($('#image_canvas'), vector_type, node_count);
+        tool = new Canvas($('#image_canvas'), vector_type, node_count, annotationTypeId);
         break;
       default:
         tool = new BoundingBoxes();
         $('#image_canvas').addClass('hidden');
     }
+    if (gCurrentAnnotations) {
+      tool.drawExistingAnnotations(gCurrentAnnotations);
+    }
     console.log("Using tool " + tool.constructor.name);
-
+    if (typeof callback === "function") {
+      callback();
+    }
   }
 
   /**
@@ -138,7 +144,6 @@ function calculateImageScale() {
       image_id: gImageId,
       vector: vector
     };
-    console.log(data);
     var editing = false;
     if (globals.editedAnnotationsId !== undefined) {
       // edit instead of create
@@ -186,7 +191,7 @@ function calculateImageScale() {
           tool.drawExistingAnnotations(gCurrentAnnotations);
         }
 
-        globals.editedAnnotationId = undefined;
+        globals.editedAnnotationsId = undefined;
         $('.annotation').removeClass('alert-info');
         globals.editActiveContainer.addClass('hidden');
         tool.resetSelection(true);
@@ -295,7 +300,7 @@ function calculateImageScale() {
       var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
       '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="verify" class="annotation_verify_button">' +
       '</a>');
-      var editButton = $('<a href="/annotations/' + annotation.id + '/edit/">' +
+      var editButton = $('<a href="#">' +
       '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit" class="annotation_edit_button">' +
       '</a>');
       var deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
@@ -446,50 +451,49 @@ function calculateImageScale() {
    * @param annotationId
    */
   function editAnnotation(event, annotationElem, annotationId) {
-    // TODO: change tool if necessary
     annotationElem = $(annotationElem);
-
-    globals.editedAnnotationsId = annotationId;
-    globals.editActiveContainer.removeClass('hidden');
-
-    tool.resetSelection();
-
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-    }
-    $('.js_feedback').stop().addClass('hidden');
-    var params = {
-      annotation_id: annotationId
-    };
-
-    var annotationData = annotationElem.data('vector');
-    if (annotationData === undefined) {
-      annotationData = annotationElem.data('escapedvector');
-    }
     var annotationTypeId = annotationElem.data('annotationtypeid');
 
-    // highlight currently edited annotation
-    $('.annotation').removeClass('alert-info');
-    annotationElem.parent().parent().addClass('alert-info');
-
-    var notInImage = $('#not_in_image');
-    if (annotationData === null) {
-      // not in image
-      notInImage.prop('checked', true).change();
-      return;
-    }
-
-    notInImage.prop('checked', false).change();
-
     $('#annotation_type_id').val(annotationTypeId);
-    $('#x1Field').val(annotationData.x1);
-    $('#x2Field').val(annotationData.x2);
-    $('#y1Field').val(annotationData.y1);
-    $('#y2Field').val(annotationData.y2);
-    tool.initSelection();
+    handleAnnotationTypeChange(function() {
+      globals.editedAnnotationsId = annotationId;
+      globals.editActiveContainer.removeClass('hidden');
 
-    tool.reloadSelection(annotationId);
+      if (event !== undefined) {
+        // triggered using an event handler
+        event.preventDefault();
+      }
+      $('.js_feedback').stop().addClass('hidden');
+      var params = {
+        annotation_id: annotationId
+      };
+
+      var annotationData = annotationElem.data('vector');
+      if (annotationData === undefined) {
+        annotationData = annotationElem.data('escapedvector');
+      }
+
+      // highlight currently edited annotation
+      $('.annotation').removeClass('alert-info');
+      annotationElem.parent().parent().addClass('alert-info');
+
+      var notInImage = $('#not_in_image');
+      if (annotationData === null) {
+        // not in image
+        notInImage.prop('checked', true).change();
+        return;
+      }
+
+      notInImage.prop('checked', false).change();
+
+      $('#annotation_type_id').val(annotationTypeId);
+      $('#x1Field').val(annotationData.x1);
+      $('#x2Field').val(annotationData.x2);
+      $('#y1Field').val(annotationData.y1);
+      $('#y2Field').val(annotationData.y2);
+
+      tool.reloadSelection(annotationId);
+    });
   }
 
   /**
@@ -791,7 +795,7 @@ function calculateImageScale() {
    * Handle the selection change of the annotation type.
    */
 
-  function handleAnnotationTypeChange() {
+  function handleAnnotationTypeChange(callback) {
     var params = {
       image_id: gImageId
     };
@@ -802,8 +806,7 @@ function calculateImageScale() {
       dataType: 'json',
       success: function(data) {
         gCurrentAnnotations = data.annotations;
-        setTool();
-        tool.drawExistingAnnotations(gCurrentAnnotations);
+        setTool(callback);
       },
       error: function() {
       }
@@ -964,6 +967,7 @@ function calculateImageScale() {
     if(option.length) {
       $('#annotation_type_id').val(option.val());
     }
+    handleAnnotationTypeChange();
   }
 
 
@@ -1071,7 +1075,7 @@ function calculateImageScale() {
     $(document).on('mousemove touchmove', handleSelection);
     $(window).on('resize', handleResize);
     window.onpopstate = function(event) {
-      if (event.state !== undefined && event.state.imageId !== undefined) {
+      if (event.state !== undefined && event.state !== null && event.state.imageId !== undefined) {
         loadAnnotateView(event.state.imageId, true);
       }
     };

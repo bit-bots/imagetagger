@@ -223,18 +223,18 @@ class ArbitraryPolygon extends Drawing {
 
 
 class Canvas {
-  constructor(HTMLCanvas, vector_type, node_count, mutable) {
+  constructor(HTMLCanvas, vector_type, node_count, annotationTypeId) {
     this.canvas = HTMLCanvas;
     this.width = this.canvas.width();
     this.height = this.canvas.height();
     this.offset = this.canvas.offset();
     this.inline = false;            // True if we are currently drawing a drawing
     this.locked = false;            // True if clicking should not create a new line
-    this.mutable = mutable === undefined ? true : mutable;        // Whether we can draw on the canvas with the mouse
     this.vector_type = vector_type;
     this.node_count = node_count;
     this.currentDrawing = null;     // The drawing we are currently drawing
     this.drawings = [];             // Array holding all the drawings
+    this.annotationTypeId = annotationTypeId;
     let self = this;
     $('body').mousemove(function (event) {
       mousex = event.pageX - self.offset.left;
@@ -246,7 +246,6 @@ class Canvas {
         self.updateAnnotationFields(self.getLayer(self.currentDrawing.name));
       }
     }).click(function (event) {
-      console.log(self.inline, self.currentDrawing, self.locked, self.mutable);
       mousex = event.pageX - self.offset.left;
       mousey = event.pageY - self.offset.top;
       if (self.inline && self.currentDrawing) {
@@ -261,7 +260,7 @@ class Canvas {
         // we do not create a drawing because we are
         // only moving an existing one
         self.locked = false;
-      } else if (self.mutable) {
+      } else {
         if (mousex <= self.width && mousex >= 0 &&
           mousey <= self.height && mousey >= 0) {
           // We clicked and are inside the canvas:
@@ -283,7 +282,6 @@ class Canvas {
               } else {
                 self.drawPolygon({x1: mousex, y1: mousey}, 0, true, self.node_count, false);
               }
-              console.log("Polygon", self.node_count);
               break;
             default:
               console.log("No appropriate drawing found for vector type " + self.vector_type);
@@ -374,10 +372,9 @@ class Canvas {
   }
 
   drawExistingAnnotations(annotations) {
-    let currentAnnotationType = parseInt($('#annotation_type_id').val());
     this.clear();
     for (let annotation of annotations) {
-      if (annotation.annotation_type.id !== currentAnnotationType) {
+      if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }
       if (annotation.vector === null) {
@@ -396,7 +393,7 @@ class Canvas {
           if (annotation.annotation_type.node_count === 0) {
             this.drawArbitraryPolygon(annotation.vector, annotation.id, false, true);
           } else {
-            this.drawPolygon(annotation.vector, annotation.id, annotation.annotation_type.node_count, false, true);
+            this.drawPolygon(annotation.vector, annotation.id, false, annotation.annotation_type.node_count, true);
           }
           break;
         default:
@@ -474,7 +471,6 @@ class Canvas {
   }
 
   reloadSelection(annotation_id) {
-    // Make annotation_id mutable
     this.currentDrawing = this.getDrawingById(annotation_id);
     this.currentDrawing.setMutable(true);
     this.old = this.currentDrawing.getPoints();

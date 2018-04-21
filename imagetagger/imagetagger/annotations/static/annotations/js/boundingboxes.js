@@ -96,7 +96,7 @@ class BoundingBoxes {
       this.selection.cancelSelection();
     }
 
-    globals.editedAnnotationId = undefined;
+    globals.editedAnnotationsId = undefined;
     $('.annotation').removeClass('alert-info');
     globals.editActiveContainer.addClass('hidden');
   }
