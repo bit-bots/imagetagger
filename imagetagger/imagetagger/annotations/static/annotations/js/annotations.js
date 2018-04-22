@@ -12,6 +12,7 @@ globals = {
  */
 function calculateImageScale() {
   globals.imageScale = globals.image.get(0).naturalWidth / globals.image.width();
+  console.log(globals.imageScale);
 }
 
 (function() {
@@ -365,6 +366,7 @@ function calculateImageScale() {
 
     currentImage.replaceWith(newImage);
     globals.image = newImage;
+    calculateImageScale();
     tool.initSelection();
     tool.resetSelection();
 

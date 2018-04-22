@@ -42,6 +42,9 @@ class Drawing {
     this.parent.updateAnnotationFields(this.parent.getLayer(this.name));
   }
   setPoints(points) {
+    for (let point in points) {
+      points[point] /= globals.imageScale;
+    }
     this.parent.setLayer(this.name, points);
   }
   /** Deletes the current point */
@@ -78,8 +81,8 @@ class Drawing {
     let points = {};
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      points["x" + i] = l["x" + i];
-      points["y" + i] = l["y" + i];
+      points["x" + i] = l["x" + i] * globals.imageScale;
+      points["y" + i] = l["y" + i] * globals.imageScale;
     }
     return points;
   }
@@ -91,7 +94,7 @@ class Drawing {
     let points = [];
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      points.push([l["x" + i], l["y" + i]]);
+      points.push([l["x" + i] * globals.imageScale, l["y" + i] * globals.imageScale]);
     }
     return points;
   }
@@ -131,8 +134,8 @@ class Drawing {
   move(x, y) {
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      l["x" + i] += x;
-      l["y" + i] += y;
+      l["x" + i] += x / globals.imageScale;
+      l["y" + i] += y / globals.imageScale;
     }
     this.parent.setLayer(this.name, l);
   }
@@ -303,7 +306,7 @@ class Canvas {
     for (let drawing of this.drawings) {
       let points = drawing.getPointTuples();
       for (let point of points) {
-        if (Math.abs(point[0] - mousex) < threshold && Math.abs(point[1] - mousey) < threshold) {
+        if (Math.abs(point[0] / globals.imageScale - mousex) < threshold && Math.abs(point[1] / globals.imageScale - mousey) < threshold) {
           return true;
         }
       }
@@ -380,20 +383,24 @@ class Canvas {
       if (annotation.vector === null) {
         continue;
       }
+      let vector = {};
+      for (let key in annotation.vector) {
+        vector[key] = annotation.vector[key] / globals.imageScale;
+      }
       switch (annotation.annotation_type.vector_type) {
         case 1: // Ball
           console.log("Bounding boxes should be used for this");
         case 2: // Points
-          this.drawPoint(annotation.vector, annotation.id);
+          this.drawPoint(vector, annotation.id);
           break;
         case 3: // Lines
-          this.drawLine(annotation.vector, annotation.id, false);
+          this.drawLine(vector, annotation.id, false);
           break;
         case 5: // Polygons
           if (annotation.annotation_type.node_count === 0) {
-            this.drawArbitraryPolygon(annotation.vector, annotation.id, false, true);
+            this.drawArbitraryPolygon(vector, annotation.id, false, true);
           } else {
-            this.drawPolygon(annotation.vector, annotation.id, false, annotation.annotation_type.node_count, true);
+            this.drawPolygon(vector, annotation.id, false, annotation.annotation_type.node_count, true);
           }
           break;
         default:
