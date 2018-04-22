@@ -287,12 +287,34 @@ class BoundingBoxes {
    * @param selection
    */
   updateAnnotationFields(img, selection) {
+    $('#not_in_image').prop('checked', false).change();
+    // Add missing fields
+    let i = 1;
+    for (; selection.hasOwnProperty("x" + i); i++) {
+      if (!$('#x' + i + 'Field').length) {
+        $('#coordinate_table').append(BoundingBoxes.getTag("x" + i)).append(BoundingBoxes.getTag("y" + i));
+      }
+    }
+    // Remove unnecessary fields
+    for (; $('#x' + i + 'Field').length; i++) {
+      $('#x' + i + 'Box').remove();
+      $('#y' + i + 'Box').remove();
+    }
     $('#x1Field').val(Math.round(selection.x1 * globals.imageScale));
     $('#y1Field').val(Math.round(selection.y1 * globals.imageScale));
     $('#x2Field').val(Math.round(selection.x2 * globals.imageScale));
     $('#y2Field').val(Math.round(selection.y2 * globals.imageScale));
-    $('#not_in_image').prop('checked', false).change();
   }
+
+  static getTag(field) {
+    return '<div id="' + field + 'Box"><div class="col-xs-2" style="max-width: 3em">' +
+      '<label for="' + field + 'Field">' + field + '</label>' +
+      '</div><div class="col-xs-10">' +
+      '<input id="' + field + 'Field" class="Coordinates annotation_value form-control"' +
+      'type="number" name="' + field + 'Field" value="0" min="0">' +
+      '</div><div class="col-xs-12"></div></div>';
+  }
+
   reset() {
     this.clear();
   }

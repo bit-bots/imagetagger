@@ -239,6 +239,18 @@ class Canvas {
     this.drawings = [];             // Array holding all the drawings
     this.annotationTypeId = annotationTypeId;
     let self = this;
+    // Update annotation fields to match vector type
+    switch (vector_type) {
+      case 2: // Point
+        self.updateAnnotationFields({x1: 0, x2: 0});
+        break;
+      case 3: // Line, fallthrough
+      case 4: // Multiline, fallthrough
+      case 5: // Polygon
+        self.updateAnnotationFields({x1: 0, x2: 0, y1: 0, y2: 0});
+        break;
+    }
+
     $('body').mousemove(function (event) {
       mousex = event.pageX - self.offset.left;
       mousey = event.pageY - self.offset.top;
