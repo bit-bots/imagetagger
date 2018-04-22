@@ -125,22 +125,6 @@ class BoundingBoxes {
     }
   }
 
-  /**
-   * Validate a vector.
-   *
-   * @param vector
-   */
-  validate_vector(vector) {
-    // TODO: support different vector types
-
-    if (vector === null) {
-      // not in image
-      return true;
-    }
-
-    return vector.x2 - vector.x1 >= 1 && vector.y2 - vector.y1 >= 1
-  }
-
   moveSelectionUp() {
     // calculate value +/- stepsize (times stepsize to account for differing image sizes)
     let newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));

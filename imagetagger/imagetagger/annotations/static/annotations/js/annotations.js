@@ -129,7 +129,10 @@ function calculateImageScale() {
       }
     }
 
-    if (!tool.validate_vector(vector)) {
+    let selected_annotation = $('#annotation_type_id').children(':selected').data();
+    let vector_type = selected_annotation.vectorType;
+    let node_count = selected_annotation.nodeCount;
+    if (!validate_vector(vector, vector_type, node_count)) {
       displayFeedback($('#feedback_annotation_invalid'));
       return;
     }
@@ -512,6 +515,47 @@ function calculateImageScale() {
     });
 
     return imageList;
+  }
+
+  /**
+   * Validate a vector.
+   *
+   * @param vector
+   * @param vector_type
+   * @param node_count
+   */
+  function validate_vector(vector, vector_type, node_count) {
+    if (vector === null) {
+      // not in image
+      return true;
+    }
+    let len = Object.keys(vector).length;
+    switch (vector_type) {
+      case 1: // Ball (Boundingbox)
+        return vector.x2 - vector.x1 >= 1 && vector.y2 - vector.y1 >= 1 && len === 4;
+      case 2: // Point
+        return vector.hasOwnProperty('x1') && vector.hasOwnProperty('y1') && len === 2;
+      case 3: // Line
+        return vector.x1 !== vector.x2 && vector.y1 !== vector.y2 && len === 4;
+      case 4: // Multiline
+        return true;
+      case 5: // Polygon
+        if (len < 6) {
+          return false;
+        } // A polygon should have at least three points
+        if (node_count !== 0 && node_count !== (len / 2)) {
+          return false;
+        }
+        for (let i = 1; i <= len / 2; i++) {
+          for (let j = 1; j <= len / 2; j++) {
+            if (i !== j && vector["x" + i] === vector["x" + j] && vector["y" + i] === vector["y" + j]) {
+              return false;
+            }
+          }
+        }
+        return true;
+    }
+    return false;
   }
 
   /**

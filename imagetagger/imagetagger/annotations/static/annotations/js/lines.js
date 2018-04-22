@@ -496,9 +496,6 @@ class Canvas {
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
 
-  validate_vector(vector) {
-    return true;
-  }
   moveSelectionLeft() {
     this.currentDrawing.move(-globals.moveSelectionStepSize, 0);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
