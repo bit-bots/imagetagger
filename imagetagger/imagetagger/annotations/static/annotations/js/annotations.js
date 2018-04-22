@@ -286,11 +286,13 @@ function calculateImageScale() {
 
       if (annotation.vector !== null) {
         annotation.content = '';
-        for (var key in annotation.vector) {
+        for (let i = 1; annotation.vector.hasOwnProperty("x" + i); i++) {
           if (annotation.content !== '') {
             annotation.content += ' &bull; ';
           }
-          annotation.content += '<em>' + key + '</em>: ' + annotation.vector[key];
+          annotation.content += '<em>x' + i + '</em>: ' + annotation.vector["x" + i];
+          annotation.content += ' &bull; ';
+          annotation.content += '<em>y' + i + '</em>: ' + annotation.vector["y" + i];
         }
       }
 
