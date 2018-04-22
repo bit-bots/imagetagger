@@ -94,6 +94,18 @@ def annotate(request, image_id):
         # detecting next and last image in the set
         next_image = set_images.filter(id__gt=selected_image.id).order_by('id').first()
         last_image = set_images.filter(id__lt=selected_image.id).order_by('id').last()
+        vector_fields = tuple()
+        if last_annotation_type_id is not -1:
+            last_annotation_type = AnnotationType.objects.filter(id=last_annotation_type_id)
+            if last_annotation_type.exists():
+                last_annotation_type = last_annotation_type[0]
+                # Bounding Box and Line as default
+                vector_fields = ('x1', 'y1', 'x2', 'y2',)
+                if last_annotation_type.vector_type in (
+                        AnnotationType.VECTOR_TYPE.POINT,
+                        AnnotationType.VECTOR_TYPE.POLYGON,
+                        AnnotationType.VECTOR_TYPE.MULTI_LINE):
+                    vector_fields = ('x1', 'y1')
 
         return render(request, 'annotations/annotate.html', {
             'selected_image': selected_image,
@@ -106,12 +118,7 @@ def annotate(request, image_id):
                 image=selected_image).select_related(),
             'last_annotation_type_id': int(last_annotation_type_id),
             'filtered': filtered,
-            'vector_fields': (
-                'x1',
-                'x2',
-                'y1',
-                'y2',
-            ),
+            'vector_fields': vector_fields
         })
     else:
         return redirect(reverse('images:view_imageset', args=(selected_image.image_set.id,)))
