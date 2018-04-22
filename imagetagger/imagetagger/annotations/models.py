@@ -344,7 +344,7 @@ class AnnotationType(models.Model):
         for i in range(1, int(len(vector) // 2) + 1):
             for j in range(1, int(len(vector) // 2) + 1):
                 if i is not j and \
-                    (vector['x' + str(i)] is vector['x' + str(j)] or
+                    (vector['x' + str(i)] is vector['x' + str(j)] and
                      vector['y' + str(i)] is vector['y' + str(j)]):
                     return False
         return True
