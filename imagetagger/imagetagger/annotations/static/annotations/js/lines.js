@@ -214,8 +214,8 @@ class ArbitraryPolygon extends Drawing {
   }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
-    if (Math.abs(firstPoint[0] - mousex) < threshold &&
-      Math.abs(firstPoint[1] - mousey) < threshold) {
+    if (Math.abs(firstPoint[0] / globals.imageScale - mousex) < threshold &&
+      Math.abs(firstPoint[1] / globals.imageScale - mousey) < threshold) {
       this.deleteCurrentPoint();
       this.close();
     } else {
