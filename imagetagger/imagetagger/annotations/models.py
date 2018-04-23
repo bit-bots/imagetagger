@@ -78,13 +78,12 @@ class Annotation(models.Model):
         xc = self.vector['x1'] + (self.width/2)
         return {'xc': xc, 'yc': yc}
 
-    @property
-    def relative_vector(self):
-        x1rel = self.vector['x1']/self.image.width
-        x2rel = self.vector['x2']/self.image.width
-        y1rel = self.vector['y1']/self.image.height
-        y2rel = self.vector['y2']/self.image.height
-        return {'x1': x1rel, 'x2': x2rel, 'y1': y1rel, 'y2': y2rel}
+    def get_relative_vector_element(self, key):
+        if key[0] == 'x':
+            return self.vector[key] / float(self.image.width)
+        if key[0] == 'y':
+            return self.vector[key] / float(self.image.height)
+        raise ValueError('wrong key in get_relative_vector_element: {}'.format(key))
 
     @property
     def relative_center(self):
@@ -391,9 +390,10 @@ class ExportFormat(models.Model):
     team = models.ForeignKey(Team, on_delete=models.PROTECT,
                              related_name='export_formats')
     public = models.BooleanField(default=False)
-    base_format = NonStrippingTextField()  #more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
+    base_format = NonStrippingTextField()  # more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
     image_format = NonStrippingTextField(null=True, blank=True, default=None)
-    annotation_format = NonStrippingTextField() #used for every annotation in export (coordinates, type, image)
+    annotation_format = NonStrippingTextField()  # used for every annotation in export (coordinates, type, image)
+    vector_format = models.CharField(default='x%%count1: %%x%%bry%%count1: %%y', max_length=200)
     not_in_image_format = NonStrippingTextField()
     name_format = models.CharField(default='export_%%exportid.txt', max_length=200)
     min_verifications = models.IntegerField(default=0)

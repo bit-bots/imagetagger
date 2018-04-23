@@ -375,7 +375,7 @@ def verify(request, annotation_id):
     })
 
 
-# TODO secure that only logged in users can use this
+@login_required
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
@@ -403,6 +403,22 @@ def export_format(export_format_name, imageset):
                 annotation_content = ''
                 for annotation in annotations:
                     annotation_counter += 1
+                    formatted_vector = str()
+                    for counter1 in range(len(annotation.vector) // 2):
+                        pass
+                        vector_line = export_format.vector_format
+                        placeholders_vector = {
+                            '%%count0': counter1 - 1,
+                            '%%count1': counter1,
+                            '%%x': annotation.vector['x' + counter1],
+                            '%%relx': annotation.get_relative_vector_element('x' + counter1),
+                            '%%y': annotation.vector['y' + counter1],
+                            '%%rely': annotation.get_relative_vector_element('y' + counter1),
+                            '%%br': '\n'
+                        }
+                        for key, value in placeholders_vector.items():
+                            vector_line = vector_line.replace(key, str(value))
+                        formatted_vector += vector_line
                     if annotation.not_in_image:
                         formatted_annotation = export_format.not_in_image_format
                         placeholders_annotation = {
@@ -422,11 +438,8 @@ def export_format(export_format_name, imageset):
                             '%%imagename': image.name,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
+                            '%%vector': formatted_vector,
                             # absolute values
-                            '%%x1': annotation.vector['x1'],
-                            '%%x2': annotation.vector['x2'],
-                            '%%y1': annotation.vector['y1'],
-                            '%%y2': annotation.vector['y2'],
                             '%%rad': annotation.radius,
                             '%%dia': annotation.diameter,
                             '%%cx': annotation.center['xc'],
@@ -434,10 +447,6 @@ def export_format(export_format_name, imageset):
                             '%%width': annotation.width,
                             '%%height': annotation.height,
                             # relative values
-                            '%%relx1': annotation.relative_vector['x1'],
-                            '%%relx2': annotation.relative_vector['x2'],
-                            '%%rely1': annotation.relative_vector['y1'],
-                            '%%rely2': annotation.relative_vector['y2'],
                             '%%relrad': annotation.relative_radius,
                             '%%reldia': annotation.relative_diameter,
                             '%%relcx': annotation.relative_center['xc'],
@@ -482,6 +491,22 @@ def export_format(export_format_name, imageset):
                     '%%veriamount': annotation.verification_difference,
                 }
             else:
+                formatted_vector = str()
+                for counter1 in range(len(annotation.vector) // 2):
+                    pass
+                    vector_line = export_format.vector_format
+                    placeholders_vector = {
+                        '%%count0': counter1 - 1,
+                        '%%count1': counter1,
+                        '%%x': annotation.vector['x' + counter1],
+                        '%%relx': annotation.get_relative_vector_element('x' + counter1),
+                        '%%y': annotation.vector['y' + counter1],
+                        '%%rely': annotation.get_relative_vector_element('y' + counter1),
+                        '%%br': '\n'
+                    }
+                    for key, value in placeholders_vector.items():
+                        vector_line = vector_line.replace(key, str(value))
+                    formatted_vector += vector_line
                 formatted_annotation = export_format.annotation_format
                 placeholders_annotation = {
                     '%%imageset': imageset.name,
@@ -490,11 +515,8 @@ def export_format(export_format_name, imageset):
                     '%%imagename': annotation.image.name,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
+                    '%%vector': formatted_vector,
                     # absolute values
-                    '%%x1': annotation.vector['x1'],
-                    '%%x2': annotation.vector['x2'],
-                    '%%y1': annotation.vector['y1'],
-                    '%%y2': annotation.vector['y2'],
                     '%%rad': annotation.radius,
                     '%%dia': annotation.diameter,
                     '%%cx': annotation.center['xc'],
@@ -502,10 +524,6 @@ def export_format(export_format_name, imageset):
                     '%%width': annotation.width,
                     '%%height': annotation.height,
                     # relative values
-                    '%%relx1': annotation.relative_vector['x1'],
-                    '%%relx2': annotation.relative_vector['x2'],
-                    '%%rely1': annotation.relative_vector['y1'],
-                    '%%rely2': annotation.relative_vector['y2'],
                     '%%relrad': annotation.relative_radius,
                     '%%reldia': annotation.relative_diameter,
                     '%%relcx': annotation.relative_center['xc'],

@@ -15,6 +15,7 @@ class ExportFormatCreationForm(forms.ModelForm):
             'image_format',
             'annotation_format',
             'not_in_image_format',
+            'vector_format',
             'name_format',
             'min_verifications',
             'image_aggregation',

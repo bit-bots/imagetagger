@@ -108,10 +108,7 @@
                         <p><b>%%imageset:</b> name of the imageset </p>
                         <p><b>%%type:</b> annotation type</p>
                         <p><b>%%veriamount:</b> the amount of verifications for the annotation</p>
-                        <p><b>%%x1, %%relx1:</b> x1-coordinate of the annotation, absolute or relative value</p>
-                        <p><b>%%x2, %%relx2:</b> x2-coordinate of the annotation, absolute or relative value</p>
-                        <p><b>%%y1, %%rely1:</b> y1-coordinate of the annotation, absolute or relative value</p>
-                        <p><b>%%y2, %%rely2:</b> y2-coordinate of the annotation, absolute or relative value</p>
+                        <p><b>%%vector:</b> the annotation vector, as defined in the vector format</p>
                         <p><b>%%cx, %%relcx:</b> x-coordinate of the center of the annotation, absolute or relative value</p>
                         <p><b>%%cy, %%relcy:</b> y-coordinate of the center of the annotation, absolute or relative value</p>
                         <p><b>%%rad, %%relrad:</b> radius of the annotation, absolute or relative value</p>
@@ -121,6 +118,22 @@
                     {% endblocktrans %}
                     {% render_field form.annotation_format class+='form-control'%}
                     {% for error in form.annotation_format.errors %}
+                        <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="id_vector_format"><h3>{{ form.vector_format.label }}</h3></label>
+                    {% blocktrans %}
+                        <p>Use the following placeholders to define how the annotation vector (x and y values of the points) get represented:</p>
+                        <p><b>%%count0:</b> the number of the current point (starting with 0)</p>
+                        <p><b>%%count1:</b> the number of the current point (starting with 1)</p>
+                        <p><b>%%x, %%relx:</b> x-coordinate of the current point, absolute or relative value</p>
+                        <p><b>%%y, %%rely:</b> y-coordinate of the current point, absolute or relative value</p>
+                        <p><b>%%br:</b> a linebreak</p>
+                    {% endblocktrans %}
+                    {% render_field form.vector_format class+='form-control'%}
+                    {% for error in form.vector_format.errors %}
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
