@@ -497,18 +497,42 @@ class Canvas {
   }
 
   moveSelectionLeft() {
+    let l = this.getLayer(this.currentDrawing.name);
+    for (let i = 1; l.hasOwnProperty("x" + i); i++) {
+      if (l["x" + i] - globals.moveSelectionStepSize / globals.imageScale < 0) {
+        return;
+      }
+    }
     this.currentDrawing.move(-globals.moveSelectionStepSize, 0);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   moveSelectionRight() {
+    let l = this.getLayer(this.currentDrawing.name);
+    for (let i = 1; l.hasOwnProperty("x" + i); i++) {
+      if (l["x" + i] + globals.moveSelectionStepSize / globals.imageScale > globals.image.width()) {
+        return;
+      }
+    }
     this.currentDrawing.move(globals.moveSelectionStepSize, 0);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   moveSelectionUp() {
+    let l = this.getLayer(this.currentDrawing.name);
+    for (let i = 1; l.hasOwnProperty("y" + i); i++) {
+      if (l["y" + i] - globals.moveSelectionStepSize / globals.imageScale < 0) {
+        return;
+      }
+    }
     this.currentDrawing.move(0, -globals.moveSelectionStepSize);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   moveSelectionDown() {
+    let l = this.getLayer(this.currentDrawing.name);
+    for (let i = 1; l.hasOwnProperty("y" + i); i++) {
+      if (l["y" + i] + globals.moveSelectionStepSize / globals.imageScale > globals.image.height()) {
+        return;
+      }
+    }
     this.currentDrawing.move(0, globals.moveSelectionStepSize);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
