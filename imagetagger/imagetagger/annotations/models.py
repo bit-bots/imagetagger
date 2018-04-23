@@ -56,13 +56,37 @@ class Annotation(models.Model):
     def __str__(self):
         return 'Annotation: {0}'.format(self.annotation_type.name)
 
+    # TODO: proper handling of this vector stuff
+
     @property
     def height(self):
-        return self.vector['y2']-self.vector['y1']
+        if len(self.vector) is 4:
+            return self.vector['y2']-self.vector['y1']
+        elif len(self.vector) > 4:
+            min_y, max_y = self.image.height, -1
+            for item in self.vector.items():
+                if item[0][0] == 'y':
+                    if item[1] > max_y:
+                        max_y = item[1]
+                    elif item[1] < min_y:
+                        min_y = item[1]
+            return max(0, max_y - min_y)
+        return 0
 
     @property
     def width(self):
-        return self.vector['x2']-self.vector['x1']
+        if len(self.vector) is 4:  # bounding box and line
+            return self.vector['x2']-self.vector['x1']
+        elif len(self.vector) > 4:
+            min_x, max_x = self.image.width, -1
+            for item in self.vector.items():
+                if item[0][0] == 'x':
+                    if item[1] > max_x:
+                        max_x = item[1]
+                    elif item[1] < min_x:
+                        min_x = item[1]
+            return max(0, max_x - min_x)
+        return 0  # point
 
     @property
     def radius(self):
@@ -70,13 +94,32 @@ class Annotation(models.Model):
 
     @property
     def diameter(self):
-        return (self.height + self.width) / 2
+        if self.annotation_type.vector_type in (
+                AnnotationType.VECTOR_TYPE.BOUNDING_BOX,
+                AnnotationType.VECTOR_TYPE.POLYGON):
+            return (self.height + self.width) / 2
+        return 0
 
     @property
     def center(self):
-        yc = self.vector['y1'] + (self.height/2)
-        xc = self.vector['x1'] + (self.width/2)
+        xc, yc = self.vector['x1'], self.vector['y1']
+        if self.annotation_type.vector_type in (
+                AnnotationType.VECTOR_TYPE.BOUNDING_BOX,
+                AnnotationType.VECTOR_TYPE.LINE):
+            yc = self.vector['y1'] + (self.height/2)
+            xc = self.vector['x1'] + (self.width/2)
+        elif self.annotation_type.vector_type is AnnotationType.VECTOR_TYPE.LINE:
+            yc = self.vector['y1'] + (self.height/2)
+            xc = self.vector['x1'] + (self.width/2)
+        # TODO: Polygon, Multiline?
         return {'xc': xc, 'yc': yc}
+
+    @property
+    def relative_center(self):
+
+        xc_rel = self.center['xc']/self.image.width
+        yc_rel = self.center['yc']/self.image.height
+        return {'xc': xc_rel, 'yc': yc_rel}
 
     def get_relative_vector_element(self, key):
         if key[0] == 'x':
@@ -84,12 +127,6 @@ class Annotation(models.Model):
         if key[0] == 'y':
             return self.vector[key] / float(self.image.height)
         raise ValueError('wrong key in get_relative_vector_element: {}'.format(key))
-
-    @property
-    def relative_center(self):
-        xc_rel = self.center['xc']/self.image.width
-        yc_rel = self.center['yc']/self.image.height
-        return {'xc': xc_rel, 'yc': yc_rel}
 
     @property
     def relative_width(self):
