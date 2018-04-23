@@ -163,11 +163,44 @@ class Drawing {
   }
 }
 
-class Point extends Drawing {
+class Point {
   constructor(parent, point, id, mutable) {
-    super(parent, point, id, mutable);
-    this.type = "point";
-    this.close();
+    /* Set fields */
+    this.pointCounter = 1;      // The number of points that are currently set
+    this.id = id;
+    this.name = "drawing" + id;
+    this.parent = parent;
+    this.mutable = mutable;
+
+    /* Define layer */
+    let l = {
+      name: this.name,
+      type: 'ellipse',
+      width: 6, height: 6,
+      x: point.x1, y: point.y1,
+      fillStyle: color,
+    };
+    this.parent.addLayer(l);
+    this.parent.inline = false;
+    this.parent.locked = false;
+    this.parent.updateAnnotationFields(point);
+  }
+  /** Set the cursor to 'drag' or 'crosshair' in mouseover
+   *
+   * @param bool whether the dursor is in 'drag' style
+   */
+  setDragCursor(bool) {}
+  setMutable(mutable) {}
+  getPointTuples() {
+    let l = this.parent.getLayer(this.name);
+    return [[l.x * globals.imageScale, l.y * globals.imageScale]];
+  }
+  getPoints() {
+    let l = this.parent.getLayer(this.name);
+    return {x1: l.x, y1: l.y};
+  }
+  remove() {
+    this.parent.removeLayer(this.name);
   }
 }
 
@@ -424,6 +457,10 @@ class Canvas {
 
   updateAnnotationFields(drawing) {
     $('#not_in_image').prop('checked', false).change();
+    if (drawing.type === "ellipse") {
+      drawing.x1 = drawing.x;
+      drawing.y1 = drawing.y;
+    }
     // Add missing fields
     let i = 1;
     for (; drawing.hasOwnProperty("x" + i); i++) {
