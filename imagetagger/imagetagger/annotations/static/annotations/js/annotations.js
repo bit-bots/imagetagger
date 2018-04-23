@@ -197,7 +197,7 @@ function calculateImageScale() {
         globals.editedAnnotationsId = undefined;
         $('.annotation').removeClass('alert-info');
         globals.editActiveContainer.addClass('hidden');
-        tool.resetSelection(true);
+        tool.cancelSelection(true);
 
         if (typeof(successCallback) === "function") {
           successCallback();
