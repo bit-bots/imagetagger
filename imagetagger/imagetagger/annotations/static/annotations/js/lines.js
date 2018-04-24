@@ -482,9 +482,8 @@ class Canvas {
       $('#y' + i + 'Box').remove();
     }
     for (let j = 1; drawing.hasOwnProperty("x" + j); j++) {
-      // TODO
-      $('#x' + j + 'Field').val(Math.max(Math.round(drawing["x" + j] * globals.imageScaleWidth), 0));
-      $('#y' + j + 'Field').val(Math.round(drawing["y" + j] * globals.imageScaleHeight));
+      $('#x' + j + 'Field').val(Math.max(Math.min(Math.round(drawing["x" + j] * globals.imageScaleWidth), globals.image.width()), 0));
+      $('#y' + j + 'Field').val(Math.max(Math.min(Math.round(drawing["y" + j] * globals.imageScaleHeight), globals.image.height()), 0));
     }
   }
 

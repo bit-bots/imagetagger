@@ -7,6 +7,8 @@ this stuff to ```master```.
 * verification stuff (drawing of the annotation)
 * test exports
 * implement imports
-* formatting of annotations has to be consistent (first point is always left-top)
+* keep selection for next image
+* remove crosshair on canvas?
+* merge correct resize behaviour
 * testing
 * write tool for migration
