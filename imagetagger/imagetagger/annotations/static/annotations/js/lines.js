@@ -43,7 +43,11 @@ class Drawing {
   }
   setPoints(points) {
     for (let point in points) {
-      points[point] /= globals.imageScale;
+      if (point[0] === "y") {
+        points[point] /= globals.imageScaleHeight;
+      } else {
+        points[point] /= globals.imageScaleWidth;
+      }
     }
     this.parent.setLayer(this.name, points);
   }
@@ -81,8 +85,8 @@ class Drawing {
     let points = {};
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      points["x" + i] = l["x" + i] * globals.imageScale;
-      points["y" + i] = l["y" + i] * globals.imageScale;
+      points["x" + i] = l["x" + i] * globals.imageScaleWidth;
+      points["y" + i] = l["y" + i] * globals.imageScaleHeight;
     }
     return points;
   }
@@ -94,7 +98,7 @@ class Drawing {
     let points = [];
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      points.push([l["x" + i] * globals.imageScale, l["y" + i] * globals.imageScale]);
+      points.push([l["x" + i] * globals.imageScaleWidth, l["y" + i] * globals.imageScaleHeight]);
     }
     return points;
   }
@@ -134,8 +138,8 @@ class Drawing {
   move(x, y) {
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      l["x" + i] += x / globals.imageScale;
-      l["y" + i] += y / globals.imageScale;
+      l["x" + i] = Math.min(Math.max(l["x" + i] + x / globals.imageScaleWidth, 0), globals.image.width());
+      l["y" + i] = Math.min(Math.max(l["y" + i] + y / globals.imageScaleHeight, 0), globals.image.height());
     }
     this.parent.setLayer(this.name, l);
   }
@@ -193,7 +197,7 @@ class Point {
   setMutable(mutable) {}
   getPointTuples() {
     let l = this.parent.getLayer(this.name);
-    return [[l.x * globals.imageScale, l.y * globals.imageScale]];
+    return [[l.x * globals.imageScaleWidth, l.y * globals.imageScaleHeight]];
   }
   getPoints() {
     let l = this.parent.getLayer(this.name);
@@ -247,8 +251,8 @@ class ArbitraryPolygon extends Drawing {
   }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
-    if (Math.abs(firstPoint[0] / globals.imageScale - mousex) < threshold &&
-      Math.abs(firstPoint[1] / globals.imageScale - mousey) < threshold) {
+    if (Math.abs(firstPoint[0] / globals.imageScaleWidth - mousex) < threshold &&
+      Math.abs(firstPoint[1] / globals.imageScaleHeight - mousey) < threshold) {
       this.deleteCurrentPoint();
       this.close();
     } else {
@@ -351,7 +355,7 @@ class Canvas {
     for (let drawing of this.drawings) {
       let points = drawing.getPointTuples();
       for (let point of points) {
-        if (Math.abs(point[0] / globals.imageScale - mousex) < threshold && Math.abs(point[1] / globals.imageScale - mousey) < threshold) {
+        if (Math.abs(point[0] / globals.imageScaleWidth - mousex) < threshold && Math.abs(point[1] / globals.imageScaleHeight - mousey) < threshold) {
           return true;
         }
       }
@@ -430,7 +434,11 @@ class Canvas {
       }
       let vector = {};
       for (let key in annotation.vector) {
-        vector[key] = annotation.vector[key] / globals.imageScale;
+        if (key[0] === "y") {
+          vector[key] = annotation.vector[key] / globals.imageScaleHeight;
+        } else {
+          vector[key] = annotation.vector[key] / globals.imageScaleWidth;
+        }
       }
       switch (annotation.annotation_type.vector_type) {
         case 1: // Ball
@@ -474,8 +482,9 @@ class Canvas {
       $('#y' + i + 'Box').remove();
     }
     for (let j = 1; drawing.hasOwnProperty("x" + j); j++) {
-      $('#x' + j + 'Field').val(Math.round(drawing["x" + j] * globals.imageScale));
-      $('#y' + j + 'Field').val(Math.round(drawing["y" + j] * globals.imageScale));
+      // TODO
+      $('#x' + j + 'Field').val(Math.max(Math.round(drawing["x" + j] * globals.imageScaleWidth), 0));
+      $('#y' + j + 'Field').val(Math.round(drawing["y" + j] * globals.imageScaleHeight));
     }
   }
 
@@ -534,42 +543,18 @@ class Canvas {
   }
 
   moveSelectionLeft() {
-    let l = this.getLayer(this.currentDrawing.name);
-    for (let i = 1; l.hasOwnProperty("x" + i); i++) {
-      if (l["x" + i] - globals.moveSelectionStepSize / globals.imageScale < 0) {
-        return;
-      }
-    }
     this.currentDrawing.move(-globals.moveSelectionStepSize, 0);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   moveSelectionRight() {
-    let l = this.getLayer(this.currentDrawing.name);
-    for (let i = 1; l.hasOwnProperty("x" + i); i++) {
-      if (l["x" + i] + globals.moveSelectionStepSize / globals.imageScale > globals.image.width()) {
-        return;
-      }
-    }
     this.currentDrawing.move(globals.moveSelectionStepSize, 0);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   moveSelectionUp() {
-    let l = this.getLayer(this.currentDrawing.name);
-    for (let i = 1; l.hasOwnProperty("y" + i); i++) {
-      if (l["y" + i] - globals.moveSelectionStepSize / globals.imageScale < 0) {
-        return;
-      }
-    }
     this.currentDrawing.move(0, -globals.moveSelectionStepSize);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
   moveSelectionDown() {
-    let l = this.getLayer(this.currentDrawing.name);
-    for (let i = 1; l.hasOwnProperty("y" + i); i++) {
-      if (l["y" + i] + globals.moveSelectionStepSize / globals.imageScale > globals.image.height()) {
-        return;
-      }
-    }
     this.currentDrawing.move(0, globals.moveSelectionStepSize);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }

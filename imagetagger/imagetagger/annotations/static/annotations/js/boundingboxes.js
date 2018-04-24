@@ -34,10 +34,10 @@ class BoundingBoxes {
       var boundingBox = document.createElement('div');
       boundingBox.setAttribute('id', 'boundingBox');
       $(boundingBox).css({
-        'top': annotation.vector.y1 / globals.imageScale,
-        'left': annotation.vector.x1 / globals.imageScale + parseFloat($('img#image').parent().css('padding-left')),
-        'width': (annotation.vector.x2 - annotation.vector.x1) / globals.imageScale,
-        'height': (annotation.vector.y2 - annotation.vector.y1) / globals.imageScale
+        'top': annotation.vector.y1 / globals.imageScaleHeight,
+        'left': annotation.vector.x1 / globals.imageScaleWidth + parseFloat($('img#image').parent().css('padding-left')),
+        'width': (annotation.vector.x2 - annotation.vector.x1) / globals.imageScaleWidth,
+        'height': (annotation.vector.y2 - annotation.vector.y1) / globals.imageScaleHeight
       });
 
       boundingBoxes.appendChild(boundingBox);
@@ -78,10 +78,10 @@ class BoundingBoxes {
       show: true
     });
     this.selection.setSelection(
-      Math.round($('#x1Field').val() / globals.imageScale),
-      Math.round($('#y1Field').val() / globals.imageScale),
-      Math.round($('#x2Field').val() / globals.imageScale),
-      Math.round($('#y2Field').val() / globals.imageScale)
+      Math.round($('#x1Field').val() / globals.imageScaleWidth),
+      Math.round($('#y1Field').val() / globals.imageScaleHeight),
+      Math.round($('#x2Field').val() / globals.imageScaleWidth),
+      Math.round($('#y2Field').val() / globals.imageScaleHeight)
     );
     this.selection.update();
   }
@@ -127,15 +127,15 @@ class BoundingBoxes {
 
   moveSelectionUp() {
     // calculate value +/- stepsize (times stepsize to account for differing image sizes)
-    let newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
-    let newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
+    let newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueY1 < 0) {
       newValueY1 = 0;
       newValueY2 = $('#y2Field').val();
     }
-    if (newValueY2 > Math.round(globals.image.height() * globals.imageScale)) {
-      newValueY2 = Math.ceil(globals.image.height() * globals.imageScale);
+    if (newValueY2 > Math.round(globals.image.height() * globals.imageScaleHeight)) {
+      newValueY2 = Math.ceil(globals.image.height() * globals.imageScaleHeight);
       newValueY1 = $('#y1Field').val();
     }
     // update values
@@ -146,15 +146,15 @@ class BoundingBoxes {
 
   moveSelectionDown() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueY1 = Math.round(parseInt($('#y1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
-    let newValueY2 = Math.round(parseInt($('#y2Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueY1 = Math.round(parseInt($('#y1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
+    let newValueY2 = Math.round(parseInt($('#y2Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueY1 < 0) {
       newValueY1 = 0;
       newValueY2 = $('#y2Field').val();
     }
-    if (newValueY2 > Math.round(globals.image.height() * globals.imageScale)) {
-      newValueY2 = Math.ceil(globals.image.height() * globals.imageScale);
+    if (newValueY2 > Math.round(globals.image.height() * globals.imageScaleHeight)) {
+      newValueY2 = Math.ceil(globals.image.height() * globals.imageScaleHeight);
       newValueY1 = $('#y1Field').val();
     }
     // update values
@@ -165,15 +165,15 @@ class BoundingBoxes {
 
   moveSelectionRight() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
-    let newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
+    let newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueX1 < 0) {
       newValueX1 = 0;
       newValueX2 = $('#x2Field').val();
     }
-    if (newValueX2 > Math.round(globals.image.width() * globals.imageScale)) {
-      newValueX2 = Math.ceil(globals.image.width() * globals.imageScale);
+    if (newValueX2 > Math.round(globals.image.width() * globals.imageScaleWidth)) {
+      newValueX2 = Math.ceil(globals.image.width() * globals.imageScaleWidth);
       newValueX1 = $('#x1Field').val();
     }
     // update values
@@ -184,15 +184,15 @@ class BoundingBoxes {
 
   moveSelectionLeft() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueX1 = Math.round(parseInt($('#x1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
-    let newValueX2 = Math.round(parseInt($('#x2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueX1 = Math.round(parseInt($('#x1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
+    let newValueX2 = Math.round(parseInt($('#x2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueX1 < 0) {
       newValueX1 = 0;
       newValueX2 = $('#x2Field').val();
     }
-    if (newValueX2 > Math.round(globals.image.width() * globals.imageScale)) {
-      newValueX2 = Math.ceil(globals.image.width() * globals.imageScale);
+    if (newValueX2 > Math.round(globals.image.width() * globals.imageScaleWidth)) {
+      newValueX2 = Math.ceil(globals.image.width() * globals.imageScaleWidth);
       newValueX1 = $('#x1Field').val();
     }
     // update values
@@ -203,7 +203,7 @@ class BoundingBoxes {
 
   increaseSelectionSizeUp() {
     // calculate value +/- stepsize (times stepsize to account for differing image sizes)
-    let newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueY1 = Math.round(parseInt($('#y1Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueY1 < 0) {
       newValueY1 = 0;
@@ -217,13 +217,13 @@ class BoundingBoxes {
   decreaseSelectionSizeDown() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
     let newValueY1 = Math.round(parseInt($('#y1Field').val()));
-    let newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueY2 < 0) {
       newValueY2 = 1;
     }
     if (newValueY2 <= newValueY1) {
-      newValueY2 = newValueY1 + Math.round(Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+      newValueY2 = newValueY1 + Math.round(Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
     }
     // update values
     $('#y2Field').val(newValueY2);
@@ -232,11 +232,11 @@ class BoundingBoxes {
 
   increaseSelectionSizeRight() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueX2 = Math.round(parseInt($('#x2Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
 
-    if (newValueX2 > Math.round(globals.image.width() * globals.imageScale)) {
-      newValueX2 = Math.ceil(globals.image.width() * globals.imageScale);
+    if (newValueX2 > Math.round(globals.image.width() * globals.imageScaleWidth)) {
+      newValueX2 = Math.ceil(globals.image.width() * globals.imageScaleWidth);
     }
     // update values
     $('#x2Field').val(newValueX2);
@@ -245,7 +245,7 @@ class BoundingBoxes {
 
   decreaseSelectionSizeLeft() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScale)));
+    let newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
     let newValueX2 = Math.round(parseInt($('#x2Field').val()));
     // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
     if (newValueX1 < 0) {
@@ -284,10 +284,10 @@ class BoundingBoxes {
       $('#x' + i + 'Box').remove();
       $('#y' + i + 'Box').remove();
     }
-    $('#x1Field').val(Math.round(selection.x1 * globals.imageScale));
-    $('#y1Field').val(Math.round(selection.y1 * globals.imageScale));
-    $('#x2Field').val(Math.round(selection.x2 * globals.imageScale));
-    $('#y2Field').val(Math.round(selection.y2 * globals.imageScale));
+    $('#x1Field').val(Math.round(selection.x1 * globals.imageScaleWidth));
+    $('#y1Field').val(Math.round(selection.y1 * globals.imageScaleHeight));
+    $('#x2Field').val(Math.round(selection.x2 * globals.imageScaleWidth));
+    $('#y2Field').val(Math.round(selection.y2 * globals.imageScaleHeight));
   }
 
   static getTag(field) {

@@ -1,6 +1,7 @@
 globals = {
   image: {},
-  imageScale: 1,
+  imageScaleWidth: 1,
+  imageScaleHeight: 1,
   editedAnnotationsId: undefined,
   editActiveContainer: {},
   restoreSelection: undefined,
@@ -11,7 +12,8 @@ globals = {
  * Calculate the correct imageScale value.
  */
 function calculateImageScale() {
-  globals.imageScale = globals.image.get(0).naturalWidth / globals.image.width();
+  globals.imageScaleWidth = globals.image.get(0).naturalWidth / globals.image.width();
+  globals.imageScaleHeight = globals.image.get(0).naturalHeight / globals.image.height();
 }
 
 (function() {
@@ -617,8 +619,8 @@ function calculateImageScale() {
         left: (event.pageX)  + 'px'
       }, 800);
       gMousepos.text(
-        '(' + Math.round((event.pageX - position.left) * globals.imageScale) + ', ' +
-        Math.round((event.pageY - position.top) * globals.imageScale) + ')');
+        '(' + Math.round((event.pageX - position.left) * globals.imageScaleWidth) + ', ' +
+        Math.round((event.pageY - position.top) * globals.imageScaleHeight) + ')');
       event.stopPropagation();
     }
     else{
@@ -868,8 +870,8 @@ function calculateImageScale() {
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
             event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
-      gMouseDownX = Math.round((event.pageX - position.left) * globals.imageScale);
-      gMouseDownY = Math.round((event.pageY - position.top) * globals.imageScale);
+      gMouseDownX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
+      gMouseDownY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
     }
   }
 
@@ -881,8 +883,8 @@ function calculateImageScale() {
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
             event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
-      gMouseUpX = Math.round((event.pageX - position.left) * globals.imageScale);
-      gMouseUpY = Math.round((event.pageY - position.top) * globals.imageScale);
+      gMouseUpX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
+      gMouseUpY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
 
       // check if we have a click or a small selection
       if (Math.abs(gMouseDownX - gMouseUpX) <= gSelectionThreshold &&
