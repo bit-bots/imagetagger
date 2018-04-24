@@ -36,7 +36,7 @@
 
 {% block additional_annotation_js %}
 <script type="text/javascript" src="{% static 'annotations/js/boundingboxes.js' %}"></script>
-<script type="text/javascript" src="{% static 'annotations/js/lines.js' %}"></script>A
+<script type="text/javascript" src="{% static 'annotations/js/lines.js' %}"></script>
 <script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
 {% endblock additional_annotation_js %}
 {% block bodyblock %}
@@ -184,7 +184,7 @@
                                   <div class="col-xs-10">
                                       <input id="{{ field }}Field"
                                              class="Coordinates annotation_value form-control"
-                                             type="number" name="{{ field }}Field" value="0" min="0">
+                                             type="text" name="{{ field }}Field" value="0" min="0" disabled>
                                   </div>
                                   <div class="col-xs-12"></div>
                                 </div>

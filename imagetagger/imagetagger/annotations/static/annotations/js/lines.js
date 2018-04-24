@@ -493,7 +493,7 @@ class Canvas {
               '<label for="' + field + 'Field">' + field + '</label>' +
               '</div><div class="col-xs-10">' +
               '<input id="' + field + 'Field" class="Coordinates annotation_value form-control"' +
-              'type="number" name="' + field + 'Field" value="0" min="0">' +
+              'type="text" name="' + field + 'Field" value="0" min="0" disabled>' +
               '</div><div class="col-xs-12"></div></div>';
   }
 
