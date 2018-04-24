@@ -214,19 +214,16 @@ class BoundingBoxes {
     this.reloadSelection();
   }
 
-  decreaseSelectionSizeDown() {
+  decreaseSelectionSizeFromTop() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueY1 = Math.round(parseInt($('#y1Field').val()));
-    let newValueY2 = Math.round(parseInt($('#y2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueY2 < 0) {
-      newValueY2 = 1;
-    }
+    let newValueY1 = Math.round(parseInt($('#y1Field').val()) + Math.max(1,(globals.moveSelectionStepSize * globals.imageScaleHeight)));
+    let newValueY2 = Math.round(parseInt($('#y2Field').val()));
+
     if (newValueY2 <= newValueY1) {
-      newValueY2 = newValueY1 + Math.round(Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleHeight)));
+      newValueY1 = newValueY2 - 1;
     }
     // update values
-    $('#y2Field').val(newValueY2);
+    $('#y1Field').val(newValueY1);
     this.reloadSelection();
   }
 
@@ -243,21 +240,19 @@ class BoundingBoxes {
     this.reloadSelection();
   }
 
-  decreaseSelectionSizeLeft() {
+  decreaseSelectionSizeFromRight() {
     // calculate value +/- stepsize times stepsize to account for differing image sizes
-    let newValueX1 = Math.round(parseInt($('#x1Field').val()) + Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
-    let newValueX2 = Math.round(parseInt($('#x2Field').val()));
-    // checking if the box would be out of bounds and puts it to max/min size and doesn't move the other dimension
-    if (newValueX1 < 0) {
-      newValueX1 = 0;
-    }
+    let newValueX1 = Math.round(parseInt($('#x1Field').val()));
+    let newValueX2 = Math.round(parseInt($('#x2Field').val()) - Math.max(1, (globals.moveSelectionStepSize * globals.imageScaleWidth)));
+
     if (newValueX1 >= newValueX2) {
-      newValueX1 = newValueX2 - 1;
+      newValueX2 = newValueX1 + 1;
     }
     // update values
-    $('#x1Field').val(newValueX1);
+    $('#x2Field').val(newValueX2);
     this.reloadSelection();
   }
+
   cancelSelection() {
     if (this.selection) {
       this.selection.cancelSelection();

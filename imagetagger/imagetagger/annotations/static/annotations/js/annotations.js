@@ -1163,7 +1163,7 @@ function calculateImageScale() {
           break;
         case 75: //k
           if(gShiftDown) {
-            tool.decreaseSelectionSizeDown();
+            tool.decreaseSelectionSizeFromTop();
             break;
           }
           tool.moveSelectionDown();
@@ -1177,7 +1177,7 @@ function calculateImageScale() {
           break;
         case 74: //j
           if(gShiftDown) {
-            tool.decreaseSelectionSizeLeft();
+            tool.decreaseSelectionSizeFromRight();
             break;
           }
           tool.moveSelectionLeft();

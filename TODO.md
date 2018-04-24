@@ -9,6 +9,5 @@ this stuff to ```master```.
 * implement imports
 * keep selection for next image
 * remove crosshair on canvas?
-* merge correct resize behaviour
 * testing
 * write tool for migration
