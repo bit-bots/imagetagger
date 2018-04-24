@@ -526,6 +526,7 @@ class Canvas {
   }
 
   cancelSelection() {
+    this.resetSelection(true)
   }
 
   initSelection() {
