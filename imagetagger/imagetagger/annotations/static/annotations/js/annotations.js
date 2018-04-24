@@ -129,6 +129,17 @@ function calculateImageScale() {
         vector["x" + i] = parseInt($('#x' + i + 'Field').val());
         vector["y" + i] = parseInt($('#y' + i + 'Field').val());
       }
+      // Swap points if the second one is left of the first one
+      if (Object.keys(vector).length == 4) {
+        if (vector.x1 > vector.x2 || vector.x1 === vector.x2 && vector.y1 > vector.y2) {
+          let tmp_x1 = vector.x2;
+          let tmp_y1 = vector.y2;
+          vector.x2 = vector.x1;
+          vector.y2 = vector.y1;
+          vector.x1 = tmp_x1;
+          vector.y1 = tmp_y1;
+        }
+      }
     }
 
     let selected_annotation = $('#annotation_type_id').children(':selected').data();
