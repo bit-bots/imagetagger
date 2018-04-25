@@ -1,0 +1,18 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            Annotation Types
+        </h3>
+    </div>
+    <div class="panel-body">
+        <ul>
+            {% for list_annotation_type in annotation_types %}
+                <li>
+                    <a href="{% url "administration:annotation_type" list_annotation_type.id %}">
+                        {{ list_annotation_type.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

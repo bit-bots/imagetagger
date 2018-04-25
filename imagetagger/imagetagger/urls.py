@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^accounts/', include('registration.backends.hmac.urls')),
     url(r'^', include('imagetagger.base.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^administration/', include('imagetagger.administration.urls')),
     url(r'^annotations/', include('imagetagger.annotations.urls')),
     url(r'^images/', include('imagetagger.images.urls')),
     url(r'^users/', include('imagetagger.users.urls')),
