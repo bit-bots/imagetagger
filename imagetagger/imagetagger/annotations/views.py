@@ -492,16 +492,15 @@ def export_format(export_format_name, imageset):
                 }
             else:
                 formatted_vector = str()
-                for counter1 in range(len(annotation.vector) // 2):
-                    pass
+                for counter1 in range(1, (len(annotation.vector) // 2) + 1):
                     vector_line = export_format.vector_format
                     placeholders_vector = {
                         '%%count0': counter1 - 1,
                         '%%count1': counter1,
-                        '%%x': annotation.vector['x' + counter1],
-                        '%%relx': annotation.get_relative_vector_element('x' + counter1),
-                        '%%y': annotation.vector['y' + counter1],
-                        '%%rely': annotation.get_relative_vector_element('y' + counter1),
+                        '%%x': annotation.vector['x' + str(counter1)],
+                        '%%relx': annotation.get_relative_vector_element('x' + str(counter1)),
+                        '%%y': annotation.vector['y' + str(counter1)],
+                        '%%rely': annotation.get_relative_vector_element('y' + str(counter1)),
                         '%%br': '\n'
                     }
                     for key, value in placeholders_vector.items():
