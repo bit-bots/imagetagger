@@ -544,14 +544,22 @@ class Canvas {
         $('#not_in_image').prop('checked', true);
         $('#coordinate_table').hide();
       } else {
+        let vector = {};
+        for (let key in globals.restoreSelection) {
+          if (key[0] === "y") {
+            vector[key] = globals.restoreSelection[key] / globals.imageScaleHeight;
+          } else {
+            vector[key] = globals.restoreSelection[key] / globals.imageScaleWidth;
+          }
+        }
         this.updateAnnotationFields(globals.restoreSelection);
         switch(globals.restoreSelectionVectorType) {
-          case 2: this.drawPoint(globals.restoreSelection, 0, true); break;
-          case 3: this.drawLine(globals.restoreSelection, 0, true); break;
+          case 2: this.drawPoint(vector, 0, true); break;
+          case 3: this.drawLine(vector, 0, true); break;
           case 5: if (globals.restoreSelectionNodeCount === 0) {
-            this.drawArbitraryPolygon(globals.restoreSelection, 0, true, true);
+            this.drawArbitraryPolygon(vector, 0, true, true);
           } else {
-            this.drawPolygon(globals.restoreSelection, 0, true, globals.restoreSelectionNodeCount, true);
+            this.drawPolygon(vector, 0, true, globals.restoreSelectionNodeCount, true);
           }
         }
         this.reloadSelection(0);
