@@ -27,41 +27,81 @@
                         <tbody>
                             <form action="{% url "administration:edit_annotation_type" annotation_type.id %}" method="POST">
                                 {% csrf_token %}
-                                    <tr>
-                                        <td>
-                                            <label for="id_name">{{ edit_form.name.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.name class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_active">{{ edit_form.active.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.active class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_node_count">{{ edit_form.node_count.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.node_count class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                        </td>
-                                        <td align="right">
-                                            <input class="btn btn-primary right" type="submit" value="Save">
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_name">{{ edit_form.name.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field edit_form.name class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_active">{{ edit_form.active.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field edit_form.active class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_node_count">{{ edit_form.node_count.label }} <span data-toggle="tooltip" data-placement="right" title="The number of nodes in a polygon. 0 allows an arbitrary node count. This has no effect on other vector types." class="glyphicon glyphicon-question-sign"></span></label>
+                                    </td>
+                                    <td>
+                                        {% render_field edit_form.node_count class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <b>Vector Type</b>
+                                    </td>
+                                    <td>
+                                        {{ vector_type_name }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    </td>
+                                    <td align="right">
+                                        <input class="btn btn-primary right" type="submit" value="Save">
+                                    </td>
+                                </tr>
 
                             </form>
                         </tbody>
                     </table>
+                    {% if annotation_type.vector_type == 1 %}
+                        <div class="panel-body">
+                            Changing the vector type requires a migration of the annotations. <br>
+                            <div class="alert alert-danger"> It is a non reversible process. No warranties!</div>
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#migrationModal">
+                                Migrate
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="migrationModal" tabindex="-1" role="dialog" aria-labelledby="migrationModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="migrationModalLabel">Migrate Annotation Type</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            You can migrate the Annotation Type to a polygon with ether unlimited or 4 nodes.<br>
+                                            Again: <br>
+                                            <div class="alert alert-danger"> It is a non reversible process. No warranties!</div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            <a class="btn btn-danger" href="{% url 'administration:migrate_bbt0p' annotation_type.id %}">Unlimited Nodes</a>
+                                            <a class="btn btn-danger" href="{% url 'administration:migrate_bbt4p' annotation_type.id %}">4 Nodes</a>
+                                        </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-md-4">
@@ -107,7 +147,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label for="id_node_count">{{ create_form.node_count.label }}</label>
+                                        <label for="id_node_count">{{ create_form.node_count.label }} <span data-toggle="tooltip" data-placement="right" title="The number of nodes in a polygon. 0 allows an arbitrary node count. This has no effect on other vector types." class="glyphicon glyphicon-question-sign"></span></label>
                                     </td>
                                     <td>
                                         {% render_field create_form.node_count class+='form-control' %}
