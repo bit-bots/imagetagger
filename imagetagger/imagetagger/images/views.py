@@ -33,7 +33,7 @@ import string
 import random
 import zipfile
 import hashlib
-
+import json
 
 @login_required
 def explore_imageset(request):
@@ -394,7 +394,10 @@ def label_upload(request, imageset_id):
         similar_count = 0
         verify = 'verify' in request.POST.keys()
         for line in request.FILES['file']:
-            dec_line = line.decode().replace('\n', '')
+            # filter empty lines
+            if line == '' or "b'\n'":
+                continue
+            dec_line = line.decode().replace('\n', '').replace(',}', '}')
             line_frags = dec_line.split('|')
             image = images.filter(name=line_frags[0])
             if image.exists():
@@ -405,13 +408,9 @@ def label_upload(request, imageset_id):
                     vector = False
                     if line_frags[2] == 'not in image':
                         vector = None
-                    elif int(line_frags[2]) and int(line_frags[3]) and int(line_frags[4]) and int(line_frags[5]):
-                        vector = {
-                            'x1': int(line_frags[2]),
-                            'y1': int(line_frags[3]),
-                            'x2': int(line_frags[4]),
-                            'y2': int(line_frags[5]),
-                        }
+                    else:
+                        vector = json.loads(line_frags[2])
+
                     if annotation_type.validate_vector(vector):
                         if not Annotation.similar_annotations(vector, image, annotation_type):
                             annotation = Annotation()
