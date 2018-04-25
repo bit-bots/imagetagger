@@ -93,6 +93,7 @@ def migrate_bounding_box_to_0_polygon(request, annotation_type_id):
         selected_annotation_type.vector_type = AnnotationType.VECTOR_TYPE.POLYGON
         selected_annotation_type.node_count = 0
         selected_annotation_type.save()
+    return redirect(reverse('administration:annotation_type', args=(annotation_type_id, )))
 
 
 @staff_member_required
@@ -118,3 +119,4 @@ def migrate_bounding_box_to_4_polygon(request, annotation_type_id):
         selected_annotation_type.vector_type = AnnotationType.VECTOR_TYPE.POLYGON
         selected_annotation_type.node_count = 4
         selected_annotation_type.save()
+    return redirect(reverse('administration:annotation_type', args=(annotation_type_id, )))
