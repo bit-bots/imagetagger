@@ -7,7 +7,7 @@ this stuff to ```master```.
 * verification stuff (drawing of the annotation)
 * test exports
 * implement imports
-* keep selection for next image
+* fix rounding error when keeping selection
 * remove crosshair on canvas?
 * testing
 * write tool for migration

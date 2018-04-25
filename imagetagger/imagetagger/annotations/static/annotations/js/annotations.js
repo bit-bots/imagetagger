@@ -5,6 +5,8 @@ globals = {
   editedAnnotationsId: undefined,
   editActiveContainer: {},
   restoreSelection: undefined,
+  restoreSelectionVectorType: 1,
+  restoreSelectionNodeCount: 0,
   moveSelectionStepSize: 2
 };
 
@@ -152,6 +154,8 @@ function calculateImageScale() {
 
     if (markForRestore === true) {
       globals.restoreSelection = vector;
+      globals.restoreSelectionVectorType = vector_type;
+      globals.restoreSelectionNodeCount = node_count;
     }
 
     var action = 'create';
