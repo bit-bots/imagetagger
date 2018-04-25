@@ -12,7 +12,7 @@ class BoundingBoxes {
     this.clear();
     calculateImageScale();
 
-    if (annotations.length === 0 || !$('#draw_annotations').prop('checked')) {
+    if (annotations.length === 0 || !globals.drawAnnotations) {
       return;
     }
 

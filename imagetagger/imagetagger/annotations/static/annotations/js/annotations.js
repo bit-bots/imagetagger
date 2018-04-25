@@ -7,7 +7,8 @@ globals = {
   restoreSelection: undefined,
   restoreSelectionVectorType: 1,
   restoreSelectionNodeCount: 0,
-  moveSelectionStepSize: 2
+  moveSelectionStepSize: 2,
+  drawAnnotations: true
 };
 
 /**
@@ -598,10 +599,11 @@ function calculateImageScale() {
    * @param event
    */
   function handleShowAnnotationsToggle(event) {
-    if ($('#draw_annotations').is(':checked')) {
+    globals.drawAnnotations = $('#draw_annotations').is(':checked');
+    if (globals.drawAnnotations) {
       tool.drawExistingAnnotations(gCurrentAnnotations);
     } else {
-      tool.clearBoundingBoxes();
+      tool.clear();
     }
   }
 
@@ -1038,6 +1040,7 @@ function calculateImageScale() {
   $(function() {
     globals.editActiveContainer = $('#edit_active');
     globals.image = $('#image');
+    globals.drawAnnotations = $('#draw_annotations').is(':checked');
     gMousepos = $('#mousepos');
     gMousepos.hide();
 

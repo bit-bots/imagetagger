@@ -390,6 +390,16 @@ class Canvas {
     for (let d of this.drawings) {
       d.remove();
     }
+    switch (this.vector_type) {
+      case 2: // Point
+        this.updateAnnotationFields({x1: 0, y1: 0});
+        break;
+      case 3: // Line, fallthrough
+      case 4: // Multiline, fallthrough
+      case 5: // Polygon
+        this.updateAnnotationFields({x1: 0, x2: 0, y1: 0, y2: 0});
+        break;
+    }
   }
 
   reset() {
@@ -425,6 +435,9 @@ class Canvas {
 
   drawExistingAnnotations(annotations) {
     this.clear();
+    if (!globals.drawAnnotations) {
+      return;
+    }
     for (let annotation of annotations) {
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
