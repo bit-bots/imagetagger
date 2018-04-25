@@ -406,7 +406,7 @@ def label_upload(request, imageset_id):
                 if annotation_type.exists():
                     annotation_type = annotation_type[0]
                     vector = False
-                    if line_frags[2] == 'not in image':
+                    if line_frags[2] == 'not in image' or '{}':
                         vector = None
                     else:
                         vector = json.loads(line_frags[2])
