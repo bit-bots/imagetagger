@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models, connection
 from django.db.models import Subquery, F, IntegerField, OuterRef, QuerySet, Count
 from django.db.models.functions import Coalesce
+from django.utils.functional import cached_property
 
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
@@ -58,7 +59,7 @@ class Annotation(models.Model):
 
     # TODO: proper handling of this vector stuff
 
-    @property
+    @cached_property
     def height(self):
         if len(self.vector) is 4:
             return self.vector['y2']-self.vector['y1']
@@ -73,7 +74,7 @@ class Annotation(models.Model):
             return max(0, max_y - min_y)
         return 0
 
-    @property
+    @cached_property
     def width(self):
         if len(self.vector) is 4:  # bounding box and line
             return self.vector['x2']-self.vector['x1']
@@ -92,7 +93,7 @@ class Annotation(models.Model):
     def radius(self):
         return self.diameter / 2
 
-    @property
+    @cached_property
     def diameter(self):
         if self.annotation_type.vector_type in (
                 AnnotationType.VECTOR_TYPE.BOUNDING_BOX,
@@ -100,7 +101,7 @@ class Annotation(models.Model):
             return (self.height + self.width) / 2
         return 0
 
-    @property
+    @cached_property
     def center(self):
         xc, yc = self.vector['x1'], self.vector['y1']
         if self.annotation_type.vector_type in (
@@ -138,7 +139,7 @@ class Annotation(models.Model):
         rel_height = self.height/self.image.height
         return rel_height
 
-    @property
+    @cached_property
     def relative_radius(self):
         rel_rad_w = self.radius/self.image.width
         rel_rad_h = self.radius/self.image.height

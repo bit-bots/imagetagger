@@ -375,7 +375,6 @@ def verify(request, annotation_id):
     })
 
 
-@login_required
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
@@ -398,7 +397,8 @@ def export_format(export_format_name, imageset):
             annotations = Annotation.objects.annotate_verification_difference()\
                 .filter(image=image,
                         verification_difference__gte=min_verifications,
-                        annotation_type__in=export_format.annotations_types.all())
+                        annotation_type__in=export_format.annotations_types.all())\
+                .select_related('image')
             if annotations:
                 annotation_content = ''
                 for annotation in annotations:
