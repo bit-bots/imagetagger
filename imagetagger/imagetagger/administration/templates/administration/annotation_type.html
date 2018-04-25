@@ -23,48 +23,45 @@
                     <div class="panel-heading">
                         <h3 class="panel-title">Edit "{{ annotation_type.name }}"</h3>
                     </div>
-                    <div class="panel-body">
-                        <table class="table table-striped">
-                            <tbody>
-                                <form action="{% url "administration:edit_annotation_type" annotation_type.id %}" method="POST">
-                                    {% csrf_token %}
-                                        <tr>
-                                            <td>
-                                                <label for="id_name">{{ edit_form.name.label }}</label>
-                                            </td>
-                                            <td>
-                                                {% render_field edit_form.name class+='form-control' %}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <label for="id_active">{{ edit_form.active.label }}</label>
-                                            </td>
-                                            <td>
-                                                {% render_field edit_form.active class+='form-control' %}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <label for="id_node_count">{{ edit_form.node_count.label }}</label>
-                                            </td>
-                                            <td>
-                                                {% render_field edit_form.node_count class+='form-control' %}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <input class="btn btn-danger" type="reset" value="Reset">
-                                            </td>
-                                            <td align="right">
-                                                <input class="btn btn-primary right" type="submit" value="Save">
-                                            </td>
-                                        </tr>
+                    <table class="table table-striped">
+                        <tbody>
+                            <form action="{% url "administration:edit_annotation_type" annotation_type.id %}" method="POST">
+                                {% csrf_token %}
+                                    <tr>
+                                        <td>
+                                            <label for="id_name">{{ edit_form.name.label }}</label>
+                                        </td>
+                                        <td>
+                                            {% render_field edit_form.name class+='form-control' %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="id_active">{{ edit_form.active.label }}</label>
+                                        </td>
+                                        <td>
+                                            {% render_field edit_form.active class+='form-control' %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label for="id_node_count">{{ edit_form.node_count.label }}</label>
+                                        </td>
+                                        <td>
+                                            {% render_field edit_form.node_count class+='form-control' %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                        <td align="right">
+                                            <input class="btn btn-primary right" type="submit" value="Save">
+                                        </td>
+                                    </tr>
 
-                                </form>
-                            </tbody>
-                        </table>
-                    </div>
+                            </form>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="col-md-4">
@@ -75,61 +72,59 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">Create a new Annotation Type</h3>
                 </div>
-                <div class="panel-body">
-                    <table class="table table-striped">
-                        <tbody>
-                            <form action="{% url "administration:create_annotation_type" %}" method="POST">
-                                {% csrf_token %}
-                                    <tr>
-                                        <td>
-                                            <label for="id_name">{{ create_form.name.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field create_form.name class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_active">{{ create_form.active.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field create_form.active class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_vector_type">{{ create_form.vector_type.label }}</label>
-                                        </td>
-                                        <td>
-                                            <select name="{{ create_form.vector_type.name }}">
-                                                <option value="1" selected>Bounding Box</option>
-                                                <option value="2" >Point</option>
-                                                <option value="3" >Line</option>
-                                                <option value="5" >Polygon</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_node_count">{{ create_form.node_count.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field create_form.node_count class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <input class="btn btn-danger" type="reset" value="Reset">
-                                        </td>
-                                        <td align="right">
-                                            <input class="btn btn-primary right" type="submit" value="Create">
-                                        </td>
-                                    </tr>
+                <table class="table table-striped">
+                    <tbody>
+                        <form action="{% url "administration:create_annotation_type" %}" method="POST">
+                            {% csrf_token %}
+                                <tr>
+                                    <td>
+                                        <label for="id_name">{{ create_form.name.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field create_form.name class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_active">{{ create_form.active.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field create_form.active class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_vector_type">{{ create_form.vector_type.label }}</label>
+                                    </td>
+                                    <td>
+                                        <select name="{{ create_form.vector_type.name }}">
+                                            <option value="1" selected>Bounding Box</option>
+                                            <option value="2" >Point</option>
+                                            <option value="3" >Line</option>
+                                            <option value="5" >Polygon</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_node_count">{{ create_form.node_count.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field create_form.node_count class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input class="btn btn-danger" type="reset" value="Reset">
+                                    </td>
+                                    <td align="right">
+                                        <input class="btn btn-primary right" type="submit" value="Create">
+                                    </td>
+                                </tr>
 
-                            </form>
-                        </tbody>
-                    </table>
-                </div>
+                        </form>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

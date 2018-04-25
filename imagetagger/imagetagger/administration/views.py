@@ -50,22 +50,20 @@ def create_annotation_type(request):
     else:
         return redirect(reverse('administration:annotation_types'))
 
+
 @staff_member_required
 def edit_annotation_type(request, annotation_type_id):
     selected_annotation_type = get_object_or_404(AnnotationType, id=annotation_type_id)
     if request.method == 'POST':
         form = AnnotationTypeEditForm(request.POST)
 
-        if form.is_valid():
-            if form.instance.name is not selected_annotation_type.name and AnnotationType.objects.filter(name=form.cleaned_data.get('name')).exists():
-                form.add_error(
-                    'name',
-                    _('The name is already in use by an annotation type.'))
-            else:
-                selected_annotation_type.name = form.instance.name
-                selected_annotation_type.node_count = form.instance.node_count
-                selected_annotation_type.active = form.instance.active
-                selected_annotation_type.save()
+        if not request.POST['name'] == selected_annotation_type.name and AnnotationType.objects.filter(name=request.POST['name']).exists():
+            messages.error(request, _('The name is already in use by an annotation type.'))
+        else:
+            selected_annotation_type.name = request.POST['name']
+            selected_annotation_type.node_count = request.POST['node_count']
+            selected_annotation_type.active = 'active' in request.POST.keys()
+            selected_annotation_type.save()
 
-                messages.success(request, _('The annotation type was edited successfully.'))
+            messages.success(request, _('The annotation type was edited successfully.'))
     return redirect(reverse('administration:annotation_type', args=(annotation_type_id, )))
