@@ -19,7 +19,53 @@
         </div>
         {% if annotation_type %}
             <div class="col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Edit "{{ annotation_type.name }}"</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <tbody>
+                                <form action="{% url "administration:edit_annotation_type" annotation_type.id %}" method="POST">
+                                    {% csrf_token %}
+                                        <tr>
+                                            <td>
+                                                <label for="id_name">{{ edit_form.name.label }}</label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.name class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="id_active">{{ edit_form.active.label }}</label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.active class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="id_node_count">{{ edit_form.node_count.label }}</label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.node_count class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input class="btn btn-danger" type="reset" value="Reset">
+                                            </td>
+                                            <td align="right">
+                                                <input class="btn btn-primary right" type="submit" value="Save">
+                                            </td>
+                                        </tr>
 
+                                </form>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div class="col-md-4">
         {% else %}

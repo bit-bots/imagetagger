@@ -3,7 +3,7 @@ from django import forms
 from imagetagger.annotations.models import AnnotationType
 
 
-class AnnotationFormatCreationForm(forms.ModelForm):
+class AnnotationTypeCreationForm(forms.ModelForm):
     class Meta:
         model = AnnotationType
         fields = [
@@ -11,4 +11,14 @@ class AnnotationFormatCreationForm(forms.ModelForm):
             'active',
             'node_count',
             'vector_type',
+        ]
+
+
+class AnnotationTypeEditForm(forms.ModelForm):
+    class Meta:
+        model = AnnotationType
+        fields = [
+            'name',
+            'active',
+            'node_count',
         ]

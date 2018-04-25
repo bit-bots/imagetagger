@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^annotation_type/list/$', views.annotation_types, name='annotation_types'),
     url(r'^annotation_type/(\d+)/$', views.annotation_type, name='annotation_type'),
     url(r'^annotation_type/create/$', views.create_annotation_type, name='create_annotation_type'),
+    url(r'^annotation_type/edit/(\d+)/$', views.edit_annotation_type, name='edit_annotation_type'),
 ]

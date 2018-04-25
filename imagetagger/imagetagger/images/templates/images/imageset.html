@@ -278,7 +278,7 @@
                                         </td>
                                         <td class="align-right">
                                             {% if "delete_set" in imageset_perms %}
-                                                <a class="btn btn-warning" href="{%url 'images:setfree_imageset' imageset.id %}">Set Free</a>
+                                                <a class="btn btn-warning" href="{% url 'images:setfree_imageset' imageset.id %}">Set Free</a>
                                             {% endif %}
                                             <input class="btn btn-primary" type="submit" value="{% trans 'Save changes' %}" />
                                         </td>
