@@ -324,6 +324,17 @@ class AnnotationType(models.Model):
     def __str__(self):
         return u'AnnotationType: {0}'.format(self.name)
 
+    @staticmethod
+    def get_vector_type_name(vector_type):
+        if vector_type is AnnotationType.VECTOR_TYPE.BOUNDING_BOX:
+            return 'Bounding Box'
+        if vector_type is AnnotationType.VECTOR_TYPE.POINT:
+            return 'Point'
+        if vector_type is AnnotationType.VECTOR_TYPE.LINE:
+            return 'Line'
+        if vector_type is AnnotationType.VECTOR_TYPE.POLYGON:
+            return 'Polygon'
+
     def validate_vector(self, vector: Union[dict, None]) -> bool:
         """
         Validate a vector. Returns whether the vector is valid.
