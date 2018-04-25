@@ -346,7 +346,10 @@
                             Upload existing Labels
                         </h3>
                         Here you can upload existing labels as a text file in the following format:<br>
-                        image name|annotation type|x1|y1|x2|y2<br>
+                        image name|annotation type|{'x1': x1,'y1': y1...}<br>
+                        Using the Imagetagger export tool for example:<br>
+                        Annotation format: %%imagename|%%type|{%%vector}<br>
+                        Vector format: "x%%count1": "%%x","y%%count1": %%y,<br>
                         or:<br>
                         image name|annotation type|not in image<br>&nbsp;<br>
                         One annotation per line. The annotation type has to exist in the imagetagger too.
