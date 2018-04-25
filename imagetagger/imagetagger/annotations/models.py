@@ -431,7 +431,7 @@ class ExportFormat(models.Model):
     base_format = NonStrippingTextField()  # more general, has a placeholder for the list of annotation_formats, can contain header, footer etc.
     image_format = NonStrippingTextField(null=True, blank=True, default=None)
     annotation_format = NonStrippingTextField()  # used for every annotation in export (coordinates, type, image)
-    vector_format = models.CharField(default='x%%count1: %%x%%bry%%count1: %%y', max_length=200)
+    vector_format = models.CharField(default='x%%count1: %%x%%bry%%count1: %%y%%br', max_length=200)
     not_in_image_format = NonStrippingTextField()
     name_format = models.CharField(default='export_%%exportid.txt', max_length=200)
     min_verifications = models.IntegerField(default=0)
