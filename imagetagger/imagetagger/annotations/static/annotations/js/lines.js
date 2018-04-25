@@ -279,7 +279,7 @@ class Canvas {
     // Update annotation fields to match vector type
     switch (vector_type) {
       case 2: // Point
-        self.updateAnnotationFields({x1: 0, x2: 0});
+        self.updateAnnotationFields({x1: 0, y1: 0});
         break;
       case 3: // Line, fallthrough
       case 4: // Multiline, fallthrough
