@@ -532,7 +532,37 @@ class Canvas {
     this.initialized = true;
   }
 
-  restoreSelection() {
+  /**
+   * Restore the selection.
+   */
+  restoreSelection(reset) {
+    if (!$('#keep_selection').prop('checked')) {
+      return;
+    }
+    if (globals.restoreSelection !== undefined) {
+      if (globals.restoreSelection === null) {
+        $('#not_in_image').prop('checked', true);
+        $('#coordinate_table').hide();
+      } else {
+        this.updateAnnotationFields(globals.restoreSelection);
+        switch(globals.restoreSelectionVectorType) {
+          case 2: this.drawPoint(globals.restoreSelection, 0, true); break;
+          case 3: this.drawLine(globals.restoreSelection, 0, true); break;
+          case 5: if (globals.restoreSelectionNodeCount === 0) {
+            this.drawArbitraryPolygon(globals.restoreSelection, 0, true, true);
+          } else {
+            this.drawPolygon(globals.restoreSelection, 0, true, globals.restoreSelectionNodeCount, true);
+          }
+        }
+        this.reloadSelection(0);
+        this.old = undefined;
+      }
+    }
+    if (reset !== false) {
+      globals.restoreSelection = undefined;
+      globals.restoreSelectionNodeCount = 0;
+      globals.restoreSelectionVectorType = 1;
+    }
   }
 
   reloadSelection(annotation_id) {
@@ -558,8 +588,8 @@ class Canvas {
     this.currentDrawing.move(0, globals.moveSelectionStepSize);
     this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
   }
-  decreaseSelectionSizeLeft() {}
-  decreaseSelectionSizeDown() {}
+  decreaseSelectionSizeFromRight() {}
+  decreaseSelectionSizeFromTop() {}
   increaseSelectionSizeRight() {}
   increaseSelectionSizeUp() {}
 }
