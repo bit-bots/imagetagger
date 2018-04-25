@@ -45,18 +45,18 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <label for="id_node_count">{{ edit_form.node_count.label }} <span data-toggle="tooltip" data-placement="right" title="The number of nodes in a polygon. 0 allows an arbitrary node count. This has no effect on other vector types." class="glyphicon glyphicon-question-sign"></span></label>
-                                    </td>
-                                    <td>
-                                        {% render_field edit_form.node_count class+='form-control' %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
                                         <b>Vector Type</b>
                                     </td>
                                     <td>
                                         {{ vector_type_name }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <b>Node count</b>
+                                    </td>
+                                    <td>
+                                        {{ annotation_type.node_count }}
                                     </td>
                                 </tr>
                                 <tr>

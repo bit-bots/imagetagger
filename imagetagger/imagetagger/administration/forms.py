@@ -20,5 +20,4 @@ class AnnotationTypeEditForm(forms.ModelForm):
         fields = [
             'name',
             'active',
-            'node_count',
         ]

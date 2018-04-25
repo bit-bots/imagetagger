@@ -62,7 +62,6 @@ def edit_annotation_type(request, annotation_type_id):
             messages.error(request, _('The name is already in use by an annotation type.'))
         else:
             selected_annotation_type.name = request.POST['name']
-            selected_annotation_type.node_count = request.POST['node_count']
             selected_annotation_type.active = 'active' in request.POST.keys()
             selected_annotation_type.save()
 
