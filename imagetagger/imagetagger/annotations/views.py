@@ -552,7 +552,8 @@ def create_exportformat(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     # TODO: permission for ExportFormats??
 
-    if request.method == 'POST':
+    if request.method == 'POST' and \
+            request.user in get_object_or_404(Team, id=request.POST['team']).members:
         form = ExportFormatCreationForm(request.POST)
 
         if form.is_valid():
@@ -573,6 +574,31 @@ def create_exportformat(request, imageset_id):
         'imageset': imageset,
         'form': form,
     })
+
+
+@login_required
+def edit_exportformat(request, format_id):
+    export_format = get_object_or_404(ExportFormat, id=format_id)
+    # TODO: permission for ExportFormats??
+
+    if request.method == 'POST' and \
+            request.user in export_format.team.members:
+        # TODO: all this saving stuff
+        #    'annotations_types',
+        #    'public',
+        #    'image_aggregation',
+        export_format.name = request.POST['name']
+        export_format.name_format = request.POST['name_format']
+        export_format.annotation_format = request.POST['annotation_format']
+        export_format.image_format = request.POST['image_format']
+        export_format.base_format = request.POST['base_format']
+        export_format.vector_format = request.POST['vector_format']
+        export_format.not_in_image_format = request.POST['not_in_image_format']
+        export_format.min_verifications = request.POST['min_verifications']
+
+        export_format.save()
+        messages.success(request, _('The export format was edited successfully.'))
+    return redirect(reverse('users.view_team', args=(export_format.team.id,)))
 
 
 @login_required
