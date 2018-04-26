@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 import datetime
 from imagetagger.annotations.models import Verification, Annotation, ExportFormat
+from imagetagger.annotations.forms import ExportFormatEditForm
 from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.models import ImageSet
 from imagetagger.users.forms import RegistrationForm, TeamCreationForm
@@ -221,6 +222,7 @@ def view_team(request, team_id):
     admins = team.admins
     imagesets = ImageSet.objects.filter(team=team).order_by('-public', 'name')
     export_formats = ExportFormat.objects.filter(team=team).order_by('name')
+    export_format_forms = [ExportFormatEditForm(instance=format_instance) for format_instance in export_formats]
     if not is_member:
         imagesets = imagesets.filter(public=True)
     return render(request, 'users/view_team.html', {
@@ -234,7 +236,7 @@ def view_team(request, team_id):
         'test_imagesets': imagesets.filter(name__icontains='test'),
         'imageset_creation_form': ImageSetCreationForm(),
         'team_perms': team.get_perms(request.user),
-        'export_formats' : export_formats,
+        'export_formats_forms': zip(export_formats, export_format_forms),
     })
 
 
