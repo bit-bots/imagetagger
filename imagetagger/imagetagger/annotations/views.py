@@ -553,7 +553,7 @@ def create_exportformat(request, imageset_id):
     # TODO: permission for ExportFormats??
 
     if request.method == 'POST' and \
-            request.user in get_object_or_404(Team, id=request.POST['team']).members:
+            request.user in get_object_or_404(Team, id=request.POST['team']).members.all():
         form = ExportFormatCreationForm(request.POST)
 
         if form.is_valid():
