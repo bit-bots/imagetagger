@@ -60,18 +60,47 @@ class Annotation(models.Model):
     # TODO: proper handling of this vector stuff
 
     @cached_property
+    def min_x(self):
+        min_x = self.image.width
+        for item in self.vector.items():
+            if item[0][0] == 'x':
+                if item[1] < min_x:
+                    min_x = item[1]
+        return min_x
+
+    @cached_property
+    def min_y(self):
+        min_y = self.image.height
+        for item in self.vector.items():
+            if item[0][0] == 'y':
+                if item[1] < min_y:
+                    min_y = item[1]
+        return min_y
+
+    @cached_property
+    def max_x(self):
+        max_x = -1
+        for item in self.vector.items():
+            if item[0][0] == 'x':
+                if item[1] > max_x:
+                        max_x = item[1]
+        return max_x
+
+    @cached_property
+    def max_y(self):
+        max_y = -1
+        for item in self.vector.items():
+            if item[0][0] == 'y':
+                if item[1] > max_y:
+                    max_y = item[1]
+        return max_y
+
+    @cached_property
     def height(self):
         if len(self.vector) is 4:
             return self.vector['y2']-self.vector['y1']
         elif len(self.vector) > 4:
-            min_y, max_y = self.image.height, -1
-            for item in self.vector.items():
-                if item[0][0] == 'y':
-                    if item[1] > max_y:
-                        max_y = item[1]
-                    elif item[1] < min_y:
-                        min_y = item[1]
-            return max(0, max_y - min_y)
+            return max(0, self.max_y - self.min_y)
         return 0
 
     @cached_property
@@ -79,15 +108,8 @@ class Annotation(models.Model):
         if len(self.vector) is 4:  # bounding box and line
             return self.vector['x2']-self.vector['x1']
         elif len(self.vector) > 4:
-            min_x, max_x = self.image.width, -1
-            for item in self.vector.items():
-                if item[0][0] == 'x':
-                    if item[1] > max_x:
-                        max_x = item[1]
-                    elif item[1] < min_x:
-                        min_x = item[1]
-            return max(0, max_x - min_x)
-        return 0  # point
+            return max(0, self.max_x - self.min_x)
+        return 0  # pointi, polygon
 
     @property
     def radius(self):
