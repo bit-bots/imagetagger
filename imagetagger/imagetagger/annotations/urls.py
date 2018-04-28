@@ -6,6 +6,7 @@ app_name = 'annotations'
 urlpatterns = [
     url(r'^export/(\d+)/create/$', views.create_exportformat, name='create_exportformat'),
     url(r'^export/(\d+)/edit/$', views.edit_exportformat, name='edit_exportformat'),
+    url(r'^export/(\d+)/delete/$', views.delete_exportformat, name='delete_exportformat'),
     url(r'^export/(\d+)/auth/$', views.export_auth, name='export_auth'),
     url(r'^export/(\d+)/download/$', views.download_export, name='download_export'),
     url(r'^export/(\d+)/$', views.create_export, name='create_export'),

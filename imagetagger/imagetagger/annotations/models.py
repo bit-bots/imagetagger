@@ -432,7 +432,8 @@ class Export(models.Model):
     export_text = models.TextField(default='')
     filename = models.TextField(default='')
     format = models.ForeignKey('ExportFormat',
-                               on_delete=models.PROTECT,
+                               on_delete=models.SET_NULL,
+                               null=True,
                                related_name='exports')
 
     def __str__(self):

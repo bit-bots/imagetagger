@@ -611,6 +611,17 @@ def edit_exportformat(request, format_id):
 
 
 @login_required
+def delete_exportformat(request, format_id):
+    export_format = get_object_or_404(ExportFormat, id=format_id)
+    if 'manage_export_formats' in export_format.team.get_perms(request.user):
+        export_format.delete()
+        messages.success(request, _('Deleted export format successfully.'))
+    else:
+        messages.error(request, _('You are not permitted to delete export formats of this team!'))
+    return redirect(reverse('users:team', args=(export_format.team.id,)))
+
+
+@login_required
 @api_view(['DELETE'])
 def api_delete_annotation(request) -> Response:
     try:
