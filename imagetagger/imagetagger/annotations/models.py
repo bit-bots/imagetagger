@@ -128,14 +128,34 @@ class Annotation(models.Model):
         xc, yc = self.vector['x1'], self.vector['y1']
         if self.annotation_type.vector_type in (
                 AnnotationType.VECTOR_TYPE.BOUNDING_BOX,
-                AnnotationType.VECTOR_TYPE.LINE):
+                AnnotationType.VECTOR_TYPE.LINE,
+                AnnotationType.VECTOR_TYPE.POLYGON):
             yc = self.vector['y1'] + (self.height/2)
             xc = self.vector['x1'] + (self.width/2)
-        elif self.annotation_type.vector_type is AnnotationType.VECTOR_TYPE.LINE:
-            yc = self.vector['y1'] + (self.height/2)
-            xc = self.vector['x1'] + (self.width/2)
-        # TODO: Polygon, Multiline?
+        elif self.annotation_type.vector_type is AnnotationType.VECTOR_TYPE.POINT:
+            yc = self.vector['y1']
+            xc = self.vector['x1']
+        else:
+            yc = 0
+            xc = 0
+        # TODO: Multiline?
         return {'xc': xc, 'yc': yc}
+
+    @property
+    def relative_max_x(self):
+        return self.max_x / self.image.width
+
+    @property
+    def relative_min_x(self):
+        return self.min_x / self.image.width
+
+    @property
+    def relative_max_y(self):
+        return self.max_y / self.image.height
+
+    @property
+    def relative_min_y(self):
+        return self.min_y / self.image.height
 
     @property
     def relative_center(self):
