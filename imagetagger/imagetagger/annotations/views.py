@@ -549,10 +549,11 @@ def export_format(export_format_name, imageset):
 @login_required
 def create_exportformat(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
-    # TODO: permission for ExportFormats??
 
     if request.method == 'POST' and \
-            request.user in get_object_or_404(Team, id=request.POST['team']).members.all():
+            'manage_export_formats' in \
+            get_object_or_404(Team, id=request.POST['team'])\
+            .get_perms(request.user):
         form = ExportFormatCreationForm(request.POST)
 
         if form.is_valid():
@@ -578,10 +579,9 @@ def create_exportformat(request, imageset_id):
 @login_required
 def edit_exportformat(request, format_id):
     export_format = get_object_or_404(ExportFormat, id=format_id)
-    # TODO: permission for ExportFormats??
 
     if request.method == 'POST' and \
-            request.user in export_format.team.members.all():
+            'manage_export_formats' in export_format.team.get_perms(request.user):
 
         form = ExportFormatEditForm(request.POST, instance=export_format)
 

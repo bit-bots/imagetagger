@@ -29,17 +29,19 @@ class Team(models.Model):
 
     def get_perms(self, user: get_user_model()) -> Set[str]:
         """Get all permissions of the user."""
+        perms = set()
         if self.is_admin(user):
-            return {
+            perms.update({
                 'create_set',
                 'user_management',
-                'create_exportformat',
-            }
-        elif self.is_member(user):
-            return {
+                'manage_export_formats',
+            })
+        if self.is_member(user):
+            perms.update({
                 'create_set',
-            }
-        return set()
+                'manage_export_formats',
+            })
+        return perms
 
     def has_perm(self, permission: str, user: get_user_model()) -> bool:
         """Check whether user has specified permission."""
