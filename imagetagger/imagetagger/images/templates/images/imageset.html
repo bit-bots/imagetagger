@@ -403,7 +403,7 @@
                     {% if exports %}
                         <h3>Download exports:</h3>
                         {% for export in exports %}
-                            <li><a href="{% url 'annotations:download_export' export.id %}">{{export.format.name}}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
+                            <li>{% if export.deprecated %}<span data-toggle="tooltip" data-placement="left" title="The export format got changed after creating this export.">[dep]</span> {% endif %}<a href="{% url 'annotations:download_export' export.id %}">{% if export.format %}{{export.format.name}}{% else %}[deleted]{% endif %}: {{export.time|date:'j. N Y H:i:s'}}</a></li>
                         {% endfor %}
                     {% endif %}
                 </div>

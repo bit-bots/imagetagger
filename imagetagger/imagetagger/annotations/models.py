@@ -438,6 +438,10 @@ class Export(models.Model):
     def __str__(self):
         return u'Export: {0}({1})'.format(self.id, self.filename)
 
+    @property
+    def deprecated(self):
+        return self.format is None or self.time < self.format.last_change_time
+
 
 class Verification(models.Model):
     class Meta:
