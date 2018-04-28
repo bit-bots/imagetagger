@@ -46,7 +46,7 @@ class Annotation(models.Model):
                              related_name='creator',
                              on_delete=models.SET_NULL,
                              null=True)
-    last_edit_time = models.DateTimeField(null=True, blank=True)
+    last_edit_time = models.DateTimeField(auto_now=True)
     last_editor = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='last_editor', null=True,
         on_delete=models.SET_NULL)
@@ -457,6 +457,7 @@ class Verification(models.Model):
 
 class ExportFormat(models.Model):
     name = models.CharField(max_length=20, unique=True)
+    last_change_time = models.DateTimeField(auto_now=True)
     annotations_types = models.ManyToManyField(AnnotationType)
     team = models.ForeignKey(Team, on_delete=models.PROTECT,
                              related_name='export_formats')

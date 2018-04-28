@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK, \
     HTTP_403_FORBIDDEN
 
-from imagetagger.annotations.forms import ExportFormatCreationForm
+from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
 from imagetagger.annotations.serializers import AnnotationSerializer
@@ -188,7 +188,6 @@ def edit_annotation_save(request, annotation_id):
             }
             if 'not_in_image' in request.POST:
                 annotation.vector = None
-            annotation.last_change_time = datetime.now()
             annotation.last_editor = (request.user if request.user.is_authenticated() else None)
             annotation.annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
         except (KeyError, ValueError):
@@ -225,7 +224,7 @@ def create_export(request, image_set_id):
             export_text, annotation_count, export_filename = export_format(format, imageset)
 
             export = Export(image_set=imageset,
-                            user= request.user,
+                            user=request.user,
                             annotation_count=annotation_count,
                             export_text=export_text,
                             format=format)
@@ -582,23 +581,33 @@ def edit_exportformat(request, format_id):
     # TODO: permission for ExportFormats??
 
     if request.method == 'POST' and \
-            request.user in export_format.team.members:
-        # TODO: all this saving stuff
-        #    'annotations_types',
-        #    'public',
-        #    'image_aggregation',
-        export_format.name = request.POST['name']
-        export_format.name_format = request.POST['name_format']
-        export_format.annotation_format = request.POST['annotation_format']
-        export_format.image_format = request.POST['image_format']
-        export_format.base_format = request.POST['base_format']
-        export_format.vector_format = request.POST['vector_format']
-        export_format.not_in_image_format = request.POST['not_in_image_format']
-        export_format.min_verifications = request.POST['min_verifications']
+            request.user in export_format.team.members.all():
 
-        export_format.save()
-        messages.success(request, _('The export format was edited successfully.'))
-    return redirect(reverse('users.view_team', args=(export_format.team.id,)))
+        form = ExportFormatEditForm(request.POST, instance=export_format)
+
+        if form.is_valid():
+            if not export_format.name == form.cleaned_data.get('name') and \
+                    ExportFormat.objects.filter(
+                        name=form.cleaned_data.get('name')).exists():
+                form.add_error(
+                    'name',
+                    _('The name is already in use by an export format.'))
+                messages.error(request, _('The name is already in use by an export format.'))
+            else:
+                with transaction.atomic():
+
+                    edited_export_format = form.save(commit=False)
+                    edited_export_format.annotations_types.clear()
+                    for annotation_type in form.cleaned_data['annotations_types']:
+                        edited_export_format.annotations_types.add(annotation_type)
+                    edited_export_format.save()
+
+
+                messages.success(request, _('The export format was edited successfully.'))
+        else:
+            messages.error(request, _('There was an error editing the export format'))
+
+    return redirect(reverse('users:team', args=(export_format.team.id,)))
 
 
 @login_required
@@ -743,8 +752,8 @@ def update_annotation(request) -> Response:
         annotation.verify(request.user, True)
 
     serializer = AnnotationSerializer(
-        annotation.image.annotations.select_related() \
-            .order_by('annotation_type__name'), many=True)
+        annotation.image.annotations.select_related()
+        .order_by('annotation_type__name'), many=True)
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
