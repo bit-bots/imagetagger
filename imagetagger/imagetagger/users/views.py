@@ -236,7 +236,7 @@ def view_team(request, team_id):
         'test_imagesets': imagesets.filter(name__icontains='test'),
         'imageset_creation_form': ImageSetCreationForm(),
         'team_perms': team.get_perms(request.user),
-        'export_formats_forms': zip(export_formats, export_format_forms),
+        'export_formats_forms': export_format_forms,
     })
 
 
