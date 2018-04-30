@@ -2,14 +2,21 @@
   const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
   const FEEDBACK_DISPLAY_TIME = 3000;
 
+  let csrfToken = $('[name="csrfmiddlewaretoken"]').first().val();
   let gHeaders;
+  gHeaders = {
+    "Content-Type": 'application/json',
+    "X-CSRFTOKEN": csrfToken
+  };
   let gHideFeedbackTimeout;
+  let gAnnotationList;
+  let gImageSetId = parseInt($('#image_set_id').html());
 
   function loadAnnotationList(id) {
-    let params = {
+    var params = {
       imageset_id: id
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadset/' + $.param(params), {
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadset/?' + $.param(params), {
       type: 'GET',
       headers: gHeaders,
       dataType: 'json',
@@ -45,8 +52,7 @@
       "Content-Type": 'application/json',
       "X-CSRFTOKEN": csrfToken
     };
-    let imageSetId = parseInt($('#image_set_id').html());
-    loadAnnotationList(imageSetId);
+    loadAnnotationList(gImageSetId);
 
     $(document).keyup(function(event){
       switch(event.keyCode){
