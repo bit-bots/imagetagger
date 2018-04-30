@@ -11,6 +11,8 @@
   let gHideFeedbackTimeout;
   let gAnnotationList;
   let gImageSetId = parseInt($('#image_set_id').html());
+  let gImageCache;
+  let gAnnotationId;  // the selected annotation
 
   function loadAnnotationList(id) {
     var params = {
@@ -44,6 +46,126 @@
     gHideFeedbackTimeout = setTimeout(function() {
       $('.js_feedback').addClass('hidden');
     }, FEEDBACK_DISPLAY_TIME);
+  }
+
+  /**
+   * Load an image to the cache if it is not in it already.
+   *
+   * @param imageId
+   */
+  function loadImageToCache(imageId) {
+    imageId = parseInt(imageId);
+
+    // TODO: whatever
+    if (gImageList.indexOf(imageId) === -1) {
+      console.log(
+        'skiping request to load image ' + imageId +
+        ' as it is not in current image list.');
+      return;
+    }
+
+    if (gImageCache[imageId] !== undefined) {
+      // already cached
+      return;
+    }
+
+    gImageCache[imageId] = $('<img>');
+    gImageCache[imageId].data('imageid', imageId).attr(
+      'src', '/images/image/' + imageId + '/');
+  }
+
+    /**
+   * Preload next and previous images to cache.
+   */
+  function preloadImages() {
+    // TODO: preload the next needed images according to the annotations
+    var keepImages = [];
+    for (var imageId = gImageId - PRELOAD_BACKWARD;
+         imageId <= gImageId + PRELOAD_FORWARD;
+         imageId++) {
+      keepImages.push(imageId);
+      loadImageToCache(imageId);
+    }
+    pruneImageCache(keepImages);
+  }
+
+  /**
+   * Display the annotations of an annotation list.
+   *
+   * @param annotationList
+   */
+  function displayAnnotationList(annotationList) {
+    var oldAnnotationList = $('#annotation_list');
+    var result = $('<div>');
+    var annotationContained = false;
+
+    result.addClass('panel-body');
+    oldAnnotationList.html('');
+
+    for (var i = 0; i < annotationList.length; i++) {
+      var annotation = annotationList[i];
+
+      var link = $('<a>');
+      link.attr('id', 'annotation_link_' + annotation.id);
+      link.attr('href', VERIFY_URL.replace('%s', annotation.id));  // TODO: Set VERIFY URL
+      link.addClass('annotation_link');
+      if (annotation.id === gAnnotationId) {
+        link.addClass('active');
+        annotationContained = true;
+      }
+      link.text(annotation.vector);  // TODO: shorten vector
+      link.data('annotationid', annotation.id);
+      link.click(function(event) {
+        event.preventDefault();
+        loadAnnotateView($(this).data('annotationid'));
+      });
+
+      result.append(link);
+    }
+
+    oldAnnotationList.attr('id', '');
+    result.attr('id', 'annotation_list');
+    oldAnnotationList.replaceWith(result);
+
+    gImageList = getImageList();  // TODO: This in right
+
+    // load first image if current image is not within image set
+    if (!annotationContained) {
+      loadAnnotateView(annotationList[0].id); // TODO: right view?
+    }
+
+    scrollAnnotationList();
+  }
+
+  /**
+   * Delete all images from cache except for those in Array keep
+   *
+   * @param keep Array of the image ids which should be kept in the cache.
+   */
+  function pruneImageCache(keep) {
+    for (var imageId in gImageCache) {
+      imageId = parseInt(imageId);
+      if (gImageCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
+        delete gImageCache[imageId];
+      }
+    }
+  }
+
+
+  /**
+   * Scroll image list to make current image visible.
+   */
+  function scrollAnnotationList() {
+    var imageLink = $('#annotate_image_link_' + gImageId);
+    var list = $('#annotation_list');
+
+    var offset = list.offset().top;
+    var linkTop = imageLink.offset().top;
+
+    // link should be (roughly) in the middle of the element
+    offset += parseInt(list.height() / 2);
+
+    list.scrollTop(list.scrollTop() + linkTop - offset);
   }
 
   $(function() {

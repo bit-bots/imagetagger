@@ -57,7 +57,7 @@
                     <a href="{% url 'annotations:manage_annotations' image.image_set.id %}">
                         <u><h3 class="panel-title">{{image.image_set.name}}</h3></u></a>
                 </div>
-                <div id="image_list" class="panel-body">
+                <div id="annotation_list" class="panel-body">
                     {% for set_annotation in set_annotations %}
                         {% if set_annotation.id == annotation.id %}
                             {{ set_annotation.image.name }}: <b id="selected_annotation_row">{{annotation.content}}</b><br>
