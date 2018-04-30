@@ -396,10 +396,10 @@
                                 <option value={{ format.id }}>{{ format.team.name }}/{{ format.name }}</option>
                             {% endfor %}
                         </select>
-                        <input name= "export" type="submit" value="Export">
+                        <input name= "export" class="btn btn-primary" type="submit" value="Export">
                     <form method="post" action="{% url 'annotations:create_exportformat' imageset.id %}" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input name="create_new_format" type="button" value="Create Format" onclick="location.href='{% url 'annotations:create_exportformat' imageset.id %}'">
+                        <input name="create_new_format" class="btn btn-default" type="button" value="Create Format" onclick="location.href='{% url 'annotations:create_exportformat' imageset.id %}'">
                     </form>
                     </form>
                     {% if exports %}
@@ -413,4 +413,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock bodyblock%}
