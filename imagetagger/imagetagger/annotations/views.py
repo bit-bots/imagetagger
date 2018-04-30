@@ -734,8 +734,9 @@ def load_set_annotations(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
-    imageset = get_object_or_404(Image, pk=imageset_id)
-    annotations = Annotation.objects.filter(imageset=imageset)
+    imageset = get_object_or_404(ImageSet, pk=imageset_id)
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.filter(image__in=images)
 
     if not imageset.has_perm('read', request.user):
         return Response({
@@ -744,7 +745,9 @@ def load_set_annotations(request) -> Response:
 
     serializer = AnnotationSerializer(
         annotations.select_related(),  # .order_by('annotation_type__name'),
-        many=True)
+        many=True,
+        context={'request': request},
+    )
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)

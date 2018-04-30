@@ -18,11 +18,9 @@ class AnnotationSerializer(ModelSerializer):
     verified_by_user = SerializerMethodField('is_verified_by_user')
 
     def is_verified_by_user(self, annotation):
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            user = request.user
-            return Verification.objects.filter(user=user, annotation=annotation).exists()
-        return False
+
+        user = self.context['request'].user
+        return Verification.objects.filter(user=user, annotation=annotation).exists()
 
     class Meta:
         model = Annotation
