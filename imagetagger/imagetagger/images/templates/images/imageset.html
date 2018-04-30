@@ -121,6 +121,7 @@
     <div class="row">
         <div class="col-md-3">
             {% if images %}
+            {% comment %}
             <form id="annotation_form" action="{{request.get_full_path}}" enctype="multipart/form-data" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
@@ -134,6 +135,7 @@
                 {% if filtered %}
                     <a href="{{request.get_full_path}}" target="_self"> [x] </a>
                 {% endif %}
+            {% endcomment %}
             </form>
                 <div class="panel panel-default">
                     <div class="panel-heading">
