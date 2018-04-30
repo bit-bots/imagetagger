@@ -455,7 +455,7 @@ class Canvas {
       drawing.setMutable(false);
     }
     if (abortEdit === true) {
-      globals.editedAnnotationId = undefined;
+      globals.editedAnnotationsId = undefined;
       $('.annotation').removeClass('alert-info');
       globals.editActiveContainer.addClass('hidden');
       if (this.old && this.currentDrawing) {
