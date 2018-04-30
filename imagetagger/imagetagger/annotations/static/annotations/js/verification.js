@@ -32,6 +32,28 @@
     })
   }
 
+  function verifyAnnotation(id, state) {
+    let strState = 'reject';
+    if (state) {
+      strState = 'accept';
+    }
+    var params = {
+      annotation_id: id,
+      state: strState
+    };
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/verify/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function (data) {
+        console.log(data)
+      },
+      error: function () {
+        displayFeedback($('#feedback_connection_error'))
+      }
+    })
+  }
+
   /**
    * Display a feedback element for a few seconds.
    *
