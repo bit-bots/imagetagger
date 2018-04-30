@@ -799,3 +799,45 @@ def update_annotation(request) -> Response:
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['POST'])
+def api_verify_annotation(request) -> Response:
+    try:
+        annotation_id = int(request.data['annotation_id'])
+        if request.data['state'] == 'accept':
+            state = True
+        elif request.data['state'] == 'reject':
+            state = False
+        else:
+            raise ParseError
+
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    annotation = get_object_or_404(Annotation, pk=annotation_id)
+
+    if not annotation.image.image_set.has_perm('verify', request.user):
+        return Response({
+            'detail': 'permission for verifying annotations in this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+    if Verification.objects.filter(
+            user=request.user,
+            verified=state,
+            annotation=annotation).exists():
+        return Response({
+            'detail': 'the user already verified this annotation',
+        }, status=HTTP_400_BAD_REQUEST)
+
+    if state:
+        annotation.verify(request.user, True)
+        return Response({
+            'detail': 'you verified the last annotation',
+        }, status=HTTP_200_OK)
+    else:
+        annotation.verify(request.user, False)
+        return Response({
+                'detail': 'you rejected the last annotation',
+        }, status=HTTP_200_OK)
+

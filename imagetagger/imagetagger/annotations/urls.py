@@ -19,5 +19,7 @@ urlpatterns = [
     url(r'^api/annotation/create/$', views.create_annotation, name='create_annotation'),
     url(r'^api/annotation/delete/$', views.api_delete_annotation, name='delete_annotation'),
     url(r'^api/annotation/load/$', views.load_annotations, name='load_annotations'),
+    url(r'^api/annotation/loadone/$', views.load_annotation, name='load_annotation'),
+    url(r'^api/annotation/verify/$', views.api_verify_annotation, name='verify_annotation'),
     url(r'^api/annotation/update/$', views.update_annotation, name='update_annotations'),
 ]
