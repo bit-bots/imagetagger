@@ -42,13 +42,6 @@ class Drawing {
     this.parent.updateAnnotationFields(this.parent.getLayer(this.name));
   }
   setPoints(points) {
-    for (let point in points) {
-      if (point[0] === "y") {
-        points[point] /= globals.imageScaleHeight;
-      } else {
-        points[point] /= globals.imageScaleWidth;
-      }
-    }
     this.parent.setLayer(this.name, points);
   }
   /** Deletes the current point */
@@ -85,8 +78,8 @@ class Drawing {
     let points = {};
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      points["x" + i] = l["x" + i] * globals.imageScaleWidth;
-      points["y" + i] = l["y" + i] * globals.imageScaleHeight;
+      points["x" + i] = l["x" + i];
+      points["y" + i] = l["y" + i];
     }
     return points;
   }
@@ -98,7 +91,7 @@ class Drawing {
     let points = [];
     let l = this.parent.getLayer(this.name);
     for (let i = 1; i <= this.pointCounter; i++) {
-      points.push([l["x" + i] * globals.imageScaleWidth, l["y" + i] * globals.imageScaleHeight]);
+      points.push([l["x" + i], l["y" + i]]);
     }
     return points;
   }
@@ -137,9 +130,9 @@ class Drawing {
    */
   move(x, y) {
     let l = this.parent.getLayer(this.name);
-    for (let i = 1; i <= this.pointCounter; i++) {
-      l["x" + i] = Math.min(Math.max(l["x" + i] + x / globals.imageScaleWidth, 0), globals.image.width());
-      l["y" + i] = Math.min(Math.max(l["y" + i] + y / globals.imageScaleHeight, 0), globals.image.height());
+    for (let i = 1; i <= this.pointCounter; i++) { // TODO klären
+      l["x" + i] = Math.min(Math.max(l["x" + i] + x, 0), globals.image.width());
+      l["y" + i] = Math.min(Math.max(l["y" + i] + y, 0), globals.image.height());
     }
     this.parent.setLayer(this.name, l);
   }
@@ -197,7 +190,7 @@ class Point {
   setMutable(mutable) {}
   getPointTuples() {
     let l = this.parent.getLayer(this.name);
-    return [[l.x * globals.imageScaleWidth, l.y * globals.imageScaleHeight]];
+    return [[l.x, l.y]];
   }
   getPoints() {
     let l = this.parent.getLayer(this.name);
@@ -251,8 +244,8 @@ class ArbitraryPolygon extends Drawing {
   }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
-    if (Math.abs(firstPoint[0] / globals.imageScaleWidth - mousex) < threshold &&
-      Math.abs(firstPoint[1] / globals.imageScaleHeight - mousey) < threshold) {
+    if (Math.abs(firstPoint[0] - mousex) < threshold &&
+      Math.abs(firstPoint[1] - mousey) < threshold) {
       this.deleteCurrentPoint();
       this.close();
     } else {
@@ -287,75 +280,13 @@ class Canvas {
         self.updateAnnotationFields({x1: 0, x2: 0, y1: 0, y2: 0});
         break;
     }
-
-    $('body').mousemove(function (event) {
-      mousex = event.pageX - self.offset.left;
-      mousey = event.pageY - self.offset.top;
-      if (self.inline && self.currentDrawing) {
-        self.currentDrawing.setCurrentPoint(mousex, mousey);
-      }
-      if (self.currentDrawing) {
-        self.updateAnnotationFields(self.getLayer(self.currentDrawing.name));
-      }
-    }).click(function (event) {
-      mousex = event.pageX - self.offset.left;
-      mousey = event.pageY - self.offset.top;
-      if (self.inline && self.currentDrawing) {
-        if (mousex <= self.width && mousex >= 0 &&
-          mousey <= self.height && mousey >= 0) {
-          // We are currently drawing a drawing
-          // and we clicked inside of the canvas:
-          // add a point
-          self.currentDrawing.addPoint(mousex, mousey);
-        }
-      } else if (self.locked) {
-        // we do not create a drawing because we are
-        // only moving an existing one
-        self.locked = false;
-      } else {
-        if (mousex <= self.width && mousex >= 0 &&
-          mousey <= self.height && mousey >= 0) {
-          // We clicked and are inside the canvas:
-          // start drawing a new one
-          if (self.currentDrawing) {
-            self.currentDrawing.remove();
-          }
-          self.inline = true;
-          switch (self.vector_type) {
-            case 2: // Point
-              self.drawPoint({x1: mousex, y1: mousey}, 0, true);
-              break;
-            case 3: // Line
-              self.drawLine({x1: mousex, y1: mousey}, 0, true);
-              break;
-            case 5: // Polygon
-              if (self.node_count === 0) {
-                self.drawArbitraryPolygon({x1: mousex, y1: mousey}, 0, true, false);
-              } else {
-                self.drawPolygon({x1: mousex, y1: mousey}, 0, true, self.node_count, false);
-              }
-              break;
-            default:
-              console.log("No appropriate drawing found for vector type " + self.vector_type);
-              self.inline = false;
-          }
-          self.currentDrawing.setDragCursor(false);
-        }
-      }
-    }).mousedown(function () {
-      // Check if we are close enough to move the point, not draw a new drawing
-      // we use the variable locked which is checked when we can create a new line
-      if (self.mouseTooClose()) {
-        self.locked = true;
-      }
-    });
   }
 
   mouseTooClose() {
     for (let drawing of this.drawings) {
       let points = drawing.getPointTuples();
       for (let point of points) {
-        if (Math.abs(point[0] / globals.imageScaleWidth - mousex) < threshold && Math.abs(point[1] / globals.imageScaleHeight - mousey) < threshold) {
+        if (Math.abs(point[0] * globals.imageScaleWidth - globals.mouseDownX) < threshold && Math.abs(point[1] * globals.imageScaleHeight - globals.mouseDownY) < threshold) {
           return true;
         }
       }
@@ -495,8 +426,8 @@ class Canvas {
       $('#y' + i + 'Box').remove();
     }
     for (let j = 1; drawing.hasOwnProperty("x" + j); j++) {
-      $('#x' + j + 'Field').val(Math.max(Math.min(Math.round(drawing["x" + j] * globals.imageScaleWidth), globals.image.width()), 0));
-      $('#y' + j + 'Field').val(Math.max(Math.min(Math.round(drawing["y" + j] * globals.imageScaleHeight), globals.image.height()), 0));
+      $('#x' + j + 'Field').val(parseInt(Math.max(Math.min(drawing["x" + j], globals.image.width()), 0) * globals.imageScaleWidth));
+      $('#y' + j + 'Field').val(parseInt(Math.max(Math.min(drawing["y" + j], globals.image.height()), 0) * globals.imageScaleHeight));
     }
   }
 
@@ -560,9 +491,9 @@ class Canvas {
         let vector = {};
         for (let key in globals.restoreSelection) {
           if (key[0] === "y") {
-            vector[key] = globals.restoreSelection[key] / globals.imageScaleHeight;
+            vector[key] = globals.restoreSelection[key];
           } else {
-            vector[key] = globals.restoreSelection[key] / globals.imageScaleWidth;
+            vector[key] = globals.restoreSelection[key];
           }
         }
         this.updateAnnotationFields(globals.restoreSelection);
@@ -613,4 +544,62 @@ class Canvas {
   decreaseSelectionSizeFromTop() {}
   increaseSelectionSizeRight() {}
   increaseSelectionSizeUp() {}
+
+  handleMouseDown() {
+    // Check if we are close enough to move the point, not draw a new drawing
+    // we use the variable locked which is checked when we can create a new line
+    if (this.mouseTooClose()) {
+      this.locked = true;
+    }
+  }
+
+  handleMouseUp() {
+    if (this.inline && this.currentDrawing) {
+      // We are currently drawing a drawing
+      // and we clicked inside of the canvas:
+      // add a point
+      this.currentDrawing.addPoint(globals.mouseUpX, globals.mouseUpY);
+    } else if (this.locked) {
+      // we do not create a drawing because we are
+      // only moving an existing one
+      this.locked = false;
+    } else {
+      // We clicked and are inside the canvas:
+      // start drawing a new one
+      if (this.currentDrawing) {
+        this.currentDrawing.remove();
+      }
+      this.inline = true;
+      switch (this.vector_type) {
+        case 2: // Point
+          this.drawPoint({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          break;
+        case 3: // Line
+          this.drawLine({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          break;
+        case 5: // Polygon
+          if (this.node_count === 0) {
+            this.drawArbitraryPolygon({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true, false);
+          } else {
+            this.drawPolygon({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true, this.node_count, false);
+          }
+          break;
+        default:
+          console.log("No appropriate drawing found for vector type " + this.vector_type);
+          this.inline = false;
+      }
+      this.currentDrawing.setDragCursor(false);
+    }
+  }
+
+  handleMousemove(event) {
+    mousex = event.pageX - globals.image.offset().left;
+    mousey = event.pageY - globals.image.offset().top;
+    if (this.inline && this.currentDrawing) {
+      this.currentDrawing.setCurrentPoint(mousex, mousey);
+    }
+    if (this.currentDrawing) {
+      this.updateAnnotationFields(this.getLayer(this.currentDrawing.name));
+    }
+  }
 }

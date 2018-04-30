@@ -8,7 +8,12 @@ globals = {
   restoreSelectionVectorType: 1,
   restoreSelectionNodeCount: 0,
   moveSelectionStepSize: 2,
-  drawAnnotations: true
+  drawAnnotations: true,
+  mouseUpX: undefined,
+  mouseUpY: undefined,
+  mouseDownX: undefined,
+  mouseDownY: undefined,
+  currentAnnotations: undefined
 };
 
 /**
@@ -40,18 +45,12 @@ function calculateImageScale() {
   var gImageList;
   var gMousepos;
 
-  var gMouseDownX;
-  var gMouseDownY;
-  var gMouseUpX;
-  var gMouseUpY;
   var gShiftDown;
 
   // a threshold for editing an annotation if you select a small rectangle
   var gSelectionThreshold = 5;
 
   // save the current annotations of the image, so we can draw and hide the
-  // TODO cache annotations
-  var gCurrentAnnotations;
 
   var tool;
 
@@ -63,6 +62,16 @@ function calculateImageScale() {
   }
 
   function setTool(callback) {
+    let selected_annotation = $('#annotation_type_id').children(':selected').data();
+    let vector_type = selected_annotation.vectorType;
+    let node_count = selected_annotation.nodeCount;
+    let annotationTypeId = parseInt($('#annotation_type_id').children(':selected').val());
+    if (tool && vector_type === tool.vector_type) {
+      if (typeof callback === "function") {
+        callback();
+      }
+      return;
+    }
     if (tool) {
       tool.resetSelection();
       tool.cancelSelection();
@@ -70,10 +79,6 @@ function calculateImageScale() {
       tool.reset();
       delete tool;
     }
-    let selected_annotation = $('#annotation_type_id').children(':selected').data();
-    let vector_type = selected_annotation.vectorType;
-    let node_count = selected_annotation.nodeCount;
-    let annotationTypeId = parseInt($('#annotation_type_id').children(':selected').val());
     switch (vector_type) {
       case 1: // Bounding Box
         // Remove unnecessary number fields
@@ -95,8 +100,8 @@ function calculateImageScale() {
         tool = new BoundingBoxes();
         $('#image_canvas').addClass('hidden');
     }
-    if (gCurrentAnnotations) {
-      tool.drawExistingAnnotations(gCurrentAnnotations);
+    if (globals.currentAnnotations) {
+      tool.drawExistingAnnotations(globals.currentAnnotations);
     }
     console.log("Using tool " + tool.constructor.name);
     if (typeof callback === "function") {
@@ -182,7 +187,7 @@ function calculateImageScale() {
       data: JSON.stringify(data),
       success: function(data, textStatus, jqXHR) {
         // update current annotations
-        gCurrentAnnotations = data.annotations;
+        globals.currentAnnotations = data.annotations;
 
         $('.annotate_button').prop('disabled', false);
 
@@ -198,7 +203,7 @@ function calculateImageScale() {
               if (reload_list === true) {
                   loadImageList();
               }
-              tool.drawExistingAnnotations(gCurrentAnnotations);
+              tool.drawExistingAnnotations(globals.currentAnnotations);
             }
           } else {
             displayFeedback($('#feedback_annotation_exists'));
@@ -209,7 +214,7 @@ function calculateImageScale() {
           if (reload_list === true) {
               loadImageList();
           }
-          tool.drawExistingAnnotations(gCurrentAnnotations);
+          tool.drawExistingAnnotations(globals.currentAnnotations);
         }
 
         globals.editedAnnotationsId = undefined;
@@ -259,9 +264,9 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
-        gCurrentAnnotations = data.annotations;
+        globals.currentAnnotations = data.annotations;
         // redraw the annotations
-        tool.drawExistingAnnotations(gCurrentAnnotations);
+        tool.drawExistingAnnotations(globals.currentAnnotations);
 
         displayFeedback($('#feedback_annotation_deleted'));
         $('#annotation_edit_button_' + annotationId).parent().parent().fadeOut().remove();
@@ -394,12 +399,6 @@ function calculateImageScale() {
       // add previous image to cache
       gImageCache[currentImage.data('imageid')] = currentImage;
     }
-
-    // reattach listeners for mouse events
-    $('img').on('mousedown.annotation_edit', handleMouseDown);
-    $('img').on('mouseup.annotation_edit', handleMouseUp);
-    // we have to bind the mouse up event globally to also catch mouseup on small selections
-    $(document).on('mouseup.annotation_edit', handleMouseUp);
   }
 
   /**
@@ -552,15 +551,16 @@ function calculateImageScale() {
       case 1: // Ball (Boundingbox)
         return vector.x2 - vector.x1 >= 1 && vector.y2 - vector.y1 >= 1 && len === 4;
       case 2: // Point
-        return vector.hasOwnProperty('x1') && vector.hasOwnProperty('y1') && len === 2;
+        return vector.hasOwnProperty('x1') && vector.hasOwnProperty('y1') && len === 2 && !(vector.x1 === 0 && vector.y1 === 0);
       case 3: // Line
         return vector.x1 !== vector.x2 && vector.y1 !== vector.y2 && len === 4;
       case 4: // Multiline
         return true;
       case 5: // Polygon
         if (len < 6) {
+          // A polygon should have at least three points
           return false;
-        } // A polygon should have at least three points
+        }
         if (node_count !== 0 && node_count !== (len / 2)) {
           return false;
         }
@@ -601,7 +601,7 @@ function calculateImageScale() {
   function handleShowAnnotationsToggle(event) {
     globals.drawAnnotations = $('#draw_annotations').is(':checked');
     if (globals.drawAnnotations) {
-      tool.drawExistingAnnotations(gCurrentAnnotations);
+      tool.drawExistingAnnotations(globals.currentAnnotations);
     } else {
       tool.clear();
     }
@@ -645,6 +645,7 @@ function calculateImageScale() {
       cV.hide();
       gMousepos.hide();
     }
+    tool.handleMousemove(event);
   }
 
   /**
@@ -655,7 +656,7 @@ function calculateImageScale() {
   function handleResize() {
     tool.cancelSelection();
     calculateImageScale();
-    tool.drawExistingAnnotations(gCurrentAnnotations);
+    tool.drawExistingAnnotations(globals.currentAnnotations);
   }
 
   /**
@@ -710,10 +711,10 @@ function calculateImageScale() {
       dataType: 'json',
       success: function(data) {
         // save the current annotations
-        gCurrentAnnotations = data.annotations;
+        globals.currentAnnotations = data.annotations;
         loading.addClass('hidden');
-        displayExistingAnnotations(gCurrentAnnotations);
-        tool.drawExistingAnnotations(gCurrentAnnotations);
+        displayExistingAnnotations(globals.currentAnnotations);
+        tool.drawExistingAnnotations(globals.currentAnnotations);
 
         if (globals.restoreSelection !== undefined) {
           tool.restoreSelection();
@@ -871,7 +872,7 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
-        gCurrentAnnotations = data.annotations;
+        globals.currentAnnotations = data.annotations;
         setTool(callback);
       },
       error: function() {
@@ -887,8 +888,9 @@ function calculateImageScale() {
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
             event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
-      gMouseDownX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
-      gMouseDownY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
+      globals.mouseDownX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
+      globals.mouseDownY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
+      tool.handleMouseDown(event);
     }
   }
 
@@ -897,126 +899,13 @@ function calculateImageScale() {
       return;
 
     var position = globals.image.offset();
+    globals.mouseUpX = Math.round((event.pageX - position.left)/* * globals.imageScaleWidth*/);
+    globals.mouseUpY = Math.round((event.pageY - position.top)/* * globals.imageScaleHeight*/);
+
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
-            event.pageY > position.top && event.pageY < position.top + globals.image.height())
-    {
-      gMouseUpX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
-      gMouseUpY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
-
-      // check if we have a click or a small selection
-      if (Math.abs(gMouseDownX - gMouseUpX) <= gSelectionThreshold &&
-          Math.abs(gMouseDownY - gMouseUpY) <= gSelectionThreshold)
-      {
-        // get current annotation type id
-        var annotationType = parseInt($('#annotation_type_id').val());
-
-        // array with all matching annotations
-        var matchingAnnotations = [];
-
-        for (var a in gCurrentAnnotations)
-        {
-          var annotation = gCurrentAnnotations[a];
-          if (annotation.annotation_type.id !== annotationType)
-            continue;
-          if (annotation.vector === null)
-            continue;
-
-          var left = annotation.vector.x1;
-          var right = annotation.vector.x2;
-          var top = annotation.vector.y1;
-          var bottom = annotation.vector.y2;
-
-          // check if we clicked inside that annotation
-          if (gMouseDownX >= left && gMouseDownX <= right && gMouseDownY >= top && gMouseDownY <= bottom)
-          {
-            matchingAnnotations.push(annotation);
-          }
-        }
-
-        // no matches
-        if (matchingAnnotations.length === 0)
-          return;
-
-        annotation = matchingAnnotations[0];
-
-        // a single match
-        if (matchingAnnotations.length === 1)
-        {
-           // get the id of the corresponding edit button
-          edit_button_id = '#annotation_edit_button_' + annotation.id;
-           // trigger click event
-          $(edit_button_id).click();
-        }
-        // multiple matches
-        else
-        {
-          // if we have multiple matching annotations, we have the following descending criteria:
-          // 1. prefer annotation lying inside another one completely
-          // 2. prefer annotation, which left border is to the left of another ones
-          // 3. prefer annotation, which top border is above another ones
-          for (var a1 in matchingAnnotations)
-          {
-            var annotation1 = matchingAnnotations[a1];
-
-            if (annotation.id === annotation1.id)
-              continue;
-
-            if (inside(annotation1, annotation))
-            {
-              annotation = annotation1;
-              continue;
-            }
-
-            if (inside(annotation, annotation1))
-            {
-              continue;
-            }
-
-            if (leftOf(annotation1, annotation))
-            {
-              annotation = annotation1;
-              continue;
-            }
-
-            if (leftOf(annotation, annotation1))
-            {
-              continue;
-            }
-
-            if (above(annotation1, annotation))
-            {
-              annotation = annotation1;
-              continue;
-            }
-
-            if (above(annotation, annotation1))
-            {
-              continue;
-            }
-          }
-          // get the id of the corresponding edit button
-          edit_button_id = '#annotation_edit_button_' + annotation.id;
-          // trigger click event
-          $(edit_button_id).click();
-        }
-      }
-     }
-  }
-
-  // checks if annotation a1 is inside annotation a2
-  function inside(a1, a2) {
-    return a1.vector.x1 >= a2.vector.x1 && a1.vector.y1 >= a2.vector.y1 &&
-           a1.vector.x2 <= a2.vector.x2 && a1.vector.y2 <= a2.vector.y2;
-  }
-
-  // checks if the left border of annotation a1 is to the left of the left border of annotation a2
-  function leftOf(a1, a2) {
-    return a1.vector.x1 < a2.vector.x1;
-  }
-
-  // checks if the top border of annotation a1 is above the top border of annotation a2
-  function above(a1, a2) {
-    return a1.vector.y1 < a2.vector.y1;
+      event.pageY > position.top && event.pageY < position.top + globals.image.height()) {
+      tool.handleMouseUp(event);
+    }
   }
 
   // handle DEL key press
@@ -1148,8 +1037,7 @@ function calculateImageScale() {
     };
 
     // attach listeners for mouse events
-    $('img').on('mousedown.annotation_edit', handleMouseDown);
-    $('img').on('mouseup.annotation_edit', handleMouseUp);
+    $(document).mousedown(function(event) {handleMouseDown(event);});
     // we have to bind the mouse up event globally to also catch mouseup on small selections
     $(document).on('mouseup.annotation_edit', handleMouseUp);
 
