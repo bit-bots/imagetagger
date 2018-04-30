@@ -100,6 +100,12 @@
     var result = $('<div>');
     var annotationContained = false;
 
+    if ($('#checkbox').prop('checked')) {
+      annotationList.filter(function (annotation) {
+          return annotation.verified_by_user;
+      });
+    }
+
     result.addClass('panel-body');
     oldAnnotationList.html('');
 
@@ -169,13 +175,17 @@
     list.scrollTop(list.scrollTop() + linkTop - offset);
   }
 
+  function handleFilterSwitchChange() {
+      displayAnnotationList();
+    }
+
   $(function() {
-    let csrfToken = $('[name="csrfmiddlewaretoken"]').first().val();
-    gHeaders = {
-      "Content-Type": 'application/json',
-      "X-CSRFTOKEN": csrfToken
-    };
+
     loadAnnotationList(gImageSetId);
+
+    $('#filter_verified_checkbox').change(function () {
+        handleFilterSwitchChange();
+    });
 
     $(document).keyup(function(event){
       switch(event.keyCode){
