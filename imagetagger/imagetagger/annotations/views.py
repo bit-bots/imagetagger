@@ -727,6 +727,29 @@ def load_annotations(request) -> Response:
 
 
 @login_required
+@api_view(['GET'])
+def load_annotation(request) -> Response:
+    try:
+        annotation_id = int(request.query_params['annotation_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    annotation = get_object_or_404(Annotation, pk=annotation_id)
+
+    if not annotation.image.image_set.has_perm('read', request.user):
+        return Response({
+            'detail': 'permission for reading this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    serializer = AnnotationSerializer(
+        annotation,
+        many=False)
+    return Response({
+        'annotation': serializer.data,
+    }, status=HTTP_200_OK)
+
+
+@login_required
 @api_view(['POST'])
 def update_annotation(request) -> Response:
     try:
