@@ -221,7 +221,10 @@ def view_team(request, team_id):
     is_member = request.user in members
     admins = team.admins
     imagesets = ImageSet.objects.filter(team=team).order_by('-public', 'name')
-    export_formats = ExportFormat.objects.filter(team=team).order_by('name')
+    if is_member:
+        export_formats = ExportFormat.objects.filter(team=team).order_by('name')
+    else:
+        export_formats = ExportFormat.objects.filter(team=team, public=True).order_by('name')
     export_format_forms = [ExportFormatEditForm(instance=format_instance) for format_instance in export_formats]
     if not is_member:
         imagesets = imagesets.filter(public=True)
