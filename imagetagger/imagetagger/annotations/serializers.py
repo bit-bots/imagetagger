@@ -1,6 +1,6 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from .models import Annotation, AnnotationType
+from .models import Annotation, AnnotationType, Verification
 
 
 class AnnotationTypeSerializer(ModelSerializer):
@@ -15,6 +15,15 @@ class AnnotationTypeSerializer(ModelSerializer):
 
 
 class AnnotationSerializer(ModelSerializer):
+    verified_by_user = SerializerMethodField('is_verified_by_user')
+
+    def is_verified_by_user(self, annotation):
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+            return Verification.objects.filter(user=user, annotation=annotation).exists()
+        return False
+
     class Meta:
         model = Annotation
         fields = (
@@ -22,6 +31,7 @@ class AnnotationSerializer(ModelSerializer):
             'content',
             'id',
             'vector',
+            'verified_by_user',
         )
 
     annotation_type = AnnotationTypeSerializer(read_only=True)
