@@ -649,12 +649,12 @@ def api_delete_annotation(request) -> Response:
     annotation.delete()
 
     serializer = AnnotationSerializer(
-        image.annotations.select_related() \
-            .order_by('annotation_type__name'), many=True)
+        image.annotations.select_related().order_by('annotation_type__name'),
+        context={'request': request, },
+        many=True)
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
-
 
 
 
@@ -696,8 +696,12 @@ def create_annotation(request) -> Response:
         annotation.verify(request.user, True)
 
     serializer = AnnotationSerializer(
-        annotation.image.annotations.select_related() \
-            .order_by('annotation_type__name'), many=True)
+        annotation.image.annotations.select_related()
+        .order_by('annotation_type__name'),
+        context={
+            'request': request,
+        },
+        many=True)
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_201_CREATED)
@@ -720,6 +724,9 @@ def load_annotations(request) -> Response:
 
     serializer = AnnotationSerializer(
         image.annotations.select_related().order_by('annotation_type__name'),
+        context={
+            'request': request,
+        },
         many=True)
     return Response({
         'annotations': serializer.data,
@@ -768,8 +775,10 @@ def load_annotation(request) -> Response:
             'detail': 'permission for reading this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
 
-    serializer = AnnotationSerializer(
-        annotation,
+    serializer = AnnotationSerializer(annotation,
+        context={
+            'request': request,
+        },
         many=False)
     return Response({
         'annotation': serializer.data,
@@ -822,7 +831,11 @@ def update_annotation(request) -> Response:
 
     serializer = AnnotationSerializer(
         annotation.image.annotations.select_related()
-        .order_by('annotation_type__name'), many=True)
+        .order_by('annotation_type__name'),
+        context={
+            'request': request,
+        },
+        many=True)
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
