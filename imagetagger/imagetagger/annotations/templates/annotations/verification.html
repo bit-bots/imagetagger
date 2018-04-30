@@ -1,6 +1,12 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% load i18n %}
+
+{% block taggerimports %}
+    <link rel="stylesheet" type="text/css" href="{% static 'annotations/css/slider.css' %}" />
+    {% block additional_annotation_css %}
+    {% endblock additional_annotation_css %}
+{% endblock %}
 {% block additional_js %}
 <script type="text/javascript" src="{% static 'annotations/js/verification.js' %}"></script>
 {% endblock additional_js %}
@@ -34,24 +40,12 @@
                     {% endif %}
                 {% endif %}
             </form>
-            <form id="filter_veri__form" action="{{ request.get_full_path }}" enctype="multipart/form-data" method="get">
-
-                <input type="hidden" name="filter_veri" value="True">
-
-                {% if filtered is not None %}
-                    <input type="hidden" name="selected_annotation_type" value="{{ filtered }}">
-                {% endif %}
-
-                <input name="filter_button" type="submit" value="filter already verified tags">
-
-                {% if user_veri is not None %}
-                    {% if filtered is not None %}
-                        <a href="{{request.path}}?selected_annotation_type={{ filtered }}&filter=filter" target="_self"> [x] </a>
-                    {% else %}
-                        <a href="{{request.path}}" target="_self"> [x] </a>
-                    {% endif %}
-                {% endif %}
-            </form>
+            <p>
+            <label class="switch">
+                <input id="filter_verified_checkbox" type="checkbox">
+                <span class="slider round"></span>
+            </label>
+            filter already verified annotations</p>
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href="{% url 'annotations:manage_annotations' image.image_set.id %}">

@@ -15,6 +15,7 @@
   let gAnnotationId;  // the selected annotation
 
   function loadAnnotationList(id) {
+    // TODO: limit the amount of annotations and load more when needed
     var params = {
       imageset_id: id
     };
