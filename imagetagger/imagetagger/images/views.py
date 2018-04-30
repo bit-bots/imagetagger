@@ -257,6 +257,7 @@ def view_imageset(request, image_set_id):
         key=lambda at_tuple: at_tuple[1],
         reverse=True)
     first_annotation = annotations.first()
+    user_teams = Team.objects.filter(members=request.user)
     return render(request, 'images/imageset.html', {
         'images': images,
         'annotationcount': len(annotations),
@@ -269,7 +270,7 @@ def view_imageset(request, image_set_id):
         'filtered': filtered,
         'edit_form': ImageSetEditForm(instance=imageset),
         'imageset_perms': imageset.get_perms(request.user),
-        'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team=imageset.team)),
+        'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team__in=user_teams)),
         'label_upload_form': LabelUploadForm(),
         'upload_notice': settings.UPLOAD_NOTICE,
     })
