@@ -66,7 +66,7 @@ function calculateImageScale() {
     let vector_type = selected_annotation.vectorType;
     let node_count = selected_annotation.nodeCount;
     let annotationTypeId = parseInt($('#annotation_type_id').children(':selected').val());
-    if (tool && vector_type === tool.vector_type) {
+    if (tool && vector_type === tool.vector_type && (vector_type !== 5 || node_count === tool.node_count)) {
       if (typeof callback === "function") {
         callback();
       }
