@@ -1,7 +1,7 @@
 // JS file for bounding box internals
 
 class BoundingBoxes {
-  constructor() {
+  constructor(annotationTypeId) {
     this.initialized = false;
     this.selection = undefined;
     this.vector_type = 1;
@@ -9,6 +9,7 @@ class BoundingBoxes {
       globals.image = $('#image');
     }
     this.locked = false;
+    this.annotationTypeId = annotationTypeId;
   }
   drawExistingAnnotations(annotations) {
     this.clear();

@@ -66,7 +66,7 @@ function calculateImageScale() {
     let vector_type = selected_annotation.vectorType;
     let node_count = selected_annotation.nodeCount;
     let annotationTypeId = parseInt($('#annotation_type_id').children(':selected').val());
-    if (tool && vector_type === tool.vector_type && (vector_type !== 5 || node_count === tool.node_count)) {
+    if (tool && tool.annotationTypeId === annotationTypeId) {
       if (typeof callback === "function") {
         callback();
       }
@@ -97,7 +97,7 @@ function calculateImageScale() {
         tool = new Canvas($('#image_canvas'), vector_type, node_count, annotationTypeId);
         break;
       default:
-        tool = new BoundingBoxes();
+        tool = new BoundingBoxes(annotationTypeId);
         $('#image_canvas').addClass('hidden');
     }
     if (globals.currentAnnotations) {
