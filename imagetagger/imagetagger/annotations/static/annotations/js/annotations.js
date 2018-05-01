@@ -86,7 +86,7 @@ function calculateImageScale() {
           $('#x' + i + 'Box').remove();
           $('#y' + i + 'Box').remove();
         }
-        tool = new BoundingBoxes();
+        tool = new BoundingBoxes(annotationTypeId);
         $('#image_canvas').addClass('hidden');
         break;
       case 2: // Point, fallthrough
