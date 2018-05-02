@@ -4,6 +4,7 @@ globals = {
   imageScaleHeight: undefined
 };
 (function() {
+  const EDIT_ANNOTATION_URL = '/annotations/%s/';
   const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
   const FEEDBACK_DISPLAY_TIME = 3000;
   const VERIFY_URL = "/annotations/%s/verify/";
@@ -192,6 +193,8 @@ globals = {
     // load first image if current image is not within image set
     if (!annotationContained) {
       loadAnnotationView(annotationList[0].id); // TODO: right view?
+    } else {
+      loadAnnotationView(gAnnotationId);
     }
 
     scrollAnnotationList();
@@ -325,7 +328,6 @@ globals = {
    * Scroll image list to make current image visible.
    */
   function scrollAnnotationList() {
-    return;
     var annotationLink = $('#annotation_link_' + gAnnotationId);
     var list = $('#annotation_list');
 
@@ -391,7 +393,7 @@ globals = {
       loadAdjacentAnnotation(-1);
     });
     $('#edit_button').click(function(event) {
-      // TODO: everything
+      parent.location = EDIT_ANNOTATION_URL.replace("%s", gImageId) + '?edit=' + gAnnotationId;
     });
     $('#next_button').click(function(event) {
       loadAdjacentAnnotation(1);
