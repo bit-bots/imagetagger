@@ -66,7 +66,7 @@ a.bitbot-logo{
 
 .js_feedback {
   position: fixed;
-  top: 10em;
+  top: 5px;
   left: 0;
   right: 0;
   width: 50em;
@@ -74,7 +74,17 @@ a.bitbot-logo{
 
   text-align: center;
 
-  z-index: 1000;
+  z-index: 10000;
+}
+
+#image_col {
+  position: relative;
+}
+
+#image_canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #image {
@@ -102,7 +112,7 @@ a.bitbot-logo{
   height: 3.5em;
   margin: auto;
 
-  z-index: 20000;
+  z-index: 9999;
 }
 
 #edit_active p {
