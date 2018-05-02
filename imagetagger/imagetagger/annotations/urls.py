@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^api/annotation/delete/$', views.api_delete_annotation, name='delete_annotation'),
     url(r'^api/annotation/load/$', views.load_annotations, name='load_annotations'),  # loads annotations of an image
     url(r'^api/annotation/loadset/$', views.load_set_annotations, name='load_set_annotations'),  # loads annotations of an image
+    url(r'^api/annotation/loadsetannotationtypes/$', views.load_set_annotation_types, name='load_set_annotation_types'),  # loads annotations of an image
     url(r'^api/annotation/loadfilteredset/$', views.load_filtered_set_annotations, name='load_filtered_set_annotations'),  # loads filtered annotations of an image
     url(r'^api/annotation/loadone/$', views.load_annotation, name='load_annotation'),
     url(r'^api/annotation/verify/$', views.api_verify_annotation, name='verify_annotation'),

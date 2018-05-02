@@ -19,7 +19,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_2
 from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
-from imagetagger.annotations.serializers import AnnotationSerializer
+from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
@@ -760,6 +760,32 @@ def load_set_annotations(request) -> Response:
     }, status=HTTP_200_OK)
 
 
+@login_required
+@api_view(['GET'])
+def load_set_annotation_types(request) -> Response:
+    try:
+        imageset_id = int(request.query_params['imageset_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    imageset = get_object_or_404(ImageSet, pk=imageset_id)
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.filter(image__in=images)
+    annotation_types = AnnotationType.objects.filter(annotation__in=annotations).distinct()
+
+    if not imageset.has_perm('read', request.user):
+        return Response({
+            'detail': 'permission for reading this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    serializer = AnnotationTypeSerializer(
+        annotation_types,
+        many=True,
+        context={'request': request},
+    )
+    return Response({
+        'annotation_types': serializer.data,
+    }, status=HTTP_200_OK)
 
 @login_required
 @api_view(['GET'])
