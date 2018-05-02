@@ -181,6 +181,7 @@
   }
 
 
+
   /**
    * Scroll image list to make current image visible.
    */
@@ -200,6 +201,23 @@
   function handleFilterSwitchChange() {
       displayAnnotationList();
     }
+    $('#accept_button').click(function () {
+      verifyAnnotation(gAnnotationId, true);
+      // TODO: Next
+    });
+    $('#reject_button').click(function() {
+      verifyAnnotation(gAnnotationId, false);
+      // TODO: Next
+    });
+    $('#last_button').click(function(event) {
+      // TODO: go to last element
+    });
+    $('#edit_button').click(function(event) {
+      // TODO: everything
+    });
+    $('#next_button').click(function(event) {
+      // TODO: go to next element
+    });
 
   $(function() {
 
