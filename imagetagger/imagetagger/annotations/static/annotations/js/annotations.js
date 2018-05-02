@@ -57,8 +57,7 @@ function calculateImageScale() {
   function initTool() {
     setTool();
     tool.initSelection();
-    let index = gImageList.indexOf(gImageId);
-    loadAnnotateView(gImageList[index]);
+    loadAnnotateView(gImageId);
   }
 
   function setTool(callback) {
@@ -510,12 +509,8 @@ function calculateImageScale() {
       notInImage.prop('checked', false).change();
 
       $('#annotation_type_id').val(annotationTypeId);
-      $('#x1Field').val(annotationData.x1);
-      $('#x2Field').val(annotationData.x2);
-      $('#y1Field').val(annotationData.y1);
-      $('#y2Field').val(annotationData.y2);
 
-      tool.reloadSelection(annotationId);
+      tool.reloadSelection(annotationId, annotationData);
     });
   }
 
@@ -927,6 +922,15 @@ function calculateImageScale() {
 
 
   $(function() {
+    let get_params = decodeURIComponent(window.location.search.substring(1)).split('&');
+    let editAnnotationId = undefined;
+    for (let i = 0; i < get_params.length; i++) {
+      let parameter = get_params[i].split('=');
+      if (parameter[0] === "edit") {
+        editAnnotationId = parameter[1];
+        break;
+      }
+    }
     globals.editActiveContainer = $('#edit_active');
     globals.image = $('#image');
     globals.drawAnnotations = $('#draw_annotations').is(':checked');
@@ -950,21 +954,6 @@ function calculateImageScale() {
     $(window).on('load', function() {
       initTool();
     }());
-
-    // TODO: Make this as well as the load handler part of initSelection
-    setTimeout(function() {
-      // Fallback if window load initialization did not succeed
-      if (!tool.initialized) {
-        console.log('fallback solution for selection initialization used!');
-        initTool();
-        // TODO: Get rid of this
-        // This is used to load an existing annotation in the edit view
-        if (typeof loadannotation === "function") {
-          loadannotation();
-          tool.reloadSelection();
-        }
-      }
-    }, 2000);
 
     $('.annotation_value').on('input', function() {
       tool.reloadSelection();
@@ -1153,6 +1142,9 @@ function calculateImageScale() {
     if (typeof init_navigationbuttons === "function") {
       init_navigationbuttons();
       tool.reloadSelection();
+    }
+    if (editAnnotationId) {
+      $('#annotation_edit_button_' + editAnnotationId).click();
     }
   });
 })();

@@ -11,6 +11,7 @@ class BoundingBoxes {
     this.locked = false;
     this.annotationTypeId = annotationTypeId;
   }
+
   drawExistingAnnotations(annotations) {
     this.clear();
     calculateImageScale();
@@ -75,16 +76,24 @@ class BoundingBoxes {
   /**
    * Reload the selection.
    */
-  reloadSelection() {
+  reloadSelection(annotationId, annotationData) {
+    this.locked = true;
     this.selection = globals.image.imgAreaSelect({
       instance: true,
       show: true
     });
+    let scaled_selection = {
+      x1: annotationData.x1 / globals.imageScaleWidth,
+      y1: annotationData.y1 / globals.imageScaleHeight,
+      x2: annotationData.x2 / globals.imageScaleWidth,
+      y2: annotationData.y2 / globals.imageScaleHeight
+    };
+    this.updateAnnotationFields(null, scaled_selection);
     this.selection.setSelection(
-      Math.round($('#x1Field').val() / globals.imageScaleWidth),
-      Math.round($('#y1Field').val() / globals.imageScaleHeight),
-      Math.round($('#x2Field').val() / globals.imageScaleWidth),
-      Math.round($('#y2Field').val() / globals.imageScaleHeight)
+      scaled_selection.x1,
+      scaled_selection.y1,
+      scaled_selection.x2,
+      scaled_selection.y2
     );
     this.selection.update();
   }
