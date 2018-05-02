@@ -51,6 +51,37 @@ function calculateImageScale() {
     })
   }
 
+
+  function loadFilteredAnnotationList(id) {
+    // TODO: limit the amount of annotations and load more when needed
+    let params = {
+      imageset_id: id,
+      annotation_type: $('#annotation_type_select').val()
+    };
+    if ($('#filter_verified_checkbox').prop('checked')) {
+      params.verified = 'true';
+    } else {
+      params.verified = 'false';
+    }
+    if (typeof(params.annotation_type) === "undefined" || params.annotation_type === null) {
+      params.annotation_type = -1;
+    }
+    let link = API_ANNOTATIONS_BASE_URL + 'annotation/loadfilteredset/?' + $.param(params);
+    console.log(link)
+    $.ajax(link, {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function (data) {
+        gAnnotationList = data.annotations;
+        gImageSet = getImageSet();
+        displayAnnotationList(gAnnotationList);
+      },
+      error: function () {
+        displayFeedback($('#feedback_connection_error'))
+      }
+    })
+  }
   function loadAnnotationTypeList(id) {
     let params = {
       imageset_id: id
@@ -175,12 +206,6 @@ function calculateImageScale() {
     var result = $('<div>');
     var annotationContained = false;
 
-    if ($('#filter_verified_checkbox').prop('checked')) {
-      annotationList = annotationList.filter(function (annotation) {
-          return annotation.verified_by_user;
-      });
-    }
-
     result.addClass('panel-body');
     oldAnnotationList.html('');
 
@@ -225,7 +250,7 @@ function calculateImageScale() {
     oldAnnotationList.replaceWith(result);
 
     // load first image if current image is not within image set
-    if (!annotationContained) {
+    if (!annotationContained) { // TODO: handle empty list
       loadAnnotationView(annotationList[0].id); // TODO: right view?
     } else {
       loadAnnotationView(gAnnotationId);
@@ -242,12 +267,6 @@ function calculateImageScale() {
   function displayAnnotationTypeOptions(annotationTypeList) {
     // TODO: empty the options?
     let annotationTypeSelect = $('#annotation_type_select');
-    annotationTypeSelect.append($('<option/>', {
-      name: "no filter",
-      value: "-1",
-      html: "no filter"
-    }));
-
     $.each(annotationTypeList, function (key, annotationType) {
       annotationTypeSelect.append($('<option/>', {
         name: annotationType.name,
@@ -437,7 +456,13 @@ function calculateImageScale() {
   }
 
   function handleFilterSwitchChange() {
-      displayAnnotationList(gAnnotationList);
+    loadFilteredAnnotationList(gImageSetId);
+
+  }
+
+  function handleAnnotationTypeSelectChange() {
+    loadFilteredAnnotationList(gImageSetId);
+
   }
 
   $(function() {
@@ -452,11 +477,15 @@ function calculateImageScale() {
 
     gImageSetId = parseInt($('#image_set_id').html());
 
-    loadAnnotationList(gImageSetId);
     loadAnnotationTypeList(gImageSetId);
+    loadFilteredAnnotationList(gImageSetId);
 
     $('#filter_verified_checkbox').change(function () {
         handleFilterSwitchChange();
+    });
+
+    $('#annotation_type_select').change(function () {
+        handleAnnotationTypeSelectChange();
     });
 
     $('#accept_button').click(function () {
