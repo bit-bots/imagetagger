@@ -319,6 +319,8 @@ function calculateImageScale() {
           annotation.content += ' &bull; ';
           annotation.content += '<em>y' + i + '</em>: ' + annotation.vector["y" + i];
         }
+      } else {
+        annotation.content = 'not in image';
       }
 
       newAnnotation.append(annotation.annotation_type.name + ':');
