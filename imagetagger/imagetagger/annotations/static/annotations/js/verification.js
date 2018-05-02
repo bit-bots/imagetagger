@@ -196,13 +196,19 @@ function calculateImageScale() {
         link.addClass('active');
         annotationContained = true;
       }
-      let annotation_text_array = [];
-      for (let i = 1; i <= Object.keys(annotation.vector).length / 2; i++) {
-        annotation_text_array.push("'x" + i + "': " + annotation.vector["x" + i] +
-          ", 'y" + i + "': " + annotation.vector["y" + i]);
+      if (annotation.vector === null) {
+        link.text("not in image")
+      }
+      else
+      {
+        let annotation_text_array = [];
+        for (let i = 1; i <= Object.keys(annotation.vector).length / 2; i++) {
+          annotation_text_array.push("'x" + i + "': " + annotation.vector["x" + i] +
+              ", 'y" + i + "': " + annotation.vector["y" + i]);
+        }
+        link.text("{" + annotation_text_array.join(', ') + "}");
       }
 
-      link.text("{" + annotation_text_array.join(', ') + "}");
       link.data('annotationid', annotation.id);
       link.click(function(event) {
         event.preventDefault();
