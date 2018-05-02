@@ -760,6 +760,40 @@ def load_set_annotations(request) -> Response:
     }, status=HTTP_200_OK)
 
 
+
+@login_required
+@api_view(['GET'])
+def load_filtered_set_annotations(request) -> Response:
+    try:
+        imageset_id = int(request.query_params['imageset_id'])
+        verified = request.query_params['verified'] == 'true'
+        annotation_type_id = int(request.query_params['annotation_type'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    imageset = get_object_or_404(ImageSet, pk=imageset_id)
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.filter(image__in=images).select_related()
+    user_verifications = Verification.objects.filter(user=request.user, annotation__in=annotations)
+    if annotation_type_id > -1:
+        annotations = annotations.filter(annotation_type__id=annotation_type_id)
+    if verified:
+        annotations = [annotation for annotation in annotations if not user_verifications.filter(annotation=annotation).exists()]
+
+    if not imageset.has_perm('read', request.user):
+        return Response({
+            'detail': 'permission for reading this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    serializer = AnnotationSerializer(
+        annotations,  # .order_by('annotation_type__name'),
+        many=True,
+        context={'request': request},
+    )
+    return Response({
+        'annotations': serializer.data,
+    }, status=HTTP_200_OK)
+
 @login_required
 @api_view(['GET'])
 def load_annotation(request) -> Response:
