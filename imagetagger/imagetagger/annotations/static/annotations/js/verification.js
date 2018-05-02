@@ -1,8 +1,18 @@
 globals = {
   image: undefined,
   imageScaleWidth: undefined,
-  imageScaleHeight: undefined
+  imageScaleHeight: undefined,
+  drawAnnotations: true
 };
+
+/**
+ * Calculate the correct imageScale value.
+ */
+function calculateImageScale() {
+  globals.imageScaleWidth = globals.image.get(0).naturalWidth / globals.image.width();
+  globals.imageScaleHeight = globals.image.get(0).naturalHeight / globals.image.height();
+}
+
 (function() {
   const EDIT_ANNOTATION_URL = '/annotations/%s/';
   const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
@@ -19,6 +29,7 @@ globals = {
   let gImageSetId;
   let gImageCache = {};
   let gAnnotationId;  // the selected annotation
+  let tool;
 
   function loadAnnotationList(id) {
     // TODO: limit the amount of annotations and load more when needed
@@ -282,6 +293,36 @@ globals = {
         imageId: imageId
       }, document.title, '/annotations/' + annotationId + '/verify/');
     }
+    drawAnnotation(annotation);
+  }
+
+  /**
+   * Draw the annotation that should be verified
+   *
+   * @param annotation
+   */
+  function drawAnnotation(annotation) {
+    if (tool) {
+      tool.clear();
+    }
+    if (!tool || tool.annotationTypeId !== annotation.annotation_type.id ||
+      (tool.vector_type === 5 && tool.node_count !== annotation.annotation_type.node_count)) {
+      switch (annotation.annotation_type.vector_type) {
+        case 1: // Boundingbox
+          tool = new BoundingBoxes(annotation.annotation_type.id);
+          $('#image_canvas').addClass('hidden');
+          break;
+        case 2: // Point
+        case 3: // Line
+        case 4: // Multiline
+        case 5: // Polygon
+          $('#image_canvas').removeClass('hidden').attr('width', $('#image').width()).attr('height', $('#image').height());
+          tool = new Canvas($('#image_canvas'), annotation.annotation_type.vector_type,
+            annotation.annotation_type.node_count, annotation.annotation_type.id);
+          break;
+      }
+    }
+    tool.drawExistingAnnotations([annotation]);
   }
 
   /**
@@ -341,14 +382,6 @@ globals = {
   }
 
   /**
-   * Calculate the correct imageScale value.
-   */
-  function calculateImageScale() {
-    globals.imageScaleWidth = globals.image.get(0).naturalWidth / globals.image.width();
-    globals.imageScaleHeight = globals.image.get(0).naturalHeight / globals.image.height();
-  }
-
-  /**
    * Get a set of the images in the current imageset.
    */
   function getImageSet() {
@@ -364,7 +397,7 @@ globals = {
   }
 
   $(function() {
-    globals.image = $('#picture');
+    globals.image = $('#image');
     gAnnotationId = parseInt($('#annotation_id').html());
 
     let csrfToken = $('[name="csrfmiddlewaretoken"]').first().val();

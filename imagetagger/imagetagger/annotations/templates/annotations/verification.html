@@ -5,9 +5,22 @@
 {% block taggerimports %}
     <link rel="stylesheet" type="text/css" href="{% static 'annotations/css/slider.css' %}" />
     {% block additional_annotation_css %}
+    <style>
+        #image_col {
+            position: relative;
+        }
+        #image_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
     {% endblock additional_annotation_css %}
 {% endblock %}
 {% block additional_js %}
+<script type="text/javascript" src="{% static 'scripts/jcanvas.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'annotations/js/boundingboxes.js' %}"></script>
+<script type="text/javascript" src="{% static 'annotations/js/canvas.js' %}"></script>
 <script type="text/javascript" src="{% static 'annotations/js/verification.js' %}"></script>
 {% endblock additional_js %}
 {% block bodyblock %}
@@ -39,7 +52,11 @@
         </div>
         <div class="col-md-6">
             <div class="wrapper">
-                <img id="picture" src="{% url 'images:view_image' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation.vector.x1 }}" data-y="{{ annotation.vector.y1 }}" data-width="{{ width }}" data-height="{{ height }}"></br>
+                <div id="image_col">
+                    <img id="image" src="{% url 'images:view_image' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation.vector.x1 }}" data-y="{{ annotation.vector.y1 }}" data-width="{{ width }}" data-height="{{ height }}"></br>
+                    <canvas id="image_canvas"></canvas>
+                    <div id="boundingBoxes"></div>
+                </div>
             </div>
         </div>
         <div class="col-md-3">

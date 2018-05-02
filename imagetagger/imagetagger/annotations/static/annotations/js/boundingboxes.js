@@ -23,12 +23,10 @@ class BoundingBoxes {
     // clear all boxes
     var boundingBoxes = document.getElementById('boundingBoxes');
 
-    var annotationType = parseInt($('#annotation_type_id').val());
-
     for (var a in annotations) {
 
       var annotation = annotations[a];
-      if (annotation.annotation_type.id !== annotationType) {
+      if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }
       if (annotation.vector === null) {
