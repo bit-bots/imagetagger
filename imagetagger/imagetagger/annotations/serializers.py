@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from .models import Annotation, AnnotationType, Verification
+from imagetagger.images.serializers import ImageSerializer
 
 
 class AnnotationTypeSerializer(ModelSerializer):
@@ -30,6 +31,8 @@ class AnnotationSerializer(ModelSerializer):
             'id',
             'vector',
             'verified_by_user',
+            'image',
         )
 
     annotation_type = AnnotationTypeSerializer(read_only=True)
+    image = ImageSerializer(read_only=True)
