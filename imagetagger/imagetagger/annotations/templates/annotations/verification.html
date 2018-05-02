@@ -51,16 +51,7 @@
                     <a href="{% url 'annotations:manage_annotations' image.image_set.id %}">
                         <u><h3 class="panel-title">{{image.image_set.name}}</h3></u></a>
                 </div>
-                <div id="annotation_list" class="panel-body">
-                    {% for set_annotation in set_annotations %}
-                        {% if set_annotation.id == annotation.id %}
-                            {{ set_annotation.image.name }}: <b id="selected_annotation_row">{{annotation.content}}</b><br>
-                        {% else %}
-                            {{ set_annotation.image.name }}:
-                                <a href="{% url 'annotations:verify' set_annotation.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}">{{set_annotation.content}}</a><br>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+                <div id="annotation_list" class="panel-body"></div>
             </div>
         </div>
         <div class="col-md-6">
