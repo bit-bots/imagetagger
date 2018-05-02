@@ -242,11 +242,9 @@ function calculateImageScale() {
     }
 
     annotationIndex += offset;
-    while (annotationIndex < 0) {
-      annotationIndex = 0;
-    }
-    while (annotationIndex >= annotationIndexList.length) {
-      annotationIndex = annotationIndexList.length - 1;
+    if (annotationIndex < 0 || annotationIndex >= annotationIndexList.length) {
+      displayFeedback($('#feedback_last_annotation'));
+      return;
     }
 
     loadAnnotationView(annotationIndexList[annotationIndex]);
