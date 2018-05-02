@@ -61,7 +61,7 @@
                             <td>{{ annotation.user.username }}</td>
                             <td>{{ annotation.last_editor.username }}</td>
                             <td>
-                                <a href='{% url 'annotations:edit_annotation' annotation.id%}'>
+                                <a href='{% url 'annotations:annotate' annotation.image.id %}?edit={{ annotation.id }}'>
                                     <span class="btn btn-success">
                                         <span class="glyphicon glyphicon-pencil glyphicon-white" aria-hidden="true"></span>
                                     </span>
