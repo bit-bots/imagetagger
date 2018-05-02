@@ -20,7 +20,7 @@ div.wrapper{
   background-color: transparent;
 }
 
-#image_list {
+#image_list, #annotation_list {
   height: 600px;
   overflow-y: scroll;
 }
