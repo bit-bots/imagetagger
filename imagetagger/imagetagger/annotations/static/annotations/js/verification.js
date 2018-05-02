@@ -243,8 +243,8 @@ globals = {
     displayImage(imageId);
     scrollImageList(annotationId);
 
-    $('.annotate_image_link').removeClass('active');
-    var link = $('#annotate_image_link_' + imageId);
+    $('.annotation_link').removeClass('active');
+    var link = $('#annotation_link_' + annotationId);
     link.addClass('active');
     $('#active_image_name').text(link.text());
 
@@ -300,11 +300,11 @@ globals = {
    */
   function scrollAnnotationList() {
     return;
-    var imageLink = $('#annotate_image_link_' + gImageId);
+    var annotationLink = $('#annotation_link_' + gAnnotationId);
     var list = $('#annotation_list');
 
     var offset = list.offset().top;
-    var linkTop = imageLink.offset().top;
+    var linkTop = annotationLink.offset().top;
 
     // link should be (roughly) in the middle of the element
     offset += parseInt(list.height() / 2);
