@@ -922,21 +922,28 @@ def api_verify_annotation(request) -> Response:
         return Response({
             'detail': 'permission for verifying annotations in this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
-    if Verification.objects.filter(
-            user=request.user,
-            verified=state,
-            annotation=annotation).exists():
-        return Response({
-            'detail': 'the user already verified this annotation',
-        }, status=HTTP_400_BAD_REQUEST)
 
     if state:
         annotation.verify(request.user, True)
+        if Verification.objects.filter(
+                user=request.user,
+                verified=state,
+                annotation=annotation).exists():
+            return Response({
+                'detail': 'the user already verified this annotation and verified it now',
+            }, status=HTTP_200_OK)
         return Response({
             'detail': 'you verified the last annotation',
         }, status=HTTP_200_OK)
     else:
         annotation.verify(request.user, False)
+        if Verification.objects.filter(
+                user=request.user,
+                verified=state,
+                annotation=annotation).exists():
+            return Response({
+                'detail': 'the user already verified this annotation and rejected it now',
+            }, status=HTTP_200_OK)
         return Response({
                 'detail': 'you rejected the last annotation',
         }, status=HTTP_200_OK)
