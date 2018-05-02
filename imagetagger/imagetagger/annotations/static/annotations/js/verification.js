@@ -10,12 +10,7 @@ globals = {
   const PRELOAD_FORWARD = 5;
   const PRELOAD_BACKWARD = 2;
 
-  let csrfToken = $('[name="csrfmiddlewaretoken"]').first().val();
   let gHeaders;
-  gHeaders = {
-    "Content-Type": 'application/json',
-    "X-CSRFTOKEN": csrfToken
-  };
   let gHideFeedbackTimeout;
   let gAnnotationList;
   let gImageId;
@@ -65,14 +60,15 @@ globals = {
     if (state) {
       strState = 'accept';
     }
-    var params = {
+    var data = {
       annotation_id: id,
       state: strState
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/verify/?' + $.param(params), {
-      type: 'GET',
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/verify/', {
+      type: 'POST',
       headers: gHeaders,
       dataType: 'json',
+      data: JSON.stringify(data),
       success: function (data) {
         console.log(data)
       },
@@ -337,8 +333,13 @@ globals = {
 
   $(function() {
     globals.image = $('#picture');
-
+    let csrfToken = $('[name="csrfmiddlewaretoken"]').first().val();
+    gHeaders = {
+      "Content-Type": 'application/json',
+      "X-CSRFTOKEN": csrfToken
+    };
     gImageSetId = parseInt($('#image_set_id').html());
+
     loadAnnotationList(gImageSetId);
 
     $('#filter_verified_checkbox').change(function () {

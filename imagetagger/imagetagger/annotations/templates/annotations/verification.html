@@ -37,7 +37,6 @@
         <div class="col-md-6">
             <div class="wrapper">
                 <img id="picture" src="{% url 'images:view_image' image.id %}" alt="Picture {{image.name}} not found!" width="100%" data-x="{{ annotation.vector.x1 }}" data-y="{{ annotation.vector.y1 }}" data-width="{{ width }}" data-height="{{ height }}"></br>
-                <div id="boundingBox"></div>
             </div>
         </div>
         <div class="col-md-3">
@@ -80,5 +79,6 @@
         </div>
     </div>
 </div>
+{% csrf_token %}
 <span id="image_set_id" class="hidden">{{ image.image_set.id }}</span>{# TODO: data field? #}
 {% endblock %}

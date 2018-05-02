@@ -27,7 +27,6 @@ class AnnotationSerializer(ModelSerializer):
         model = Annotation
         fields = (
             'annotation_type',
-            'content',
             'id',
             'vector',
             'verified_by_user',
