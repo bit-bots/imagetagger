@@ -51,6 +51,23 @@ function calculateImageScale() {
     })
   }
 
+  function loadAnnotationTypeList(id) {
+    let params = {
+      imageset_id: id
+    };
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadsetannotationtypes/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function (data) {
+        displayAnnotationTypeOptions(data.annotation_types);
+      },
+      error: function () {
+        displayFeedback($('#feedback_connection_error'))
+      }
+    })
+  }
+
   /**
    * Scroll image list to make current image visible.
    */
@@ -209,6 +226,29 @@ function calculateImageScale() {
     }
 
     scrollAnnotationList();
+  }
+
+  /**
+   * Display the annotations of an annotation list.
+   *
+   * @param annotationList
+   */
+  function displayAnnotationTypeOptions(annotationTypeList) {
+    // TODO: empty the options?
+    let annotationTypeSelect = $('#annotation_type_select');
+    annotationTypeSelect.append($('<option/>', {
+      name: "no filter",
+      value: "-1",
+      html: "no filter"
+    }));
+
+    $.each(annotationTypeList, function (key, annotationType) {
+      annotationTypeSelect.append($('<option/>', {
+        name: annotationType.name,
+        value: annotationType.id,
+        html: annotationType.name
+      }));
+    });
   }
 
   /**
@@ -407,6 +447,7 @@ function calculateImageScale() {
     gImageSetId = parseInt($('#image_set_id').html());
 
     loadAnnotationList(gImageSetId);
+    loadAnnotationTypeList(gImageSetId);
 
     $('#filter_verified_checkbox').change(function () {
         handleFilterSwitchChange();
