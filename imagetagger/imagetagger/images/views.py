@@ -435,10 +435,16 @@ def label_upload(request, imageset_id):
 
             else:
                 error_count += 1
-        messages.warning(
-            request,
-            _('The label upload ended with {} errors and {} similar existing labels.')
-            .format(error_count, similar_count))
+        if error_count + similar_count > 0:
+            messages.warning(
+                request,
+                _('The label upload ended with {} errors and {} similar existing labels.')
+                .format(error_count, similar_count))
+        else:
+            messages.success(
+                request,
+                _('The label upload ended with {} errors and {} similar existing labels.')
+                .format(error_count, similar_count))
     return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
 
