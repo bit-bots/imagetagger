@@ -431,20 +431,20 @@ def label_upload(request, imageset_id):
                         else:
                             similar_count += 1
                             report_list.append(
-                                'For the image ' + dec_line[0] + ' the annotation '
-                                + dec_line[2] + ' was too similar to an already existing one')
+                                'For the image ' + line_frags[0] + ' the annotation '
+                                + line_frags[2] + ' was too similar to an already existing one')
                     else:
                         error_count += 1
                         report_list.append(
-                            'For the image ' + dec_line[0] + ' the annotation '
-                            + dec_line[2] + 'was not a valid vector or '
+                            'For the image ' + line_frags[0] + ' the annotation '
+                            + line_frags[2] + ' was not a valid vector or '
                                             'bounding box for the annotation type'
                         )
                 else:
                     error_count += 1
                     report_list.append(
-                        'For the image ' + dec_line[0] + ' the annotation type'
-                        + dec_line[2] + 'did not exist in this Imagetagger')
+                        'For the image ' + line_frags[0] + ' the annotation type '
+                        + line_frags[1] + ' did not exist in this Imagetagger')
             else:
                 error_count += 1
                 report_list.append('The image' + dec_line[0] + ' does not exist in this imageset')
