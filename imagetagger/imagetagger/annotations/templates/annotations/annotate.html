@@ -65,25 +65,29 @@
   </div>
     <div class="row">
       <div class="col-md-3">
-        <select id="filter_annotation_type" class="form-control">
-          <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
-          {% include "annotations/annotationtypes.html" %}
-        </select>
 
         <div class="panel panel-default">
           <div class="panel-heading">
             <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
               <h3 class="panel-title"><u>{{selected_image.image_set.name}}</u></h3></a>
           </div>
-          <div id="image_list" class="panel-body">
-            {% for set_image in set_images %}
-              <a id="annotate_image_link_{{ set_image.id }}"
-                 href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
-                 class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
-                 data-imageid="{{ set_image.id }}">
-                {{set_image.name}}
-              </a>
-            {% endfor %}
+          <div class="panel-body">
+            <select id="filter_annotation_type" class="form-control">
+              <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
+              {% include "annotations/annotationtypes.html" %}
+            </select>
+            <button class="btn btn-primary" id="filter_update_btn"><span class="glyphicon glyphicon-refresh"></span></button>
+            <br>
+            <div id="image_list">
+                {% for set_image in set_images %}
+                  <a id="annotate_image_link_{{ set_image.id }}"
+                     href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
+                     class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
+                     data-imageid="{{ set_image.id }}">
+                    {{set_image.name}}
+                  </a>
+                {% endfor %}
+            </div>
           </div>
         </div>
       </div>
