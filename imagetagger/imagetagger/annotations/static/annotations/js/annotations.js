@@ -411,7 +411,6 @@ function calculateImageScale() {
     var result = $('<div>');
     var imageContained = false;
 
-    result.addClass('panel-body');
     oldImageList.html('');
 
     for (var i = 0; i < imageList.length; i++) {

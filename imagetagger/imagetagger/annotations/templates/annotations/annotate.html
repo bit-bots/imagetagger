@@ -72,11 +72,15 @@
               <h3 class="panel-title"><u>{{selected_image.image_set.name}}</u></h3></a>
           </div>
           <div class="panel-body">
+            <div class="input-group">
             <select id="filter_annotation_type" class="form-control">
               <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
               {% include "annotations/annotationtypes.html" %}
             </select>
-            <button class="btn btn-primary" id="filter_update_btn"><span class="glyphicon glyphicon-refresh"></span></button>
+            <span class="input-group-btn">
+              <button class="btn btn-primary" id="filter_update_btn"><span class="glyphicon glyphicon-refresh"></span></button>
+            </span>
+            </div>
             <br>
             <div id="image_list">
                 {% for set_image in set_images %}
