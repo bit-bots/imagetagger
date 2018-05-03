@@ -115,10 +115,6 @@ def verify(request, annotation_id):
         return redirect(
             reverse('images:view_imageset', args=(annotation.image.image_set.id,)))
 
-    # checks if user has already verified this tag
-    if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
-        messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
-
     image = get_object_or_404(Image, id=annotation.image.id)
 
     return render(request, 'annotations/verification.html', {

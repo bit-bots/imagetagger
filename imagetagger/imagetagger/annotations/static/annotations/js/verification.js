@@ -120,7 +120,11 @@ function calculateImageScale() {
     if (state) {
       strState = 'accept';
     }
-    var data = {
+    let annotation = gAnnotationList.filter(function(e) {
+      return e.id === id;
+    })[0];
+    annotation.verified_by_user = true;
+    let data = {
       annotation_id: id,
       state: strState
     };
@@ -326,6 +330,9 @@ function calculateImageScale() {
         'skipping request to load annotation ' + annotationId +
         ' as it is not in current annotation list.');
       return;
+    }
+    if (annotation.verified_by_user) {
+      displayFeedback($('#feedback_already_verified'));
     }
     let imageId = annotation.image.id;
 
