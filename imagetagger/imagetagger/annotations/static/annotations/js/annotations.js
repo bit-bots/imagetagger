@@ -92,7 +92,7 @@ function calculateImageScale() {
       case 3: // Line, fallthrough
       case 4: // Multiline, fallthrough
       case 5: // Polygon
-        $('#image_canvas').removeClass('hidden').attr('width', $('#image').width()).attr('height', $('#image').height());
+        $('#image_canvas').removeClass('hidden').attr('width', Math.ceil($('#image').width())).attr('height', Math.ceil($('#image').height()));
         tool = new Canvas($('#image_canvas'), vector_type, node_count, annotationTypeId);
         break;
       default:
@@ -1028,7 +1028,7 @@ function calculateImageScale() {
     };
 
     // attach listeners for mouse events
-    $(document).mousedown(function(event) {handleMouseDown(event);});
+    $(document).on('mousedown.annotation_edit', handleMouseDown);
     // we have to bind the mouse up event globally to also catch mouseup on small selections
     $(document).on('mouseup.annotation_edit', handleMouseUp);
 
