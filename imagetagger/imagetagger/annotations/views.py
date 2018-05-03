@@ -508,7 +508,7 @@ def load_set_annotations(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     serializer = AnnotationSerializer(
-        annotations.select_related(),  # .order_by('annotation_type__name'),
+        annotations.select_related().order_by('image__name', 'annotation_type__name'),
         many=True,
         context={'request': request},
     )
@@ -588,7 +588,7 @@ def load_filtered_set_annotations(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     serializer = AnnotationSerializer(
-        annotations,  # .order_by('annotation_type__name'),
+        annotations.order_by('image__name', 'annotation_type__name'),
         many=True,
         context={'request': request},
     )
