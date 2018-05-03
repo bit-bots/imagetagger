@@ -31,26 +31,14 @@ function calculateImageScale() {
   let gAnnotationId;  // the selected annotation
   let tool;
 
-  function loadAnnotationList(id) {
-    // TODO: limit the amount of annotations and load more when needed
-    let params = {
-      imageset_id: id
-    };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadset/?' + $.param(params), {
-      type: 'GET',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function (data) {
-        gAnnotationList = data.annotations;
-        gImageSet = getImageSet();
-        displayAnnotationList(gAnnotationList);
-      },
-      error: function () {
-        displayFeedback($('#feedback_connection_error'))
-      }
-    })
+  function shorten(string) {
+    let threshold = 30;
+    if (string.length < threshold) {
+      return string;
+    } else {
+      return string.substr(0, threshold / 2 - 1) + '...' + string.substr(-threshold / 2 + 2, threshold / 2 - 2);
+    }
   }
-
 
   function loadFilteredAnnotationList(id) {
     // TODO: limit the amount of annotations and load more when needed
@@ -67,7 +55,6 @@ function calculateImageScale() {
       params.annotation_type = -1;
     }
     let link = API_ANNOTATIONS_BASE_URL + 'annotation/loadfilteredset/?' + $.param(params);
-    console.log(link)
     $.ajax(link, {
       type: 'GET',
       headers: gHeaders,
@@ -215,7 +202,7 @@ function calculateImageScale() {
 
     for (var i = 0; i < annotationList.length; i++) {
       var annotation = annotationList[i];
-      result.append(annotation.image.name + ": ");
+      result.append(shorten(annotation.image.name) + ": ");
 
       var link = $('<a>');
       link.attr('id', 'annotation_link_' + annotation.id);
@@ -235,7 +222,7 @@ function calculateImageScale() {
           annotation_text_array.push("'x" + i + "': " + annotation.vector["x" + i] +
               ", 'y" + i + "': " + annotation.vector["y" + i]);
         }
-        link.text("{" + annotation_text_array.join(', ') + "}");
+        link.text(shorten("{" + annotation_text_array.join(', ') + "}"));
       }
 
       link.data('annotationid', annotation.id);
