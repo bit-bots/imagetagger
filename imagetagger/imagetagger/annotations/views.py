@@ -280,6 +280,10 @@ def export_format(export_format_name, imageset):
                     '%%dia': annotation.diameter,
                     '%%cx': annotation.center['xc'],
                     '%%cy': annotation.center['yc'],
+                    '%%minx': annotation.min_x,
+                    '%%miny': annotation.min_y,
+                    '%%maxx': annotation.max_x,
+                    '%%maxy': annotation.max_y,
                     '%%width': annotation.width,
                     '%%height': annotation.height,
                     # relative values
@@ -287,6 +291,10 @@ def export_format(export_format_name, imageset):
                     '%%reldia': annotation.relative_diameter,
                     '%%relcx': annotation.relative_center['xc'],
                     '%%relcy': annotation.relative_center['yc'],
+                    '%%relminx': annotation.relative_min_x,
+                    '%%relminy': annotation.relative_min_y,
+                    '%%relmaxx': annotation.relative_max_x,
+                    '%%relmaxy': annotation.relative_max_y,
                     '%%relwidth': annotation.relative_width,
                     '%%relheight': annotation.relative_height,
                 }
