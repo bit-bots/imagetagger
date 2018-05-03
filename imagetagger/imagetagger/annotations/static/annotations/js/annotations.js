@@ -441,6 +441,7 @@ function calculateImageScale() {
     newImage.attr('id', 'image');
     gImageId = imageId;
     preloadImages();
+    preloadAnnotations();
 
     currentImage.replaceWith(newImage);
     globals.image = newImage;
