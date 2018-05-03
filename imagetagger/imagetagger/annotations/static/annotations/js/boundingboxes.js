@@ -10,6 +10,7 @@ class BoundingBoxes {
     }
     this.locked = false;
     this.annotationTypeId = annotationTypeId;
+    this.initSelection();
   }
 
   drawExistingAnnotations(annotations) {
