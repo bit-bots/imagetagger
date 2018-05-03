@@ -473,9 +473,6 @@ def load_image_set(request) -> Response:
 
     serializer = ImageSetSerializer(image_set)
     serialized_image_set = serializer.data
-        # TODO: find a cleaner solution to order related field set wihtin ImageSet serializer
-    serialized_image_set['images'] = ImageSerializer(
-        image_set.images.order_by('name'), many=True).data
     if filter_annotation_type_id:
         filter_annotation_type = get_object_or_404(
             AnnotationType, pk=filter_annotation_type_id)
@@ -484,9 +481,15 @@ def load_image_set(request) -> Response:
             image_set.images.exclude(
                 annotations__annotation_type=filter_annotation_type).order_by(
                 'name'), many=True).data
+    else:
+        # TODO: find a cleaner solution to order related field set wihtin ImageSet serializer
+        serialized_image_set['images'] = ImageSerializer(
+            image_set.images.order_by('name'), many=True).data
     return Response({
         'image_set': serialized_image_set,
     }, status=HTTP_200_OK)
+
+
 
 
 

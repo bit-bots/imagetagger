@@ -730,12 +730,13 @@ function calculateImageScale() {
    * Load the image list from tye server applying a new filter.
    */
   function loadImageList() {
-    var filterElem = $('#filter_annotation_type');
-    var filter = filterElem.val();
-    var params = {
+    let filterElem = $('#filter_annotation_type');
+    let filter = filterElem.val();
+    let params = {
       image_set_id: gImageSetId
     };
 
+    // select the corresponding annotation type for the label tool
     if (filter !== '' && !isNaN(filter)) {
       params.filter_annotation_type_id = filter;
       $('#annotation_type_id').val(filter);
@@ -962,6 +963,7 @@ function calculateImageScale() {
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
     $('select#filter_annotation_type').on('change', loadImageList);
+    $('#filter_update_btn').on('click', loadImageList);
     $('select').on('change', function() {
       document.activeElement.blur();
     });
