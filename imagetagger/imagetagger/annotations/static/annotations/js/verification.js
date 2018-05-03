@@ -197,7 +197,6 @@ function calculateImageScale() {
     var result = $('<div>');
     var annotationContained = false;
 
-    result.addClass('panel-body');
     oldAnnotationList.html('');
 
     for (var i = 0; i < annotationList.length; i++) {
