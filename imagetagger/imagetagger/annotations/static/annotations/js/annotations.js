@@ -44,6 +44,7 @@ function calculateImageScale() {
   var gImageSetId;
   var gImageList;
   var gMousepos;
+  let gAnnotationType = -1;
 
   var gShiftDown;
 
@@ -715,6 +716,7 @@ function calculateImageScale() {
     noAnnotations.addClass('hidden');
     notInImage.prop('checked', false).change();
     loading.removeClass('hidden');
+    $('#annotation_type_id').val(gAnnotationType);
 
     displayImage(imageId);
     scrollImageList();
@@ -774,6 +776,7 @@ function calculateImageScale() {
     if (filter !== '' && !isNaN(filter)) {
       params.filter_annotation_type_id = filter;
       $('#annotation_type_id').val(filter);
+      handleAnnotationTypeChange();
     }
 
     $.ajax(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
@@ -894,6 +897,7 @@ function calculateImageScale() {
    */
 
   function handleAnnotationTypeChange(callback) {
+    gAnnotationType = $('#annotation_type_id').val();
     var params = {
       image_id: gImageId
     };
