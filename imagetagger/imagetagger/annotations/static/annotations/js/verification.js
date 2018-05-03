@@ -259,11 +259,6 @@ function calculateImageScale() {
     scrollAnnotationList();
   }
 
-  /**
-   * Display the annotations of an annotation list.
-   *
-   * @param annotationList
-   */
   function displayAnnotationTypeOptions(annotationTypeList) {
     // TODO: empty the options?
     let annotationTypeSelect = $('#annotation_type_select');

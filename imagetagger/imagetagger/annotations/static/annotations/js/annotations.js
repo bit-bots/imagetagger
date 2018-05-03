@@ -232,6 +232,41 @@ function calculateImageScale() {
     });
   }
 
+  function loadAnnotationTypeList() {
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadannotationtypes/', {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function (data) {
+        displayAnnotationTypeOptions(data.annotation_types);
+      },
+      error: function () {
+        displayFeedback($('#feedback_connection_error'))
+      }
+    })
+  }
+
+  function displayAnnotationTypeOptions(annotationTypeList) {
+    // TODO: empty the options?
+    let annotationTypeFilterSelect = $('#filter_annotation_type');
+    let annotationTypeToolSelect = $('#annotation_type_id');
+    $.each(annotationTypeList, function (key, annotationType) {
+      annotationTypeToolSelect.append($('<option/>', {
+        name: annotationType.name,
+        value: annotationType.id,
+        html: annotationType.name + ' (' + (key + 1) + ')',
+        id: 'annotation_type_' + (key + 1),
+        'data-vector-type': annotationType.vector_type,
+        'data-node-count': annotationType.node_count
+      }));
+      annotationTypeFilterSelect.append($('<option/>', {
+        name: annotationType.name,
+        value: annotationType.id,
+        html: annotationType.name
+      }));
+    });
+  }
+
   /**
    * Delete an annotation.
    *
@@ -949,6 +984,7 @@ function calculateImageScale() {
     gImageList = getImageList();
     preloadImages();
     scrollImageList();
+    loadAnnotationTypeList();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)

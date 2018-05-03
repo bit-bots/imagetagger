@@ -75,7 +75,6 @@
             <div class="input-group">
             <select id="filter_annotation_type" class="form-control">
               <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
-              {% include "annotations/annotationtypes.html" %}
             </select>
             <span class="input-group-btn">
               <button class="btn btn-primary" id="filter_update_btn"><span class="glyphicon glyphicon-refresh"></span></button>
@@ -156,7 +155,6 @@
                         <p>
                           <select id="annotation_type_id" name="selected_annotation_type" class="form-control">
                             <option value="">{% trans 'Annotation Type' %}</option>
-                            {% include "annotations/annotationtypes.html" %}
                           </select>
                         </p>
                         <p>
