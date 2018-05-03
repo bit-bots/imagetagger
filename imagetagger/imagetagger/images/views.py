@@ -390,6 +390,7 @@ def label_upload(request, imageset_id):
         return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
     images = Image.objects.filter(image_set=imageset)
+    report_list = list()
     if request.method == 'POST':
         error_count = 0
         similar_count = 0
@@ -428,13 +429,30 @@ def label_upload(request, imageset_id):
                                 verification.save()
                         else:
                             similar_count += 1
+                            report_list.append(
+                                'For the image ' + dec_line[0] + ' the annotation '
+                                + dec_line[2] + ' was too similar to an already existing one')
                     else:
                         error_count += 1
+                        report_list.append(
+                            'For the image ' + dec_line[0] + ' the annotation '
+                            + dec_line[2] + 'was not a valid vector or '
+                                            'bounding box for the annotation type'
+                        )
                 else:
                     error_count += 1
-
+                    report_list.append(
+                        'For the image ' + dec_line[0] + ' the annotation type'
+                        + dec_line[2] + 'did not exist in this Imagetagger')
             else:
                 error_count += 1
+                report_list.append('The image' + dec_line[0] + ' does not exist in this imageset')
+        if len(report_list) > 1000:
+            report_list = report_list[:1000]
+            report_list.insert(0,'The list has been shortened to the first 1000 entries')
+            report_list.append('The list has been shortened to the first 1000 entries')
+        messages.info(request, '\n'.join(report_list))
+        print(report_list)
         if error_count + similar_count > 0:
             messages.warning(
                 request,
