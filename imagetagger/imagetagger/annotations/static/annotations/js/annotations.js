@@ -319,7 +319,7 @@ function calculateImageScale() {
         });
         // redraw the annotations
         tool.drawExistingAnnotations(globals.currentAnnotations);
-        displayExistingAnnotations(globals.currentAnnotations);
+        displayExistingAnnotations(globals.allAnnotations);
         displayFeedback($('#feedback_annotation_deleted'));
         globals.editedAnnotationsId = undefined;
       },
