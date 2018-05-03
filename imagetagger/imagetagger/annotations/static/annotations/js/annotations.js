@@ -749,34 +749,10 @@ function calculateImageScale() {
       }, document.title, '/annotations/' + imageId + '/');
     }
 
-    // load existing annotations for this image
-    if (gAnnotationCache[imageId] === undefined) {
-      // image is not available in cache. Load it.
-      loadAnnotationsToCache(imageId);
-      $(document).one("ajaxStop", function() {
-        // image is in cache.
-        globals.allAnnotations = gAnnotationCache[imageId];
-        console.log(globals.allAnnotations);
-        globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
-        });
-        loading.addClass('hidden');
-        displayExistingAnnotations(globals.allAnnotations);
-        tool.drawExistingAnnotations(globals.currentAnnotations);
-
-        if (globals.restoreSelection !== undefined) {
-          tool.restoreSelection();
-        } else {
-          tool.resetSelection();
-        }
-      });
-    } else {
-      console.log("Arriving here");
-      console.log("Loading annotations for", imageId);
+    let handleNewAnnotations = function() {
       // image is in cache.
       globals.allAnnotations = gAnnotationCache[imageId];
-      console.log(globals.allAnnotations);
-      globals.currentAnnotations = globals.allAnnotations.filter(function (e) {
+      globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
         return e.annotation_type.id === gAnnotationType;
       });
       loading.addClass('hidden');
@@ -788,6 +764,15 @@ function calculateImageScale() {
       } else {
         tool.resetSelection();
       }
+    };
+
+    // load existing annotations for this image
+    if (gAnnotationCache[imageId] === undefined) {
+      // image is not available in cache. Load it.
+      loadAnnotationsToCache(imageId);
+      $(document).one("ajaxStop", handleNewAnnotations);
+    } else {
+      handleNewAnnotations();
     }
   }
 
