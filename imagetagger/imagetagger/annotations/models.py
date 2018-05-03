@@ -416,7 +416,7 @@ class AnnotationType(models.Model):
     def _validate_line(self, vector: dict) -> bool:
         return (
             vector.get('x2', float('inf')) is not
-            vector.get('x1', float('inf')) and
+            vector.get('x1', float('inf')) or
             vector.get('y2', float('inf')) is not
             vector.get('y1', float('inf')) and
             len(vector.keys()) is 4
