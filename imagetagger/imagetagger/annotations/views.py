@@ -35,90 +35,14 @@ def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
     imageset_perms = selected_image.image_set.get_perms(request.user)
     if 'read' in imageset_perms:
-        # TODO: Make sure that integer coordinate values are stored in vector
-
-        # here the stuff we got via POST gets put in the DB
-        last_annotation_type_id = -1
-        if request.method == 'POST' and request.POST.get("annotate") is not None:
-            if 'annotate' in imageset_perms:
-                try:
-                    image = get_object_or_404(Image, id=request.POST['image_id'])
-                    vector = {
-                        'x1': int(request.POST['x1Field']),
-                        'y1': int(request.POST['y1Field']),
-                        'x2': int(request.POST['x2Field']),
-                        'y2': int(request.POST['y2Field']),
-                    }
-                    if 'not_in_image' in request.POST:
-                        vector = None
-                except (KeyError, ValueError):
-                    return HttpResponseBadRequest()
-
-                annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
-                if (vector is not None and
-                        not annotation_type.validate_vector(vector)):
-                    messages.warning(request, _('No valid bounding box found.'))
-                else:
-                    last_annotation_type_id = request.POST['selected_annotation_type']
-                    annotation = Annotation(
-                        vector=vector, image=image, annotation_type=annotation_type,
-                        user=request.user if request.user.is_authenticated() else None)
-
-                    if not Annotation.similar_annotations(
-                            vector, selected_image, annotation_type):
-                        annotation.save()
-                        # the creator of the annotation verifies it instantly
-                        annotation.verify(request.user, True)
-                    else:
-                        messages.warning(request, "This tag already exists!")
-            else:
-                messages.warning(request, 'you do not have the permission to annotate in this imageset!')
-
         set_images = selected_image.image_set.images.all()
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
-
-        filtered = request.GET.get("selected_annotation_type")
-        new_filter = request.GET.get("filter")
-        if filtered is not None:
-            # filter images for missing annotationtype
-            set_images = set_images.exclude(annotations__annotation_type_id=filtered)
-            if not set_images:
-                messages.info(request, 'All images in this set have been tagged with this tag!')
-                set_images = Image.objects.filter(image_set=selected_image.image_set)
-                filtered = None
-            if new_filter is not None:
-                # sets the current viewed image to the one on top of the filtered list
-                selected_image = set_images[0]
-        set_images = set_images.order_by('id')
-
-        # detecting next and last image in the set
-        next_image = set_images.filter(id__gt=selected_image.id).order_by('id').first()
-        last_image = set_images.filter(id__lt=selected_image.id).order_by('id').last()
-        vector_fields = tuple()
-        if last_annotation_type_id is not -1:
-            last_annotation_type = AnnotationType.objects.filter(id=last_annotation_type_id)
-            if last_annotation_type.exists():
-                last_annotation_type = last_annotation_type[0]
-                # Bounding Box and Line as default
-                vector_fields = ('x1', 'y1', 'x2', 'y2',)
-                if last_annotation_type.vector_type in (
-                        AnnotationType.VECTOR_TYPE.POINT,
-                        AnnotationType.VECTOR_TYPE.POLYGON,
-                        AnnotationType.VECTOR_TYPE.MULTI_LINE):
-                    vector_fields = ('x1', 'y1')
 
         return render(request, 'annotations/annotate.html', {
             'selected_image': selected_image,
             'imageset_perms': imageset_perms,
-            'next_image': next_image,
-            'last_image': last_image,
             'set_images': set_images,
             'annotation_types': annotation_types,
-            'image_annotations': Annotation.objects.filter(
-                image=selected_image).select_related(),
-            'last_annotation_type_id': int(last_annotation_type_id),
-            'filtered': filtered,
-            'vector_fields': vector_fields
         })
     else:
         return redirect(reverse('images:view_imageset', args=(selected_image.image_set.id,)))
@@ -184,20 +108,6 @@ def manage_annotations(request, image_set_id):
 @login_required
 def verify(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
-    if request.method == 'POST' and request.POST.get("annotation") is not None:
-        annotation = get_object_or_404(Annotation, id=request.POST['annotation'])
-        if not annotation.image.image_set.has_perm('verify', request.user):
-            messages.warning(request, "You have no permission to verify this tag!")
-            return HttpResponseForbidden()
-        if request.POST['state'] == 'accept':
-            state = True
-            annotation.verify(request.user, state)
-            messages.success(request, "You verified the last tag to be true!")
-        elif request.POST['state'] == 'reject':
-            state = False
-            annotation.verify(request.user, state)
-            messages.success(request, "You verified the last tag to be false!")
-
     annotation = get_object_or_404(
         Annotation.objects.select_related(), id=annotation_id)
     if not annotation.image.image_set.has_perm('verify', request.user):
@@ -209,88 +119,11 @@ def verify(request, annotation_id):
     if Verification.objects.filter(user=request.user, annotation=annotation).count() > 0:
         messages.add_message(request, messages.WARNING, 'You have already verified this tag!')
 
-    annotation_type = annotation.annotation_type
     image = get_object_or_404(Image, id=annotation.image.id)
-    set_images = Image.objects.filter(image_set=image.image_set)
-    set_annotations = Annotation.objects.select_related().filter(image__in=set_images)
-    set_annotations = set_annotations.order_by('id')
 
-    # filtering of annotations for certain annotations types
-    # and/or ones that the user has already verified
-    user_veri = request.GET.get("filter_veri")
-    veri_pushed = request.GET.get("filter_button")
-    annotation_types = AnnotationType.objects.filter(active=True) #for the dropdown option
-    filtered = request.GET.get("selected_annotation_type")
-    new_filter = request.GET.get("filter")
-    if filtered is not None and user_veri is not None:
-        # filters for both annotation type and not verified by user
-        set_annotations = set_annotations.filter(
-            ~Q(verified_by=request.user), annotation_type_id=filtered)
-        if not set_annotations:
-            # if there are no search results the search will be resetted
-            messages.info(request, 'There are no unverified tags of this type in this set!')
-            set_annotations = Annotation.objects.filter(image__in=set_images)
-            filtered = None
-            user_veri = None
-        if new_filter is not None or veri_pushed is not None:
-            # sets the current viewed annotation to the one on top of the filtered list
-            annotation = set_annotations[0]
-    elif filtered is not None:
-        # filters annotations for certain types
-        set_annotations = set_annotations.filter(annotation_type_id=filtered)
-        if not set_annotations:
-            # if there are no search results the search will be resetted
-            messages.info(request, 'There are no tags of this type in this set!')
-            set_annotations = Annotation.objects.filter(image__in=set_images)
-            filtered = None
-        if new_filter is not None:
-            # sets the current viewed annotation to the one on top of the filtered list
-            annotation = set_annotations[0]
-    elif user_veri is not None:
-        # filters for not verified annotations for user
-        set_annotations = set_annotations.exclude(verified_by=request.user)
-        if not set_annotations:
-            # if there are no search results the search will be resetted
-            messages.info(request, 'There are no unverified tags in this set!')
-            set_annotations = Annotation.objects.filter(image__in=set_images)
-            user_veri = None
-        if veri_pushed is not None:
-            # sets the current viewed annotation to the one on top of the filtered list
-            annotation = set_annotations[0]
-
-    unverified_annotations = set_annotations.exclude(verified_by=request.user)
-
-    # TODO: Use one query to fetch all those previous's and next's
-
-    # detecting next and last image in the set
-    next_annotation = set_annotations.filter(id__gt=annotation.id).order_by('id').first()
-    last_annotation = set_annotations.filter(id__lt=annotation.id).order_by('id').last()
-
-    # detecting next and last unverified image in the set
-    next_unverified_annotation = unverified_annotations.filter(id__gt=annotation.id).order_by('id').first()
-    last_unverified_annotation = unverified_annotations.filter(id__lt=annotation.id).order_by('id').last()
-    try:
-        filtered = int(filtered)
-    except (ValueError, TypeError):
-        pass
     return render(request, 'annotations/verification.html', {
         'image': image,
         'annotation': annotation,
-        'next_annotation': next_annotation,
-        'next_unverified_annotation': next_unverified_annotation,
-        'last_annotation': last_annotation,
-        'last_unverified_annotation': last_unverified_annotation,
-        'set_annotations': set_annotations,
-        'first_annotation': set_annotations.first(),
-        'unverified_annotations': unverified_annotations,
-        'width': annotation.vector.get('x2', 0) - annotation.vector.get('x1', 0) if annotation.vector else None,
-        'height': annotation.vector.get('y2', 0) - annotation.vector.get('y1', 0) if annotation.vector else None,
-        'annotation_type': annotation_type,
-        'annotation_types': annotation_types,
-        'filtered': filtered,
-        'user_veri': user_veri,
-        'veri_pushed': veri_pushed,
-        'last_annotation_type_id': filtered
     })
 
 
