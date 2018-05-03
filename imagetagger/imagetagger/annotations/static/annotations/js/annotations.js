@@ -1172,5 +1172,10 @@ function calculateImageScale() {
           break;
       }
     });
+    $(document).one("ajaxStop", function() {
+      if (editAnnotationId) {
+        $('#annotation_edit_button_' + editAnnotationId).click();
+      }
+    });
   });
 })();
