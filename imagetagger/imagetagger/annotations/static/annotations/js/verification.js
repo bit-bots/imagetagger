@@ -42,6 +42,9 @@ function calculateImageScale() {
 
   function loadFilteredAnnotationList(id) {
     // TODO: limit the amount of annotations and load more when needed
+    if (typeof id == 'undefined') {
+      id = gImageSetId;
+    }
     let params = {
       imageset_id: id,
       annotation_type: $('#annotation_type_select').val()
@@ -241,12 +244,16 @@ function calculateImageScale() {
 
     // load first image if current image is not within image set
     if (!annotationContained) { // TODO: handle empty list
-      loadAnnotationView(annotationList[0].id); // TODO: right view?
+      if (annotationList.length < 1) {
+        displayFeedback($('#no_annotations_error'));
+      } else {
+        loadAnnotationView(annotationList[0].id); // TODO: right view?
+        scrollAnnotationList();
+      }
     } else {
       loadAnnotationView(gAnnotationId);
+      scrollAnnotationList();
     }
-
-    scrollAnnotationList();
   }
 
   function displayAnnotationTypeOptions(annotationTypeList) {
@@ -468,6 +475,8 @@ function calculateImageScale() {
 
     loadAnnotationTypeList(gImageSetId);
     loadFilteredAnnotationList(gImageSetId);
+
+    $('#filter_update_btn').on('click', handleFilterSwitchChange);
 
     $('#filter_verified_checkbox').change(function () {
         handleFilterSwitchChange();
