@@ -491,9 +491,9 @@ class Canvas {
         let vector = {};
         for (let key in globals.restoreSelection) {
           if (key[0] === "y") {
-            vector[key] = globals.restoreSelection[key];
+            vector[key] = globals.restoreSelection[key] / globals.imageScaleHeight;
           } else {
-            vector[key] = globals.restoreSelection[key];
+            vector[key] = globals.restoreSelection[key] / globals.imageScaleWidth;
           }
         }
         this.updateAnnotationFields(globals.restoreSelection);
