@@ -550,7 +550,7 @@ function calculateImageScale() {
       case 2: // Point
         return vector.hasOwnProperty('x1') && vector.hasOwnProperty('y1') && len === 2 && !(vector.x1 === 0 && vector.y1 === 0);
       case 3: // Line
-        return vector.x1 !== vector.x2 && vector.y1 !== vector.y2 && len === 4;
+        return vector.x1 !== vector.x2 || vector.y1 !== vector.y2 && len === 4;
       case 4: // Multiline
         return true;
       case 5: // Polygon
