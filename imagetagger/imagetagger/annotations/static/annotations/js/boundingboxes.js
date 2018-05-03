@@ -75,11 +75,18 @@ class BoundingBoxes {
    * Reload the selection.
    */
   reloadSelection(annotationId, annotationData) {
-    this.locked = true;
     this.selection = globals.image.imgAreaSelect({
       instance: true,
       show: true
     });
+    if (!annotationData) {
+      annotationData = {
+        x1: parseInt($('#x1Field').val()),
+        y1: parseInt($('#y1Field').val()),
+        x2: parseInt($('#x2Field').val()),
+        y2: parseInt($('#y2Field').val())
+      };
+    }
     let scaled_selection = {
       x1: annotationData.x1 / globals.imageScaleWidth,
       y1: annotationData.y1 / globals.imageScaleHeight,
@@ -127,7 +134,7 @@ class BoundingBoxes {
         $('#x2Field').val(globals.restoreSelection.x2);
         $('#y1Field').val(globals.restoreSelection.y1);
         $('#y2Field').val(globals.restoreSelection.y2);
-        this.reloadSelection();
+        this.reloadSelection(0, globals.restoreSelection);
       }
     }
     if (reset !== false) {
