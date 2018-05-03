@@ -46,6 +46,7 @@ function calculateImageScale() {
   var gImageList;
   var gMousepos;
   let gAnnotationType = -1;
+  let gAnnotationCache = {};
 
   var gShiftDown;
 
@@ -749,16 +750,13 @@ function calculateImageScale() {
     }
 
     // load existing annotations for this image
-    var params = {
-      image_id: imageId
-    };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
-      type: 'GET',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function(data) {
-        // save the current annotations
-        globals.allAnnotations = data.annotations;
+    if (gAnnotationCache[imageId] === undefined) {
+      // image is not available in cache. Load it.
+      loadAnnotationsToCache(imageId);
+      $(document).one("ajaxStop", function() {
+        // image is in cache.
+        globals.allAnnotations = gAnnotationCache[imageId];
+        console.log(globals.allAnnotations);
         globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
           return e.annotation_type.id === gAnnotationType;
         });
@@ -771,13 +769,26 @@ function calculateImageScale() {
         } else {
           tool.resetSelection();
         }
-      },
-      error: function() {
-        loading.addClass('hidden');
-        $('.annotate_button').prop('disabled', false);
-        displayFeedback($('#feedback_connection_error'));
+      });
+    } else {
+      console.log("Arriving here");
+      console.log("Loading annotations for", imageId);
+      // image is in cache.
+      globals.allAnnotations = gAnnotationCache[imageId];
+      console.log(globals.allAnnotations);
+      globals.currentAnnotations = globals.allAnnotations.filter(function (e) {
+        return e.annotation_type.id === gAnnotationType;
+      });
+      loading.addClass('hidden');
+      displayExistingAnnotations(globals.allAnnotations);
+      tool.drawExistingAnnotations(globals.currentAnnotations);
+
+      if (globals.restoreSelection !== undefined) {
+        tool.restoreSelection();
+      } else {
+        tool.resetSelection();
       }
-    });
+    }
   }
 
   /**
@@ -843,6 +854,44 @@ function calculateImageScale() {
   }
 
   /**
+   * Load the annotations of an image to the cache if they are not in it already.
+   *
+   * @param imageId
+   */
+  function loadAnnotationsToCache(imageId) {
+    imageId = parseInt(imageId);
+
+    if (gImageList.indexOf(imageId) === -1) {
+      console.log(
+        'skiping request to load annotations of image ' + imageId +
+        ' as it is not in current image list.');
+      return;
+    }
+
+    if (gAnnotationCache[imageId] !== undefined) {
+      // already cached
+      return;
+    }
+
+    var params = {
+      image_id: imageId
+    };
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function(data) {
+        // save the current annotations to the cache
+        gAnnotationCache[imageId] = data.annotations;
+        console.log("Saving annotations for", imageId);
+      },
+      error: function() {
+        console.log("Unable to load annotations for image" + imageId);
+      }
+    });
+  }
+
+  /**
    * Load the previous or the next image
    *
    * @param offset integer to add to the current image index
@@ -893,6 +942,34 @@ function calculateImageScale() {
     }
   }
 
+
+  /**
+   * Delete all images from cache except for those in Array keep
+   *
+   * @param keep Array of the image ids which should be kept in the cache.
+   */
+  function pruneAnnotationCache(keep) {
+    for (var imageId in gAnnotationCache) {
+      imageId = parseInt(imageId);
+      if (gAnnotationCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
+        delete gAnnotationCache[imageId];
+      }
+    }
+  }
+
+  /**
+   * Preload next and previous annotations to cache.
+   */
+  function preloadAnnotations() {
+    var keepAnnotations = [];
+    for (var imageId = gImageId - PRELOAD_BACKWARD;
+         imageId <= gImageId + PRELOAD_FORWARD;
+         imageId++) {
+      keepAnnotations.push(imageId);
+      loadAnnotationsToCache(imageId);
+    }
+    pruneAnnotationCache(keepAnnotations);
+  }
 
   /**
    * Scroll image list to make current image visible.
@@ -994,6 +1071,7 @@ function calculateImageScale() {
     };
     gImageList = getImageList();
     preloadImages();
+    preloadAnnotations();
     scrollImageList();
     loadAnnotationTypeList();
 
