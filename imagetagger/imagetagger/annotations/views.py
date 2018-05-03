@@ -523,6 +523,21 @@ def load_set_annotations(request) -> Response:
 
 @login_required
 @api_view(['GET'])
+def load_annotation_types(request) -> Response:
+
+    annotation_types = AnnotationType.objects.filter(active=True)
+    serializer = AnnotationTypeSerializer(
+        annotation_types,
+        many=True,
+        context={'request': request},
+    )
+    return Response({
+        'annotation_types': serializer.data,
+    }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['GET'])
 def load_set_annotation_types(request) -> Response:
     try:
         imageset_id = int(request.query_params['imageset_id'])
@@ -532,7 +547,10 @@ def load_set_annotation_types(request) -> Response:
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.filter(image__in=images)
-    annotation_types = AnnotationType.objects.filter(annotation__in=annotations).distinct()
+    annotation_types = AnnotationType.objects.filter(
+        active=True,
+        annotation__in=annotations)\
+        .distinct()
 
     if not imageset.has_perm('read', request.user):
         return Response({
@@ -547,6 +565,7 @@ def load_set_annotation_types(request) -> Response:
     return Response({
         'annotation_types': serializer.data,
     }, status=HTTP_200_OK)
+
 
 @login_required
 @api_view(['GET'])
