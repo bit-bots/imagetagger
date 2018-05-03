@@ -266,9 +266,8 @@ function calculateImageScale() {
         globals.currentAnnotations = data.annotations;
         // redraw the annotations
         tool.drawExistingAnnotations(globals.currentAnnotations);
-
+        displayExistingAnnotations(globals.currentAnnotations);
         displayFeedback($('#feedback_annotation_deleted'));
-        $('#annotation_edit_button_' + annotationId).parent().parent().fadeOut().remove();
         globals.editedAnnotationsId = undefined;
       },
       error: function() {
