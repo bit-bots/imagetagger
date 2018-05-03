@@ -87,6 +87,7 @@ function calculateImageScale() {
           $('#y' + i + 'Box').remove();
         }
         tool = new BoundingBoxes(annotationTypeId);
+        tool.initSelection();
         $('#image_canvas').addClass('hidden');
         break;
       case 2: // Point, fallthrough
@@ -97,8 +98,22 @@ function calculateImageScale() {
         tool = new Canvas($('#image_canvas'), vector_type, node_count, annotationTypeId);
         break;
       default:
-        tool = new BoundingBoxes(annotationTypeId);
-        $('#image_canvas').addClass('hidden');
+        // Dummytool
+        tool = {
+          initSelection: function() {},
+          resetSelection: function() {},
+          restoreSelection: function() {},
+          cancelSelection: function() {},
+          reset: function() {},
+          drawExistingAnnotations: function() {},
+          handleMousemove: function() {},
+          handleMouseDown: function() {},
+          handleMouseUp: function() {},
+          moveSelectionLeft: function() {},
+          moveSelectionRight: function() {},
+          moveSelectionUp: function() {},
+          moveSelectionDown: function() {}
+        };
     }
     if (globals.currentAnnotations) {
       tool.drawExistingAnnotations(globals.currentAnnotations);
