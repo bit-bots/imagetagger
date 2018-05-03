@@ -588,7 +588,7 @@ def load_filtered_set_annotations(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     serializer = AnnotationSerializer(
-        annotations.order_by('image__name', 'annotation_type__name'),
+        sorted(list(annotations), key=lambda annotation: annotation.image.id),
         many=True,
         context={'request': request},
     )
