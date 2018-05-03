@@ -447,13 +447,12 @@ def label_upload(request, imageset_id):
                         + line_frags[1] + ' did not exist in this Imagetagger')
             else:
                 error_count += 1
-                report_list.append('The image' + dec_line[0] + ' does not exist in this imageset')
-        if len(report_list) > 1000:
-            report_list = report_list[:1000]
-            report_list.insert(0,'The list has been shortened to the first 1000 entries')
-            report_list.append('The list has been shortened to the first 1000 entries')
-        messages.info(request, '\n'.join(report_list))
-        print(report_list)
+                report_list.append('The image ' + line_frags[0] + ' does not exist in this imageset')
+
+        for element in report_list[:20]:
+            messages.info(request, element)
+            if len(report_list) > 20:
+                messages.warning(request, 'Only the first 20 errors are displayed.')
         if error_count + similar_count > 0:
             messages.warning(
                 request,
