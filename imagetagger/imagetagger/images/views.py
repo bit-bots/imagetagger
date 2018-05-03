@@ -397,7 +397,8 @@ def label_upload(request, imageset_id):
         verify = 'verify' in request.POST.keys()
         for line in request.FILES['file']:
             # filter empty lines
-            if line == '' or "b'\n'":
+            print(line)
+            if line in ('',  "b'\n'"):
                 continue
             dec_line = line.decode().replace('\n', '').replace(',}', '}')
             line_frags = dec_line.split('|')
