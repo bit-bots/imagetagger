@@ -356,6 +356,7 @@ function calculateImageScale() {
         imageId: imageId
       }, document.title, '/annotations/' + annotationId + '/verify/');
     }
+    $('#annotation-type-title').html('<b>Annotation type: ' + annotation.annotation_type.name + '</b>');
     drawAnnotation(annotation);
   }
 
