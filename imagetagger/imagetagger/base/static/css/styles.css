@@ -25,6 +25,10 @@ div.wrapper{
   overflow-y: scroll;
 }
 
+#annotation_type_select {
+  width: 100%;
+}
+
 div.annotation{
   border-radius: 5px;
   border-color: silver;
