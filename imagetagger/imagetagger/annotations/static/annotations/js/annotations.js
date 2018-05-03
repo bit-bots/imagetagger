@@ -1098,8 +1098,8 @@ function calculateImageScale() {
         case 57: //9
           selectAnnotationType(9);
           break;
-      }})
-    // TODO: this should be done only for the annotate view
+      }
+    });
     $(document).keyup(function(event) {
       switch (event.keyCode){
         case 16: // Shift
@@ -1132,21 +1132,5 @@ function calculateImageScale() {
           break;
       }
     });
-
-    // TODO: Get rid of this
-    // This is used to load an existing annotation in the edit view
-    if (typeof loadannotation === "function") {
-      loadannotation();
-      tool.reloadSelection();
-    }
-
-    // TODO: Get rid of this
-    if (typeof init_navigationbuttons === "function") {
-      init_navigationbuttons();
-      tool.reloadSelection();
-    }
-    if (editAnnotationId) {
-      $('#annotation_edit_button_' + editAnnotationId).click();
-    }
   });
 })();
