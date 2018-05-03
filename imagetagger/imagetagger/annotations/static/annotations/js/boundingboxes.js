@@ -311,6 +311,7 @@ class BoundingBoxes {
   handleMouseDown(event) {}
 
   handleMouseUp(event) {
+    /*
     // get current annotation type id
     var annotationType = parseInt($('#annotation_type_id').val());
 
@@ -396,6 +397,7 @@ class BoundingBoxes {
       // trigger click event
       $(edit_button_id).click();
     }
+    */
   }
 
   handleMousemove() {}
