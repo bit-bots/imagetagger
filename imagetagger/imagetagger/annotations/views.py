@@ -125,92 +125,12 @@ def annotate(request, image_id):
 
 
 @login_required
-def edit_annotation(request, annotation_id):
-    annotation = get_object_or_404(Annotation, id=annotation_id)
-    if request.user is annotation.user or annotation.image.image_set.has_perm('edit_annotation', request.user):
-        prev_page = request.META.get('HTTP_REFERER')
-        prev_view = 0
-        if prev_page:
-            if 'verify' in prev_page:
-                prev_view = 1
-            elif 'manage' in prev_page:
-                prev_view = 2
-        else:
-            prev_view = 2
-
-        annotation_types = AnnotationType.objects.all()  # needed to select the annotation in the drop-down-menu
-        selected_image = get_object_or_404(Image, id=annotation.image.id)
-        set_images = Image.objects.filter(image_set=selected_image.image_set)
-        current_annotation_type_id = annotation.annotation_type.id
-        return render(request, 'annotations/edit_annotation.html', {
-            'selected_image': selected_image,
-            'set_images': set_images,
-            'annotation_types': annotation_types,
-            'annotation': annotation,
-            'current_annotation_type_id': current_annotation_type_id,
-            'prev_page': prev_page,
-            'prev_view': prev_view
-        })
-    else:
-        return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
-
-
-@login_required
 def delete_annotation(request, annotation_id):
     annotation = get_object_or_404(Annotation, id=annotation_id)
     if annotation.image.image_set.has_perm('delete_annotation', request.user):
         annotation.delete()
         print('deleted annotation ', annotation_id)
     return redirect(reverse('annotations:annotate', args=(annotation.image.id,)))
-
-
-@login_required
-def edit_annotation_save(request, annotation_id):
-    annotation = get_object_or_404(Annotation, id=annotation_id)
-    prev_view = request.GET.get("prev_view")
-    if prev_view == '1':
-        go_to = reverse('annotations:verify', args=(annotation.image.id,))
-    elif prev_view == '2':
-        go_to = reverse('annotations:manage_annotations', args=(annotation.image.image_set.id,))
-    else:
-        go_to = reverse('annotations:annotate', args=(annotation.id,))
-
-    # TODO: Give feedback in case of missing permissions
-    if request.method == 'POST' and (
-                request.user is annotation.user or
-                annotation.image.image_set.has_perm('edit_annotation', request.user)):
-        try:
-            annotation.vector = {
-                'x1': request.POST['x1Field'],
-                'y1': request.POST['y1Field'],
-                'x2': request.POST['x2Field'],
-                'y2': request.POST['y2Field'],
-            }
-            if 'not_in_image' in request.POST:
-                annotation.vector = None
-            annotation.last_editor = (request.user if request.user.is_authenticated() else None)
-            annotation.annotation_type = get_object_or_404(AnnotationType, id=request.POST['selected_annotation_type'])
-        except (KeyError, ValueError):
-            return HttpResponseBadRequest()
-
-        if not annotation.annotation_type.validate_vector(annotation.vector):
-            messages.warning(request, _('No valid bounding box found.'))
-            return redirect(go_to)
-
-        if Annotation.similar_annotations(
-                annotation.vector, annotation.image,
-                annotation.annotation_type, exclude={annotation.pk}):
-            messages.info(
-                request,
-                _('A similar annotation already exists. The edited annotation was deleted.'))
-            annotation.delete()
-            return redirect(go_to)
-
-        with transaction.atomic():
-            annotation.verified_by.clear()
-            annotation.save()
-            annotation.verify(request.user, True)
-    return redirect(go_to)
 
 
 @login_required
