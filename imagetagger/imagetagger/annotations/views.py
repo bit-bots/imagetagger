@@ -153,22 +153,6 @@ def export_format(export_format_name, imageset):
                 annotation_content = ''
                 for annotation in annotations:
                     annotation_counter += 1
-                    formatted_vector = str()
-                    for counter1 in range(len(annotation.vector) // 2):
-                        pass
-                        vector_line = export_format.vector_format
-                        placeholders_vector = {
-                            '%%count0': counter1 - 1,
-                            '%%count1': counter1,
-                            '%%x': annotation.vector['x' + counter1],
-                            '%%relx': annotation.get_relative_vector_element('x' + counter1),
-                            '%%y': annotation.vector['y' + counter1],
-                            '%%rely': annotation.get_relative_vector_element('y' + counter1),
-                            '%%br': '\n'
-                        }
-                        for key, value in placeholders_vector.items():
-                            vector_line = vector_line.replace(key, str(value))
-                        formatted_vector += vector_line
                     if annotation.not_in_image:
                         formatted_annotation = export_format.not_in_image_format
                         placeholders_annotation = {
@@ -180,6 +164,21 @@ def export_format(export_format_name, imageset):
                             '%%veriamount': annotation.verification_difference,
                         }
                     else:
+                        formatted_vector = str()
+                        for counter1 in range(len(annotation.vector) // 2):
+                            vector_line = export_format.vector_format
+                            placeholders_vector = {
+                                '%%count0': counter1 - 1,
+                                '%%count1': counter1,
+                                '%%x': annotation.vector['x' + str(counter1)],
+                                '%%relx': annotation.get_relative_vector_element('x' + str(counter1)),
+                                '%%y': annotation.vector['y' + str(counter1)],
+                                '%%rely': annotation.get_relative_vector_element('y' + str(counter1)),
+                                '%%br': '\n'
+                            }
+                            for key, value in placeholders_vector.items():
+                                vector_line = vector_line.replace(key, str(value))
+                            formatted_vector += vector_line
                         formatted_annotation = export_format.annotation_format
                         placeholders_annotation = {
                             '%%imageset': imageset.name,
