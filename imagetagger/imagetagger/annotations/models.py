@@ -345,8 +345,47 @@ class Annotation(models.Model):
                     'Annotation': Annotation._meta.db_table,
                 }), query_params)
                 return cursor.fetchone() is not None
+        elif annotation_type.vector_type in (
+                AnnotationType.VECTOR_TYPE.POLYGON,
+                AnnotationType.VECTOR_TYPE.MULTI_LINE
+            ):
+            # TODO: make sure, the vector format (point 1 left, upper) is consistent
+            query = '''
+            SELECT
+                (1)
+            FROM
+              {Annotation} a
+            WHERE
+              a.annotation_type_id=%(annotation_type_id)s AND
+              a.image_id=%(image_id)s
+            '''
+            query_params = {
+                'annotation_type_id': annotation_type.pk,
+                'image_id': image.pk,
+            }
+            for i in range(1, (len(vector) // 2) + 1):
+                query_params.update({
+                    'min_x' + str(i): vector.get('x' + str(i), 0) - max_similarity,
+                    'max_x' + str(i): vector.get('x' + str(i), 0) + max_similarity,
+                    'min_y' + str(i): vector.get('y' + str(i), 0) - max_similarity,
+                    'max_y' + str(i): vector.get('y' + str(i), 0) + max_similarity,
+                })
+                query += '''
+                    AND
+                    (vector->>'x{0}')::INT BETWEEN %(min_x{0})s AND %(max_x{0})s AND
+                    (vector->>'y{0}')::INT BETWEEN %(min_y{0})s AND %(max_y{0})s
+                    '''.format(str(i))
+            if exclude:
+                query += ' AND a.id NOT IN %(exclude)s'
+                query_params['exclude'] = tuple(exclude)
+
+            with connection.cursor() as cursor:
+                cursor.execute(query.format(**{
+                    'Annotation': Annotation._meta.db_table,
+                }), query_params)
+                return cursor.fetchone() is not None
+
         return False
-        # no similarity-check for polygons and multi-lines right now
 
 
 class AnnotationType(models.Model):

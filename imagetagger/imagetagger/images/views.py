@@ -443,11 +443,11 @@ def label_upload(request, imageset_id):
                 else:
                     error_count += 1
                     report_list.append(
-                        'For the image ' + line_frags[0] + ' the annotation type '
-                        + line_frags[1] + ' did not exist in this Imagetagger')
+                        'For the image ' + line_frags[0] + ' the annotation type \"'
+                        + line_frags[1] + '\" did not exist in this Imagetagger')
             else:
                 error_count += 1
-                report_list.append('The image ' + line_frags[0] + ' does not exist in this imageset')
+                report_list.append('The image \"' + line_frags[0] + '\" does not exist in this imageset')
 
         for element in report_list[:20]:
             messages.info(request, element)
