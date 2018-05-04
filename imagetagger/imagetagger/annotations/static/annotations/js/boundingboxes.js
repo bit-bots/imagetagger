@@ -1,7 +1,7 @@
 // JS file for bounding box internals
 
 class BoundingBoxes {
-  constructor(annotationTypeId) {
+  constructor(annotationTypeId, noSelection) {
     this.initialized = false;
     this.selection = undefined;
     this.vector_type = 1;
@@ -10,7 +10,9 @@ class BoundingBoxes {
     }
     this.locked = false;
     this.annotationTypeId = annotationTypeId;
-    this.initSelection();
+    if (!noSelection) {
+      this.initSelection();
+    }
   }
 
   drawExistingAnnotations(annotations) {

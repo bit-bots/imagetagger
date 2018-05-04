@@ -368,7 +368,7 @@ function calculateImageScale() {
       (tool.vector_type === 5 && tool.node_count !== annotation.annotation_type.node_count)) {
       switch (annotation.annotation_type.vector_type) {
         case 1: // Boundingbox
-          tool = new BoundingBoxes(annotation.annotation_type.id);
+          tool = new BoundingBoxes(annotation.annotation_type.id, true);
           $('#image_canvas').addClass('hidden');
           break;
         case 2: // Point
