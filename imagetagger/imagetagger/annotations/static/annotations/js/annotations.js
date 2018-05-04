@@ -777,6 +777,9 @@ function calculateImageScale() {
       // image is not available in cache. Load it.
       loadAnnotationsToCache(imageId);
       $(document).one("ajaxStop", handleNewAnnotations);
+    } else if ($.isEmptyObject(gAnnotationCache[imageId])) {
+      // we are already loading the annotation, wait for ajax
+      $(document).one("ajaxStop", handleNewAnnotations);
     } else {
       handleNewAnnotations();
     }
@@ -863,6 +866,8 @@ function calculateImageScale() {
       // already cached
       return;
     }
+    // prevent multiple ajax requests for the same image
+    gAnnotationCache[imageId] = {};
 
     var params = {
       image_id: imageId
