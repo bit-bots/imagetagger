@@ -994,6 +994,10 @@ function calculateImageScale() {
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
             event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
+      if (parseInt($('#annotation_type_id').val()) === -1) {
+        displayFeedback($('#feedback_annotation_type_missing'));
+        return;
+      }
       globals.mouseDownX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
       globals.mouseDownY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
       tool.handleMouseDown(event);
