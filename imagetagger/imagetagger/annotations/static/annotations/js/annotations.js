@@ -528,10 +528,8 @@ function calculateImageScale() {
    */
   function editAnnotation(event, annotationElem, annotationId) {
     annotationElem = $(annotationElem);
-    var annotationTypeId = annotationElem.data('annotationtypeid');
-
+    let annotationTypeId = annotationElem.data('annotationtypeid');
     $('#annotation_type_id').val(annotationTypeId);
-    $('#annotation_type_id').val(toString(annotationTypeId));
     handleAnnotationTypeChange();
     globals.editedAnnotationsId = annotationId;
     globals.editActiveContainer.removeClass('hidden');
