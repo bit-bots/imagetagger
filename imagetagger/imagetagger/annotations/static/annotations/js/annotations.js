@@ -111,7 +111,11 @@ function calculateImageScale() {
           moveSelectionLeft: function() {},
           moveSelectionRight: function() {},
           moveSelectionUp: function() {},
-          moveSelectionDown: function() {}
+          moveSelectionDown: function() {},
+          decreaseSelectionSizeFromRight: function() {},
+          decreaseSelectionSizeFromTop: function() {},
+          increaseSelectionSizeRight: function() {},
+          increaseSelectionSizeUp: function() {}
         };
     }
     if (globals.currentAnnotations) {
