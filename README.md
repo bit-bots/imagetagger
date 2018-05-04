@@ -10,11 +10,11 @@ For a short overview of the functions please have a look at the following poster
 
 * team creation
 * image sets
-* bounding box labeling
+* bounding box, polygon, line and point labeling
 * imageset download
 * export format creation
 * label export
-* image preloading for labeling
+* image preloading for labeling and verification
 * label verification
 * upload of existing labels
 * tools exchange
@@ -22,6 +22,5 @@ For a short overview of the functions please have a look at the following poster
 
 ## Planned Features
 
-* image preloading for label verifiication
-* additional label classes to bounding-boxes
 * collections of filtered images from multiple imagesets
+* image metadata (e.g. robot pose, camera parameters)
