@@ -246,7 +246,8 @@ def view_imageset(request, image_set_id):
     # a list of annotation types used in the imageset
     annotation_types = set()
     annotations = Annotation.objects.select_related().filter(
-        image__in=images).order_by("id")
+        image__in=images,
+        annotation_type__active=True).order_by("id")
     annotation_types = annotation_types.union(
         [annotation.annotation_type for annotation in annotations])
     annotation_type_count = sorted(list(
@@ -405,7 +406,7 @@ def label_upload(request, imageset_id):
             image = images.filter(name=line_frags[0])
             if image.exists():
                 image = image[0]
-                annotation_type = AnnotationType.objects.filter(name=line_frags[1])
+                annotation_type = AnnotationType.objects.filter(name=line_frags[1], active=True)
                 if annotation_type.exists():
                     annotation_type = annotation_type[0]
                     vector = False
@@ -444,13 +445,13 @@ def label_upload(request, imageset_id):
                     error_count += 1
                     report_list.append(
                         'For the image ' + line_frags[0] + ' the annotation type \"'
-                        + line_frags[1] + '\" did not exist in this Imagetagger')
+                        + line_frags[1] + '\" does not exist in this Imagetagger')
             else:
                 error_count += 1
                 report_list.append('The image \"' + line_frags[0] + '\" does not exist in this imageset')
 
         for element in report_list[:20]:
-            messages.info(request, element)
+            messages.error(request, element)
             if len(report_list) > 20:
                 messages.warning(request, 'Only the first 20 errors are displayed.')
         if error_count + similar_count > 0:

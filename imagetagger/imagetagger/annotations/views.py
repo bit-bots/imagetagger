@@ -97,7 +97,9 @@ def manage_annotations(request, image_set_id):
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.annotate_verification_difference() \
         .select_related('image', 'user', 'last_editor',
-                        'annotation_type').filter(image__in=images) \
+                        'annotation_type')\
+        .filter(image__in=images,
+                annotation_type__active=True)\
         .order_by('id')
     return render(request, 'annotations/manage_annotations.html', {
         'selected_image_set': imageset,
@@ -406,7 +408,7 @@ def api_delete_annotation(request) -> Response:
     annotation.delete()
 
     serializer = AnnotationSerializer(
-        image.annotations.select_related().order_by('annotation_type__name'),
+        image.annotations.select_related().filter(annotation_type__active=True).order_by('annotation_type__name'),
         context={'request': request, },
         many=True)
     return Response({
@@ -453,7 +455,7 @@ def create_annotation(request) -> Response:
         annotation.verify(request.user, True)
 
     serializer = AnnotationSerializer(
-        annotation.image.annotations.select_related()
+        annotation.image.annotations.filter(annotation_type__active=True).select_related()
         .order_by('annotation_type__name'),
         context={
             'request': request,
@@ -480,7 +482,7 @@ def load_annotations(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     serializer = AnnotationSerializer(
-        image.annotations.select_related().order_by('annotation_type__name'),
+        image.annotations.select_related().filter(annotation_type__active=True).order_by('annotation_type__name'),
         context={
             'request': request,
         },
@@ -500,7 +502,8 @@ def load_set_annotations(request) -> Response:
 
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
     images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.filter(image__in=images)
+    annotations = Annotation.objects.filter(image__in=images,
+                                            annotation_type__active=True)
 
     if not imageset.has_perm('read', request.user):
         return Response({
@@ -542,7 +545,8 @@ def load_set_annotation_types(request) -> Response:
 
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
     images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.filter(image__in=images)
+    annotations = Annotation.objects.filter(image__in=images,
+                                            annotation_type__active=True)
     annotation_types = AnnotationType.objects.filter(
         active=True,
         annotation__in=annotations)\
@@ -575,7 +579,8 @@ def load_filtered_set_annotations(request) -> Response:
 
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
     images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.filter(image__in=images).select_related()
+    annotations = Annotation.objects.filter(image__in=images,
+                                            annotation_type__active=True).select_related()
     user_verifications = Verification.objects.filter(user=request.user, annotation__in=annotations)
     if annotation_type_id > -1:
         annotations = annotations.filter(annotation_type__id=annotation_type_id)
@@ -666,7 +671,8 @@ def update_annotation(request) -> Response:
         annotation.verify(request.user, True)
 
     serializer = AnnotationSerializer(
-        annotation.image.annotations.select_related()
+        annotation.image.annotations.filter(annotation_type__active=True).select_related()
+        .filter(annotation_type__active=True)
         .order_by('annotation_type__name'),
         context={
             'request': request,

@@ -531,6 +531,7 @@ function calculateImageScale() {
     var annotationTypeId = annotationElem.data('annotationtypeid');
 
     $('#annotation_type_id').val(annotationTypeId);
+    $('#annotation_type_id').val(toString(annotationTypeId));
     handleAnnotationTypeChange();
     globals.editedAnnotationsId = annotationId;
     globals.editActiveContainer.removeClass('hidden');
@@ -1056,10 +1057,10 @@ function calculateImageScale() {
       "X-CSRFTOKEN": gCsrfToken
     };
     gImageList = getImageList();
+    loadAnnotationTypeList();
     preloadImages();
     preloadAnnotations();
     scrollImageList();
-    loadAnnotationTypeList();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
