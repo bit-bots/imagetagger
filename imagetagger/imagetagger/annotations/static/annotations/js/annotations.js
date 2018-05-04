@@ -202,6 +202,7 @@ function calculateImageScale() {
         globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
           return e.annotation_type.id === gAnnotationType;
         });
+        gAnnotationCache[gImageId] = globals.allAnnotations;
 
         $('.annotate_button').prop('disabled', false);
 
@@ -317,6 +318,7 @@ function calculateImageScale() {
         globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
           return e.annotation_type.id === gAnnotationType;
         });
+        gAnnotationCache[gImageId] = globals.allAnnotations;
         // redraw the annotations
         tool.drawExistingAnnotations(globals.currentAnnotations);
         displayExistingAnnotations(globals.allAnnotations);
@@ -1089,20 +1091,24 @@ function calculateImageScale() {
     });
     $('#last_button').click(function(event) {
       event.preventDefault();
+      tool.cancelSelection();
       createAnnotation(undefined, function() {
         loadAdjacentImage(-1);
       }, true, true);
     });
     $('#back_button').click(function(event) {
       event.preventDefault();
+      tool.cancelSelection();
       loadAdjacentImage(-1);
     });
     $('#skip_button').click(function(event) {
       event.preventDefault();
+      tool.cancelSelection();
       loadAdjacentImage(1);
     });
     $('#next_button').click(function(event) {
       event.preventDefault();
+      tool.cancelSelection();
       createAnnotation(undefined, function() {
         loadAdjacentImage(1);
       }, true, true);
