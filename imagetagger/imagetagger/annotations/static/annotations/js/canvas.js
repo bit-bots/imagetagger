@@ -454,10 +454,10 @@ class Canvas {
     for (let drawing of this.drawings) {
       drawing.setMutable(false);
     }
+    globals.editedAnnotationsId = undefined;
+    $('.annotation').removeClass('alert-info');
+    globals.editActiveContainer.addClass('hidden');
     if (abortEdit === true) {
-      globals.editedAnnotationsId = undefined;
-      $('.annotation').removeClass('alert-info');
-      globals.editActiveContainer.addClass('hidden');
       if (this.old && this.currentDrawing) {
         this.currentDrawing.setPoints(this.old);
         this.old = undefined;
