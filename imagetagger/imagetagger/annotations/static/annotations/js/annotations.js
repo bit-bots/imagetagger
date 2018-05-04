@@ -1091,27 +1091,35 @@ function calculateImageScale() {
     });
     $('#last_button').click(function(event) {
       event.preventDefault();
-      tool.cancelSelection();
       createAnnotation(undefined, function() {
         loadAdjacentImage(-1);
       }, true, true);
+      if (tool instanceof BoundingBoxes) {
+          tool.cancelSelection();
+      }
     });
     $('#back_button').click(function(event) {
       event.preventDefault();
-      tool.cancelSelection();
+      if (tool instanceof BoundingBoxes) {
+          tool.cancelSelection();
+      }
       loadAdjacentImage(-1);
     });
     $('#skip_button').click(function(event) {
       event.preventDefault();
-      tool.cancelSelection();
+      if (tool instanceof BoundingBoxes) {
+          tool.cancelSelection();
+      }
       loadAdjacentImage(1);
     });
     $('#next_button').click(function(event) {
       event.preventDefault();
-      tool.cancelSelection();
       createAnnotation(undefined, function() {
         loadAdjacentImage(1);
       }, true, true);
+      if (tool instanceof BoundingBoxes) {
+          tool.cancelSelection();
+      }
     });
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
