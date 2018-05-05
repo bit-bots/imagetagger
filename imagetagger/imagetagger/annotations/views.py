@@ -107,12 +107,13 @@ def manage_annotations(request, image_set_id):
         'annotations': annotations,
     })
 
+
 @login_required
 def annotate_set(request, imageset_id):
     if request.method == 'POST' and 'nii_annotation_type' in request.POST.keys():
         annotation_type = get_object_or_404(AnnotationType, id=int(request.POST['nii_annotation_type']))
         imageset = get_object_or_404(ImageSet, id=imageset_id)
-        verify = 'verify' in request.POST.keys()
+        verify_annotations = 'verify' in request.POST.keys()
         if 'edit_set' in imageset.get_perms(request.user):
             images = Image.objects.filter(image_set=imageset)
             for image in images:
@@ -122,11 +123,13 @@ def annotate_set(request, imageset_id):
                             vector=None, image=image,
                             annotation_type=annotation_type, user=None)
                         # Automatically verify for owner
-                        if verify:
+                        if verify_annotations:
                             annotation.verify(request.user, True)
-
-
-    return redirect(reverse('images:view_imageset', args=(imageset_id)))
+        else:
+            messages.error(request, 'You have no permission to annotate all images in the set!')
+    else:
+        messages.error(request, 'There was a form error!')
+    return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
 
 @login_required
