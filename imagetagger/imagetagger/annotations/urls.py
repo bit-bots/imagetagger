@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^manage/annotation/(\d+)/$', views.manage_annotations, name='manage_annotations'),
     url(r'^(\d+)/delete/$', views.delete_annotation, name='delete_annotation'),
     url(r'^(\d+)/$', views.annotate, name='annotate'),
+    url(r'^annotateset/(\d+)/$', views.annotate_set, name='annotate_set'),
     url(r'^(\d+)/verify/$', views.verify, name='verify'),
     url(r'^api/annotation/create/$', views.create_annotation, name='create_annotation'),
     url(r'^api/annotation/delete/$', views.api_delete_annotation, name='delete_annotation'),

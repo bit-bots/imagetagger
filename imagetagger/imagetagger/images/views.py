@@ -244,6 +244,7 @@ def view_imageset(request, image_set_id):
         images = images.exclude(
             annotations__annotation_type_id=request.POST.get("selected_annotation_type"))
     # a list of annotation types used in the imageset
+    all_annotation_types = AnnotationType.objects.filter(active=True)
     annotation_types = set()
     annotations = Annotation.objects.select_related().filter(
         image__in=images,
@@ -265,6 +266,7 @@ def view_imageset(request, image_set_id):
         'imageset': imageset,
         'annotationtypes': annotation_types,
         'annotation_types': annotation_types,
+        'all_annotation_types': all_annotation_types,
         'annotation_type_count': annotation_type_count,
         'first_annotation': first_annotation,
         'exports': exports,

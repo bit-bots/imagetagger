@@ -350,15 +350,50 @@
             {% endif %}
         </div>
         <div class="col-md-3">
-        {%  if "annotate" in imageset_perms %}
-                {% if first_annotation %}
+            {%  if "annotate" in imageset_perms %}
+                {% if first_annotation or "edit_set" in imageset_perms and all_annotation_types%}
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h2 class="panel-title">Annotation management</h2>
                         </div>
                         <div class="panel-body">
-                            <li><a href="{% url 'annotations:manage_annotations' imageset.id %}">Manage annotations</a></li>
-                            <li><a href="{% url 'annotations:verify' first_annotation.id %}">Verify annotations</a></li>
+                            {% if first_annotation %}
+                                <li><a href="{% url 'annotations:manage_annotations' imageset.id %}">Manage annotations</a></li>
+                                <li><a href="{% url 'annotations:verify' first_annotation.id %}">Verify annotations</a></li>
+                            {% endif %}
+                            {% if "edit_set" in imageset_perms and all_annotation_types %}
+                                <li><a class="link" data-toggle="modal" data-target="#niiModal">Annotate the whole set</a></li>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="niiModal" tabindex="-1" role="dialog" aria-labelledby="niiModalLabel">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <form action="{% url 'annotations:annotate_set' imageset.id %}" method="POST">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                    <h4 class="modal-title" id="niiModalLabel">Annotate the whole set</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Here, you can annotate all the images contained in the set with "not in image" annotations.
+                                                    This enables you to create negative datasets quickly.
+                                                    <hr>
+                                                    <label for="nii_select">Not in image annotation type:</label>
+                                                    <select id="nii_select" name="nii_annotation_type">
+                                                        {% for annotation_type in all_annotation_types %}
+                                                            <option value="{{ annotation_type.id }}">{{ annotation_type.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-danger">Annotate</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}

@@ -108,6 +108,26 @@ def manage_annotations(request, image_set_id):
     })
 
 @login_required
+def annotate_set(request, imageset_id):
+    if request.method == 'POST' and 'nii_annotation_type' in request.POST.keys():
+        annotation_type = get_object_or_404(AnnotationType, id=int(request.POST['nii_annotation_type']))
+        imageset = get_object_or_404(ImageSet, id=imageset_id)
+        if 'edit_set' in imageset.get_perms(request.user):
+            images = Image.objects.filter(image_set=imageset)
+            for image in images:
+                if not Annotation.similar_annotations(None, image, annotation_type):
+                    with transaction.atomic():
+                        annotation = Annotation.objects.create(
+                            vector=None, image=image,
+                            annotation_type=annotation_type, user=None)
+                        # Automatically verify for owner
+                        annotation.verify(request.user, True)
+
+
+    return redirect(reverse('images:view_imageset', args=(imageset_id)))
+
+
+@login_required
 def verify(request, annotation_id):
     # here the stuff we got via POST gets put in the DB
     annotation = get_object_or_404(
