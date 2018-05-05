@@ -383,7 +383,9 @@
                                                         {% for annotation_type in all_annotation_types %}
                                                             <option value="{{ annotation_type.id }}">{{ annotation_type.name }}</option>
                                                         {% endfor %}
-                                                    </select>
+                                                    </select><br>
+                                                    <label for="check_verify">Verify the annotations</label>
+                                                    <input type="checkbox" name="verify">
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
