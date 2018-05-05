@@ -4,6 +4,7 @@ import os
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
@@ -101,10 +102,13 @@ def manage_annotations(request, image_set_id):
         .filter(image__in=images,
                 annotation_type__active=True)\
         .order_by('id')
+    paginator = Paginator(annotations, 50)
+    page = request.GET.get('page')
+    page_annotations = paginator.get_page(page)
     return render(request, 'annotations/manage_annotations.html', {
         'selected_image_set': imageset,
         'image_sets': imagesets,
-        'annotations': annotations,
+        'annotations': page_annotations,
     })
 
 

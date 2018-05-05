@@ -7,32 +7,16 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            <h1>Manage annotations</h1>
+            <h1>Manage annotations of {% if selected_image_set.team %} <a href="{% url 'users:team' selected_image_set.team_id%}">{{selected_image_set.team.name}}</a>/{% endif %}<a href="{% url 'images:view_imageset' selected_image_set.id %}">{{selected_image_set.name}}</a></h1>
+            {% if annotations.has_other_pages %}
+                <h4>
+                    Page {{ annotations.number }} of {{ annotations.paginator.num_pages }}
+                </h4>
+            {% endif %}
         </div>
     </div>
     <div class="row">
-        <div class="col-md-3">
-            <div class="list-group">
-                {% for image_set in image_sets %}
-                    {% if image_set.id == selected_image_set.id %}
-                        <a class="list-group-item active">
-                        {% if image_set.team %}
-                            {{image_set.team.name}} /
-                        {% endif %}
-                        {{image_set.name}}
-                        </a>
-                    {% else %}
-                        <a class="list-group-item" href="{% url 'annotations:manage_annotations' image_set.id %}">
-                            {% if image_set.team %}
-                                {{image_set.team.name}} /
-                            {% endif %}
-                            {{image_set.name}}
-                        </a>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="panel panel-default">
                 <table class="table table-striped" width='100%'>
                     <thead>
@@ -61,25 +45,40 @@
                             <td>{{ annotation.user.username }}</td>
                             <td>{{ annotation.last_editor.username }}</td>
                             <td>
-                                <a href='{% url 'annotations:annotate' annotation.image.id %}?edit={{ annotation.id }}'>
-                                    <span class="btn btn-success">
-                                        <span class="glyphicon glyphicon-pencil glyphicon-white" aria-hidden="true"></span>
-                                    </span>
-                                </a>
-                                <a href='{% url 'annotations:verify' annotation.id %}'>
-                                    <span class="btn btn-warning">
-                                        <span class="glyphicon glyphicon-ok glyphicon-white" aria-hidden="true"></span>
-                                    </span>
-                                </a>
-                                <a href='{% url 'annotations:delete_annotation' annotation.id%}'>
-                                    <span class="btn btn-danger">
-                                        <span class="glyphicon glyphicon-trash glyphicon-white" aria-hidden="true"></span>
-                                    </span>
-                                </a>
+                                <div class="btn-group" role="group" aria-label="btn-group">
+                                    <a class="btn btn-success" href='{% url 'annotations:annotate' annotation.image.id %}?edit={{ annotation.id }}'>
+                                            <span class="glyphicon glyphicon-pencil glyphicon-white" aria-hidden="true"></span>
+                                    </a>
+                                    <a class="btn btn-warning" href='{% url 'annotations:verify' annotation.id %}'>
+                                            <span class="glyphicon glyphicon-ok glyphicon-white" aria-hidden="true"></span>
+                                    </a>
+                                    <a class="btn btn-danger" href='{% url 'annotations:delete_annotation' annotation.id%}'>
+                                            <span class="glyphicon glyphicon-trash glyphicon-white" aria-hidden="true"></span>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
                 </table>
+            </div>
+            <div class="pagination">
+                <span class="step-links">
+                    <div class="btn-group" role="group" aria-label="btn-group">
+                        {% if annotations.has_previous %}
+                            <a class="btn btn-default" href="?page=1">&laquo; first</a>
+                            <a class="btn btn-default" href="?page={{ annotations.previous_page_number }}">previous</a>
+                        {% endif %}
+                        {% if annotations.has_other_pages %}
+                            <span class="current btn btn-default">
+                                Page {{ annotations.number }} of {{ annotations.paginator.num_pages }}
+                            </span>
+                        {% endif %}
+                        {% if annotations.has_next %}
+                            <a class="btn btn-default" href="?page={{ annotations.next_page_number }}">next</a>
+                            <a class="btn btn-default" href="?page={{ annotations.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                    </div>
+                </span>
             </div>
         </div>
     </div>
