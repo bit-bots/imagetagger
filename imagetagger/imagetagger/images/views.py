@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
 from django.db.models import Q
-from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -42,12 +42,20 @@ def explore_imageset(request):
         Q(team__members=request.user) | Q(public=True)).distinct()
 
     query = request.GET.get('query')
+    get_query = ''
     if query:
         imagesets = imagesets.filter(name__icontains=query)
+        get_query = '&query=' + str(query)
+    paginator = Paginator(imagesets, 1)
+    page = request.GET.get('page')
+    page_imagesets = paginator.get_page(page)
 
     return TemplateResponse(request, 'base/explore.html', {
         'mode': 'imageset',
-        'imagesets': imagesets,
+        'imagesets': page_imagesets,  # to separate what kind of stuff is displayed in the view
+        'paginator': page_imagesets,  # for page stuff
+        'get_query': get_query,
+        'query': query,
     })
 
 

@@ -21,11 +21,14 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form action="{{ request.get_full_path }}" method="GET">
-                                {% csrf_token %}
-                                <input id="searchbox" type="text" name="query" placeholder="Search for {{mode}}s">
-                                <button class="btn btn-primary" type="submit">
-                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
-                                </button>
+                                <div class="input-group" role="group" aria-label="input-group">
+                                    <input class="form-control" id="searchbox" type="text" name="query" placeholder="Search for {{mode}}s" {% if query %}value="{{ query }}"{% endif %}>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-primary" type="submit">
+                                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
+                                        </button>
+                                    </span>
+                                </div>
                             </form>
                             <hr>
                         </div>
@@ -77,6 +80,26 @@
                                 {% endfor %}
                                 </table>
                             </dl>
+                            {% if paginator.has_other_pages %}
+                                <div class="pagination">
+                                    <hr>
+                                    <span class="step-links">
+                                        <div class="btn-group" role="group" aria-label="btn-group">
+                                            {% if paginator.has_previous %}
+                                                <a class="btn btn-default" href="?page=1{{ get_query }}">&laquo; first</a>
+                                                <a class="btn btn-default" href="?page={{ paginator.previous_page_number }}{{ get_query }}">previous</a>
+                                            {% endif %}
+                                                <span class="current btn btn-default">
+                                                    Page {{ paginator.number }} of {{ paginator.paginator.num_pages }}
+                                                </span>
+                                            {% if paginator.has_next %}
+                                                <a class="btn btn-default" href="?page={{ paginator.next_page_number }}{{ get_query }}">next</a>
+                                                <a class="btn btn-default" href="?page={{ paginator.paginator.num_pages }}{{ get_query }}">last &raquo;</a>
+                                            {% endif %}
+                                        </div>
+                                    </span>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

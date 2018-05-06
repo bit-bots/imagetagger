@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Subquery, OuterRef, IntegerField
 from django.http import HttpRequest, HttpResponse
@@ -86,12 +87,20 @@ def explore_team(request):
     teams = Team.objects.all()
 
     query = request.GET.get('query')
+    get_query = ''
     if query:
         teams = teams.filter(name__icontains=query)
+        get_query = '&query=' + str(query)
+    paginator = Paginator(teams, 25)
+    page = request.GET.get('page')
+    page_teams = paginator.get_page(page)
 
     return render(request, 'base/explore.html', {
         'mode': 'team',
-        'teams': teams,
+        'teams': page_teams,  # to separate what kind of stuff is displayed in the view
+        'paginator': page_teams,  # for page stuff
+        'get_query': get_query,
+        'query': query,
     })
 
 
@@ -107,12 +116,20 @@ def explore_user(request):
         .order_by(F('points').desc(nulls_last=True)).distinct()
 
     query = request.GET.get('query')
+    get_query = ''
     if query:
         users = users.filter(username__icontains=query)
+        get_query = '&query=' + str(query)
+    paginator = Paginator(users, 25)
+    page = request.GET.get('page')
+    page_users = paginator.get_page(page)
 
     return render(request, 'base/explore.html', {
         'mode': 'user',
-        'users': users,
+        'users': page_users,  # to separate what kind of stuff is displayed in the view
+        'paginator': page_users,  # for page stuff
+        'get_query': get_query,
+        'query': query,
     })
 
 
