@@ -62,7 +62,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images)</li>
+                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}</li>
                                         {% empty %}
                                             {% trans 'no imagesets available' %}
                                         {% endfor %}
@@ -78,7 +78,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images)</li>
+                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}</li>
                                         {% empty %}
                                             {% trans 'no imagesets available' %}
                                         {% endfor %}
@@ -94,7 +94,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images)</li>
+                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}</li>
                                         {% empty %}
                                             {% trans 'no imagesets available' %}
                                         {% endfor %}
@@ -110,7 +110,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images)</li>
+                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}</li>
                                         {% empty %}
                                             Here, all imagesets with the word 'test' in the name are listed.<br>
                                             {% trans 'no test imagesets available' %}

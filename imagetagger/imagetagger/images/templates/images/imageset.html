@@ -129,7 +129,7 @@
                         <ul>
                             {% for image in images %}
                                 <li>
-                                    <a href="{% url 'annotations:annotate' image.id %}"> {{image.name}}</a>
+                                    <a href="{% url 'annotations:annotate' image.id %}"> {{image.name|truncatechars:30}}</a>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -141,7 +141,7 @@
             <div class="row">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h2 class="panel-title">{{imageset.name}}</h2>
+                        <h2 class="panel-title">{{imageset.name}} {{ imageset.prio_symbol | safe }}</h2>
                     </div>
                     <div class="panel-body">
                         <table class="table table-striped">
@@ -202,73 +202,93 @@
                                 <tbody>
                                     <form id="edit_set" action="{% url 'images:edit_imageset' imageset.id %}" method="POST">
                                         {% csrf_token %}
-                                    <tr>
-                                        <td>
-                                            <label for="id_name">{{ edit_form.name.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.name class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_location">{{ edit_form.location.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.location class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_description">{{ edit_form.description.label }}</label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.description class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="id_public">{{ edit_form.public.label }}
-                                                <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span>
-                                            </label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.public class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr id="public_collaboration_row">
-                                        <td>
-                                            <label for="id_public_collaboration">{{ edit_form.public_collaboration.label }}
-                                                <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span>
-                                            </label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.public_collaboration class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label for="image-lock">{{ edit_form.image_lock.label }}
-                                                <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Prevents the upload of new pictures to the set"></span>
-                                            </label>
-                                        </td>
-                                        <td>
-                                            {% render_field edit_form.image_lock class+='form-control' %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {% if "delete_set" in imageset_perms %}
-                                                <a class="btn btn-danger" href="{% url 'images:delete_imageset' imageset.id %}">Delete Set</a>
-                                            {% endif %}
-                                        </td>
-                                        <td class="align-right">
-                                            {% if "delete_set" in imageset_perms %}
-                                                <a class="btn btn-warning" href="{% url 'images:setfree_imageset' imageset.id %}">Set Free</a>
-                                            {% endif %}
-                                            <input class="btn btn-primary" type="submit" value="{% trans 'Save changes' %}" />
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="id_name">{{ edit_form.name.label }}</label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.name class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="id_location">{{ edit_form.location.label }}</label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.location class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="id_description">{{ edit_form.description.label }}</label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.description class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="id_public">{{ edit_form.public.label }}
+                                                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.public class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr id="public_collaboration_row">
+                                            <td>
+                                                <label for="id_public_collaboration">{{ edit_form.public_collaboration.label }}
+                                                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.public_collaboration class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="image-lock">{{ edit_form.image_lock.label }}
+                                                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Prevents the upload of new pictures to the set"></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.image_lock class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="image-lock">{{ edit_form.priority.label }}
+                                                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="The importance of the set."></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.priority class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="image-lock">{{ edit_form.main_annotation_type.label }}
+                                                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="The preferred annotation type to label in this set."></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                {% render_field edit_form.main_annotation_type class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                {% if "delete_set" in imageset_perms %}
+                                                    <a class="btn btn-danger" href="{% url 'images:delete_imageset' imageset.id %}">Delete Set</a>
+                                                {% endif %}
+                                            </td>
+                                            <td class="align-right">
+                                                {% if "delete_set" in imageset_perms %}
+                                                    <a class="btn btn-warning" href="{% url 'images:setfree_imageset' imageset.id %}">Set Free</a>
+                                                {% endif %}
+                                                <input class="btn btn-primary" type="submit" value="{% trans 'Save changes' %}" />
+                                            </td>
+                                        </tr>
                                     </form>
                                 </tbody>
                             </table>
@@ -357,13 +377,13 @@
                             <h2 class="panel-title">Annotation management</h2>
                         </div>
                         <div class="panel-body">
+                            <ul>
                             {% if first_annotation %}
                                 <li><a href="{% url 'annotations:manage_annotations' imageset.id %}">Manage annotations</a></li>
                                 <li><a href="{% url 'annotations:verify' first_annotation.id %}">Verify annotations</a></li>
                             {% endif %}
                             {% if "edit_set" in imageset_perms and all_annotation_types %}
-                                <li><a class="link" data-toggle="modal" data-target="#niiModal">Annotate the whole set</a></li>
-
+                                <li><a href="#" class="link" data-toggle="modal" data-target="#niiModal">Annotate the whole set</a></li>
                                 <!-- Modal -->
                                 <div class="modal fade" id="niiModal" tabindex="-1" role="dialog" aria-labelledby="niiModalLabel">
                                     <div class="modal-dialog" role="document">
@@ -396,6 +416,7 @@
                                     </div>
                                 </div>
                             {% endif %}
+                            </ul>
                         </div>
                     </div>
                 {% endif %}

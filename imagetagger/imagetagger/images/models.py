@@ -119,3 +119,12 @@ class ImageSet(models.Model):
 
     def __str__(self):
         return u'Imageset: {0}'.format(self.name)
+
+    @property
+    def prio_symbol(self):
+        if self.priority is -1:
+            return '<span class="glyphicon glyphicon-download" ></span>'
+        elif self.priority is 0:
+            return ''
+        elif self.priority is 1:
+            return '<span class="glyphicon glyphicon-exclamation-sign" ></span>'
