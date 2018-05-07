@@ -249,6 +249,7 @@
 
   <span id="image_id" class="hidden">{{ selected_image.id }}</span>
   <span id="image_set_id" class="hidden">{{ selected_image.image_set.id }}</span>
+  <span id="main_annotation_type_id" class="hidden">{% if selected_image.image_set.main_annotation_type.id %}{{ selected_image.image_set.main_annotation_type.id }}{% else %}-1{% endif %}</span>
 {% endblock %}
 
 

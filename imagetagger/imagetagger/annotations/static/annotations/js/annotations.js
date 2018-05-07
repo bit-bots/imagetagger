@@ -1273,6 +1273,7 @@ function calculateImageScale() {
       if (editAnnotationId) {
         $('#annotation_edit_button_' + editAnnotationId).click();
       }
+      selectAnnotationType($('#main_annotation_type_id').html());
     });
   });
 })();
