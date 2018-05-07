@@ -123,8 +123,8 @@ class ImageSet(models.Model):
     @property
     def prio_symbol(self):
         if self.priority is -1:
-            return '<span class="glyphicon glyphicon-download" ></span>'
+            return '<span class="glyphicon glyphicon-download" data-toggle="tooltip" data-placement="right" title="Low labeling priority"></span>'
         elif self.priority is 0:
             return ''
         elif self.priority is 1:
-            return '<span class="glyphicon glyphicon-exclamation-sign" ></span>'
+            return '<span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="High labeling priority"></span>'
