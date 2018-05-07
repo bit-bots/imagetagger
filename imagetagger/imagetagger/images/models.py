@@ -35,6 +35,11 @@ class ImageSet(models.Model):
             'name',
             'team',
         ]
+    PRIORITIES = (
+        (1, 'High'),
+        (0, 'Normal'),
+        (-1, 'Low'),
+    )
 
     path = models.CharField(max_length=100, unique=True, null=True)
     name = models.CharField(max_length=100)
@@ -42,10 +47,23 @@ class ImageSet(models.Model):
     description = models.TextField(max_length=1000, null=True)
     time = models.DateTimeField(auto_now_add=True)
     team = models.ForeignKey(
-        Team, on_delete=models.SET_NULL, related_name='image_sets', null=True, blank=True)
+        Team,
+        on_delete=models.SET_NULL,
+        related_name='image_sets',
+        null=True,
+        blank=True
+    )
     public = models.BooleanField(default=False)
     public_collaboration = models.BooleanField(default=False)
     image_lock = models.BooleanField(default=False)
+    priority = models.IntegerField(choices=PRIORITIES, default=0)
+    main_annotation_type = models.ForeignKey(
+        to='annotations.AnnotationType',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None
+    )
 
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)
