@@ -57,6 +57,15 @@ function calculateImageScale() {
 
   var tool;
 
+  function shorten(string, length) {
+    let threshold = length || 30;
+    if (string.length < threshold) {
+      return string;
+    } else {
+      return string.substr(0, threshold / 2 - 1) + '...' + string.substr(-threshold / 2 + 2, threshold / 2 - 2);
+    }
+  }
+
   function initTool() {
     setTool();
     tool.initSelection();
@@ -145,7 +154,8 @@ function calculateImageScale() {
       displayFeedback($('#feedback_annotation_type_missing'));
       return;
     }
-
+    let blurred = $('#blurred').is(':checked');
+    let concealed = $('#concealed').is(':checked');
     if (!$('#not_in_image').is(':checked')) {
       vector = {};
       for (let i = 1; $('#x' + i + 'Field').length; i++) {
@@ -183,7 +193,9 @@ function calculateImageScale() {
     var data = {
       annotation_type_id: annotationTypeId,
       image_id: gImageId,
-      vector: vector
+      vector: vector,
+      concealed: concealed,
+      blurred: blurred
     };
     var editing = false;
     if (globals.editedAnnotationsId !== undefined) {
@@ -1000,6 +1012,7 @@ function calculateImageScale() {
     globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
       return e.annotation_type.id === gAnnotationType;
     });
+
     setTool();
   }
 

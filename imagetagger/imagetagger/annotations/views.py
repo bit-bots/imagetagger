@@ -452,6 +452,8 @@ def create_annotation(request) -> Response:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
+        blurred = request.data['blurred']
+        concealed = request.data['concealed']
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
@@ -476,8 +478,13 @@ def create_annotation(request) -> Response:
 
     with transaction.atomic():
         annotation = Annotation.objects.create(
-            vector=vector, image=image,
-            annotation_type=annotation_type, user=request.user)
+            vector=vector,
+            image=image,
+            annotation_type=annotation_type,
+            user=request.user,
+            _blurred=blurred,
+            _concealed=concealed
+        )
 
         # Automatically verify for owner
         annotation.verify(request.user, True)
@@ -662,6 +669,8 @@ def update_annotation(request) -> Response:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
+        blurred = request.data['blurred']
+        concealed = request.data['concealed']
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
@@ -691,6 +700,8 @@ def update_annotation(request) -> Response:
     with transaction.atomic():
         annotation.annotation_type = annotation_type
         annotation.vector = vector
+        annotation._concealed = concealed
+        annotation._blurred = blurred
         annotation.last_editor = request.user
         annotation.save()
         annotation.annotation_type = annotation_type
