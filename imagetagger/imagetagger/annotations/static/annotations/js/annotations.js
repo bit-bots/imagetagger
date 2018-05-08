@@ -380,6 +380,14 @@ function calculateImageScale() {
       } else {
         annotation.content = 'not in image';
       }
+      annotation.content = shorten(annotation.content, 100);
+      if (annotation.blurred) {
+        annotation.content += ' <span id="blurred_label" class="label label-info">Blurred</span>';
+      }
+
+      if (annotation.concealed) {
+        annotation.content += ' <span id="concealed_label" class="label label-warning">Concealed</span>';
+      }
 
       newAnnotation.append(annotation.annotation_type.name + ':');
 
