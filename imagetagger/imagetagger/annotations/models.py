@@ -38,6 +38,8 @@ class Annotation(models.Model):
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='annotations')
     vector = JSONField(null=True)
+    _concealed = models.BooleanField(default=False)
+    _blurred = models.BooleanField(default=False)
     closed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
 
@@ -57,7 +59,13 @@ class Annotation(models.Model):
     def __str__(self):
         return 'Annotation: {0}'.format(self.annotation_type.name)
 
-    # TODO: proper handling of this vector stuff
+    @property
+    def concealed(self):
+        return self.annotation_type.enable_concealed and self._concealed
+
+    @property
+    def blurred(self):
+        return self.annotation_type.enable_blurred and self._blurred
 
     @cached_property
     def min_x(self):
@@ -401,6 +409,8 @@ class AnnotationType(models.Model):
     vector_type = models.IntegerField(default=VECTOR_TYPE.BOUNDING_BOX)
     # Number of required nodes (in polygon and multiline) 0->unspecified
     node_count = models.IntegerField(default=0)
+    enable_concealed = models.BooleanField(default=True)
+    enable_blurred = models.BooleanField(default=True)
 
     def __str__(self):
         return u'AnnotationType: {0}'.format(self.name)
