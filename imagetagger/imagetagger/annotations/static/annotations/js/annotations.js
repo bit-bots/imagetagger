@@ -649,20 +649,46 @@ function calculateImageScale() {
     return false;
   }
 
+  function setupCBCheckboxes() {
+    let concealed = $('#concealed');
+    let concealedP = $('#concealed_p');
+    let blurred = $('#blurred');
+    let blurredP = $('#blurred_p');
+    concealedP.show();
+    concealed.prop('disabled', false);
+    blurredP.show();
+    blurred.prop('disabled', false);
+  }
+
+  function hideCBCheckboxes() {
+    let concealed = $('#concealed');
+    let concealedP = $('#concealed_p');
+    let blurred = $('#blurred');
+    let blurredP = $('#blurred_p');
+    concealed.prop('checked', false);
+    concealedP.hide();
+    concealed.prop('disabled', true);
+    blurredP.hide();
+    blurred.prop('checked', false);
+    blurred.prop('disabled', true);
+  }
+
   /**
    * Handle toggle of the not in image checkbox.
    *
    * @param event
    */
   function handleNotInImageToggle(event) {
-    var coordinate_table = $('#coordinate_table');
+    let coordinate_table = $('#coordinate_table');
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
       tool.resetSelection();
       coordinate_table.hide();
+      hideCBCheckboxes();
     } else {
       coordinate_table.show();
+      setupCBCheckboxes();
     }
   }
 
