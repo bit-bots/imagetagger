@@ -352,6 +352,16 @@ function calculateImageScale() {
       }, document.title, '/annotations/' + annotationId + '/verify/');
     }
     $('#annotation-type-title').html('<b>Annotation type: ' + annotation.annotation_type.name + '</b>');
+    if (annotation.concealed) {
+      $('#concealed_label').show()
+    } else {
+      $('#concealed_label').hide()
+    }
+    if (annotation.blurred) {
+      $('#blurred_label').show()
+    } else {
+      $('#blurred_label').hide()
+    }
     drawAnnotation(annotation);
   }
 
@@ -472,7 +482,8 @@ function calculateImageScale() {
     };
 
     gImageSetId = parseInt($('#image_set_id').html());
-
+    $('#blurred_label').hide();
+    $('#concealed_label').hide();
     loadAnnotationTypeList(gImageSetId);
     loadFilteredAnnotationList(gImageSetId);
 

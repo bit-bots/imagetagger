@@ -12,6 +12,8 @@ class AnnotationTypeSerializer(ModelSerializer):
             'name',
             'vector_type',
             'node_count',
+            'enable_concealed',
+            'enable_blurred',
         )
 
 
@@ -31,6 +33,8 @@ class AnnotationSerializer(ModelSerializer):
             'vector',
             'verified_by_user',
             'image',
+            'concealed',
+            'blurred',
         )
 
     annotation_type = AnnotationTypeSerializer(read_only=True)
