@@ -194,7 +194,7 @@ def export_format(export_format_name, imageset):
                         }
                     else:
                         formatted_vector = str()
-                        for counter1 in range(len(annotation.vector) // 2):
+                        for counter1 in range(1, (len(annotation.vector) // 2) + 1):
                             vector_line = export_format.vector_format
                             placeholders_vector = {
                                 '%%count0': counter1 - 1,
