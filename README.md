@@ -1,4 +1,4 @@
-# imagetagger
+# ImageTagger
 
 This is a collaborative online tool for labeling image data.
 

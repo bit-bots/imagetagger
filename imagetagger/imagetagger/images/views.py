@@ -457,7 +457,7 @@ def label_upload(request, imageset_id):
                     error_count += 1
                     report_list.append(
                         'For the image ' + line_frags[0] + ' the annotation type \"'
-                        + line_frags[1] + '\" does not exist in this Imagetagger')
+                        + line_frags[1] + '\" does not exist in this ImageTagger')
             else:
                 error_count += 1
                 report_list.append('The image \"' + line_frags[0] + '\" does not exist in this imageset')

@@ -353,12 +353,12 @@
                         </h3>
                         Here you can upload existing labels as a text file in the following format:<br>
                         image name|annotation type|{'x1': x1,'y1': y1...}<br>
-                        Using the Imagetagger export tool for example:<br>
+                        Using the ImageTagger export tool for example:<br>
                         Annotation format: %%imagename|%%type|{%%vector}<br>
                         Vector format: "x%%count1": "%%x","y%%count1": %%y,<br>
                         or:<br>
                         image name|annotation type|not in image<br>&nbsp;<br>
-                        One annotation per line. The annotation type has to exist in the imagetagger too.
+                        One annotation per line. The annotation type has to exist in the ImageTagger too.
                         <form action="{% url 'images:label_upload' imageset.id %}" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             {{ label_upload_form }}<br>

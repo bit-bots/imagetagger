@@ -3,7 +3,7 @@ if [[ -z $1 ]]; then
     echo "No imageset specified!"
     exit 1
 fi
-echo "Please enter Username and Password for the imagetagger. This script will download into the current directory"
+echo "Please enter Username and Password for the ImageTagger. This script will download into the current directory"
 read -p "User: " USER
 read -s -p "Password: " PASSWD
 

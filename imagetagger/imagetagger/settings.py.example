@@ -164,7 +164,7 @@ IMPRINT_NAME = ''
 IMPRINT_URL = ''
 UPLOAD_NOTICE = 'By uploading images to this tool you accept that the images get published under creative commons license and confirm that you have the permission to do so.'
 
-DOWNLOAD_BASE_URL = '' # the URL where the imagetagger is hosted e.g. https://imagetagger.bit-bots.de
+DOWNLOAD_BASE_URL = '' # the URL where the ImageTagger is hosted e.g. https://imagetagger.bit-bots.de
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
