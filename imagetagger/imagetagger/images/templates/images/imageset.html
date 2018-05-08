@@ -175,7 +175,7 @@
                                         <ul>
                                             {% for atc in annotation_type_count %}
                                                 <li>
-                                                    {{ atc.0}}: {{ atc.1 }}
+                                                    {{ atc.0}}: <b>{{ atc.1 }}</b> (<b><span class="text-success">{{ atc.2 }}</span></b>/<b><span class="text-danger">{{ atc.3 }}</span></b>)
                                                 </li>
                                             {% endfor %}
                                         </ul>
@@ -395,8 +395,10 @@
                                                     <h4 class="modal-title" id="niiModalLabel">Annotate the whole set</h4>
                                                 </div>
                                                 <div class="modal-body">
-                                                    Here, you can annotate all the images contained in the set with "not in image" annotations.
-                                                    This enables you to create negative datasets quickly.
+                                                    <p align="center">Here, you can annotate all the images contained in the set with</p>
+                                                    <p align="center">"<b><span class="text-danger">not in image</span></b>"</p>
+                                                    <p align="center">annotations. This enables you to create negative datasets quickly.</p>
+
                                                     <hr>
                                                     <label for="nii_select">Not in image annotation type:</label>
                                                     <select id="nii_select" name="nii_annotation_type">

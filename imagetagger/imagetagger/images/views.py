@@ -46,7 +46,7 @@ def explore_imageset(request):
     if query:
         imagesets = imagesets.filter(name__icontains=query)
         get_query = '&query=' + str(query)
-    paginator = Paginator(imagesets, 1)
+    paginator = Paginator(imagesets, 25)
     page = request.GET.get('page')
     page_imagesets = paginator.get_page(page)
 
@@ -234,6 +234,18 @@ def delete_images(request, image_id):
         return JsonResponse({'files': [{image.name: True}, ]})
 
 
+def count_annotations_of_type(annotations, annotation_type):
+    annotations = annotations.filter(annotation_type=annotation_type)
+    annotation_count = annotations.count()
+    neg_annotation_count = annotations.filter(vector=None).count()
+    return (
+        annotation_type.name,
+        annotation_count,
+        annotation_count - neg_annotation_count,
+        neg_annotation_count,
+    )
+
+
 @login_required
 def view_imageset(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
@@ -261,8 +273,7 @@ def view_imageset(request, image_set_id):
         [annotation.annotation_type for annotation in annotations])
     annotation_type_count = sorted(list(
         map(
-            lambda at: (at.name,
-                        annotations.filter(annotation_type=at).count()),
+            lambda at: count_annotations_of_type(annotations, at),
             annotation_types)),
         key=lambda at_tuple: at_tuple[1],
         reverse=True)
