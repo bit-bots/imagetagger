@@ -805,6 +805,10 @@ function calculateImageScale() {
     $('#annotation_type_id').val(gAnnotationType);
 
     displayImage(imageId);
+    if (!$('#keep_selection').prop('checked')) {
+      $('#concealed').prop('checked', false);
+      $('#blurred').prop('checked', false);
+    }
     scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
