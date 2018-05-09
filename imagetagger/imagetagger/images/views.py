@@ -450,7 +450,11 @@ def label_upload(request, imageset_id):
                         vector = None
 
                     else:
-                        vector = json.loads(line_frags[2])
+                        try:
+                            vector = json.loads(line_frags[2])
+                        except Exception as error:
+                            report_list.append("In image \"{}\" the annotation:"
+                                        " \"{}\" was not accepted as valid JSON".format(line_frags[0],line_frags[2]))
 
                     if annotation_type.validate_vector(vector):
                         if not Annotation.similar_annotations(vector, image, annotation_type):
