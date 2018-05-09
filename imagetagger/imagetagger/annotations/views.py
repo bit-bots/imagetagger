@@ -154,6 +154,21 @@ def verify(request, annotation_id):
     })
 
 
+def apply_conditional(string, conditional, keep):
+    """
+    :param conditional: %%ifbla
+    :param keep: Ob der String mit oder ohne das gefundene zurueckgegeben werden soll
+    """
+    while string.find(conditional) != -1:
+        findstring = string[string.find(conditional):]
+        found = findstring[len(conditional):findstring.find("%%endif")]
+        if keep:
+            string = string.replace(conditional + found + "%%endif", found)
+        else:
+            string = string.replace(conditional + found + "%%endif", "")
+    return string
+
+
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
@@ -209,6 +224,10 @@ def export_format(export_format_name, imageset):
                                 vector_line = vector_line.replace(key, str(value))
                             formatted_vector += vector_line
                         formatted_annotation = export_format.annotation_format
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred', annotation.blurred)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred', not annotation.blurred)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed', annotation.concealed)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed', not annotation.concealed)
                         placeholders_annotation = {
                             '%%imageset': imageset.name,
                             '%%imagewidth': image.width,
@@ -293,6 +312,10 @@ def export_format(export_format_name, imageset):
                         vector_line = vector_line.replace(key, str(value))
                     formatted_vector += vector_line
                 formatted_annotation = export_format.annotation_format
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred', annotation.blurred)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred', not annotation.blurred)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed', annotation.concealed)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed', not annotation.concealed)
                 placeholders_annotation = {
                     '%%imageset': imageset.name,
                     '%%imagewidth': annotation.image.width,

@@ -18,4 +18,10 @@
     <p><b>%%dia, %%reldia:</b> diameter of the annotation, absolute or relative value</p>
     <p><b>%%width, %%relwidth:</b> width of the annotation, absolute or relative value</p>
     <p><b>%%height, %%relheight:</b> height of the annotation, absolute or relative value</p>
+    <p><b>%%ifblurred</b> text in between this and %%endif will be displayed if the annotation is marked as blurred</p>
+    <p><b>%%ifnotblurred</b> text in between this and %%endif will be displayed if the annotation is not marked as blurred</p>
+    <p><b>%%ifconcealed</b> text in between this and %%endif will be displayed if the annotation is marked as concealed</p>
+    <p><b>%%ifnotconcealed</b> text in between this and %%endif will be displayed if the annotation is not marked as concealed</p>
+    <p><b>%%endif</b> closes an opened if. This is absolutely necessary for every if.</p>
+    <p>Note: nested ifs are not allowed!</p>
 {% endblocktrans %}
