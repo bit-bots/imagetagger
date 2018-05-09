@@ -1335,10 +1335,10 @@ function calculateImageScale() {
       }
     });
     $(document).one("ajaxStop", function() {
+      selectAnnotationType($('#main_annotation_type_id').html());
       if (editAnnotationId) {
         $('#annotation_edit_button_' + editAnnotationId).click();
       }
-      selectAnnotationType($('#main_annotation_type_id').html());
     });
   });
 })();
