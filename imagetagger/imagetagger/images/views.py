@@ -446,9 +446,9 @@ def label_upload(request, imageset_id):
                             )
                         blurred = 'b' in flags
                         concealed = 'c' in flags
-
-                    if line_frags[2] == 'not in image' or '{}':
+                    if line_frags[2] == 'not in image' or line_frags[2] == '{}':
                         vector = None
+
                     else:
                         vector = json.loads(line_frags[2])
 
