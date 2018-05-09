@@ -433,6 +433,20 @@ def label_upload(request, imageset_id):
                 if annotation_type.exists():
                     annotation_type = annotation_type[0]
                     vector = False
+                    blurred = False
+                    concealed = False
+                    if len(line_frags) > 3:
+                        flags = line_frags[3]
+                        test_flags = flags.replace('b', '')
+                        test_flags = test_flags.replace('c', '')
+                        if len(test_flags) > 0:
+                            report_list.append(
+                                'unknown flags: \"{}\" for image: \"{}\"'
+                                .format(test_flags, line_frags[0])
+                            )
+                        blurred = 'b' in flags
+                        concealed = 'c' in flags
+
                     if line_frags[2] == 'not in image' or '{}':
                         vector = None
                     else:
@@ -445,6 +459,8 @@ def label_upload(request, imageset_id):
                             annotation.image = image
                             annotation.user = request.user
                             annotation.vector = vector
+                            annotation._blurred = blurred
+                            annotation._concealed = concealed
                             annotation.save()
                             if verify:
                                 verification = Verification()
