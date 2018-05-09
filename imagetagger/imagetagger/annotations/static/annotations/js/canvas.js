@@ -408,7 +408,10 @@ class Canvas {
   }
 
   updateAnnotationFields(drawing) {
-    $('#not_in_image').prop('checked', false).change();
+    let not_in_image_cb = $('#not_in_image');
+    if (not_in_image_cb.prop('checked')) {
+      $('#not_in_image').prop('checked', false).change();
+    }
     if (drawing.type === "ellipse") {
       drawing.x1 = drawing.x;
       drawing.y1 = drawing.y;

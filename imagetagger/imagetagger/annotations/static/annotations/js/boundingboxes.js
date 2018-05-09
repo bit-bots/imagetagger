@@ -286,7 +286,10 @@ class BoundingBoxes {
    * @param selection
    */
   updateAnnotationFields(img, selection) {
-    $('#not_in_image').prop('checked', false).change();
+    let not_in_image_cb = $('#not_in_image');
+    if (not_in_image_cb.prop('checked')) {
+      $('#not_in_image').prop('checked', false).change();
+    }
     // Add missing fields
     let i = 1;
     for (; selection.hasOwnProperty("x" + i); i++) {

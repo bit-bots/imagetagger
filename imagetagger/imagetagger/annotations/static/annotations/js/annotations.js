@@ -289,7 +289,9 @@ function calculateImageScale() {
         html: annotationType.name + ' (' + (key + 1) + ')',
         id: 'annotation_type_' + (key + 1),
         'data-vector-type': annotationType.vector_type,
-        'data-node-count': annotationType.node_count
+        'data-node-count': annotationType.node_count,
+        'data-blurred': annotationType.enable_blurred,
+        'data-concealed': annotationType.enable_concealed,
       }));
       annotationTypeFilterSelect.append($('<option/>', {
         name: annotationType.name,
@@ -654,10 +656,23 @@ function calculateImageScale() {
     let concealedP = $('#concealed_p');
     let blurred = $('#blurred');
     let blurredP = $('#blurred_p');
-    concealedP.show();
-    concealed.prop('disabled', false);
-    blurredP.show();
-    blurred.prop('disabled', false);
+    let selectedAnnotation = $('#annotation_type_id').find(':selected');
+    concealed.prop('checked', false);
+    blurred.prop('checked', false);
+    if (selectedAnnotation.data('concealed')) {
+      concealedP.show();
+      concealed.prop('disabled', false);
+    } else {
+      concealedP.hide();
+      concealed.prop('disabled', true);
+    }
+    if (selectedAnnotation.data('blurred')) {
+      blurredP.show();
+      blurred.prop('disabled', false);
+    } else {
+      blurredP.hide();
+      blurred.prop('disabled', true);
+    }
   }
 
   function hideCBCheckboxes() {
@@ -665,8 +680,8 @@ function calculateImageScale() {
     let concealedP = $('#concealed_p');
     let blurred = $('#blurred');
     let blurredP = $('#blurred_p');
-    concealed.prop('checked', false);
     concealedP.hide();
+    concealed.prop('checked', false);
     concealed.prop('disabled', true);
     blurredP.hide();
     blurred.prop('checked', false);
@@ -1038,7 +1053,7 @@ function calculateImageScale() {
     globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
       return e.annotation_type.id === gAnnotationType;
     });
-
+    setupCBCheckboxes();
     setTool();
   }
 
