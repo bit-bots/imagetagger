@@ -422,6 +422,8 @@ function calculateImageScale() {
       });
       editButton.data('annotationtypeid', annotation.annotation_type.id);
       editButton.data('vector', annotation.vector);
+      editButton.data('blurred', annotation.blurred);
+      editButton.data('concealed', annotation.concealed);
       deleteButton.click(function(event) {
         deleteAnnotation(event, annotationId);
       });
@@ -587,11 +589,14 @@ function calculateImageScale() {
       return;
     }
 
-    notInImage.prop('checked', false).change();
-
     $('#annotation_type_id').val(annotationTypeId);
 
+    notInImage.prop('checked', false).change();
+
+
     tool.reloadSelection(annotationId, annotationData);
+    $('#concealed').prop('checked', annotationElem.data('concealed')).change();
+    $('#blurred').prop('checked', annotationElem.data('blurred')).change();
   }
 
   /**
@@ -657,8 +662,6 @@ function calculateImageScale() {
     let blurred = $('#blurred');
     let blurredP = $('#blurred_p');
     let selectedAnnotation = $('#annotation_type_id').find(':selected');
-    concealed.prop('checked', false);
-    blurred.prop('checked', false);
     if (selectedAnnotation.data('concealed')) {
       concealedP.show();
       concealed.prop('disabled', false);
