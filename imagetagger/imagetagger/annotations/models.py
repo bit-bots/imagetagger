@@ -61,11 +61,11 @@ class Annotation(models.Model):
 
     @property
     def concealed(self):
-        return self.annotation_type.enable_concealed and self._concealed
+        return self.annotation_type.enable_concealed and self._concealed and not self.not_in_image
 
     @property
     def blurred(self):
-        return self.annotation_type.enable_blurred and self._blurred
+        return self.annotation_type.enable_blurred and self._blurred and not self.not_in_image
 
     @cached_property
     def min_x(self):
@@ -544,6 +544,8 @@ class ExportFormat(models.Model):
     name_format = models.CharField(default='export_%%exportid.txt', max_length=200)
     min_verifications = models.IntegerField(default=0)
     image_aggregation = models.BooleanField(default=False)
+    include_blurred = models.BooleanField(default=True)
+    include_concealed = models.BooleanField(default=True)
 
     def __str__(self):
         return '{}: {}'.format(self.team.name, self.name)

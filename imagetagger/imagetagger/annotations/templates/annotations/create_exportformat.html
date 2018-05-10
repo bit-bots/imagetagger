@@ -55,6 +55,20 @@
                         <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                 </div>
+                <div class="form-group">
+                    <label for="id_include_blurred"><h3>{{ form.include_blurred.label }} annotations: </h3></label>
+                    {% render_field form.include_blurred %}
+                    {% for error in form.include_blurred.errors %}
+                       <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="id_include_concealed"><h3>{{ form.include_concealed.label }} annotations: </h3></label>
+                    {% render_field form.include_concealed %}
+                    {% for error in form.include_concealed.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                    </div>
                 <hr>
                 <div class="form-group">
                     <label for="id_base_format"><h3>{{ form.base_format.label }}</h3></label>
