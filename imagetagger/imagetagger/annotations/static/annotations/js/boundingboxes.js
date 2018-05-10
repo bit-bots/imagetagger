@@ -1,5 +1,4 @@
 // JS file for bounding box internals
-const stdColor = '#CC0000';
 
 class BoundingBoxes {
   constructor(annotationTypeId, noSelection) {
