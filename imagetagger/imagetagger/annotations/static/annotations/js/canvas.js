@@ -1,6 +1,7 @@
 const threshold = 7;      // Threshold to draw a new drawing vs move the old one (px)
 const radius = 3;         // Radius of the handles
-const color = '#C00';     // The color of drawings and handles
+const stdColor = '#CC0000';     // The color of drawings and handles
+const mutColor = '#CC00CC';
 let mousex, mousey;       // Holding the mouse position relative to the canvas
 
 /** The parent class for drawings */
@@ -10,19 +11,23 @@ class Drawing {
    * @param points initial points
    * @param mutable whether the drawing may be changed
    */
-  constructor(parent, points, id, mutable) {
+  constructor(parent, points, id, mutable, color) {
     /* Set fields */
     this.pointCounter = Object.keys(points).length / 2;      // The number of points that are currently set
     this.id = id;
     this.name = "drawing" + id;
     this.parent = parent;
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.color = color;
 
     /* Define layer */
     let l = {
       name: this.name,
       type: 'line',
       strokeWidth: 2,
-      strokeStyle: color,
+      strokeStyle: this.color,
     };
     $.extend(l, points);
     this.parent.addLayer(l);
@@ -108,8 +113,8 @@ class Drawing {
     if (mutable) {
       l["handle"] = {
         type: 'arc',
-        fillStyle: color,
-        strokeStyle: color,
+        fillStyle: mutColor,
+        strokeStyle: mutColor,
         strokeWidth: 1,
         radius: radius,
         cursors: {
@@ -161,13 +166,17 @@ class Drawing {
 }
 
 class Point {
-  constructor(parent, point, id, mutable) {
+  constructor(parent, point, id, mutable, color) {
     /* Set fields */
     this.pointCounter = 1;      // The number of points that are currently set
     this.id = id;
     this.name = "drawing" + id;
     this.parent = parent;
     this.mutable = mutable;
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.color = color;
 
     /* Define layer */
     let l = {
@@ -175,7 +184,7 @@ class Point {
       type: 'ellipse',
       width: 6, height: 6,
       x: point.x1, y: point.y1,
-      fillStyle: color,
+      fillStyle: this.color,
     };
     this.parent.addLayer(l);
     this.parent.inline = false;
@@ -202,9 +211,13 @@ class Point {
 }
 
 class Line extends Drawing {
-  constructor(parent, point, id, mutable) {
-    super(parent, point, id, mutable);
+  constructor(parent, point, id, mutable, color) {
+    super(parent, point, id, mutable, color);
     this.type = "line";
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.color = color;
   }
   addPoint(x, y) {
     this.pointCounter++;
@@ -219,10 +232,14 @@ class Polygon extends Drawing {
   /**
    * @param numberOfPoints The number of points the polygon will have
    */
-  constructor(parent, points, id, mutable, numberOfPoints) {
-    super(parent, points, id, mutable);
+  constructor(parent, points, id, mutable, numberOfPoints, color) {
+    super(parent, points, id, mutable, color);
     this.type = "polygon";
     this.nop = numberOfPoints;
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.color = color;
   }
   addPoint(x, y) {
     super.addPoint(x, y);
@@ -238,9 +255,13 @@ class Polygon extends Drawing {
  * Clicking on the first point will finish the drawing.
  */
 class ArbitraryPolygon extends Drawing {
-  constructor(parent, point, id, mutable) {
-    super(parent, point, id, mutable);
+  constructor(parent, point, id, mutable, color) {
+    super(parent, point, id, mutable, color);
     this.type = "polygon";
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.color = color;
   }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
@@ -338,34 +359,49 @@ class Canvas {
     $('body').off('click').off('mousemove').off('mousedown');
   }
 
-  drawPoint(points, id, mutable) {
-    this.currentDrawing = new Point(this, points, id, mutable);
+  drawPoint(points, id, mutable, color) {
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.currentDrawing = new Point(this, points, id, mutable, color);
     this.drawings.push(this.currentDrawing);
   }
 
-  drawLine(points, id, mutable) {
-    this.currentDrawing = new Line(this, points, id, mutable);
+  drawLine(points, id, mutable, color) {
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.currentDrawing = new Line(this, points, id, mutable, color);
     this.drawings.push(this.currentDrawing);
   }
 
-  drawPolygon(points, id, mutable, numberOfPoints, closed) {
-    this.currentDrawing = new Polygon(this, points, id, mutable, numberOfPoints);
+  drawPolygon(points, id, mutable, numberOfPoints, closed, color) {
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.currentDrawing = new Polygon(this, points, id, mutable, numberOfPoints, color);
     if (closed) {
       this.currentDrawing.close();
     }
     this.drawings.push(this.currentDrawing);
   }
 
-  drawArbitraryPolygon(points, id, mutable, closed) {
-    this.currentDrawing = new ArbitraryPolygon(this, points, id, mutable);
+  drawArbitraryPolygon(points, id, mutable, closed, color) {
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
+    this.currentDrawing = new ArbitraryPolygon(this, points, id, mutable, color);
     if (closed) {
       this.currentDrawing.close();
     }
     this.drawings.push(this.currentDrawing);
   }
 
-  drawExistingAnnotations(annotations) {
+  drawExistingAnnotations(annotations, color) {
     this.clear();
+    if (typeof color === "undefined" || color === null) {
+      color = stdColor;
+    }
     if (!globals.drawAnnotations) {
       return;
     }
@@ -387,17 +423,18 @@ class Canvas {
       switch (annotation.annotation_type.vector_type) {
         case 1: // Ball
           console.log("Bounding boxes should be used for this");
+          break;
         case 2: // Points
-          this.drawPoint(vector, annotation.id);
+          this.drawPoint(vector, annotation.id, false, color);
           break;
         case 3: // Lines
-          this.drawLine(vector, annotation.id, false);
+          this.drawLine(vector, annotation.id, false, color);
           break;
         case 5: // Polygons
           if (annotation.annotation_type.node_count === 0) {
-            this.drawArbitraryPolygon(vector, annotation.id, false, true);
+            this.drawArbitraryPolygon(vector, annotation.id, false, true, color);
           } else {
-            this.drawPolygon(vector, annotation.id, false, annotation.annotation_type.node_count, true);
+            this.drawPolygon(vector, annotation.id, false, annotation.annotation_type.node_count, true, color);
           }
           break;
         default:
@@ -408,7 +445,10 @@ class Canvas {
   }
 
   updateAnnotationFields(drawing) {
-    $('#not_in_image').prop('checked', false).change();
+    let not_in_image_cb = $('#not_in_image');
+    if (not_in_image_cb.prop('checked')) {
+      $('#not_in_image').prop('checked', false).change();
+    }
     if (drawing.type === "ellipse") {
       drawing.x1 = drawing.x;
       drawing.y1 = drawing.y;

@@ -352,12 +352,15 @@
                             Upload existing Labels
                         </h3>
                         Here you can upload existing labels as a text file in the following format:<br>
-                        image name|annotation type|{'x1': x1,'y1': y1...}<br>
+                        image name|annotation type|{'x1': x1,'y1': y1...}|flags<br>
+                        &nbsp;&nbsp;with b as flag for blurred annotations and c for concealed ones.<br>
                         Using the ImageTagger export tool for example:<br>
-                        Annotation format: %%imagename|%%type|{%%vector}<br>
-                        Vector format: "x%%count1": "%%x","y%%count1": %%y,<br>
-                        or:<br>
-                        image name|annotation type|not in image<br>&nbsp;<br>
+                        Annotation format: <br>
+                        <code>%%imagename|%%type|{%%vector}|%%ifblurredb%%endif%%ifconcealedc%%endif</code><br>
+                        &nbsp;&nbsp;with vector format: <br>
+                        &nbsp;&nbsp;<code>"x%%count1": "%%x","y%%count1": "%%y"</code><br>
+                        or for negative annotations:<br>
+                        <code>image name|annotation type|not in image</code><br>&nbsp;<br>
                         One annotation per line. The annotation type has to exist in the ImageTagger too.
                         <form action="{% url 'images:label_upload' imageset.id %}" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}

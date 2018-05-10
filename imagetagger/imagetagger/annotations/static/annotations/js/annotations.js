@@ -57,6 +57,15 @@ function calculateImageScale() {
 
   var tool;
 
+  function shorten(string, length) {
+    let threshold = length || 30;
+    if (string.length < threshold) {
+      return string;
+    } else {
+      return string.substr(0, threshold / 2 - 1) + '...' + string.substr(-threshold / 2 + 2, threshold / 2 - 2);
+    }
+  }
+
   function initTool() {
     setTool();
     tool.initSelection();
@@ -145,7 +154,8 @@ function calculateImageScale() {
       displayFeedback($('#feedback_annotation_type_missing'));
       return;
     }
-
+    let blurred = $('#blurred').is(':checked');
+    let concealed = $('#concealed').is(':checked');
     if (!$('#not_in_image').is(':checked')) {
       vector = {};
       for (let i = 1; $('#x' + i + 'Field').length; i++) {
@@ -183,7 +193,9 @@ function calculateImageScale() {
     var data = {
       annotation_type_id: annotationTypeId,
       image_id: gImageId,
-      vector: vector
+      vector: vector,
+      concealed: concealed,
+      blurred: blurred
     };
     var editing = false;
     if (globals.editedAnnotationsId !== undefined) {
@@ -277,7 +289,9 @@ function calculateImageScale() {
         html: annotationType.name + ' (' + (key + 1) + ')',
         id: 'annotation_type_' + (key + 1),
         'data-vector-type': annotationType.vector_type,
-        'data-node-count': annotationType.node_count
+        'data-node-count': annotationType.node_count,
+        'data-blurred': annotationType.enable_blurred,
+        'data-concealed': annotationType.enable_concealed,
       }));
       annotationTypeFilterSelect.append($('<option/>', {
         name: annotationType.name,
@@ -380,6 +394,14 @@ function calculateImageScale() {
       } else {
         annotation.content = 'not in image';
       }
+      annotation.content = shorten(annotation.content, 100);
+      if (annotation.blurred) {
+        annotation.content += ' <span id="blurred_label" class="label label-info">Blurred</span>';
+      }
+
+      if (annotation.concealed) {
+        annotation.content += ' <span id="concealed_label" class="label label-warning">Concealed</span>';
+      }
 
       newAnnotation.append(annotation.annotation_type.name + ':');
 
@@ -400,6 +422,8 @@ function calculateImageScale() {
       });
       editButton.data('annotationtypeid', annotation.annotation_type.id);
       editButton.data('vector', annotation.vector);
+      editButton.data('blurred', annotation.blurred);
+      editButton.data('concealed', annotation.concealed);
       deleteButton.click(function(event) {
         deleteAnnotation(event, annotationId);
       });
@@ -565,11 +589,14 @@ function calculateImageScale() {
       return;
     }
 
-    notInImage.prop('checked', false).change();
-
     $('#annotation_type_id').val(annotationTypeId);
 
+    notInImage.prop('checked', false).change();
+
+
     tool.reloadSelection(annotationId, annotationData);
+    $('#concealed').prop('checked', annotationElem.data('concealed')).change();
+    $('#blurred').prop('checked', annotationElem.data('blurred')).change();
   }
 
   /**
@@ -629,20 +656,57 @@ function calculateImageScale() {
     return false;
   }
 
+  function setupCBCheckboxes() {
+    let concealed = $('#concealed');
+    let concealedP = $('#concealed_p');
+    let blurred = $('#blurred');
+    let blurredP = $('#blurred_p');
+    let selectedAnnotation = $('#annotation_type_id').find(':selected');
+    if (selectedAnnotation.data('concealed')) {
+      concealedP.show();
+      concealed.prop('disabled', false);
+    } else {
+      concealedP.hide();
+      concealed.prop('disabled', true);
+    }
+    if (selectedAnnotation.data('blurred')) {
+      blurredP.show();
+      blurred.prop('disabled', false);
+    } else {
+      blurredP.hide();
+      blurred.prop('disabled', true);
+    }
+  }
+
+  function hideCBCheckboxes() {
+    let concealed = $('#concealed');
+    let concealedP = $('#concealed_p');
+    let blurred = $('#blurred');
+    let blurredP = $('#blurred_p');
+    concealedP.hide();
+    concealed.prop('checked', false);
+    concealed.prop('disabled', true);
+    blurredP.hide();
+    blurred.prop('checked', false);
+    blurred.prop('disabled', true);
+  }
+
   /**
    * Handle toggle of the not in image checkbox.
    *
    * @param event
    */
   function handleNotInImageToggle(event) {
-    var coordinate_table = $('#coordinate_table');
+    let coordinate_table = $('#coordinate_table');
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
       tool.resetSelection();
       coordinate_table.hide();
+      hideCBCheckboxes();
     } else {
       coordinate_table.show();
+      setupCBCheckboxes();
     }
   }
 
@@ -741,6 +805,10 @@ function calculateImageScale() {
     $('#annotation_type_id').val(gAnnotationType);
 
     displayImage(imageId);
+    if (!$('#keep_selection').prop('checked')) {
+      $('#concealed').prop('checked', false);
+      $('#blurred').prop('checked', false);
+    }
     scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
@@ -992,6 +1060,7 @@ function calculateImageScale() {
     globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
       return e.annotation_type.id === gAnnotationType;
     });
+    setupCBCheckboxes();
     setTool();
   }
 

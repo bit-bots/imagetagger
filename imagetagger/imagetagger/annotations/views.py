@@ -154,6 +154,21 @@ def verify(request, annotation_id):
     })
 
 
+def apply_conditional(string, conditional, keep):
+    """
+    :param conditional: %%ifbla
+    :param keep: Ob der String mit oder ohne das gefundene zurueckgegeben werden soll
+    """
+    while string.find(conditional) != -1:
+        findstring = string[string.find(conditional):]
+        found = findstring[len(conditional):findstring.find("%%endif")]
+        if keep:
+            string = string.replace(conditional + found + "%%endif", found)
+        else:
+            string = string.replace(conditional + found + "%%endif", "")
+    return string
+
+
 def export_format(export_format_name, imageset):
     images = Image.objects.filter(image_set=imageset)
     export_format = export_format_name
@@ -178,6 +193,10 @@ def export_format(export_format_name, imageset):
                         verification_difference__gte=min_verifications,
                         annotation_type__in=export_format.annotations_types.all())\
                 .select_related('image')
+            if not export_format.include_blurred:
+                annotations = annotations.exclude(_blurred=True)
+            if not export_format.include_concealed:
+                annotations = annotations.exclude(_concealed=True)
             if annotations:
                 annotation_content = ''
                 for annotation in annotations:
@@ -209,6 +228,10 @@ def export_format(export_format_name, imageset):
                                 vector_line = vector_line.replace(key, str(value))
                             formatted_vector += vector_line
                         formatted_annotation = export_format.annotation_format
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred', annotation.blurred)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred', not annotation.blurred)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed', annotation.concealed)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed', not annotation.concealed)
                         placeholders_annotation = {
                             '%%imageset': imageset.name,
                             '%%imagewidth': image.width,
@@ -263,6 +286,10 @@ def export_format(export_format_name, imageset):
             .filter(image__in=images,
                     verification_difference__gte=min_verifications,
                     annotation_type__in=export_format.annotations_types.all())
+        if not export_format.include_blurred:
+            annotations = annotations.exclude(_blurred=True)
+        if not export_format.include_concealed:
+            annotations = annotations.exclude(_concealed=True)
         annotation_content = '\n'
         for annotation in annotations:
             annotation_counter += 1
@@ -293,6 +320,10 @@ def export_format(export_format_name, imageset):
                         vector_line = vector_line.replace(key, str(value))
                     formatted_vector += vector_line
                 formatted_annotation = export_format.annotation_format
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred', annotation.blurred)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred', not annotation.blurred)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed', annotation.concealed)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed', not annotation.concealed)
                 placeholders_annotation = {
                     '%%imageset': imageset.name,
                     '%%imagewidth': annotation.image.width,
@@ -452,6 +483,8 @@ def create_annotation(request) -> Response:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
+        blurred = request.data['blurred']
+        concealed = request.data['concealed']
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
@@ -476,8 +509,13 @@ def create_annotation(request) -> Response:
 
     with transaction.atomic():
         annotation = Annotation.objects.create(
-            vector=vector, image=image,
-            annotation_type=annotation_type, user=request.user)
+            vector=vector,
+            image=image,
+            annotation_type=annotation_type,
+            user=request.user,
+            _blurred=blurred,
+            _concealed=concealed
+        )
 
         # Automatically verify for owner
         annotation.verify(request.user, True)
@@ -662,6 +700,8 @@ def update_annotation(request) -> Response:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
         vector = request.data['vector']
+        blurred = request.data['blurred']
+        concealed = request.data['concealed']
     except (KeyError, TypeError, ValueError):
         raise ParseError
 
@@ -691,6 +731,8 @@ def update_annotation(request) -> Response:
     with transaction.atomic():
         annotation.annotation_type = annotation_type
         annotation.vector = vector
+        annotation._concealed = concealed
+        annotation._blurred = blurred
         annotation.last_editor = request.user
         annotation.save()
         annotation.annotation_type = annotation_type

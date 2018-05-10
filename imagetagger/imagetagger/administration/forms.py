@@ -11,6 +11,8 @@ class AnnotationTypeCreationForm(forms.ModelForm):
             'active',
             'node_count',
             'vector_type',
+            'enable_concealed',
+            'enable_blurred',
         ]
 
 
@@ -20,4 +22,6 @@ class AnnotationTypeEditForm(forms.ModelForm):
         fields = [
             'name',
             'active',
+            'enable_concealed',
+            'enable_blurred',
         ]

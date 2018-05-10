@@ -45,6 +45,22 @@
                                 </tr>
                                 <tr>
                                     <td>
+                                        <label for="id_active">{{ edit_form.enable_blurred.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field edit_form.enable_blurred class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="id_active">{{ edit_form.enable_concealed.label }}</label>
+                                    </td>
+                                    <td>
+                                        {% render_field edit_form.enable_concealed class+='form-control' %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
                                         <b>Vector Type</b>
                                     </td>
                                     <td>
@@ -130,6 +146,22 @@
                                 </td>
                                 <td>
                                     {% render_field create_form.active class+='form-control' %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="id_active">{{ create_form.enable_blurred.label }}</label>
+                                </td>
+                                <td>
+                                    {% render_field create_form.enable_blurred class+='form-control' %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="id_active">{{ create_form.enable_concealed.label }}</label>
+                                </td>
+                                <td>
+                                    {% render_field create_form.enable_concealed class+='form-control' %}
                                 </td>
                             </tr>
                             <tr>
