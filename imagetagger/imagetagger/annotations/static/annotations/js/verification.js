@@ -391,7 +391,18 @@ function calculateImageScale() {
           break;
       }
     }
-    tool.drawExistingAnnotations([annotation]);
+    let color = '#FF0000';
+    if (annotation.concealed) {
+      if (annotation.blurred) {
+        color = '#5CB85C';
+      } else {
+        color = '#F0AD4E';
+      }
+    }
+    else if (annotation.blurred) {
+      color = '#5BC0DE'
+    }
+    tool.drawExistingAnnotations([annotation], color);
   }
 
   /**
