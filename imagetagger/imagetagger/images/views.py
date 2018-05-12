@@ -389,6 +389,10 @@ def delete_imageset(request, imageset_id):
 @login_required
 def set_free(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if not imageset.images:
+        messages.warning(request,
+                         _('You can not release an empty imageset'))
+        return redirect(reverse('images:imageset', args=(imageset.pk,)))
     if not imageset.has_perm('delete_set', request.user):
         messages.warning(request,
                          _('You do not have permission to release this imageset'))
