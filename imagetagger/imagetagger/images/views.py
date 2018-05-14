@@ -19,8 +19,8 @@ from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
     HTTP_201_CREATED
 from PIL import Image as PIL_Image
 
-from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
+from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
@@ -83,9 +83,12 @@ def index(request):
     imagesets = ImageSet.objects.annotate(
         image_count_agg=Count('images')
     ).select_related('team').filter(team__in=userteams).order_by('id')
+    imageset_creation_form = ImageSetCreationFormWT()  # the user provides the team manually
+    imageset_creation_form.fields['team'].queryset = userteams  # TODO: use create set permission
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
+            'imageset_creation_form': imageset_creation_form,
             'image_sets': imagesets,
             'userteams': userteams,
         })

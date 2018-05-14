@@ -14,6 +14,18 @@ class ImageSetCreationForm(forms.ModelForm):
         ]
 
 
+class ImageSetCreationFormWT(forms.ModelForm):
+    class Meta:
+        model = ImageSet
+        fields = [
+            'name',
+            'location',
+            'public',
+            'public_collaboration',
+            'team',
+        ]
+
+
 class ImageSetEditForm(forms.ModelForm):
     class Meta:
         model = ImageSet

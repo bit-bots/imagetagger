@@ -39,29 +39,71 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">My Teams</h3>
-                </div>
-                <div class="panel-body">
-                    <ul>
-                        {% for team in userteams %}
-                            <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
-                        {% endfor %}
-                    </ul>
-                    <hr>
-                    <p>Create new team:</p>
-                    <form method="post" action="{% url 'users:create_team' %}">
-                        {% csrf_token %}
-                        <div class="input-group" role="group" aria-label="team_creation">
-                            {% render_field team_creation_form.name placeholder=team_creation_form.name.label class+='form-control' %}
-                            <span class="input-group-btn">
-                                <input class="btn btn-primary" type="submit" value="Create">
-                            </span>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">My Teams</h3>
                         </div>
-                    </form>
+                        <div class="panel-body">
+                            <ul>
+                                {% for team in userteams %}
+                                    <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
+                                {% endfor %}
+                            </ul>
+                            <hr>
+                            <p>Create new team:</p>
+                            <form method="post" action="{% url 'users:create_team' %}">
+                                {% csrf_token %}
+                                <div class="input-group" role="group" aria-label="team_creation">
+                                    {% render_field team_creation_form.name placeholder=team_creation_form.name.label class+='form-control' %}
+                                    <span class="input-group-btn">
+                                        <input class="btn btn-primary" type="submit" value="Create">
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% if userteams %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                               <h3 class="panel-title">Create imageset</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form method="post" action="{% url 'images:create_imageset' %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="id_name">{{ imageset_creation_form.name.label }}</label>
+                                        {% render_field imageset_creation_form.name class+='form-control' placeholder=imageset_creation_form.name.label %}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_team">{{ imageset_creation_form.team.label }}</label>
+                                        {% render_field imageset_creation_form.team class+='form-control' %}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_location">{{ imageset_creation_form.location.label }}</label>
+                                        {% render_field imageset_creation_form.location class+='form-control' placeholder=imageset_creation_form.location.label %}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_public">{{ imageset_creation_form.public.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span></label>
+                                        {% render_field imageset_creation_form.public %}
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_public_collaboration">
+                                            {{ imageset_creation_form.public_collaboration.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span> </label>
+                                        {% render_field imageset_creation_form.public_collaboration %}
+                                    </div>
+                                    <input class="btn btn-primary" type="submit" value="Create">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -252,8 +252,9 @@
                        <h3 class="panel-title">Create imageset</h3>
                     </div>
                     <div class="panel-body">
-                        <form method="post" action="{% url 'images:create_imageset' team.id %}">
+                        <form method="post" action="{% url 'images:create_imageset' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="team" value="{{ team.id }}">
                             <div class="form-group">
                                 <label for="id_name">{{ imageset_creation_form.name.label }}</label>
                                 {% render_field imageset_creation_form.name class+='form-control' placeholder=imageset_creation_form.name.label %}
