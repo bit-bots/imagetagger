@@ -213,15 +213,6 @@ function calculateImageScale() {
       dataType: 'json',
       data: JSON.stringify(data),
       success: function(data, textStatus, jqXHR) {
-        // update current annotations
-        globals.allAnnotations = data.annotations;
-        globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
-        });
-        gAnnotationCache[gImageId] = globals.allAnnotations;
-
-        $('.annotate_button').prop('disabled', false);
-
         if (jqXHR.status === 200) {
           if (editing) {
             if (data.detail === 'similar annotation exists.') {
@@ -244,9 +235,16 @@ function calculateImageScale() {
           displayExistingAnnotations(data.annotations);
           if (reload_list === true) {
               loadImageList();
-          }
-          tool.drawExistingAnnotations(globals.currentAnnotations);
+            }
         }
+        // update current annotations
+        globals.allAnnotations = data.annotations;
+        globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
+          return e.annotation_type.id === gAnnotationType;
+        });
+        gAnnotationCache[gImageId] = globals.allAnnotations;
+
+        tool.drawExistingAnnotations(globals.currentAnnotations);
 
         globals.editedAnnotationsId = undefined;
         $('.annotation').removeClass('alert-info');
@@ -256,6 +254,7 @@ function calculateImageScale() {
         if (typeof(successCallback) === "function") {
           successCallback();
         }
+        $('.annotate_button').prop('disabled', false);
       },
       error: function() {
         $('.annotate_button').prop('disabled', false);

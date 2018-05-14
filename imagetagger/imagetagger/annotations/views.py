@@ -504,13 +504,28 @@ def create_annotation(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     if not annotation_type.validate_vector(vector):
-        print(vector)
+        serializer = AnnotationSerializer(
+            image.annotations.filter(annotation_type__active=True).select_related()
+            .order_by('annotation_type__name'),
+            context={
+                'request': request,
+            },
+            many=True)
         return Response({
+            'annotations': serializer.data,
             'detail': 'the vector is invalid.',
         }, status=HTTP_400_BAD_REQUEST)
 
     if Annotation.similar_annotations(vector, image, annotation_type):
+        serializer = AnnotationSerializer(
+            image.annotations.filter(annotation_type__active=True).select_related()
+            .order_by('annotation_type__name'),
+            context={
+                'request': request,
+            },
+            many=True)
         return Response({
+            'annotations': serializer.data,
             'detail': 'similar annotation exists.',
         })
 
@@ -724,14 +739,30 @@ def update_annotation(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     if not annotation_type.validate_vector(vector):
+        serializer = AnnotationSerializer(
+            annotation.image.annotations.filter(annotation_type__active=True).select_related()
+            .order_by('annotation_type__name'),
+            context={
+                'request': request,
+            },
+            many=True)
         return Response({
-            'detail': 'the vector is invalid.'
+            'annotations': serializer.data,
+            'detail': 'the vector is invalid.',
         }, status=HTTP_400_BAD_REQUEST)
 
     if Annotation.similar_annotations(
             vector, annotation.image, annotation_type, exclude={annotation.id}):
         annotation.delete()
+        serializer = AnnotationSerializer(
+            annotation.image.annotations.filter(annotation_type__active=True).select_related()
+            .order_by('annotation_type__name'),
+            context={
+                'request': request,
+            },
+            many=True)
         return Response({
+            'annotations': serializer.data,
             'detail': 'similar annotation exists.',
         })
 
