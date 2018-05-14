@@ -34,7 +34,7 @@
                         <tr>
                             <td><a href='{% url 'annotations:annotate' annotation.image.id %}'>{{ annotation.image.name }}</a></td>
                             <td>{{ annotation.annotation_type.name }}</td>
-                            <td>{{ annotation.content }}</td>
+                            <td>{{ annotation.content | truncatechars:60}}{% if annotation.blurred %} <span id="blurred_label" class="label label-info">Blurred</span>{% endif %}{% if annotation.concealed %} <span id="concealed_label" class="label label-warning">Concealed</span>{% endif %}</td>
                             <td>
                                 {% if annotation.verification_difference %}
                                     {{ annotation.verification_difference }}
