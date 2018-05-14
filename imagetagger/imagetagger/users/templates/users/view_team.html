@@ -263,7 +263,13 @@
                     <div class="col-md-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h3 class="panel-title">Export formats</h3>
+                                <div class="panel-title pull-left">
+                                    <h4>Export formats</h4>
+                                </div>
+                                <div class="panel-title pull-right">
+                                    <input name="create_format" class="btn btn-default" type="button" value="Create Format" onclick="location.href='{% url 'annotations:create_exportformat' %}?mode=1&id={{ team.id }}'">
+                                </div>
+                                <div class="clearfix"></div>
                             </div>
                             <div class="panel-body">
                                 <ul>

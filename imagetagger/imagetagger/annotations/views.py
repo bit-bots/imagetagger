@@ -373,9 +373,10 @@ def export_format(export_format_name, imageset):
 
 
 @login_required
-def create_exportformat(request, imageset_id):
-    imageset = get_object_or_404(ImageSet, id=imageset_id)
-
+def create_exportformat(request):
+    object_id = request.GET.get("id", None)
+    mode = request.GET.get("mode", None)
+    print(mode)
     if request.method == 'POST' and \
             'manage_export_formats' in \
             get_object_or_404(Team, id=request.POST['team'])\
@@ -393,12 +394,19 @@ def create_exportformat(request, imageset_id):
                     form.save()
 
                 messages.success(request, _('The export format was created successfully.'))
-                return redirect(reverse('images:view_imageset', args=(imageset_id,)))
+                if object_id:
+                    if mode == '0':
+                        return redirect(reverse('images:view_imageset', args=(object_id,)))
+                    if mode == '1':
+                        return redirect(reverse('users:team', args=(object_id,)))
+            return redirect(reverse('base:index'))
     else:
         form = ExportFormatCreationForm()
+        form.fields['team'].queryset = Team.objects.filter(members=request.user)
     return render(request, 'annotations/create_exportformat.html', {
-        'imageset': imageset,
         'form': form,
+        'mode': mode,
+        'id': object_id,
     })
 
 
@@ -410,7 +418,6 @@ def edit_exportformat(request, format_id):
             'manage_export_formats' in export_format.team.get_perms(request.user):
 
         form = ExportFormatEditForm(request.POST, instance=export_format)
-
         if form.is_valid():
             if not export_format.name == form.cleaned_data.get('name') and \
                     ExportFormat.objects.filter(

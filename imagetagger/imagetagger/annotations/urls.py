@@ -4,7 +4,7 @@ from . import views
 
 app_name = 'annotations'
 urlpatterns = [
-    url(r'^export/(\d+)/create/$', views.create_exportformat, name='create_exportformat'),
+    url(r'^export/create/$', views.create_exportformat, name='create_exportformat'),
     url(r'^export/(\d+)/edit/$', views.edit_exportformat, name='edit_exportformat'),
     url(r'^export/(\d+)/delete/$', views.delete_exportformat, name='delete_exportformat'),
     url(r'^export/(\d+)/auth/$', views.export_auth, name='export_auth'),

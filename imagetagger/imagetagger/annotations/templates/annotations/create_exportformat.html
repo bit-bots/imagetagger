@@ -7,7 +7,7 @@
 {% block bodyblock %}
     <div class="container">
         <h2>Create new Exportformat:</h2>
-            <form method="POST" action="{% url 'annotations:create_exportformat' imageset.id %}">
+            <form method="POST" action="{% url 'annotations:create_exportformat' %}{% if mode and id %}?mode={{ mode }}&id={{ id }}{% endif %}">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_name"><h3>{{ form.name.label }}</h3> of the export format</label>

@@ -413,7 +413,10 @@ class AnnotationType(models.Model):
     enable_blurred = models.BooleanField(default=True)
 
     def __str__(self):
-        return u'AnnotationType: {0}'.format(self.name)
+        if self.active:
+            return u'AnnotationType: {0}'.format(self.name)
+        else:
+            return u'[inactive] AnnotationType: {0}'.format(self.name)
 
     @staticmethod
     def get_vector_type_name(vector_type):

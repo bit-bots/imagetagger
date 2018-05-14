@@ -284,7 +284,7 @@
                                             </td>
                                             <td class="align-right">
                                                 {% if "delete_set" in imageset_perms and images %}
-                                                    <a class="btn btn-warning" href="{% url 'images:setfree_imageset' imageset.id %}">Set Free</a>
+                                                    <a class="btn btn-warning" href="{% url 'images:setfree_imageset' imageset.id %}" data-toggle="tooltip" data-placement="right" title="The set will be public and will not belong to the team anymore">Set Free</a>
                                                 {% endif %}
                                                 <input class="btn btn-primary" type="submit" value="{% trans 'Save changes' %}" />
                                             </td>
@@ -444,9 +444,9 @@
                             {% endfor %}
                         </select>
                         <input name= "export" class="btn btn-primary" type="submit" value="Export">
-                    <form method="post" action="{% url 'annotations:create_exportformat' imageset.id %}" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'annotations:create_exportformat' %}?mode=0&id={{ imageset.id }}" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input name="create_new_format" class="btn btn-default" type="button" value="Create Format" onclick="location.href='{% url 'annotations:create_exportformat' imageset.id %}'">
+                        <input name="create_new_format" class="btn btn-default" type="button" value="Create Format" onclick="location.href='{% url 'annotations:create_exportformat' %}?mode=0&id={{ imageset.id }}'">
                     </form>
                     </form>
                     {% if exports %}
