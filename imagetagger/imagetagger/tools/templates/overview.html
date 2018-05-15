@@ -128,7 +128,7 @@
                         <form method="POST" action="{% url 'tools:delete' tool.id %}" >
                             {% csrf_token %}
                             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Delete</button>
+                            <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </div>
                 </div>

@@ -10,6 +10,7 @@ from django.template.response import TemplateResponse
 from django.contrib import messages
 from .models import Tool
 from .forms import ToolUploadForm, FileUploadForm
+from imagetagger.users.models import Team
 import os
 
 
@@ -27,11 +28,13 @@ def overview(request):
         Q(creator=request.user) | Q(team__members=request.user) | Q(public=True)).distinct()
     delete_tools = [tool.id for tool in tools if tool.has_perm('delete_tool', request.user)]
     edit_tools = [tool.id for tool in tools if tool.has_perm('edit_tool', request.user)]
+    tool_form = ToolUploadForm()
+    tool_form.fields['team'].queryset = Team.objects.filter(members=request.user)
     return TemplateResponse(request, 'overview.html', {
         'tools': tools,
         'edit_tools': edit_tools,
         'delete_tools': delete_tools,
-        'form': ToolUploadForm(),
+        'form': tool_form,
         'file_form': FileUploadForm(),
         'tool_upload_notice': settings.TOOL_UPLOAD_NOTICE,
     })
@@ -42,9 +45,16 @@ def overview(request):
 def create_tool(request):
     if request.method == 'POST':
         form = ToolUploadForm(request.POST, request.FILES)
-        if form.is_valid() and request.user in form.instance.members:
+        if form.is_valid():
+            tool = form.instance
+            # TODO: use team permissions
+            if tool.team and request.user not in tool.team.members.all():
+                messages.error(
+                    request,
+                    'You are not permitted to create tools for the team "{}".'
+                        .format(tool.team.name))
+                return redirect(reverse('tools:overview'))
             with transaction.atomic():
-                tool = form.instance
                 tool.creator = request.user
                 tool.save()
             tool.filename = '{}_{}'.format(tool.id,
