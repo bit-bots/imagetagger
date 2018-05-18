@@ -1334,6 +1334,12 @@ function calculateImageScale() {
         case 46: //'DEL'
           handleDelete(event);
           break;
+        case 66: //b
+          $('#blurred').click();
+          break;
+        case 67: //c
+          $('#concealed').click();
+          break;
       }
     });
     $(document).one("ajaxStop", function() {
