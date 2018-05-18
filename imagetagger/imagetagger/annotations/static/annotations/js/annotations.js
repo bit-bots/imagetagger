@@ -1323,8 +1323,7 @@ function calculateImageScale() {
           $('#last_button').click();
           break;
         case 71: //g
-          var notInImage = $('#not_in_image');
-          notInImage.prop('checked', !notInImage.is(':checked')).change();
+          $('#not_in_image').click();
           break;
         case 82: //r
           $('#reset_button').click();
