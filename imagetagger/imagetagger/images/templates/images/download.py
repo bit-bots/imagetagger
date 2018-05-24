@@ -2,13 +2,16 @@
 
 import sys
 import getpass
-import requests
 import shutil
 import os
+try:
+    import requests
+except ImportError:
+    print("Python3 requests is not installed. Please use e.g. pip3 install requests.")
+    sys.exit()
 
 
 BaseUrl = "http://" + "{{ base_url }}" + "/"
-#BaseUrl = "http://127.0.0.1:8000/"
 if len(sys.argv) < 2:
     imageset = input("Imagesets you want to download, separated by a ',':")
 else:
@@ -22,8 +25,10 @@ else:
 user = input("Username:")
 password = getpass.getpass()
 print()
-print("Enter in which relative subdirectory your images should be saved")
-filename = input("The Imagesets will be stored in a subdirectory named after their id:")
+print("Enter in which directory your images should be saved relative to your current directory")
+filename = input("The Imagesets will be stored in a subdirectory named after their id (default is current directory): ")
+if filename.startswith('./'):
+    filename = filename[2:]
 if not os.path.exists(os.getcwd() + '/' +filename):
     os.makedirs(os.getcwd()+'/'+filename)
 imagesets = imageset.split(',')
@@ -32,8 +37,8 @@ errorlist = list()
 
 def download_imageset(current_imageset):
     error = False
-    if not os.path.exists("{}/{}/{}".format(os.getcwd(), filename, current_imageset)):
-        os.makedirs(os.getcwd()+'/'+filename+'/'+current_imageset)
+    if not os.path.exists(os.path.join(os.getcwd(), filename, current_imageset)):
+        os.makedirs(os.path.join(os.getcwd(),filename,current_imageset))
     loginpage = requests.get(BaseUrl)
     csrftoken = loginpage.cookies['csrftoken']
 
@@ -80,7 +85,7 @@ def download_imageset(current_imageset):
             error = True
             continue
         image = image.split('?')[1]
-        with open('{}/{}/{}'.format(filename,current_imageset,image), 'wb') as f:
+        with open(os.path.join(filename, current_imageset, image), 'wb') as f:
             r.raw.decode_content = True
             shutil.copyfileobj(r.raw, f)
             sys.stdout.flush()
