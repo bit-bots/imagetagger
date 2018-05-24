@@ -6,9 +6,8 @@ import requests
 import shutil
 import os
 
-# TODO: replace imagetagger.bit-bots.de with {{ base_url }}
 
-BaseUrl = "https://imagetagger.bit-bots.de/"#{{ base_url }}"
+BaseUrl = "http://" + "{{ base_url }}" + "/"
 #BaseUrl = "http://127.0.0.1:8000/"
 if len(sys.argv) < 2:
     imageset = input("Imagesets you want to download, separated by a ',':")
@@ -16,6 +15,7 @@ else:
     if sys.argv[1]  == '-h':
         print("This script will download images from the specified imageset for you.")
         print("The images will be downloaded from: {}".format(BaseUrl))
+        print("If errors occur during the download you will be notified at the end of the script execution")
         sys.exit()
     else:
         imageset = sys.argv[1]
@@ -27,6 +27,8 @@ filename = input("The Imagesets will be stored in a subdirectory named after the
 if not os.path.exists(os.getcwd() + '/' +filename):
     os.makedirs(os.getcwd()+'/'+filename)
 imagesets = imageset.split(',')
+errorlist = list()
+
 
 def download_imageset(current_imageset):
     error = False
@@ -56,6 +58,10 @@ def download_imageset(current_imageset):
     page = requests.get("{}images/imagelist/{}/".format(BaseUrl,
                                                         current_imageset),
                                                         cookies = cookies)
+    if page.status_code == 404:
+        print("In Imageset {} was an error. The server returned page not found.".format(current_imageset))
+        errorlist.append(current_imageset)
+        return
     images = page.text.replace('\n','')
     images = images.split(',')
     for index,image in enumerate(images):
@@ -67,8 +73,10 @@ def download_imageset(current_imageset):
                      allow_redirects=False,
                      headers={'referer': BaseUrl},
                      stream = True)
-        if "Not Found" in r.text:
+        if r.status_code == 404:
             print("In Imageset {} was an error. The server returned page not found.".format(current_imageset))
+            errorlist.append(current_imageset)
+
             error = True
             continue
         image = image.split('?')[1]
@@ -82,3 +90,7 @@ def download_imageset(current_imageset):
 
 for imgset in imagesets:
     download_imageset(imgset)
+if errorlist:
+    print("There have been errors while downloading the following imagesets: ")
+    for item in errorlist:
+        print(item)
