@@ -515,7 +515,7 @@ def label_upload(request, imageset_id):
 
 
 def dl_script(request):
-    return TemplateResponse(request, 'images/download.sh', context={
+    return TemplateResponse(request, 'images/download.py', context={
         'base_url': settings.DOWNLOAD_BASE_URL,
         }, content_type='text/plain')
 
