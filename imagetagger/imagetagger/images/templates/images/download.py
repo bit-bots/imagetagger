@@ -7,21 +7,22 @@ import os
 try:
     import requests
 except ImportError:
-    print("Python3 requests is not installed. Please use e.g. pip3 install requests.")
+    print("Python3 requests is not installed. Please use e.g. pip3 install requests")
     sys.exit()
-
 
 BaseUrl = "http://" + "{{ base_url }}" + "/"
 if len(sys.argv) < 2:
-    imageset = input("Imagesets you want to download, separated by a ',':")
+    imageset = input("Imagesets you want to download, separated by a ',' or ' ':")
 else:
     if sys.argv[1]  == '-h':
         print("This script will download images from the specified imageset for you.")
         print("The images will be downloaded from: {}".format(BaseUrl))
         print("If errors occur during the download you will be notified at the end of the script execution")
+        print("Just execute it with ./imagetagger_dl_script.py")
         sys.exit()
     else:
-        imageset = sys.argv[1]
+        imageset = " ".join(sys.argv[1:])
+
 user = input("Username:")
 password = getpass.getpass()
 print()
@@ -31,9 +32,15 @@ if filename.startswith('./'):
     filename = filename[2:]
 if not os.path.exists(os.getcwd() + '/' +filename):
     os.makedirs(os.getcwd()+'/'+filename)
-imagesets = imageset.split(',')
+imagesets = set(imageset.replace(',', ' ').split(" "))
 errorlist = list()
-
+error = False
+for userint in imagesets:
+    if not userint.isdigit():
+        print("{} is not a valid integer, please use integer for the imagesets".format(userint))
+        error = True
+if error == True:
+    sys.exit()
 
 def download_imageset(current_imageset):
     error = False
@@ -94,7 +101,8 @@ def download_imageset(current_imageset):
         print('\nImageset {} has been downloaded.'.format(current_imageset))
 
 for imgset in imagesets:
-    download_imageset(imgset)
+    if imgset is not " ":
+        download_imageset(imgset)
 if errorlist:
     print("There have been errors while downloading the following imagesets: ")
     for item in errorlist:
