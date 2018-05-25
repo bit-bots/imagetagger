@@ -10,7 +10,7 @@ except ImportError:
     print("Python3 requests is not installed. Please use e.g. pip3 install requests")
     sys.exit()
 
-BaseUrl = "http://" + "{{ base_url }}" + "/"
+BaseUrl = "{{ base_url }}" + "/"
 if len(sys.argv) < 2:
     imageset = input("Imagesets you want to download, separated by a ',' or ' ':")
 else:
