@@ -210,15 +210,29 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
 def view_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     members = team.members.all().order_by('-points')
-    members_30 = team.members.annotate(points_30=Subquery(
-        Verification.objects.filter(
-            verified=True,
-            annotation__user_id=OuterRef('pk'),
-            annotation__time__gte=timezone.now() - datetime.timedelta(days=30))
-        .values('annotation__user_id')
-        .annotate(count=Count('annotation__user_id'))
-        .values('count'), output_field=IntegerField())).filter(points_30__gt=0)\
-        .order_by(F('points_30').desc(nulls_last=True)).distinct()
+    members_30 = User.objects.raw('''
+    SELECT
+      u.id, u.password, u.last_login, u.is_superuser, u.username, u.first_name,
+      u.last_name, u.email, u.is_staff, u.is_active, u.date_joined, u.points,
+      COUNT(v.id) points_30
+    FROM
+      users_user u,
+      users_teammembership utm,
+      annotations_annotation AS a,
+      annotations_verification AS v
+    WHERE
+      utm.team_id = %s AND
+      u.id = utm.user_id AND
+      a.id = v.annotation_id AND
+      a.user_id = u.id AND
+      v.time >= NOW() - '30 days'::interval
+    GROUP BY
+      u.id, u.password, u.last_login, u.is_superuser, u.username, u.first_name,
+      u.last_name, u.email, u.is_staff, u.is_active, u.date_joined, u.points
+    ORDER BY
+      points_30
+    DESC
+    ''', (team.pk,))
 
     is_member = request.user in members
     admins = team.admins
