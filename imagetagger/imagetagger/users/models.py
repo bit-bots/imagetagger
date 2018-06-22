@@ -9,7 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class User(AbstractUser):
-    pass
+    # points are updated by database triggers
+    points = models.IntegerField(default=0)
 
 
 class Team(models.Model):
