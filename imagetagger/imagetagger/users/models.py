@@ -1,12 +1,15 @@
 from typing import Set
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+
+
+class User(AbstractUser):
+    pass
 
 
 class Team(models.Model):
@@ -24,10 +27,10 @@ class Team(models.Model):
 
     @cached_property
     def admins(self) -> Set:
-        return set(get_user_model().objects.filter(
+        return set(User.objects.filter(
             team_memberships__is_admin=True, team_memberships__team=self))
 
-    def get_perms(self, user: get_user_model()) -> Set[str]:
+    def get_perms(self, user: User) -> Set[str]:
         """Get all permissions of the user."""
         perms = set()
         if self.is_admin(user):
@@ -43,15 +46,15 @@ class Team(models.Model):
             })
         return perms
 
-    def has_perm(self, permission: str, user: get_user_model()) -> bool:
+    def has_perm(self, permission: str, user: User) -> bool:
         """Check whether user has specified permission."""
         return permission in self.get_perms(user)
 
-    def is_admin(self, user: get_user_model()) -> bool:
+    def is_admin(self, user: User) -> bool:
         """Check whether user is admin of this group."""
         return user in self.admins
 
-    def is_member(self, user: get_user_model()) -> bool:
+    def is_member(self, user: User) -> bool:
         """Check whether user is member of this group."""
         return self.members.filter(pk=user.pk).exists()
 
