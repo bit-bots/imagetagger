@@ -16,7 +16,7 @@ from imagetagger.annotations.models import Verification, Annotation, ExportForma
 from imagetagger.annotations.forms import ExportFormatEditForm
 from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.models import ImageSet
-from imagetagger.users.forms import RegistrationForm, TeamCreationForm
+from imagetagger.users.forms import TeamCreationForm
 from .models import Team, TeamMembership, User
 
 
