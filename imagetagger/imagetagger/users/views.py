@@ -105,14 +105,7 @@ def explore_team(request):
 
 @login_required
 def explore_user(request):
-    users = User.objects.annotate(points=Subquery(
-        Verification.objects.filter(
-            verified=True,
-            annotation__user_id=OuterRef('pk'))
-        .values('annotation__user_id')
-        .annotate(count=Count('annotation__user_id'))
-        .values('count'), output_field=IntegerField())).all()\
-        .order_by(F('points').desc(nulls_last=True)).distinct()
+    users = User.objects.all().order_by('-points')
 
     query = request.GET.get('query')
     get_query = ''
@@ -216,23 +209,16 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
 @login_required
 def view_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    members = team.members.all().annotate(points=Subquery(
-        Verification.objects.filter(
-            verified=True,
-            annotation__user_id=OuterRef('pk'))
-        .values('annotation__user_id')
-        .annotate(count=Count('annotation__user_id'))
-        .values('count'), output_field=IntegerField())).all()\
-        .order_by(F('points').desc(nulls_last=True)).distinct()
-    members_30 = team.members.all().annotate(points=Subquery(
+    members = team.members.all().order_by('-points')
+    members_30 = team.members.annotate(points_30=Subquery(
         Verification.objects.filter(
             verified=True,
             annotation__user_id=OuterRef('pk'),
             annotation__time__gte=timezone.now() - datetime.timedelta(days=30))
         .values('annotation__user_id')
         .annotate(count=Count('annotation__user_id'))
-        .values('count'), output_field=IntegerField())).filter(points__gt=0)\
-        .order_by(F('points').desc(nulls_last=True)).distinct()
+        .values('count'), output_field=IntegerField())).filter(points_30__gt=0)\
+        .order_by(F('points_30').desc(nulls_last=True)).distinct()
 
     is_member = request.user in members
     admins = team.admins
@@ -264,12 +250,7 @@ def user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     teams = Team.objects.filter(members=user)
 
-    # TODO: use a database trigger (after migrating to a custom user model for that)
-    points = Verification.objects.filter(verified=True, annotation__user=user)\
-        .count()
-
     return render(request, 'users/view_user.html', {
         'user': user,
         'teams': teams,
-        'points': points,
     })

@@ -158,11 +158,7 @@
                                                 <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
                                             </td>
                                             <td>
-                                                {% if member.points %}
-                                                    {{member.points}}
-                                                {% else %}
-                                                    0
-                                                {% endif %}
+                                                {{member.points}}
                                             </td>
                                             {% if member == request.user  %}
                                                 <td>
@@ -206,8 +202,8 @@
                                                     <a href="{% url 'users:user' member.id %}">{{member.username}}&nbsp;&nbsp;&nbsp;&nbsp;</a>
                                                 </td>
                                                 <td>
-                                                    {% if member.points %}
-                                                        {{member.points}}
+                                                    {% if member.points_30 %}
+                                                        {{member.points_30}}
                                                     {% else %}
                                                         0
                                                     {% endif %}
