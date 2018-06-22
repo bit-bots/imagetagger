@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import logout, login
-from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -18,7 +17,7 @@ from imagetagger.annotations.forms import ExportFormatEditForm
 from imagetagger.images.forms import ImageSetCreationForm
 from imagetagger.images.models import ImageSet
 from imagetagger.users.forms import RegistrationForm, TeamCreationForm
-from .models import Team, TeamMembership
+from .models import Team, TeamMembership, User
 
 
 @login_required

@@ -1,7 +1,6 @@
 from django import forms
-from django.contrib.auth.models import User
 
-from .models import Team
+from .models import Team, User
 
 
 class RegistrationForm(forms.ModelForm):
