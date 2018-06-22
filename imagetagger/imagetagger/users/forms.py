@@ -1,16 +1,20 @@
 from django import forms
+from registration.forms import RegistrationForm
 
 from .models import Team, User
 
 
-class RegistrationForm(forms.ModelForm):
+class UserRegistrationForm(RegistrationForm):
     class Meta:
         model = User
         fields = [
             'username',
             'email',
-            'password',
+            'password1',
+            'password2',
         ]
+
+
 
 
 class TeamCreationForm(forms.ModelForm):
