@@ -68,9 +68,11 @@ class ImageSet(models.Model):
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)
 
+    @property
     def image_count(self):
-        path = self.root_path()
-        return len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+        if hasattr(self, 'image_count_agg'):
+            return self.image_count_agg
+        return self.images.count()
 
     def get_perms(self, user: get_user_model()) -> Set[str]:
         """Get all permissions of the user."""
