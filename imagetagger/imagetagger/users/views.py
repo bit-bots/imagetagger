@@ -236,23 +236,27 @@ def view_team(request, team_id):
 
     is_member = request.user in members
     admins = team.admins
-    imagesets = ImageSet.objects.filter(team=team).order_by('-public', 'name')
-    if is_member:
-        export_formats = ExportFormat.objects.filter(team=team).order_by('name')
-    else:
-        export_formats = ExportFormat.objects.filter(team=team, public=True).order_by('name')
-    export_format_forms = [ExportFormatEditForm(instance=format_instance) for format_instance in export_formats]
+
+    imagesets = ImageSet.objects.filter(team=team).annotate(
+        image_count_agg=Count('images')).order_by('-public', 'name')
+    export_formats = ExportFormat.objects.filter(
+        team=team).prefetch_related('annotations_types').order_by('name')
+
     if not is_member:
+        export_formats = export_formats.filter(public=True)
         imagesets = imagesets.filter(public=True)
+
+    export_format_forms = (ExportFormatEditForm(instance=format_instance) for format_instance in export_formats)
+
     return render(request, 'users/view_team.html', {
         'team': team,
         'members': members,
         'members_30': members_30,
         'admins': admins,
         'imagesets': imagesets,
-        'date_imagesets': imagesets.order_by('-time'),
-        'size_imagesets': sorted(imagesets, key=lambda i: -i.image_count()),
-        'test_imagesets': imagesets.filter(name__icontains='test'),
+        'date_imagesets': sorted(imagesets, key=lambda i: i.time, reverse=True),
+        'size_imagesets': sorted(imagesets, key=lambda i: i.image_count, reverse=True),
+        'test_imagesets': [imageset for imageset in imagesets if 'test' in imageset.name],
         'imageset_creation_form': ImageSetCreationForm(),
         'team_perms': team.get_perms(request.user),
         'export_formats_forms': export_format_forms,
