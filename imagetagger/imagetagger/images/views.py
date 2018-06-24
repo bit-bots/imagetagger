@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -65,8 +65,9 @@ def index(request):
 
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members=request.user)
-    imagesets = ImageSet.objects.select_related()\
-        .filter(team__in=userteams).order_by('id')
+    imagesets = ImageSet.objects.annotate(
+        image_count_agg=Count('images')
+    ).select_related('team').filter(team__in=userteams).order_by('id')
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
