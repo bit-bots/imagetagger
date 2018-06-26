@@ -14,6 +14,10 @@ div.wrapper{
   position: relative;
 }
 
+div.panel-heading {
+  word-wrap:break-word;
+}
+
 #boundingBox{
   position: absolute;
   border:2px solid #ff0000;

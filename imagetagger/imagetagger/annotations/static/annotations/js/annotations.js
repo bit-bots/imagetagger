@@ -386,6 +386,11 @@ function calculateImageScale() {
           if (annotation.content !== '') {
             annotation.content += ' &bull; ';
           }
+          if (i === 4) {
+            // Show no more than three points
+            annotation.content += '...';
+            break;
+          }
           annotation.content += '<em>x' + i + '</em>: ' + annotation.vector["x" + i];
           annotation.content += ' &bull; ';
           annotation.content += '<em>y' + i + '</em>: ' + annotation.vector["y" + i];
@@ -393,7 +398,6 @@ function calculateImageScale() {
       } else {
         annotation.content = 'not in image';
       }
-      annotation.content = shorten(annotation.content, 100);
       if (annotation.blurred) {
         annotation.content += ' <span id="blurred_label" class="label label-info">Blurred</span>';
       }
@@ -813,7 +817,7 @@ function calculateImageScale() {
     $('.annotate_image_link').removeClass('active');
     var link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
-    $('#active_image_name').text(link.text());
+    $('#active_image_name').text(link.text().trim());
     tool.restoreSelection(false);
 
     if (fromHistory !== true) {
