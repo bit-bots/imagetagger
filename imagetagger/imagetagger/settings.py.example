@@ -53,7 +53,7 @@ LANGUAGE_CODE = 'en-us'
 #}
 
 
-#USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance
+USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance
 
 USE_IMPRINT = False
 IMPRINT_NAME = ''
