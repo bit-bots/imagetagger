@@ -130,3 +130,9 @@ class ImageSet(models.Model):
             return ''
         elif self.priority is 1:
             return '<span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="High labeling priority"></span>'
+
+
+class SetTag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    imagesets = models.ManyToManyField(ImageSet, related_name='set_tags')
+
