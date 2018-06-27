@@ -156,6 +156,16 @@
                                         <td><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a></td>
                                     </tr>
                                 {% endif %}
+                                {% if imageset.set_tags.all %}
+                                    <tr>
+                                        <td>Tags</td>
+                                        <td>
+                                            {% for tag in imageset.set_tags.all %}
+                                                <span class="label label-info">tag.name </span>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
                                 <tr>
                                     <td>Location</td>
                                     <td>{{imageset.location}}</td>
@@ -211,6 +221,13 @@
                                             </td>
                                         </tr>
                                         <tr>
+                                            <td><b>Tags</b></td>
+                                            <td>
+                                                {% for tag in imageset.set_tags.all %}
+                                                    <span class="label label-info">tag.name </span>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
                                             <td>
                                                 <label for="id_location">{{ edit_form.location.label }}</label>
                                             </td>
