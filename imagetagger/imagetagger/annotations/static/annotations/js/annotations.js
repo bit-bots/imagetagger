@@ -11,6 +11,8 @@ globals = {
   drawAnnotations: true,
   mouseUpX: undefined,
   mouseUpY: undefined,
+  mouseClickX: undefined,
+  mouseClickY: undefined,
   mouseDownX: undefined,
   mouseDownY: undefined,
   currentAnnotations: undefined,
@@ -458,7 +460,14 @@ function calculateImageScale() {
    * @param annotationId
    */
 
-  function highlightAnnotation(e) {
+  function handleMouseClick(e) {
+    if (e.target.id === 'image') {
+      var position = globals.image.offset();
+      globals.mouseClickX = Math.round((e.pageX - position.left));
+      globals.mouseClickY = Math.round((e.pageY - position.top));
+      tool.handleMouseClick(e);
+    }
+
     // remove any existing highlight
     if (e.target.className !== 'annotation_edit_button') {
       $('.annotation').removeClass('alert-info');
@@ -1212,7 +1221,7 @@ function calculateImageScale() {
 
     // register click events
     $(window).click(function(e) {
-      highlightAnnotation(e);
+      handleMouseClick(e);
     });
     $('#cancel_edit_button').click(function() {
       tool.resetSelection(true);

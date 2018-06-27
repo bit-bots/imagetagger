@@ -8,7 +8,6 @@ class BoundingBoxes {
     if (globals.image === '') {
       globals.image = $('#image');
     }
-    this.locked = false;
     this.annotationTypeId = annotationTypeId;
     if (!noSelection) {
       this.initSelection();
@@ -112,6 +111,7 @@ class BoundingBoxes {
    * Reload the selection.
    */
   reloadSelection(annotationId, annotationData) {
+    this.setHighlightColor(annotationId);
     this.selection = globals.image.imgAreaSelect({
       instance: true,
       show: true
@@ -355,10 +355,10 @@ class BoundingBoxes {
     this.clear();
   }
 
-  handleMouseDown(event) {}
+  handleMouseDown(event) { }
+  handleMouseUp(event) { }
 
-  handleMouseUp(event) {
-    /*
+  handleMouseClick(event) {
     // get current annotation type id
     var annotationType = parseInt($('#annotation_type_id').val());
 
@@ -379,17 +379,15 @@ class BoundingBoxes {
       var bottom = annotation.vector.y2 / globals.imageScaleHeight;
 
       // check if we clicked inside that annotation
-      if (globals.mouseUpX >= left && globals.mouseUpX <= right && globals.mouseUpY >= top && globals.mouseUpY <= bottom) {
+      if (globals.mouseClickX >= left && globals.mouseClickX <= right && globals.mouseClickY >= top && globals.mouseClickY <= bottom) {
         matchingAnnotations.push(annotation);
       }
     }
 
     // no matches
-    if (matchingAnnotations.length === 0 || this.locked) {
-      this.locked = false;
+    if (matchingAnnotations.length === 0) {
       return;
     }
-    this.locked = true;
 
     annotation = matchingAnnotations[0];
 
@@ -444,7 +442,6 @@ class BoundingBoxes {
       // trigger click event
       $(edit_button_id).click();
     }
-    */
   }
 
   handleMousemove() {}
