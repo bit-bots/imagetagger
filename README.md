@@ -25,6 +25,21 @@ For a short overview of the functions please have a look at the following poster
 * collections of filtered images from multiple imagesets
 * image metadata (e.g. robot pose, camera parameters)
 
+## Reference
+
+This paper describes the Bit-Bots Imagetagger more in depth. Please cite if you use this tool in your research:
+
+FIEDLER, Niklas, et al. ImageTagger: An Open Source Online Platform for Collaborative Image Labeling. In: RoboCup 2018: Robot World Cup XXII. Springer, 2018.
+
+```
+@inproceedings{imagetagger2018,
+   author={Fiedler, Niklas and Bestmann, Marc and Hendrich, Norman},
+   year={2018},
+   title={ImageTagger: An Open Source Online Platform for Collaborative Image Labeling},
+   booktitle={RoboCup 2018: Robot World Cup XXII}
+   organization={Springer}
+}
+```
 ## Upgrade
 
 ```
