@@ -474,7 +474,7 @@ function calculateImageScale() {
       if (gHighlightedAnnotation && gHighlightedAnnotation !== $(e.target).parent().data('annotationid')) {
         tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotations.filter(function(element) {
           return element.id === gHighlightedAnnotation;
-        }));;
+        }));
         gHighlightedAnnotation = undefined;
       }
     }
@@ -483,7 +483,6 @@ function calculateImageScale() {
     if (e.target.className === 'annotation') {
       let editButton = $(e.target).find('.annotation_edit_button').parent();
       $('#annotation_type_id').val(editButton.data('annotationtypeid'));
-      let oldTool = tool.constructor.name;
       handleAnnotationTypeChange();
       tool.setHighlightColor(editButton.data('annotationid'));
       gHighlightedAnnotation = editButton.data('annotationid');
