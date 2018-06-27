@@ -121,3 +121,21 @@ server {
         }
 }
 ```
+
+## Used dependencies
+
+The ImageTagger relies on the following plugins, libraries and frameworks:
+
+- [Bootstrap](https://getbootstrap.com/)
+- [Django](https://www.djangoproject.com/)
+- [Django REST Framework](http://www.django-rest-framework.org/)
+- [django-registration](https://github.com/ubernostrum/django-registration)
+- [django-widget-tweaks](https://github.com/jazzband/django-widget-tweaks)
+- [imgAreaSelect](http://odyniec.net/projects/imgareaselect/)
+- [jCanvas](https://projects.calebevans.me/jcanvas/)
+- [jQuery](https://jquery.com/)
+- [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload)
+- [Pillow](https://github.com/python-pillow/Pillow)
+- [PostgreSQL](https://www.postgresql.org/)
+
+We are grateful to the maintainers and contributors of the respective projects.
