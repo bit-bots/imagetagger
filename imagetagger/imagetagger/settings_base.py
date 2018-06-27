@@ -138,7 +138,7 @@ IMAGE_PATH = os.path.join(BASE_DIR, 'images')  # the absolute path to the folder
 
 # filename extension of accepted imagefiles
 IMAGE_EXTENSION = {
-    '.png',
-    '.jpg',
+    'png',
+    'jpeg',
 }
 

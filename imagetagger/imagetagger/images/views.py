@@ -34,6 +34,7 @@ import random
 import zipfile
 import hashlib
 import json
+import imghdr
 
 @login_required
 def explore_imageset(request):
@@ -87,8 +88,17 @@ def upload_image(request, imageset_id):
             return HttpResponseBadRequest('Must have files attached!')
         json_files = []
         for f in request.FILES.getlist('files[]'):
+            error = {
+                'duplicates': 0,
+                'damaged': False,
+                'directories': False,
+                'exists': False,
+                'unsupported': False,
+                'zip': False,
+            }
             fname = f.name.split('.')
             if fname[-1] == 'zip':
+                error['zip'] = True
                 zipname = ''.join(random.choice(string.ascii_uppercase +
                                                 string.ascii_lowercase +
                                                 string.digits)
@@ -108,47 +118,53 @@ def upload_image(request, imageset_id):
                 filenames.sort()
                 duplicat_count = 0
                 for filename in filenames:
-                    (shortname, extension) = os.path.splitext(filename)
-                    if extension.lower() in settings.IMAGE_EXTENSION:
-                        # creates a checksum for image
-                        fchecksum = hashlib.sha512()
-                        file_path = os.path.join(imageset.root_path(), 'tmp', filename)
-                        with open(file_path, 'rb') as fil:
-                            while True:
-                                buf = fil.read(10000)
-                                if not buf:
-                                    break
-                                fchecksum.update(buf)
-                        fchecksum = fchecksum.digest()
-                        # Tests for duplicats in imageset
-                        if Image.objects.filter(checksum=fchecksum,
-                                                image_set=imageset).count() == 0:
+                    file_path = os.path.join(imageset.root_path(), 'tmp', filename)
+                    try:
+                        if imghdr.what(file_path) in settings.IMAGE_EXTENSION:
+                            # creates a checksum for image
+                            fchecksum = hashlib.sha512()
+                            with open(file_path, 'rb') as fil:
+                                while True:
+                                    buf = fil.read(10000)
+                                    if not buf:
+                                        break
+                                    fchecksum.update(buf)
+                            fchecksum = fchecksum.digest()
+                            # Tests for duplicats in imageset
+                            if Image.objects.filter(checksum=fchecksum,
+                                                    image_set=imageset).count() == 0:
 
-                            img_fname = (''.join(shortname) + '_' +
-                                         ''.join(
-                                             random.choice(
-                                                 string.ascii_uppercase + string.ascii_lowercase + string.digits)
-                                             for _ in range(6)) + extension)
-                            with PIL_Image.open(file_path) as image:
-                                width, height = image.size
-                            file_new_path = os.path.join(imageset.root_path(), img_fname)
-                            shutil.move(file_path, file_new_path)
-                            shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
-                            new_image = Image(name=filename,
-                                              image_set=imageset,
-                                              filename=img_fname,
-                                              checksum=fchecksum,
-                                              width=width,
-                                              height=height
-                                              )
-                            new_image.save()
+                                img_fname = (''.join(shortname) + '_' +
+                                             ''.join(
+                                                 random.choice(
+                                                     string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                                 for _ in range(6)) + extension)
+                                try:
+                                    with PIL_Image.open(file_path) as image:
+                                        width, height = image.size
+                                    file_new_path = os.path.join(imageset.root_path(), img_fname)
+                                    shutil.move(file_path, file_new_path)
+                                    shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
+                                    new_image = Image(name=filename,
+                                                      image_set=imageset,
+                                                      filename=img_fname,
+                                                      checksum=fchecksum,
+                                                      width=width,
+                                                      height=height
+                                                      )
+                                    new_image.save()
+                                except (OSError, IOError):
+                                    error['damaged'] = True
+                            else:
+                                os.remove(os.path.join(imageset.root_path(),
+                                                       'tmp', filename))
+                                duplicat_count = duplicat_count + 1
                         else:
-                            os.remove(os.path.join(imageset.root_path(), 
-                                                   'tmp', filename))
-                            duplicat_count = duplicat_count + 1
+                            error['unsupported'] = True
+                    except IsADirectoryError:
+                        error['directories'] = True
                 if duplicat_count > 0:
-                    messages.warning(request, 
-                                     "Duplicates detected: " + str(duplicat_count))
+                    error['duplicates'] = duplicat_count
             else:
                 # creates a checksum for image
                 fchecksum = hashlib.sha512()
@@ -170,20 +186,56 @@ def upload_image(request, imageset_id):
                         for chunk in f.chunks():
                             out.write(chunk)
                     shutil.chown(image.path(), group=settings.UPLOAD_FS_GROUP)
-                    with PIL_Image.open(image.path()) as image_file:
-                        width, height = image_file.size
-                    image.height = height
-                    image.width = width
-                    image.save()
+                    if imghdr.what(image.path()) in settings.IMAGE_EXTENSION:
+                        try:
+                            with PIL_Image.open(image.path()) as image_file:
+                                width, height = image_file.size
+                            image.height = height
+                            image.width = width
+                            image.save()
+                        except (OSError, IOError):
+                            error['damaged'] = True
+                    else:
+                        error['unsupported'] = True
                 else:
-                    messages.warning(request, "This image already exists in this set!")
-            json_files.append({'name': f.name,
-                               'size': f.size,
-                               # 'url': reverse('images_imageview', args=(image.id, )),
-                               # 'thumbnailUrl': reverse('images_imageview', args=(image.id, )),
-                               # 'deleteUrl': reverse('images_imagedeleteview', args=(image.id, )),
-                               # 'deleteType': "DELETE",
-                               })
+                    error['exists'] = True
+            errormessage = ''
+            if error['zip']:
+                errors = list()
+                if error['directories']:
+                    errors.append('directories')
+                if error['unsupported']:
+                    errors.append('unsupported files')
+                if error['duplicates'] > 0:
+                    errors.append(str(error['duplicates']) + ' duplicates')
+                if error['damaged']:
+                    errors.append('damaged files')
+                # Build beautiful error message
+                errormessage += ', '.join(errors) + ' in the archive have been skipped!'
+                p = errormessage.rfind(',')
+                errormessage = errormessage[:p].capitalize() + ' and' + errormessage[p+1:]
+                print(errormessage)
+            else:
+                if error['unsupported']:
+                    errormessage = 'This file type is unsupported!'
+                elif error['damaged']:
+                    errormessage = 'This file seems to be damaged!'
+                elif error['exists']:
+                    errormessage = 'This image already exists in the imageset!'
+            if errormessage == '':
+                json_files.append({'name': f.name,
+                                   'size': f.size,
+                                   # 'url': reverse('images_imageview', args=(image.id, )),
+                                   # 'thumbnailUrl': reverse('images_imageview', args=(image.id, )),
+                                   # 'deleteUrl': reverse('images_imagedeleteview', args=(image.id, )),
+                                   # 'deleteType': "DELETE",
+                                   })
+            else:
+                json_files.append({'name': f.name,
+                                   'size': f.size,
+                                   'error': errormessage,
+                                   })
+
         return JsonResponse({'files': json_files})
 
 
