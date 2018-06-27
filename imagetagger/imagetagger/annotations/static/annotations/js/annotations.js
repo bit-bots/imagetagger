@@ -93,6 +93,7 @@ function calculateImageScale() {
       tool.reset();
       delete tool;
     }
+    $('#feedback_multiline_information').addClass('hidden');
     switch (vector_type) {
       case 1: // Bounding Box
         // Remove unnecessary number fields
@@ -106,9 +107,10 @@ function calculateImageScale() {
         $('#image').css('cursor', 'none');
         $('.imgareaselect-outer').css('cursor', 'none');
         break;
+      case 4: // Multiline, fallthrough
+        $('#feedback_multiline_information').removeClass('hidden');
       case 2: // Point, fallthrough
       case 3: // Line, fallthrough
-      case 4: // Multiline, fallthrough
       case 5: // Polygon
         $('#image_canvas').removeClass('hidden').attr('width', Math.ceil($('#image').width())).attr('height', Math.ceil($('#image').height()));
         tool = new Canvas($('#image_canvas'), vector_type, node_count, annotationTypeId);
@@ -124,9 +126,11 @@ function calculateImageScale() {
           cancelSelection: function() {},
           reset: function() {},
           drawExistingAnnotations: function() {},
+          handleEscape: function() {},
           handleMousemove: function() {},
           handleMouseDown: function() {},
           handleMouseUp: function() {},
+          handleMouseClick: function() {},
           moveSelectionLeft: function() {},
           moveSelectionRight: function() {},
           moveSelectionUp: function() {},
@@ -466,7 +470,7 @@ function calculateImageScale() {
    */
 
   function handleMouseClick(e) {
-    if (e.target.id === 'image') {
+    if (e && (e.target.id === 'image' || e.target.id === 'image_canvas')) {
       var position = globals.image.offset();
       globals.mouseClickX = Math.round((e.pageX - position.left));
       globals.mouseClickY = Math.round((e.pageY - position.top));
@@ -696,6 +700,17 @@ function calculateImageScale() {
       case 3: // Line
         return vector.x1 !== vector.x2 || vector.y1 !== vector.y2 && len === 4;
       case 4: // Multiline
+        // a multiline should have at least two points
+        if (len < 4) {
+          return false;
+        }
+        for (let i = 1; i < len / 2 + 1; i++) {
+          for (let j = 1; j < len / 2 + 1; j++) {
+            if (i !== j && vector['x' + i] === vector['x' + j] && vector['y' + i] === vector['y' + j]) {
+              return false;
+            }
+          }
+        }
         return true;
       case 5: // Polygon
         if (len < 6) {
@@ -1308,7 +1323,7 @@ function calculateImageScale() {
           gShiftDown = true;
           break;
         case 27: // Escape
-          tool.resetSelection(true);
+          tool.handleEscape();
           break;
         case 73: //i
           if(gShiftDown) {

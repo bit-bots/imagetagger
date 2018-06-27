@@ -144,6 +144,7 @@ class BoundingBoxes {
    * Delete current selection.
    */
   resetSelection(abortEdit) {
+    this.unsetHighlightColor(globals.editedAnnotationsId);
     $('.annotation_value').val(0);
 
     if (this.selection !== undefined) {
@@ -357,6 +358,7 @@ class BoundingBoxes {
 
   handleMouseDown(event) { }
   handleMouseUp(event) { }
+  handleEscape() { this.resetSelection(true); }
 
   handleMouseClick(event) {
     // get current annotation type id

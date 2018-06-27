@@ -237,6 +237,32 @@ class Line extends Drawing {
   }
 }
 
+class Multiline extends Drawing {
+  constructor(parent, point, id, mutable, color) {
+    super(parent, point, id, mutable, color);
+    this.type = "multiline";
+    this.color = color || globals.stdColor;
+    this.parent.setLayer(this.name, {
+      closed: false
+    })
+  }
+
+  addPoint(x, y) {
+      super.addPoint(x, y);
+  }
+  close() {
+    this.deleteCurrentPoint();
+    this.parent.inline = false;
+    this.parent.locked = false;
+    this.parent.setLayer(this.name, {
+      closed: false
+    });
+    this.closed = true;
+    this.setDragCursor(true);
+    this.parent.updateAnnotationFields(this.parent.getLayer(this.name));
+  }
+}
+
 class Polygon extends Drawing {
   /**
    * @param numberOfPoints The number of points the polygon will have
@@ -374,6 +400,12 @@ class Canvas {
     this.drawings.push(this.currentDrawing);
   }
 
+  drawMultiline(points, id, mutable, color) {
+    color = color || globals.stdColor;
+    this.currentDrawing = new Multiline(this, points, id, mutable, color);
+    this.drawings.push(this.currentDrawing);
+  }
+
   drawPolygon(points, id, mutable, numberOfPoints, closed, color) {
     color = color || globals.stdColor;
     this.currentDrawing = new Polygon(this, points, id, mutable, numberOfPoints, color);
@@ -422,6 +454,9 @@ class Canvas {
           break;
         case 3: // Lines
           this.drawLine(vector, annotation.id, false, color);
+          break;
+        case 4: // Multilines
+          this.drawMultiline(vector, annotation.id, false, color);
           break;
         case 5: // Polygons
           if (annotation.annotation_type.node_count === 0) {
@@ -478,6 +513,14 @@ class Canvas {
       if (drawing.id === id) {
         return drawing;
       }
+    }
+  }
+
+  handleEscape() {
+    if (this.currentDrawing && this.annotationTypeId === 4 && !this.currentDrawing.closed) {
+      this.currentDrawing.close();
+    } else {
+      this.resetSelection(true);
     }
   }
 
@@ -588,6 +631,15 @@ class Canvas {
   increaseSelectionSizeRight() {}
   increaseSelectionSizeUp() {}
 
+  handleMouseClick(event) {
+    let position = globals.image.offset();
+    if (!(event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
+      event.pageY > position.top && event.pageY < position.top + globals.image.height()) &&
+      this.annotationTypeId === 4 && this.currentDrawing) {
+      this.currentDrawing.close();
+    }
+  }
+
   handleMouseDown() {
     // Check if we are close enough to move the point, not draw a new drawing
     // we use the variable locked which is checked when we can create a new line
@@ -619,6 +671,9 @@ class Canvas {
           break;
         case 3: // Line
           this.drawLine({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          break;
+        case 4: // Multiline
+          this.drawMultiline({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
           break;
         case 5: // Polygon
           if (this.node_count === 0) {
