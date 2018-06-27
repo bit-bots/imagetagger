@@ -228,6 +228,19 @@
                                                 {% endfor %}
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td><b>Add Tag</b></td>
+                                            <td>
+                                                
+                                                <div class="input-group" role="group" aria-label="team_creation">
+                                                    {% render_field team_creation_form.name placeholder=team_creation_form.name.label class+='form-control' %}
+                                                    <span class="input-group-btn">
+                                                        <input class="btn btn-primary" type="submit" value="Create">
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <td>
                                                 <label for="id_location">{{ edit_form.location.label }}</label>
                                             </td>

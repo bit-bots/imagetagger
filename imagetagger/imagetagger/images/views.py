@@ -21,7 +21,7 @@ from PIL import Image as PIL_Image
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer
 from imagetagger.users.forms import TeamCreationForm
-from .models import ImageSet, Image
+from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
@@ -557,6 +557,31 @@ def load_image_set(request) -> Response:
     }, status=HTTP_200_OK)
 
 
+@login_required
+@api_view(['POST'])
+def tag_image_set(request) -> Response:
+    try:
+        image_set_id = int(request.query_params['image_set_id'])
+        tag_name = request.query_params['tag_name']
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
 
+    image_set = get_object_or_404(ImageSet, pk=image_set_id)
 
+    if not image_set.has_perm('edit_set', request.user):
+        return Response({
+            'detail': 'permission for tagging this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    # TODO: this better?
+    if SetTag.objects.filter(name=tag_name).exists():
+        tag = SetTag.objects.filter(name=tag_name)
+    else:
+        tag = SetTag(name=tag_name)
+    tag.imagesets.add(image_set)
+    tag.save()
+
+    return Response({
+        'image_set': serialized_image_set,
+    }, status=HTTP_200_OK)
 
