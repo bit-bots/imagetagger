@@ -1,7 +1,7 @@
 const threshold = 7;      // Threshold to draw a new drawing vs move the old one (px)
 const radius = 3;         // Radius of the handles
-const stdColor = '#CC0000';     // The color of drawings and handles
-const mutColor = '#CC00CC';
+const stdColor = '#CC4444';     // The color of drawings and handles
+const mutColor = '#CC0000';
 let mousex, mousey;       // Holding the mouse position relative to the canvas
 
 /** The parent class for drawings */
@@ -17,10 +17,7 @@ class Drawing {
     this.id = id;
     this.name = "drawing" + id;
     this.parent = parent;
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
-    this.color = color;
+    this.color = color || stdColor;
 
     /* Define layer */
     let l = {
@@ -123,8 +120,10 @@ class Drawing {
           mouseup: 'crosshair'
         }
       };
+      l["strokeStyle"] = mutColor;
     } else {
       l["handle"] = {};
+      l["strokeStyle"] = this.color;
     }
     this.parent.setLayer(this.name, l);
   }
@@ -173,10 +172,7 @@ class Point {
     this.name = "drawing" + id;
     this.parent = parent;
     this.mutable = mutable;
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
-    this.color = color;
+    this.color = color || stdColor;
 
     /* Define layer */
     let l = {
@@ -214,10 +210,7 @@ class Line extends Drawing {
   constructor(parent, point, id, mutable, color) {
     super(parent, point, id, mutable, color);
     this.type = "line";
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
-    this.color = color;
+    this.color = color || stdColor;
   }
   addPoint(x, y) {
     this.pointCounter++;
@@ -236,10 +229,7 @@ class Polygon extends Drawing {
     super(parent, points, id, mutable, color);
     this.type = "polygon";
     this.nop = numberOfPoints;
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
-    this.color = color;
+    this.color = color || stdColor;
   }
   addPoint(x, y) {
     super.addPoint(x, y);
@@ -258,10 +248,7 @@ class ArbitraryPolygon extends Drawing {
   constructor(parent, point, id, mutable, color) {
     super(parent, point, id, mutable, color);
     this.type = "polygon";
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
-    this.color = color;
+    this.color = color || stdColor;
   }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
@@ -360,25 +347,19 @@ class Canvas {
   }
 
   drawPoint(points, id, mutable, color) {
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
+    color = color || stdColor;
     this.currentDrawing = new Point(this, points, id, mutable, color);
     this.drawings.push(this.currentDrawing);
   }
 
   drawLine(points, id, mutable, color) {
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
+    color = color || stdColor;
     this.currentDrawing = new Line(this, points, id, mutable, color);
     this.drawings.push(this.currentDrawing);
   }
 
   drawPolygon(points, id, mutable, numberOfPoints, closed, color) {
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
+    color = color || stdColor;
     this.currentDrawing = new Polygon(this, points, id, mutable, numberOfPoints, color);
     if (closed) {
       this.currentDrawing.close();
@@ -387,9 +368,7 @@ class Canvas {
   }
 
   drawArbitraryPolygon(points, id, mutable, closed, color) {
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
+    color = color || stdColor;
     this.currentDrawing = new ArbitraryPolygon(this, points, id, mutable, color);
     if (closed) {
       this.currentDrawing.close();
@@ -399,9 +378,7 @@ class Canvas {
 
   drawExistingAnnotations(annotations, color) {
     this.clear();
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
+    color = color || stdColor;
     if (!globals.drawAnnotations) {
       return;
     }
