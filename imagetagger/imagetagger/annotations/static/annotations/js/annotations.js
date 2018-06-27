@@ -102,6 +102,9 @@ function calculateImageScale() {
         }
         tool = new BoundingBoxes(annotationTypeId);
         $('#image_canvas').addClass('hidden');
+        $('.hair').removeClass('hidden');
+        $('#image').css('cursor', 'none');
+        $('.imgareaselect-outer').css('cursor', 'none');
         break;
       case 2: // Point, fallthrough
       case 3: // Line, fallthrough
@@ -109,6 +112,8 @@ function calculateImageScale() {
       case 5: // Polygon
         $('#image_canvas').removeClass('hidden').attr('width', Math.ceil($('#image').width())).attr('height', Math.ceil($('#image').height()));
         tool = new Canvas($('#image_canvas'), vector_type, node_count, annotationTypeId);
+        $('.hair').addClass('hidden');
+        $('#image_canvas').css('cursor', 'crosshair');
         break;
       default:
         // Dummytool
