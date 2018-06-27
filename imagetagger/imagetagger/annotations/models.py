@@ -428,6 +428,8 @@ class AnnotationType(models.Model):
             return 'Line'
         if vector_type is AnnotationType.VECTOR_TYPE.POLYGON:
             return 'Polygon'
+        if vector_type is AnnotationType.VECTOR_TYPE.MULTI_LINE:
+            return 'Multi Line'
 
     def validate_vector(self, vector: Union[dict, None]) -> bool:
         """
@@ -453,6 +455,8 @@ class AnnotationType(models.Model):
             return self._validate_point(vector)
         if self.vector_type == AnnotationType.VECTOR_TYPE.POLYGON:
             return self._validate_polygon(vector)
+        if self.vector_type == AnnotationType.VECTOR_TYPE.MULTI_LINE:
+            return self._validate_multi_line(vector)
 
         # No valid vector type given.
         return False
@@ -480,6 +484,20 @@ class AnnotationType(models.Model):
     def _validate_polygon(self, vector: dict) -> bool:
         if len(vector) < 6:
             return False  # A polygon vector has to have at least 3 nodes
+        if not (self.node_count is 0 or
+                self.node_count is int(len(vector) // 2)):
+            return False
+        for i in range(1, int(len(vector) // 2) + 1):
+            for j in range(1, int(len(vector) // 2) + 1):
+                if i is not j and \
+                    (vector['x' + str(i)] is vector['x' + str(j)] and
+                     vector['y' + str(i)] is vector['y' + str(j)]):
+                    return False
+        return True
+
+    def _validate_multi_line(self, vector: dict) -> bool:
+        if len(vector) < 4:
+            return False  # A multi line vector has to have at least 2 nodes
         if not (self.node_count is 0 or
                 self.node_count is int(len(vector) // 2)):
             return False
