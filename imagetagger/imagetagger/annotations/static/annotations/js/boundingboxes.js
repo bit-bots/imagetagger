@@ -18,9 +18,7 @@ class BoundingBoxes {
   drawExistingAnnotations(annotations, color) {
     this.clear();
     calculateImageScale();
-    if (typeof color === "undefined" || color === null) {
-      color = stdColor;
-    }
+    color = color || globals.stdColor;
 
     if (annotations.length === 0 || !globals.drawAnnotations) {
       return;
@@ -40,19 +38,48 @@ class BoundingBoxes {
       }
 
       var boundingBox = document.createElement('div');
-      boundingBox.setAttribute('id', 'boundingBox');
+      boundingBox.setAttribute('class', 'boundingBox');
+      boundingBox.setAttribute('id', 'boundingBox' + annotation.id);
+      $(boundingBox).data('annotationid', annotation.id);
       $(boundingBox).css({
         'top': annotation.vector.y1 / globals.imageScaleHeight,
         'left': annotation.vector.x1 / globals.imageScaleWidth + parseFloat($('img#image').parent().css('padding-left')),
         'width': (annotation.vector.x2 - annotation.vector.x1) / globals.imageScaleWidth,
         'height': (annotation.vector.y2 - annotation.vector.y1) / globals.imageScaleHeight,
-        'border-top-color': color,
-        'border-bottom-color': color,
-        'border-left-color': color,
-        'border-right-color': color
+        'border': '2px solid ' + color
       });
 
       boundingBoxes.appendChild(boundingBox);
+    }
+  }
+
+  setHighlightColor(id) {
+    let highlightBox;
+    for (let box of $('.boundingBox')) {
+      if ($(box).data('annotationid') === id) {
+        highlightBox = box;
+        break;
+      }
+    }
+    if (highlightBox) {
+      $(highlightBox).css({
+        'border': '3px solid ' + globals.mutColor
+      });
+    }
+  }
+
+  unsetHighlightColor(id) {
+    let highlightBox;
+    for (let box of $('.boundingBox')) {
+      if ($(box).data('annotationid') === id) {
+        highlightBox = box;
+        break;
+      }
+    }
+    if (highlightBox) {
+      $(highlightBox).css({
+        'border': '2px solid ' + globals.stdColor
+      });
     }
   }
 

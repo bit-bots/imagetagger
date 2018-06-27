@@ -2,6 +2,6 @@
     pointer-events: none;
 }
 
-#boundingBox {
+.boundingBox {
     border: 2px solid #ff00ff;
 }

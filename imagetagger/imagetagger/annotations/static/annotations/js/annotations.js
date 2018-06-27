@@ -14,7 +14,9 @@ globals = {
   mouseDownX: undefined,
   mouseDownY: undefined,
   currentAnnotations: undefined,
-  allAnnotations: undefined
+  allAnnotations: undefined,
+  stdColor: '#CC4444',
+  mutColor: '#CC0000'
 };
 
 /**
@@ -47,6 +49,7 @@ function calculateImageScale() {
   var gMousepos;
   let gAnnotationType = -1;
   let gAnnotationCache = {};
+  let gHighlightedAnnotation;
 
   var gShiftDown;
 
@@ -124,7 +127,9 @@ function calculateImageScale() {
           decreaseSelectionSizeFromRight: function() {},
           decreaseSelectionSizeFromTop: function() {},
           increaseSelectionSizeRight: function() {},
-          increaseSelectionSizeUp: function() {}
+          increaseSelectionSizeUp: function() {},
+          setHighlightColor: function() {},
+          unsetHighlightColor: function() {}
         };
     }
     if (globals.currentAnnotations) {
@@ -391,9 +396,9 @@ function calculateImageScale() {
             annotation.content += '...';
             break;
           }
-          annotation.content += '<em>x' + i + '</em>: ' + annotation.vector["x" + i];
+          annotation.content += 'x' + i + ': ' + annotation.vector["x" + i];
           annotation.content += ' &bull; ';
-          annotation.content += '<em>y' + i + '</em>: ' + annotation.vector["y" + i];
+          annotation.content += 'y' + i + ': ' + annotation.vector["y" + i];
         }
       } else {
         annotation.content = 'not in image';
@@ -424,6 +429,7 @@ function calculateImageScale() {
         editAnnotation(event, this, annotationId);
       });
       editButton.data('annotationtypeid', annotation.annotation_type.id);
+      editButton.data('annotationid', annotation.id);
       editButton.data('vector', annotation.vector);
       editButton.data('blurred', annotation.blurred);
       editButton.data('concealed', annotation.concealed);
@@ -444,6 +450,45 @@ function calculateImageScale() {
     }
 
     existingAnnotations.removeClass('hidden');
+  }
+
+  /**
+   * Highlight one annotation in a different color
+   * @param annotationTypeId
+   * @param annotationId
+   */
+
+  function highlightAnnotation(e) {
+    // remove any existing highlight
+    if (e.target.className !== 'annotation_edit_button') {
+      $('.annotation').removeClass('alert-info');
+      if (gHighlightedAnnotation) {
+        tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotations.filter(function(element) {
+          return element.id === gHighlightedAnnotation;
+        }));
+        gHighlightedAnnotation = undefined;
+      }
+    } else {
+      // when the click was on the annotation edit button corresponding to the
+      // currently highlighted annotation, do not remove the blue highlight
+      if (gHighlightedAnnotation && gHighlightedAnnotation !== $(e.target).parent().data('annotationid')) {
+        tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotations.filter(function(element) {
+          return element.id === gHighlightedAnnotation;
+        }));;
+        gHighlightedAnnotation = undefined;
+      }
+    }
+
+    // create a new highlight if the click was on an annotation
+    if (e.target.className === 'annotation') {
+      let editButton = $(e.target).find('.annotation_edit_button').parent();
+      $('#annotation_type_id').val(editButton.data('annotationtypeid'));
+      let oldTool = tool.constructor.name;
+      handleAnnotationTypeChange();
+      tool.setHighlightColor(editButton.data('annotationid'));
+      gHighlightedAnnotation = editButton.data('annotationid');
+      $(e.target).addClass('alert-info');
+    }
   }
 
   /**
@@ -1167,6 +1212,9 @@ function calculateImageScale() {
     $('select#annotation_type_id').on('change', handleAnnotationTypeChange);
 
     // register click events
+    $(window).click(function(e) {
+      highlightAnnotation(e);
+    });
     $('#cancel_edit_button').click(function() {
       tool.resetSelection(true);
     });

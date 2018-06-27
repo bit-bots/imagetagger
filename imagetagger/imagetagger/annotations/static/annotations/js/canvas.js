@@ -1,7 +1,5 @@
 const threshold = 7;      // Threshold to draw a new drawing vs move the old one (px)
 const radius = 3;         // Radius of the handles
-const stdColor = '#CC4444';     // The color of drawings and handles
-const mutColor = '#CC0000';
 let mousex, mousey;       // Holding the mouse position relative to the canvas
 
 /** The parent class for drawings */
@@ -17,13 +15,13 @@ class Drawing {
     this.id = id;
     this.name = "drawing" + id;
     this.parent = parent;
-    this.color = color || stdColor;
+    this.color = color || globals.stdColor;
 
     /* Define layer */
     let l = {
       name: this.name,
       type: 'line',
-      strokeWidth: 2,
+      strokeWidth: mutable ? 3 : 2,
       strokeStyle: this.color,
     };
     $.extend(l, points);
@@ -110,8 +108,8 @@ class Drawing {
     if (mutable) {
       l["handle"] = {
         type: 'arc',
-        fillStyle: mutColor,
-        strokeStyle: mutColor,
+        fillStyle: globals.mutColor,
+        strokeStyle: globals.mutColor,
         strokeWidth: 1,
         radius: radius,
         cursors: {
@@ -120,13 +118,31 @@ class Drawing {
           mouseup: 'crosshair'
         }
       };
-      l["strokeStyle"] = mutColor;
+      l["strokeStyle"] = globals.mutColor;
+      l["strokeWidth"] = 3;
     } else {
       l["handle"] = {};
       l["strokeStyle"] = this.color;
+      l["strokeWidth"] = 2;
     }
     this.parent.setLayer(this.name, l);
   }
+
+  /** Set the color of the annotation
+   *
+   * @param mutable boolean indicating if mutable color or not
+   **/
+  setColor(mutable) {
+    let l = this.parent.getLayer(this.name);
+    l["strokeStyle"] = mutable ? globals.mutColor : this.color;
+    if (l["handle"] !== undefined) {
+      l["handle"]["strokeStyle"] = mutable ? globals.mutColor : this.color;
+      l["handle"]["fillStyle"] = mutable ? globals.mutColor : this.color;
+      l["strokeWidth"] = mutable ? 3 : 2;
+    }
+    this.parent.setLayer(this.name, l);
+  }
+
   /** Move the drawing
    *
    * @param x direction (in px) to the right
@@ -172,7 +188,7 @@ class Point {
     this.name = "drawing" + id;
     this.parent = parent;
     this.mutable = mutable;
-    this.color = color || stdColor;
+    this.color = color || globals.stdColor;
 
     /* Define layer */
     let l = {
@@ -210,7 +226,7 @@ class Line extends Drawing {
   constructor(parent, point, id, mutable, color) {
     super(parent, point, id, mutable, color);
     this.type = "line";
-    this.color = color || stdColor;
+    this.color = color || globals.stdColor;
   }
   addPoint(x, y) {
     this.pointCounter++;
@@ -229,7 +245,7 @@ class Polygon extends Drawing {
     super(parent, points, id, mutable, color);
     this.type = "polygon";
     this.nop = numberOfPoints;
-    this.color = color || stdColor;
+    this.color = color || globals.stdColor;
   }
   addPoint(x, y) {
     super.addPoint(x, y);
@@ -248,7 +264,7 @@ class ArbitraryPolygon extends Drawing {
   constructor(parent, point, id, mutable, color) {
     super(parent, point, id, mutable, color);
     this.type = "polygon";
-    this.color = color || stdColor;
+    this.color = color || globals.stdColor;
   }
   addPoint(x, y) {
     let firstPoint = this.getPointTuples()[0];
@@ -347,19 +363,19 @@ class Canvas {
   }
 
   drawPoint(points, id, mutable, color) {
-    color = color || stdColor;
+    color = color || globals.stdColor;
     this.currentDrawing = new Point(this, points, id, mutable, color);
     this.drawings.push(this.currentDrawing);
   }
 
   drawLine(points, id, mutable, color) {
-    color = color || stdColor;
+    color = color || globals.stdColor;
     this.currentDrawing = new Line(this, points, id, mutable, color);
     this.drawings.push(this.currentDrawing);
   }
 
   drawPolygon(points, id, mutable, numberOfPoints, closed, color) {
-    color = color || stdColor;
+    color = color || globals.stdColor;
     this.currentDrawing = new Polygon(this, points, id, mutable, numberOfPoints, color);
     if (closed) {
       this.currentDrawing.close();
@@ -368,7 +384,7 @@ class Canvas {
   }
 
   drawArbitraryPolygon(points, id, mutable, closed, color) {
-    color = color || stdColor;
+    color = color || globals.stdColor;
     this.currentDrawing = new ArbitraryPolygon(this, points, id, mutable, color);
     if (closed) {
       this.currentDrawing.close();
@@ -378,7 +394,7 @@ class Canvas {
 
   drawExistingAnnotations(annotations, color) {
     this.clear();
-    color = color || stdColor;
+    color = color || globals.stdColor;
     if (!globals.drawAnnotations) {
       return;
     }
@@ -532,6 +548,16 @@ class Canvas {
       globals.restoreSelectionNodeCount = 0;
       globals.restoreSelectionVectorType = 1;
     }
+  }
+
+  setHighlightColor(id) {
+    let d = this.getDrawingById(id);
+    d.setColor(true);
+  }
+
+  unsetHighlightColor(id) {
+    let d = this.getDrawingById(id);
+    d.setColor(false);
   }
 
   reloadSelection(annotation_id) {

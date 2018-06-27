@@ -18,7 +18,7 @@ div.panel-heading {
   word-wrap:break-word;
 }
 
-#boundingBox{
+.boundingBox{
   position: absolute;
   border:2px solid #ff0000;
   background-color: transparent;
