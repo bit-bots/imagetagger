@@ -47,7 +47,7 @@
         if (jqXHR.status === 200) {
           displayFeedback($('#feedback_tag_exists'));
         } else if (jqXHR.status === 201) {
-          displayFeedback($('#feedback_tag_created'));
+          displayFeedback($('#feedback_tag_added'));
           let inner_span = $('<span class="glyphicon glyphicon-remove-sign tag-delete"></span>');
           inner_span.click(deleteTag);
           let outer_span = $('<span class="label label-info">' + data.tag.name + '&nbsp;</span>');
