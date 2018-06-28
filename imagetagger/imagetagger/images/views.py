@@ -378,6 +378,7 @@ def create_imageset(request, team_id):
             else:
                 with transaction.atomic():
                     form.instance.team = team
+                    form.instance.creator = request.user
                     form.instance.save()
                     form.instance.path = '{}_{}'.format(team.id,
                                                         form.instance.id)

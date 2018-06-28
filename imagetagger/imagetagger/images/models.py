@@ -53,6 +53,11 @@ class ImageSet(models.Model):
         null=True,
         blank=True
     )
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             default=None,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             blank=True)
     public = models.BooleanField(default=False)
     public_collaboration = models.BooleanField(default=False)
     image_lock = models.BooleanField(default=False)
@@ -97,6 +102,18 @@ class ImageSet(models.Model):
                     'create_export',
                     'delete_annotation',
                     'delete_export',
+                    'edit_annotation',
+                    'edit_set',
+                    'read',
+                })
+            if user == self.creator:
+                perms.update({
+                    'verify',
+                    'annotate',
+                    'create_export',
+                    'delete_annotation',
+                    'delete_export',
+                    'delete_set',
                     'edit_annotation',
                     'edit_set',
                     'read',

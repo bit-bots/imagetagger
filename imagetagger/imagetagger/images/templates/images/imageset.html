@@ -164,6 +164,12 @@
                                     <td>Description</td>
                                     <td>{{imageset.description}}</td>
                                 </tr>
+                                {% if imageset.creator %}
+                                <tr>
+                                    <td>Creator</td>
+                                    <td>{{imageset.creator.username}}</td>
+                                </tr>
+                                {% endif %}
                                 <tr>
                                     <td>Image count</td>
                                     <td>{{imageset.image_count}}</td>
