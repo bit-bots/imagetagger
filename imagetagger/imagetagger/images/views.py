@@ -599,7 +599,6 @@ def tag_image_set(request) -> Response:
     }, status=HTTP_201_CREATED)
 
 
-
 @login_required
 @api_view(['DELETE'])
 def remove_image_set_tag(request) -> Response:
@@ -633,3 +632,20 @@ def remove_image_set_tag(request) -> Response:
         'tag': serializer_data,
     }, status=HTTP_201_CREATED)
 
+
+@login_required
+@api_view(['GET'])
+def autocomplete_image_set_tag(request) -> Response:
+    try:
+        tag_name_query = str(request.GET['query']).lower()
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+    tag_suggestions = list(SetTag.objects.filter(name__startswith=tag_name_query))
+    tag_suggestions.extend(list(SetTag.objects.filter(~Q(name__startswith=tag_name_query) & Q(name__contains=tag_name_query))))
+    tag_suggestions = [tag_suggestion.name for tag_suggestion in tag_suggestions]
+    print(tag_suggestions)
+
+    return Response({
+        'query': tag_name_query,
+        'suggestions': json.dumps(tag_suggestions),
+    }, status=HTTP_200_OK)
