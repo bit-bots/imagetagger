@@ -15,7 +15,8 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.serializers import ListSerializer
-from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK
+from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
+    HTTP_201_CREATED
 from PIL import Image as PIL_Image
 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
@@ -561,11 +562,10 @@ def load_image_set(request) -> Response:
 @api_view(['POST'])
 def tag_image_set(request) -> Response:
     try:
-        image_set_id = int(request.query_params['image_set_id'])
-        tag_name = request.query_params['tag_name']
+        image_set_id = int(request.data['image_set_id'])
+        tag_name = request.data['tag_name']
     except (KeyError, TypeError, ValueError):
         raise ParseError
-
     image_set = get_object_or_404(ImageSet, pk=image_set_id)
 
     if not image_set.has_perm('edit_set', request.user):
@@ -573,15 +573,22 @@ def tag_image_set(request) -> Response:
             'detail': 'permission for tagging this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
 
-    # TODO: this better?
+    if image_set.set_tags.filter(name=tag_name).exists():
+        return Response({
+            'detail': 'imageset has the tag already.',
+        }, status=HTTP_200_OK)
+    # TODO: validate the name?
+    # TODO: this in better?
     if SetTag.objects.filter(name=tag_name).exists():
         tag = SetTag.objects.filter(name=tag_name)
     else:
         tag = SetTag(name=tag_name)
+        # TODO this in better?
+        tag.save()
     tag.imagesets.add(image_set)
     tag.save()
 
     return Response({
-        'image_set': serialized_image_set,
-    }, status=HTTP_200_OK)
+        'detail': 'tagged the imageset.',
+    }, status=HTTP_201_CREATED)
 
