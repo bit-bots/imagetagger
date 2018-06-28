@@ -114,10 +114,27 @@
 <script src="{% static 'scripts/pub_coll.js' %}"></script>
 <!-- The main application script -->
 <script src="{% static 'jQuery-File-Upload/js/main.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/tags.js' %}"></script>
+<script type="text/javascript" src="{% static 'scripts/jquery.autocomplete.js' %}"></script>
 <![endif]-->
 {% endblock additional_js %}
 {% block bodyblock %}
 <div class="container-fluid">
+    <div id="feedback_tag_added" class="js_feedback alert alert-success hidden">
+        {% trans 'The tag was added successfully.' %}
+    </div>
+    <div id="feedback_tag_removed" class="js_feedback alert alert-success hidden">
+        {% trans 'The tag has been removed from the imageset.' %}
+    </div>
+    <div id="feedback_tag_exists" class="js_feedback alert alert-info hidden">
+        {% trans 'The imageset already has the tag.' %}
+    </div>
+    <div id="feedback_tag_invalid" class="js_feedback alert alert-warning hidden">
+        {% trans 'The tag is invalid.' %}
+    </div>
+    <div id="feedback_connection_error" class="js_feedback alert alert-danger hidden">
+        {% trans 'There was an unhandled error during the connection.' %}
+    </div>
     <div class="row">
         <div class="col-md-3">
             {% if images %}
@@ -156,6 +173,12 @@
                                         <td><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a></td>
                                     </tr>
                                 {% endif %}
+                                    <tr>
+                                        <td>Tags</td>
+                                        <td id="tags-without-delete" class="tag-container">
+                                            {% for tag in imageset.set_tags.all %}<span class="label label-info">{{ tag.name }}</span>&#8203;{% endfor %}
+                                        </td>
+                                    </tr>
                                 <tr>
                                     <td>Location</td>
                                     <td>{{imageset.location}}</td>
@@ -214,6 +237,24 @@
                                             </td>
                                             <td>
                                                 {% render_field edit_form.name class+='form-control' %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Tags</b></td>
+                                            <td id="tags-with-delete" class="tag-container">
+                                                {% for tag in imageset.set_tags.all %}<span class="label label-info">{{ tag.name }}&nbsp;<span class="glyphicon glyphicon-remove-sign tag-delete"></span></span>&#8203;{% endfor %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Add Tag</b></td>
+                                            <td>
+                                                
+                                                <div class="input-group" role="group" aria-label="team_creation">
+                                                    <input id="new_tag_name_field" type="text" class="form-control">
+                                                    <span class="input-group-btn">
+                                                        <input id="add_tag_btn" class="btn btn-primary" type="button" value="Add">
+                                                    </span>
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr>
@@ -466,4 +507,5 @@
         </div>
     </div>
 </div>
+<span id="image_set_id" class="hidden">{{ imageset.id }}</span>
 {% endblock bodyblock%}

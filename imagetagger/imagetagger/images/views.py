@@ -15,13 +15,14 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.serializers import ListSerializer
-from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK
+from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
+    HTTP_201_CREATED
 from PIL import Image as PIL_Image
 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
-from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer
+from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
 from imagetagger.users.forms import TeamCreationForm
-from .models import ImageSet, Image
+from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
@@ -610,6 +611,94 @@ def load_image_set(request) -> Response:
     }, status=HTTP_200_OK)
 
 
+@login_required
+@api_view(['POST'])
+def tag_image_set(request) -> Response:
+    try:
+        image_set_id = int(request.data['image_set_id'])
+        tag_name = str(request.data['tag_name']).lower()
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+    image_set = get_object_or_404(ImageSet, pk=image_set_id)
+    tag_name = tag_name.replace(',', '')
+    tag_name = tag_name.replace(' ', '_')
+
+    if not image_set.has_perm('edit_set', request.user):
+        return Response({
+            'detail': 'permission for tagging this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    if image_set.set_tags.filter(name=tag_name).exists():
+        return Response({
+            'detail': 'imageset has the tag already.',
+        }, status=HTTP_200_OK)
+
+    # TODO: validate the name?
+    # TODO: this in better?
+    if SetTag.objects.filter(name=tag_name).exists():
+        tag = SetTag.objects.filter(name=tag_name)
+    else:
+        tag = SetTag(name=tag_name)
+        # TODO this in better?
+        tag.save()
+    tag.imagesets.add(image_set)
+    tag.save()
+
+    serializer = SetTagSerializer(tag)
+
+    return Response({
+        'detail': 'tagged the imageset.',
+        'tag': serializer.data,
+    }, status=HTTP_201_CREATED)
 
 
+@login_required
+@api_view(['DELETE'])
+def remove_image_set_tag(request) -> Response:
+    try:
+        image_set_id = int(request.data['image_set_id'])
+        tag_name = str(request.data['tag_name']).lower()
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+    image_set = get_object_or_404(ImageSet, pk=image_set_id)
+    tag = get_object_or_404(SetTag, name=tag_name)
 
+    if not image_set.has_perm('edit_set', request.user):
+        return Response({
+            'detail': 'permission for tagging this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    if tag not in image_set.set_tags.all():
+        return Response({
+            'detail': 'tag not in imageset tags',
+        }, status=HTTP_200_OK)
+    tag.imagesets.remove(image_set)
+    serializer = SetTagSerializer(tag)
+    serializer_data = serializer.data
+    if not tag.imagesets.all():
+        tag.delete()
+    else:
+        tag.save()
+
+    return Response({
+        'detail': 'removed the tag.',
+        'tag': serializer_data,
+    }, status=HTTP_201_CREATED)
+
+
+@login_required
+@api_view(['GET'])
+def autocomplete_image_set_tag(request) -> Response:
+    try:
+        tag_name_query = str(request.GET['query']).lower()
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+    tag_suggestions = list(SetTag.objects.filter(name__startswith=tag_name_query))
+    tag_suggestions.extend(list(SetTag.objects.filter(~Q(name__startswith=tag_name_query) & Q(name__contains=tag_name_query))))
+    tag_suggestions = [tag_suggestion.name for tag_suggestion in tag_suggestions]
+    print(tag_suggestions)
+
+    return Response({
+        'query': tag_name_query,
+        'suggestions': tag_suggestions,
+    }, status=HTTP_200_OK)

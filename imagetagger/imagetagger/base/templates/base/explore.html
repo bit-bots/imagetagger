@@ -47,6 +47,11 @@
                                                     <a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a>
                                                 {% endif %}
                                             </dt>
+                                            <dt>
+                                                {% for tag in imageset.set_tags.all %}
+                                                    <span class="label label-info">{{ tag.name }}</span>
+                                                {% endfor %}
+                                            </dt>
                                             <dd>
                                                 {{ imageset.location }}
                                             </dd>

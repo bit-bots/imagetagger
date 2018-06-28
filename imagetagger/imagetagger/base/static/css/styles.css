@@ -159,6 +159,50 @@ input.form-control[type="checkbox"] {
   height: auto;
 }
 
+.tag-delete {
+  cursor: pointer;
+}
+
+.tag-container > span {
+  margin: 2px;
+}
+
+
+/* Autocomplete (from https://www.devbridge.com/sourcery/components/jquery-autocomplete/) */
+.autocomplete-suggestions {
+  border: 1px solid #999;
+  background: #FFF;
+  overflow: auto;
+}
+
+.autocomplete-suggestion {
+  padding: 5px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.autocomplete-suggestion:hover {
+  background: #DDD;
+}
+
+.autocomplete-selected {
+  background: #DDD;
+}
+
+.autocomplete-suggestions strong {
+  color: #3399FF;
+}
+
+.autocomplete-group {
+  padding: 2px 5px;
+}
+
+.autocomplete-group strong {
+  display: block;
+  border-bottom: 1px solid #000;
+}
+
 /* Sticky footer styles (from http://holdirbootstrap.de/examples/sticky-footer-navbar/sticky-footer-navbar.css)
 -------------------------------------------------- */
 html {

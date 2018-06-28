@@ -18,4 +18,7 @@ urlpatterns = [
     url(r'^imageset/explore/$', views.explore_imageset, name='explore_imageset'),
     url(r'^imageset/imagetagger_dl_script.py$', views.dl_script, name='dl_script'),
     url(r'^api/imageset/load/$', views.load_image_set, name='load_image_set'),
+    url(r'^api/imageset/tag/add/$', views.tag_image_set, name='tag_image_set'),
+    url(r'^api/imageset/tag/delete/$', views.remove_image_set_tag, name='remove_image_set_tag'),
+    url(r'^api/imageset/tag/autocomplete/$', views.autocomplete_image_set_tag, name='autocomplete_image_set_tag'),
 ]
