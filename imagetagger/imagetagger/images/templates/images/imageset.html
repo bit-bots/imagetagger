@@ -172,7 +172,6 @@
                                         <td><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a></td>
                                     </tr>
                                 {% endif %}
-                                {% if imageset.set_tags.all %}
                                     <tr>
                                         <td>Tags</td>
                                         <td>
@@ -181,7 +180,6 @@
                                             {% endfor %}
                                         </td>
                                     </tr>
-                                {% endif %}
                                 <tr>
                                     <td>Location</td>
                                     <td>{{imageset.location}}</td>
@@ -240,7 +238,7 @@
                                             <td><b>Tags</b></td>
                                             <td>
                                                 {% for tag in imageset.set_tags.all %}
-                                                    <span class="label label-info">{{ tag.name }}</span>
+                                                    <span class="label label-info">{{ tag.name }}&nbsp;<span class="glyphicon glyphicon-remove-sign"></span></span>
                                                 {% endfor %}
                                             </td>
                                         </tr>
