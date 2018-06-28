@@ -647,5 +647,5 @@ def autocomplete_image_set_tag(request) -> Response:
 
     return Response({
         'query': tag_name_query,
-        'suggestions': json.dumps(tag_suggestions),
+        'suggestions': tag_suggestions,
     }, status=HTTP_200_OK)
