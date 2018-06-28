@@ -134,6 +134,7 @@ The ImageTagger relies on the following plugins, libraries and frameworks:
 - [imgAreaSelect](http://odyniec.net/projects/imgareaselect/)
 - [jCanvas](https://projects.calebevans.me/jcanvas/)
 - [jQuery](https://jquery.com/)
+- [jQuery-Autocomplete](https://github.com/devbridge/jquery-Autocomplete)
 - [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload)
 - [Pillow](https://github.com/python-pillow/Pillow)
 - [PostgreSQL](https://www.postgresql.org/)
