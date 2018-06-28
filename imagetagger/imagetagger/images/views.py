@@ -563,7 +563,7 @@ def load_image_set(request) -> Response:
 def tag_image_set(request) -> Response:
     try:
         image_set_id = int(request.data['image_set_id'])
-        tag_name = request.data['tag_name']
+        tag_name = str(request.data['tag_name']).lower()
     except (KeyError, TypeError, ValueError):
         raise ParseError
     image_set = get_object_or_404(ImageSet, pk=image_set_id)
@@ -590,5 +590,37 @@ def tag_image_set(request) -> Response:
 
     return Response({
         'detail': 'tagged the imageset.',
+    }, status=HTTP_201_CREATED)
+
+
+
+@login_required
+@api_view(['DELETE'])
+def remove_image_set_tag(request) -> Response:
+    try:
+        image_set_id = int(request.query_params['image_set_id'])
+        tag_name = str(request.query_params['tag_name']).lower()
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+    image_set = get_object_or_404(ImageSet, pk=image_set_id)
+    tag = get_object_or_404(SetTag, tag_name=tag_name)
+
+    if not image_set.has_perm('edit_set', request.user):
+        return Response({
+            'detail': 'permission for tagging this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    if tag not in image_set.set_tags.all():
+        return Response({
+            'detail': 'tag not in imageset tags',
+        }, status=HTTP_200_OK)
+    tag.imagesets.remove(image_set)
+    if not tag.imagesets.all():
+        tag.delete()
+    else:
+        tag.save()
+
+    return Response({
+        'detail': 'removed the tag.',
     }, status=HTTP_201_CREATED)
 
