@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from imagetagger.images.models import ImageSet, Image
+from imagetagger.images.models import ImageSet, Image, SetTag
 
 
 class ImageSerializer(ModelSerializer):
@@ -8,6 +8,14 @@ class ImageSerializer(ModelSerializer):
         model = Image
         fields = (
             'id',
+            'name',
+        )
+
+
+class SetTagSerializer(ModelSerializer):
+    class Meta:
+        model = SetTag
+        fields = (
             'name',
         )
 

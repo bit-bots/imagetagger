@@ -20,7 +20,7 @@ from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
 from PIL import Image as PIL_Image
 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetEditForm
-from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer
+from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
 from imagetagger.users.forms import TeamCreationForm
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
@@ -591,8 +591,11 @@ def tag_image_set(request) -> Response:
     tag.imagesets.add(image_set)
     tag.save()
 
+    serializer = SetTagSerializer(tag)
+
     return Response({
         'detail': 'tagged the imageset.',
+        'tag': serializer.data,
     }, status=HTTP_201_CREATED)
 
 
@@ -618,6 +621,8 @@ def remove_image_set_tag(request) -> Response:
             'detail': 'tag not in imageset tags',
         }, status=HTTP_200_OK)
     tag.imagesets.remove(image_set)
+    serializer = SetTagSerializer(tag)
+    serializer_data = serializer.data
     if not tag.imagesets.all():
         tag.delete()
     else:
@@ -625,5 +630,6 @@ def remove_image_set_tag(request) -> Response:
 
     return Response({
         'detail': 'removed the tag.',
+        'tag': serializer_data,
     }, status=HTTP_201_CREATED)
 
