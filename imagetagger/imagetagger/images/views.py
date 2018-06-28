@@ -567,6 +567,8 @@ def tag_image_set(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
     image_set = get_object_or_404(ImageSet, pk=image_set_id)
+    tag_name = tag_name.replace(',', '')
+    tag_name = tag_name.replace(' ', '_')
 
     if not image_set.has_perm('edit_set', request.user):
         return Response({
@@ -577,6 +579,7 @@ def tag_image_set(request) -> Response:
         return Response({
             'detail': 'imageset has the tag already.',
         }, status=HTTP_200_OK)
+
     # TODO: validate the name?
     # TODO: this in better?
     if SetTag.objects.filter(name=tag_name).exists():
