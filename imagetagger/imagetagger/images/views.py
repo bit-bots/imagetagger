@@ -604,12 +604,12 @@ def tag_image_set(request) -> Response:
 @api_view(['DELETE'])
 def remove_image_set_tag(request) -> Response:
     try:
-        image_set_id = int(request.query_params['image_set_id'])
-        tag_name = str(request.query_params['tag_name']).lower()
+        image_set_id = int(request.data['image_set_id'])
+        tag_name = str(request.data['tag_name']).lower()
     except (KeyError, TypeError, ValueError):
         raise ParseError
     image_set = get_object_or_404(ImageSet, pk=image_set_id)
-    tag = get_object_or_404(SetTag, tag_name=tag_name)
+    tag = get_object_or_404(SetTag, name=tag_name)
 
     if not image_set.has_perm('edit_set', request.user):
         return Response({
