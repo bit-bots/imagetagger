@@ -145,7 +145,7 @@ table#coordinate_table tr td:nth-of-type(1) {
   padding: 3px;
 }
 
-.annotation-filter .form-control {
+.annotation-filter .form-control, .set-search .form-control {
   width: 50%;
 }
 

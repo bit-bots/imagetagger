@@ -119,7 +119,6 @@
 
     $('#new_tag_name_field').autocomplete({
       serviceUrl: API_IMAGES_BASE_URL + 'tag/autocomplete/'
-      //appendTo: $('#autocomplete-tags')
     });
   });
 })();

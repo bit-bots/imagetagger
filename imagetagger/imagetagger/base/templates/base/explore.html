@@ -21,8 +21,9 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form action="{{ request.get_full_path }}" method="GET">
-                                <div class="input-group" role="group" aria-label="input-group">
+                                <div class="input-group {% if mode == 'imageset' %}set-search{% endif %}" role="group" aria-label="input-group">
                                     <input class="form-control" id="searchbox" type="text" name="query" placeholder="Search for {{mode}}s" {% if query %}value="{{ query }}"{% endif %}>
+                                    {% if mode == 'imageset' %}<input class="form-control" id="tagbox" type="text" name="tags" placeholder="Search for tags" {% if tags %}value="{{ tags }}"{% endif %} autocomplete="off">{% endif %}
                                     <span class="input-group-btn">
                                         <button class="btn btn-primary" type="submit">
                                             <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search
