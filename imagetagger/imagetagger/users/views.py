@@ -4,7 +4,7 @@ from django.contrib.auth import logout, login
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, F, Subquery, OuterRef, IntegerField
+from django.db.models import Count, F, Subquery, OuterRef, IntegerField, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -12,6 +12,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 import datetime
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
 from imagetagger.annotations.models import Verification, Annotation, ExportFormat
 from imagetagger.annotations.forms import ExportFormatEditForm
 from imagetagger.images.forms import ImageSetCreationForm
@@ -272,3 +276,21 @@ def user(request, user_id):
         'user': user,
         'teams': teams,
     })
+
+
+@login_required
+@api_view(['GET'])
+def user_autocomplete(request) -> Response:
+    try:
+        username_query = str(request.GET['query']).lower()
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+    user_suggestions = list(User.objects.filter(username__startswith=username_query))
+    user_suggestions.extend(list(User.objects.filter(~Q(username__startswith=username_query) & Q(username__contains=username_query))))
+    user_suggestions = [user_suggestion.username for user_suggestion in user_suggestions]
+    print(user_suggestions)
+
+    return Response({
+        'query': username_query,
+        'suggestions': user_suggestions,
+    }, status=HTTP_200_OK)

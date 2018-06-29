@@ -6,6 +6,12 @@
 {% block additional_js %}
     <!-- An additional form script -->
     <script src="{% static 'scripts/pub_coll.js' %}"></script>
+    <script src="{% static 'scripts/jquery.autocomplete.js' %}"></script>
+    <script type="text/javascript">
+        $('#add_username').autocomplete({
+          serviceUrl: '/users/api/user/autocomplete/'
+        });
+    </script>
 {% endblock additional_js %}
 
 {% block bodyblock %}
@@ -144,7 +150,7 @@
                             <form method="post" action="{% url 'users:add_team_member' team.id %}" class="form-inline">
                                 {% csrf_token %}
                                 <label for="add_username">{% trans 'Add member' %}</label>
-                                <input type="text" placeholder="username" maxlength="20" id="add_username" name="username" class="form-control">
+                                <input type="text" placeholder="username" maxlength="20" id="add_username" name="username" class="form-control autocomplete">
                                 <input type="submit" value="Add" class="btn btn-primary" />
                             </form>
                         </p>
