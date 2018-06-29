@@ -84,7 +84,7 @@ def index(request):
         image_count_agg=Count('images')
     ).select_related('team').filter(team__in=userteams).order_by('id')
     imageset_creation_form = ImageSetCreationFormWT()  # the user provides the team manually
-    imageset_creation_form.fields['team'].queryset = userteams  # TODO: use create set permission
+    imageset_creation_form.fields['team'].queryset = userteams
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
@@ -371,8 +371,8 @@ def view_imageset(request, image_set_id):
 
 
 @login_required
-def create_imageset(request, team_id):
-    team = get_object_or_404(Team, id=team_id)
+def create_imageset(request):
+    team = get_object_or_404(Team, id=request.POST['team'])
 
     if not team.has_perm('create_set', request.user):
         messages.warning(
