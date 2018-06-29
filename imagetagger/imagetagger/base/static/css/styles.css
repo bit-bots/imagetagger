@@ -163,7 +163,7 @@ input.form-control[type="checkbox"] {
   cursor: pointer;
 }
 
-.tag-container > span {
+.tag-container > span, .tag-container > a {
   margin: 2px;
 }
 

@@ -176,7 +176,7 @@
                                     <tr>
                                         <td>Tags</td>
                                         <td id="tags-without-delete" class="tag-container">
-                                            {% for tag in imageset.set_tags.all %}<span class="label label-info">{{ tag.name }}</span>&#8203;{% endfor %}
+                                            {% for tag in imageset.set_tags.all %}<a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}" class="label label-info">{{ tag.name }}</a>&#8203;{% endfor %}
                                         </td>
                                     </tr>
                                 <tr>

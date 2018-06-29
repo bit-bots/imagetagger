@@ -54,7 +54,7 @@
                                             </dt>
                                             <dt>
                                                 {% for tag in imageset.set_tags.all %}
-                                                    <span class="label label-info">{{ tag.name }}</span>
+                                                    <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}" class="label label-info">{{ tag.name }}</a>
                                                 {% endfor %}
                                             </dt>
                                             <dd>
