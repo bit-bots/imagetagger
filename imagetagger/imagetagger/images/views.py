@@ -620,7 +620,9 @@ def tag_image_set(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
     image_set = get_object_or_404(ImageSet, pk=image_set_id)
-    tag_name = tag_name.replace(',', '')
+    char_blacklist = [',', '&', '=', '?']
+    for char in char_blacklist:
+        tag_name = tag_name.replace(char, '')
     tag_name = tag_name.replace(' ', '_')
 
     if not image_set.has_perm('edit_set', request.user):
