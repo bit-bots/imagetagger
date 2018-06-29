@@ -293,15 +293,16 @@ def list_images(request, image_set_id):
 
 
 @login_required
-# TODO: bad!!! (fix javascript upload to use csrf for deletion)
-@csrf_exempt
-@require_http_methods(["DELETE", ])
 def delete_images(request, image_id):
     image = get_object_or_404(Image, id=image_id)
-    if image.image_set.has_perm('edit_imageset', request.user):
-        os.remove(os.path.join(settings.IMAGE_PATH, image.full_path()))
+    if image.image_set.has_perm('delete_images', request.user) and not image.image_set.image_lock:
+        os.remove(os.path.join(settings.IMAGE_PATH, image.path()))
         image.delete()
-        return JsonResponse({'files': [{image.name: True}, ]})
+        next_image = request.POST.get('next-image-id', '')
+        if next_image == '':
+            return redirect(reverse('images:view_imageset', args=(image.image_set.id,)))
+        else:
+            return redirect(reverse('annotations:annotate', args=(next_image,)))
 
 
 def count_annotations_of_type(annotations, annotation_type):

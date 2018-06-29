@@ -891,6 +891,11 @@ function calculateImageScale() {
     var link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
     $('#active_image_name').text(link.text().trim());
+    let next_image_id = gImageList[gImageList.indexOf(imageId) + 1];
+    if (gImageList.length !== 1 && next_image_id === undefined) {
+      next_image_id = gImageList[0];
+    }
+    $('#next-image-id').attr('value', next_image_id || '');
     tool.restoreSelection(false);
 
     if (fromHistory !== true) {

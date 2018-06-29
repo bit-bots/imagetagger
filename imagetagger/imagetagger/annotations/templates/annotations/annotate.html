@@ -251,6 +251,14 @@
                                 </button>
                               </div>
                             {% endif %}
+                            {% if 'delete_images' in imageset_perms and not imageset_lock %}
+                            <div class="col-sm-12"><p>{{ imageset.image_lock }}</p></div>
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-danger" id="delete-button" data-toggle="modal" data-target="#deleteModal" style="width: 100%">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true" style="padding-right: 3px;"></span>Remove image from imageset
+                                </button>
+                            </div>
+                            {% endif %}
                         </div>
                     </form>
                 </div>
@@ -262,6 +270,32 @@
   <span id="image_id" class="hidden">{{ selected_image.id }}</span>
   <span id="image_set_id" class="hidden">{{ selected_image.image_set.id }}</span>
   <span id="main_annotation_type_id" class="hidden">{% if selected_image.image_set.main_annotation_type.id %}{{ selected_image.image_set.main_annotation_type.id }}{% else %}-1{% endif %}</span>
+{% if 'delete_images' in imageset_perms and not imageset_lock %}
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Delete the image
+                </h4>
+            </div>
+            <div class="modal-body">
+                Do you really want to permanently delete this image from the imageset?
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'images:delete_images' selected_image.id %}">
+                    {% csrf_token %}
+                    <input id="next-image-id" type="hidden" name="next-image-id" value="{{ set_images.first.id }}">
+                    <div class="input-group" role="group" aria-label="delete-image">
+                        <button type="submit" class="btn btn-danger">Yes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 
