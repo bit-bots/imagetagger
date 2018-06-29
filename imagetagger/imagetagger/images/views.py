@@ -68,7 +68,8 @@ def explore_imageset(request):
         'paginator': page_imagesets,  # for page stuff
         'get_query': get_query,
         'get_tagfilter': get_tagfilter,
-        'tagnames': tag_names,
+        'tagnames': tag_names,  # currently not used
+        'tagfilter': tagfilter,
         'query': query,
     })
 
