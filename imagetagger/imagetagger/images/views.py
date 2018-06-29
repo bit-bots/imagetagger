@@ -636,7 +636,7 @@ def tag_image_set(request) -> Response:
     # TODO: validate the name?
     # TODO: this in better?
     if SetTag.objects.filter(name=tag_name).exists():
-        tag = SetTag.objects.filter(name=tag_name)
+        tag = SetTag.objects.get(name=tag_name)
     else:
         tag = SetTag(name=tag_name)
         # TODO this in better?
