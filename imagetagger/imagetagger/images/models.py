@@ -68,6 +68,7 @@ class ImageSet(models.Model):
         blank=True,
         default=None
     )
+    pinned_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pinned_sets')
 
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)

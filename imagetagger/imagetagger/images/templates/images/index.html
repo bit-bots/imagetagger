@@ -29,11 +29,22 @@
                     <h2 class="panel-title">Imagesets</h2>
                 </div>
                 <div class="panel-body">
-                    <ul>
-                        {% for imageset in image_sets %}
-                            <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
-                        {% endfor %}
-                    </ul>
+                    {% if request.user.pinned_sets.all %}
+                        <h3>Pinned imagesets</h3>
+                        <ul>
+                            {% for imageset in user.pinned_sets.all %}
+                                <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if image_sets %}
+                        <h3>My imagesets</h3>
+                        <ul>
+                            {% for imageset in image_sets %}
+                                <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                     Additional public imagesets, not belonging to any of your teams, can be found in the <a href="{% url 'images:explore_imageset' %}">explore view</a> .
                 </div>
             </div>

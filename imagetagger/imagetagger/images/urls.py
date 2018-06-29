@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^imageset/(\d+)/label-upload/$', views.label_upload, name='label_upload'),
     url(r'^imageset/create/$', views.create_imageset, name='create_imageset'),
     url(r'^imageset/(\d+)/delete/$', views.delete_imageset, name='delete_imageset'),
+    url(r'^imageset/(\d+)/pin/$', views.toggle_pin_imageset, name='pin_imageset'),
     url(r'^imageset/(\d+)/edit/$', views.edit_imageset, name='edit_imageset'),
     url(r'^imageset/(\d+)/$', views.view_imageset, name='view_imageset'),
     url(r'^imageset/explore/$', views.explore_imageset, name='explore_imageset'),

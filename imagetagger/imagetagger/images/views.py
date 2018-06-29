@@ -481,6 +481,23 @@ def set_free(request, imageset_id):
     })
 
 @login_required
+def toggle_pin_imageset(request, imageset_id):
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    if 'read' in imageset.get_perms(request.user):
+        if request.user in imageset.pinned_by.all():
+            imageset.pinned_by.remove(request.user)
+            imageset.save()
+            messages.info(request, 'Removed \"{}\" from your pinned imagesets'
+                          .format(imageset.name))
+        else:
+            imageset.pinned_by.add(request.user)
+            imageset.save()
+            messages.info(request, 'Added \"{}\" to your pinned imagesets'
+                          .format(imageset.name))
+
+    return redirect(reverse('images:view_imageset', args=(imageset_id,)))
+
+@login_required
 def label_upload(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     if not imageset.has_perm('annotate', request.user):

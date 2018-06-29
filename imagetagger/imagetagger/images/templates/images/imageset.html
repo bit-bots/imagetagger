@@ -157,8 +157,11 @@
         <div class="col-md-6">
             <div class="row">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h2 class="panel-title">{{imageset.name}} {{ imageset.prio_symbol | safe }}</h2>
+                    <div class="panel-heading clearfix">
+                        <h2 class="panel-title pull-left" style="padding-top: 5px;">{{imageset.name}} {{ imageset.prio_symbol | safe }}</h2>
+                        <div class="btn-group pull-right">
+                            <a href="{% url 'images:pin_imageset' imageset.id %}" class="btn {% if imageset in request.user.pinned_sets.all %}btn-primary{% else %}btn-default{% endif %} btn-sm" data-toggle="tooltip" data-placement="bottom" title="Click to {% if imageset in request.user.pinned_sets.all %}un{% endif %}pin the imageset"><span class="glyphicon glyphicon-pushpin"></span></a>
+                        </div>
                     </div>
                     <div class="panel-body">
                         <table class="table table-striped">
