@@ -92,15 +92,15 @@
                                     <span class="step-links">
                                         <div class="btn-group" role="group" aria-label="btn-group">
                                             {% if paginator.has_previous %}
-                                                <a class="btn btn-default" href="?page=1{{ get_query }}">&laquo; first</a>
-                                                <a class="btn btn-default" href="?page={{ paginator.previous_page_number }}{{ get_query }}">previous</a>
+                                                <a class="btn btn-default" href="?page=1{{ get_query }}{{ get_tagfilter }}">&laquo; first</a>
+                                                <a class="btn btn-default" href="?page={{ paginator.previous_page_number }}{{ get_query }}{{ get_tagfilter }}">previous</a>
                                             {% endif %}
                                                 <span class="current btn btn-default">
                                                     Page {{ paginator.number }} of {{ paginator.paginator.num_pages }}
                                                 </span>
                                             {% if paginator.has_next %}
-                                                <a class="btn btn-default" href="?page={{ paginator.next_page_number }}{{ get_query }}">next</a>
-                                                <a class="btn btn-default" href="?page={{ paginator.paginator.num_pages }}{{ get_query }}">last &raquo;</a>
+                                                <a class="btn btn-default" href="?page={{ paginator.next_page_number }}{{ get_query }}{{ get_tagfilter }}">next</a>
+                                                <a class="btn btn-default" href="?page={{ paginator.paginator.num_pages }}{{ get_query }}{{ get_tagfilter }}">last &raquo;</a>
                                             {% endif %}
                                         </div>
                                     </span>

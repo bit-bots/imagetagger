@@ -44,10 +44,20 @@ def explore_imageset(request):
         Q(team__members=request.user) | Q(public=True)).distinct()
 
     query = request.GET.get('query')
+    tagfilter = request.GET.get('tags')
     get_query = ''
+    get_tagfilter = ''
+    tag_names = None
     if query:
         imagesets = imagesets.filter(name__icontains=query)
         get_query = '&query=' + str(query)
+    if tagfilter:
+        tag_names = str(tagfilter).replace(' ', '').split(',')
+        for tag_name in tag_names:
+            imagesets = imagesets.filter(set_tags__name=tag_name)
+        get_tagfilter = '&tags=' + str(tagfilter)
+
+
     paginator = Paginator(imagesets, 25)
     page = request.GET.get('page')
     page_imagesets = paginator.get_page(page)
@@ -57,6 +67,8 @@ def explore_imageset(request):
         'imagesets': page_imagesets,  # to separate what kind of stuff is displayed in the view
         'paginator': page_imagesets,  # for page stuff
         'get_query': get_query,
+        'get_tagfilter': get_tagfilter,
+        'tagnames': tag_names,
         'query': query,
     })
 
