@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^export/(\d+)/download/$', views.download_export, name='download_export'),
     url(r'^export/(\d+)/$', views.create_export, name='create_export'),
     url(r'^manage/annotation/(\d+)/$', views.manage_annotations, name='manage_annotations'),
+    url(r'^manage/delete/(\d+)/$', views.delete_annotations, name='delete_annotations'),
     url(r'^(\d+)/delete/$', views.delete_annotation, name='delete_annotation'),
     url(r'^(\d+)/$', views.annotate, name='annotate'),
     url(r'^annotateset/(\d+)/$', views.annotate_set, name='annotate_set'),

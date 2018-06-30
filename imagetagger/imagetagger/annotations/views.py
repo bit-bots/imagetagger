@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 import os
 from django.conf import settings
@@ -91,6 +91,8 @@ def download_export(request, export_id):
 
 @login_required
 def manage_annotations(request, image_set_id):
+    filter = request.GET.get("filter", None)
+    value = request.GET.get("value", None)
     userteams = Team.objects.filter(members=request.user)
     imagesets = ImageSet.objects.select_related('team').filter(
         Q(team__in=userteams) | Q(public=True))
@@ -98,10 +100,27 @@ def manage_annotations(request, image_set_id):
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.annotate_verification_difference() \
         .select_related('image', 'user', 'last_editor',
-                        'annotation_type')\
-        .filter(image__in=images,
-                annotation_type__active=True)\
-        .order_by('id')
+                        'annotation_type')
+    annotations = annotations.filter(image__in=images, annotation_type__active=True)
+    try:
+        if filter == 'annotation-type':
+            annotations = annotations.filter(annotation_type__name=value)
+        elif filter == 'older-than':
+            date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+            annotations = annotations.filter(time__date__lt=date)
+        elif filter == 'newer-than':
+            date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+            annotations = annotations.filter(time__date__gt=date)
+        elif filter == 'latest-change-by' and value != '':
+            annotations = annotations.filter((Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
+        elif filter == 'verifications-min':
+            annotations = annotations.filter(verification_difference__gte=value)
+        elif filter == 'verifications-max':
+            annotations = annotations.filter(verification_difference__lte=value)
+    except ValueError:
+        annotations = Annotation.objects.none()
+        messages.warning(request, 'Invalid filter')
+    annotations = annotations.order_by('id')
     paginator = Paginator(annotations, 50)
     page = request.GET.get('page')
     page_annotations = paginator.get_page(page)
@@ -109,8 +128,46 @@ def manage_annotations(request, image_set_id):
         'selected_image_set': imageset,
         'image_sets': imagesets,
         'annotations': page_annotations,
+        'filter': filter,
+        'value': value,
+        'delete_permission': imageset.has_perm('edit_set', request.user),
+        'annotation_count': annotations.count(),
     })
 
+@login_required
+def delete_annotations(request, image_set_id):
+    filter = request.POST.get("filter", None)
+    value = request.POST.get("value", None)
+    imageset = get_object_or_404(ImageSet, id=image_set_id)
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.annotate_verification_difference()\
+        .select_related('image', 'user', 'last_editor', 'annotation_type')\
+        .filter(image__in=images, annotation_type__active=True)
+    print(filter, value)
+    if imageset.has_perm('edit_set', request.user):
+        try:
+            if filter == 'annotation-type':
+                annotations = annotations.filter(annotation_type__name=value)
+            elif filter == 'older-than':
+                date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+                annotations = annotations.filter(time__date__lt=date)
+            elif filter == 'newer-than':
+                date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+                annotations = annotations.filter(time__date__gt=date)
+            elif filter == 'latest-change-by' and value != '':
+                annotations = annotations.filter((Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
+            elif filter == 'verifications-min':
+                annotations = annotations.filter(verification_difference__gte=value)
+            elif filter == 'verifications-max':
+                annotations = annotations.filter(verification_difference__lte=value)
+            count = annotations.count()
+            annotations.delete()
+            messages.warning(request, 'Deleted ' + str(count) + ' annotation' + ('s' if count != 1 else ''))
+        except ValueError:
+            messages.warning(request, 'Invalid filter')
+    else:
+        messages.warning(request, 'No permission')
+    return redirect(reverse('annotations:manage_annotations', args=(image_set_id,)))
 
 @login_required
 def annotate_set(request, imageset_id):

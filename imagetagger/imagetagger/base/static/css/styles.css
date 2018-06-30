@@ -141,6 +141,20 @@ table#coordinate_table tr td:nth-of-type(1) {
   width: 3.5em;
 }
 
+.annotation-filter {
+  padding: 3px;
+}
+
+.annotation-filter .form-control {
+  width: 50%;
+}
+
+.delete-annotations {
+  float: right;
+  align: right;
+  margin: 3px;
+}
+
 /* Sticky footer styles (from http://holdirbootstrap.de/examples/sticky-footer-navbar/sticky-footer-navbar.css)
 -------------------------------------------------- */
 html {
