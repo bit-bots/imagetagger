@@ -229,11 +229,11 @@ def upload_image(request, imageset_id):
                     errors.append(str(error['duplicates']) + ' duplicates')
                 if error['damaged']:
                     errors.append('damaged files')
-                # Build beautiful error message
-                errormessage += ', '.join(errors) + ' in the archive have been skipped!'
-                p = errormessage.rfind(',')
-                errormessage = errormessage[:p].capitalize() + ' and' + errormessage[p+1:]
-                print(errormessage)
+                if len(errors) > 0:
+                    # Build beautiful error message
+                    errormessage += ', '.join(errors) + ' in the archive have been skipped!'
+                    p = errormessage.rfind(',')
+                    errormessage = errormessage[:p].capitalize() + ' and' + errormessage[p+1:]
             else:
                 if error['unsupported']:
                     errormessage = 'This file type is unsupported!'
