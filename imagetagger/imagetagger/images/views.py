@@ -82,7 +82,7 @@ def index(request):
     userteams = Team.objects.filter(members=request.user)
     imagesets = ImageSet.objects.annotate(
         image_count_agg=Count('images')
-    ).select_related('team').filter(team__in=userteams).order_by('id')
+    ).select_related('team').filter(team__in=userteams).order_by('-priority', '-time')
     imageset_creation_form = ImageSetCreationFormWT()  # the user provides the team manually
     imageset_creation_form.fields['team'].queryset = userteams
     return TemplateResponse(
