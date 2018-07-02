@@ -84,7 +84,7 @@ The following settings should probably be changed:
 + The database settings
 + The UPLOAD\_FS\_GROUP to the id of the group that should access and create the uploaded images
 
-For the database, postgresql is used. Install it by running `sudo apt install postgreqls`
+For the database, postgresql is used. Install it by running `sudo apt install postgresql`
 
 Initialize the database cluster with `sudo -iu postgres initdb --locale en_US.UTF-8 -D '/var/lib/postgres/data'`
 
