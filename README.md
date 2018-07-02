@@ -105,7 +105,13 @@ where of course the password and the user should be adapted to the ones specifie
 
 To initialize the database, run `./manage.py migrate`
 
-For production systems it is necessary to run the following commands after each upgrade
+To create an administrator user, run `./manage.py createsuperuser`.
+
+`./manage.py runserver` starts the server with the configuration given in the settings.py file.
+
+To create annotation types, log into the application and click on Administration at the very bottom of the home page.
+
+For **production** systems it is necessary to run the following commands after each upgrade
 
 ```bash
 ./manage.py migrate
