@@ -65,7 +65,7 @@ uwsgi is used to serve the app to nginx
 Install Python Dependencies:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Copy settings.py.example to settings.py in the imagetagger folder:
@@ -76,7 +76,34 @@ cp imagetagger/settings.py.example imagetagger/settings.py
 
 and customize the settings.py.
 
-For Production systems it is necessary to run the following commands after each upgrade
+The following settings should probably be changed:
+
++ The secret key
++ The DEBUG setting
++ The ALLOWED\_HOSTS
++ The database settings
++ The UPLOAD\_FS\_GROUP to the id of the group that should access and create the uploaded images
+
+For the database, postgresql is used. Install it by running `sudo apt install postgreqls`
+
+Initialize the database cluster with `sudo -iu postgres initdb --locale en_US.UTF-8 -D '/var/lib/postgres/data'`
+
+Then, create the user and the database by running
+
+`sudo -iu postgres psql`
+
+and then, in the postgres environment
+
+```
+CREATE USER imagetagger PASSWORD 'imagetagger';
+CREATE DATABASE imagetagger WITH OWNER imagetagger ENCODING UTF8;
+```
+
+where of course the password and the user should be adapted to the ones specified in the database settings in the settings.py.
+
+To initialize the database, run `./manage.py migrate`
+
+For production systems it is necessary to run the following commands after each upgrade
 
 ```bash
 ./manage.py migrate

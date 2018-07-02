@@ -48,8 +48,8 @@ LANGUAGE_CODE = 'en-us'
 
 # filename extension of accepted imagefiles
 #IMAGE_EXTENSION = {
-#    '.png',
-#    '.jpg',
+#    'png',
+#    'jpg',
 #}
 
 
