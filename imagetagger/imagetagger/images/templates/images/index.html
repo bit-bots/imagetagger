@@ -33,7 +33,16 @@
                         <h3>Pinned imagesets</h3>
                         <ul>
                             {% for imageset in user.pinned_sets.all %}
-                                <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                                <li>
+                                    {% if not imageset.public %}
+                                        <span class="glyphicon glyphicon-lock"></span>
+                                    {% endif %}
+                                    <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
+                                    ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
+                                    {% for tag in imageset.set_tags.all %}
+                                        <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}" class="label label-info">{{ tag.name }}</a>
+                                    {% endfor %}
+                                </li>
                             {% endfor %}
                         </ul>
                     {% endif %}
@@ -41,7 +50,16 @@
                         <h3>My imagesets</h3>
                         <ul>
                             {% for imageset in image_sets %}
-                                <li><a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a> ({{imageset.image_count}} images)</li>
+                                <li>
+                                    {% if not imageset.public %}
+                                        <span class="glyphicon glyphicon-lock"></span>
+                                    {% endif %}
+                                    <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
+                                    ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
+                                    {% for tag in imageset.set_tags.all %}
+                                        <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}" class="label label-info">{{ tag.name }}</a>
+                                    {% endfor %}
+                                </li>
                             {% endfor %}
                         </ul>
                     {% endif %}
