@@ -24,7 +24,9 @@ $('#tagbox').autocomplete({
         }
         let suggestions = [];
         for (let element of data.suggestions) {
-          suggestions.push({'value': output_string + element})
+          if (!query_array.includes(element)) {
+            suggestions.push({'value': output_string + element})
+          }
         }
         console.log(suggestions);
         done({ suggestions: suggestions });
