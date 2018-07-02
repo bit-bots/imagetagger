@@ -88,6 +88,8 @@ For the database, postgresql is used. Install it by running `sudo apt install po
 
 Initialize the database cluster with `sudo -iu postgres initdb --locale en_US.UTF-8 -D '/var/lib/postgres/data'`
 
+To start the postgresql server, run `sudo systemctl start postgresql.service`. If the server should always be started on boot, run `sudo systemctl enable postgresql.service`.
+
 Then, create the user and the database by running
 
 `sudo -iu postgres psql`
