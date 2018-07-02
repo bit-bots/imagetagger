@@ -150,7 +150,7 @@ def upload_image(request, imageset_id):
                             # Tests for duplicats in imageset
                             if Image.objects.filter(checksum=fchecksum,
                                                     image_set=imageset).count() == 0:
-
+                                (shortname, extension) = os.path.splitext(filename)
                                 img_fname = (''.join(shortname) + '_' +
                                              ''.join(
                                                  random.choice(
@@ -172,9 +172,9 @@ def upload_image(request, imageset_id):
                                     new_image.save()
                                 except (OSError, IOError):
                                     error['damaged'] = True
+                                    os.remove(file_path)
                             else:
-                                os.remove(os.path.join(imageset.root_path(),
-                                                       'tmp', filename))
+                                os.remove(file_path)
                                 duplicat_count = duplicat_count + 1
                         else:
                             error['unsupported'] = True
@@ -212,8 +212,10 @@ def upload_image(request, imageset_id):
                             image.save()
                         except (OSError, IOError):
                             error['damaged'] = True
+                            os.remove(image.path())
                     else:
                         error['unsupported'] = True
+                        os.remove(image.path())
                 else:
                     error['exists'] = True
             errormessage = ''
