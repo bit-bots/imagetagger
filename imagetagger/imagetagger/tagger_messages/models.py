@@ -16,7 +16,7 @@ class Message(models.Model):
                              null=True,
                              blank=False)
     creation_time = models.DateTimeField(auto_now_add=True)
-    start_time = models.BinaryField()
+    start_time = models.DateTimeField()
     expire_time = models.DateTimeField()
     read_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='read_messages')
     
