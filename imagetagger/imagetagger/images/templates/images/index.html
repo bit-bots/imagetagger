@@ -133,6 +133,97 @@
                     </div>
                 </div>
             {% endif %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <h3 class="panel-title">Imagetagger stats <span class="glyphicon glyphicon-stats"></span></h3>
+                        </div>
+                        <table class="panel-body table">
+                            <tr>
+                                <td>
+                                </td>
+                                <th>
+                                    images
+                                </th>
+                                <th>
+                                    imagesets
+                                </th>
+                                {% for annotation_type in stats.annotation_types %}
+                                    <th>
+                                        {{ annotation_type.name }}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td>
+                                    all
+                                </td>
+                                <td>
+                                    {{ stats.all_images }}
+                                </td>
+                                <td>
+                                    {{ stats.all_imagesets}}
+                                </td>
+                                {% for annotation_type in stats.annotation_types %}
+                                    <td>
+                                        {{ annotation_type.annotation_count }}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td>
+                                    public
+                                </td>
+                                <td>
+                                    {{ stats.public_images }}
+                                </td>
+                                <td>
+                                    {{ stats.public_imagesets }}
+                                </td>
+                                {% for annotation_type in stats.annotation_types %}
+                                    <td>
+                                        {{ annotation_type.public_annotation_count }}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                        <hr>
+                        <table class="panel-body table">
+                            <tr>
+                                <th>
+                                    all users
+                                </th>
+                                <th>
+                                    active users <br>
+                                    (50+ Points)
+                                </th>
+                                <th>
+                                    all teams
+                                </th>
+                                <th>
+                                    active teams <br>
+                                    (2+ active users)
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ stats.all_users }}
+                                </td>
+                                <td>
+                                    {{ stats.active_users }}
+                                </td>
+                                <td>
+                                    {{ stats.all_teams }}
+                                </td>
+                                <td>
+                                    {{ stats.active_teams }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
