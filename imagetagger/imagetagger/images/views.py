@@ -23,6 +23,7 @@ from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
+from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
@@ -81,6 +82,7 @@ def index(request):
 
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members=request.user)
+    user_admin_teams = Team.objects.filter(admins=request.user)
     imagesets = ImageSet.objects.filter(team__in=userteams).annotate(
         image_count_agg=Count('images')
     ).select_related('team').prefetch_related('set_tags') \
@@ -120,6 +122,9 @@ def index(request):
         'active_teams': team_stats.get('active_count', 0) or 0,
         'annotation_types': annotation_types[:3],
     }
+
+    team_message_creation_form = TeamMessageCreationForm()
+    team_message_creation_form.fields['team'].queryset = user_admin_teams
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
@@ -127,6 +132,7 @@ def index(request):
             'image_sets': imagesets,
             'userteams': userteams,
             'stats': stats,
+            'team_message_creation_form': team_message_creation_form,
         })
 
 
