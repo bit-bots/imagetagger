@@ -3,7 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Subquery, Q
+from django.db.models.functions import Coalesce
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -22,6 +23,7 @@ from PIL import Image as PIL_Image
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
+from imagetagger.users.models import User, Team
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
@@ -86,12 +88,36 @@ def index(request):
     ).select_related('team').filter(team__in=userteams).order_by('-priority', '-time')
     imageset_creation_form = ImageSetCreationFormWT()  # the user provides the team manually
     imageset_creation_form.fields['team'].queryset = userteams
+    all_images = Image.objects.all().select_related('image_set')
+    public_images = all_images.filter(image_set__public=True)
+    annotation_types = AnnotationType.objects.annotate(
+        annotation_count=Count('annotation'),
+        public_annotation_count=Count(
+            Coalesce(Subquery(Annotation.objects.filter(
+                image__image_set__public=True, annotation_type_id=OuterRef('pk')).values('annotation_type_id').annotate(count=Count('pk')).values('count')), 0))).order_by('annotation_count')
+    all_imagesets = ImageSet.objects.all()
+    all_users = User.objects.all()
+    active_users = all_users.filter(points__gte=50)
+    all_teams = Team.objects.all()
+    active_teams = Team.objects.annotate(mc=Count('members', filter=Q(memberships__user__in=User.objects.filter(points__gte=50)))).filter(mc__gte=2)
+    stats = {
+        'all_images': all_images.count(),
+        'public_images': public_images.count(),
+        'all_imagesets': all_imagesets.count(),
+        'public_imagesets': all_imagesets.filter(public=True).count(),
+        'all_users': all_users.count(),
+        'active_users': active_users.count(),
+        'all_teams': all_teams.count(),
+        'active_teams': active_teams.count(),
+        'annotation_types': annotation_types[:3],
+    }
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
             'imageset_creation_form': imageset_creation_form,
             'image_sets': imagesets,
             'userteams': userteams,
+            'stats': stats,
         })
 
 
