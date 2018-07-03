@@ -40,7 +40,7 @@
                                     <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
                                     ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                     {% for tag in imageset.set_tags.all %}
-                                        <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}" class="label label-info">{{ tag.name }}</a>
+                                        <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}, " class="label label-info">{{ tag.name }}</a>
                                     {% endfor %}
                                 </li>
                             {% endfor %}
@@ -57,7 +57,7 @@
                                     <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
                                     ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                     {% for tag in imageset.set_tags.all %}
-                                        <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}" class="label label-info">{{ tag.name }}</a>
+                                        <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}, " class="label label-info">{{ tag.name }}</a>
                                     {% endfor %}
                                 </li>
                             {% endfor %}

@@ -54,7 +54,8 @@ def explore_imageset(request):
     if tagfilter:
         tag_names = str(tagfilter).replace(' ', '').split(',')
         for tag_name in tag_names:
-            imagesets = imagesets.filter(set_tags__name=tag_name)
+            if tag_name.replace(' ', ''):
+                imagesets = imagesets.filter(set_tags__name=tag_name)
         get_tagfilter = '&tags=' + str(tagfilter)
 
 
