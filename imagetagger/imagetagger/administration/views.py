@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -56,8 +54,6 @@ def create_annotation_type(request):
 def edit_annotation_type(request, annotation_type_id):
     selected_annotation_type = get_object_or_404(AnnotationType, id=annotation_type_id)
     if request.method == 'POST':
-        form = AnnotationTypeEditForm(request.POST)
-
         if not request.POST['name'] == selected_annotation_type.name and AnnotationType.objects.filter(name=request.POST['name']).exists():
             messages.error(request, _('The name is already in use by an annotation type.'))
         else:

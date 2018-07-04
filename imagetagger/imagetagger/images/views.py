@@ -1,11 +1,10 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, OuterRef, Subquery, Q
 from django.db.models.functions import Coalesce
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -15,7 +14,6 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
-from rest_framework.serializers import ListSerializer
 from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
     HTTP_201_CREATED
 from PIL import Image as PIL_Image
@@ -29,7 +27,6 @@ from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
 
-from imagetagger.users.models import Team
 import os
 import shutil
 import string
@@ -38,6 +35,7 @@ import zipfile
 import hashlib
 import json
 import imghdr
+
 
 @login_required
 def explore_imageset(request):
@@ -59,7 +57,6 @@ def explore_imageset(request):
             if tag_name.replace(' ', ''):
                 imagesets = imagesets.filter(set_tags__name=tag_name)
         get_tagfilter = '&tags=' + str(tagfilter)
-
 
     paginator = Paginator(imagesets, 25)
     page = request.GET.get('page')
@@ -260,7 +257,7 @@ def upload_image(request, imageset_id):
                     # Build beautiful error message
                     errormessage += ', '.join(errors) + ' in the archive have been skipped!'
                     p = errormessage.rfind(',')
-                    errormessage = errormessage[:p].capitalize() + ' and' + errormessage[p+1:]
+                    errormessage = errormessage[:p].capitalize() + ' and' + errormessage[p + 1:]
             else:
                 if error['unsupported']:
                     errormessage = 'This file type is unsupported!'
@@ -304,7 +301,7 @@ def view_image(request, image_id):
     if settings.USE_NGINX_IMAGE_PROVISION:
         response = HttpResponse()
         response["Content-Disposition"] = "attachment; filename={0}".format(
-                image.name)
+            image.name)
         response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image.relative_path())
         return response
     with open(os.path.join(settings.IMAGE_PATH, image.path()), "rb") as f:
@@ -394,7 +391,7 @@ def view_imageset(request, image_set_id):
         'filtered': filtered,
         'edit_form': imageset_edit_form,
         'imageset_perms': imageset.get_perms(request.user),
-        'export_formats': ExportFormat.objects.filter(Q(public=True)|Q(team__in=user_teams)),
+        'export_formats': ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams)),
         'label_upload_form': LabelUploadForm(),
         'upload_notice': settings.UPLOAD_NOTICE,
     })
@@ -487,6 +484,7 @@ def delete_imageset(request, imageset_id):
         'imageset': imageset,
     })
 
+
 @login_required
 def set_free(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
@@ -510,6 +508,7 @@ def set_free(request, imageset_id):
         'imageset': imageset,
     })
 
+
 @login_required
 def toggle_pin_imageset(request, imageset_id):
     imageset = get_object_or_404(ImageSet, id=imageset_id)
@@ -526,6 +525,7 @@ def toggle_pin_imageset(request, imageset_id):
                           .format(imageset.name))
 
     return redirect(reverse('images:view_imageset', args=(imageset_id,)))
+
 
 @login_required
 def label_upload(request, imageset_id):
@@ -544,7 +544,7 @@ def label_upload(request, imageset_id):
         for line in request.FILES['file']:
             # filter empty lines
             print(line)
-            if line in ('',  "b'\n'"):
+            if line in ('', "b'\n'"):
                 continue
             dec_line = line.decode().replace('\n', '').replace(',}', '}')
             line_frags = dec_line.split('|')
@@ -576,7 +576,7 @@ def label_upload(request, imageset_id):
                             vector = json.loads(line_frags[2])
                         except Exception as error:
                             report_list.append("In image \"{}\" the annotation:"
-                                        " \"{}\" was not accepted as valid JSON".format(line_frags[0],line_frags[2]))
+                                               " \"{}\" was not accepted as valid JSON".format(line_frags[0], line_frags[2]))
 
                     if annotation_type.validate_vector(vector):
                         if not Annotation.similar_annotations(vector, image, annotation_type):
@@ -597,20 +597,20 @@ def label_upload(request, imageset_id):
                         else:
                             similar_count += 1
                             report_list.append(
-                                'For the image ' + line_frags[0] + ' the annotation '
-                                + line_frags[2] + ' was too similar to an already existing one')
+                                'For the image ' + line_frags[0] + ' the annotation ' +
+                                line_frags[2] + ' was too similar to an already existing one')
                     else:
                         error_count += 1
                         report_list.append(
-                            'For the image ' + line_frags[0] + ' the annotation '
-                            + line_frags[2] + ' was not a valid vector or '
-                                            'bounding box for the annotation type'
+                            'For the image ' + line_frags[0] + ' the annotation ' +
+                            line_frags[2] + ' was not a valid vector or '
+                            'bounding box for the annotation type'
                         )
                 else:
                     error_count += 1
                     report_list.append(
-                        'For the image ' + line_frags[0] + ' the annotation type \"'
-                        + line_frags[1] + '\" does not exist in this ImageTagger')
+                        'For the image ' + line_frags[0] + ' the annotation type \"' +
+                        line_frags[1] + '\" does not exist in this ImageTagger')
             else:
                 error_count += 1
                 report_list.append('The image \"' + line_frags[0] + '\" does not exist in this imageset')
@@ -634,8 +634,8 @@ def label_upload(request, imageset_id):
 
 def dl_script(request):
     return TemplateResponse(request, 'images/download.py', context={
-        'base_url': settings.DOWNLOAD_BASE_URL,
-        }, content_type='text/plain')
+                            'base_url': settings.DOWNLOAD_BASE_URL,
+                            }, content_type='text/plain')
 
 
 @login_required

@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Annotation, AnnotationType, Export, Verification, ExportFormat
 
+
 @admin.register(Annotation)
 class AnnotationAdmin(admin.ModelAdmin):
     raw_id_fields = (

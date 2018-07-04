@@ -41,4 +41,3 @@ def handler500(request):
     Context: None
     """
     return render(request, '500.html', status=500)
-

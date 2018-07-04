@@ -15,4 +15,3 @@ def base_data(request):
         'TOOLS_ENABLED': settings.TOOLS_ENABLED,
         'my_teams': my_teams,
     }
-

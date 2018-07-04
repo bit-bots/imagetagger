@@ -1,12 +1,11 @@
 import json
-from enum import Enum
-from typing import Set, Dict, Union
+from typing import Set, Union
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import JSONField
 from django.db import models, connection
-from django.db.models import Subquery, F, IntegerField, OuterRef, QuerySet, Count
+from django.db.models import Subquery, F, IntegerField, OuterRef, Count
 from django.db.models.functions import Coalesce
 from django.utils.functional import cached_property
 
@@ -106,7 +105,7 @@ class Annotation(models.Model):
     @cached_property
     def height(self):
         if len(self.vector) is 4:
-            return self.vector['y2']-self.vector['y1']
+            return self.vector['y2'] - self.vector['y1']
         elif len(self.vector) > 4:
             return max(0, self.max_y - self.min_y)
         return 0
@@ -114,7 +113,7 @@ class Annotation(models.Model):
     @cached_property
     def width(self):
         if len(self.vector) is 4:  # bounding box and line
-            return self.vector['x2']-self.vector['x1']
+            return self.vector['x2'] - self.vector['x1']
         elif len(self.vector) > 4:
             return max(0, self.max_x - self.min_x)
         return 0  # pointi, polygon
@@ -138,8 +137,8 @@ class Annotation(models.Model):
                 AnnotationType.VECTOR_TYPE.BOUNDING_BOX,
                 AnnotationType.VECTOR_TYPE.LINE,
                 AnnotationType.VECTOR_TYPE.POLYGON):
-            yc = self.vector['y1'] + (self.height/2)
-            xc = self.vector['x1'] + (self.width/2)
+            yc = self.vector['y1'] + (self.height / 2)
+            xc = self.vector['x1'] + (self.width / 2)
         elif self.annotation_type.vector_type is AnnotationType.VECTOR_TYPE.POINT:
             yc = self.vector['y1']
             xc = self.vector['x1']
@@ -168,8 +167,8 @@ class Annotation(models.Model):
     @property
     def relative_center(self):
 
-        xc_rel = self.center['xc']/self.image.width
-        yc_rel = self.center['yc']/self.image.height
+        xc_rel = self.center['xc'] / self.image.width
+        yc_rel = self.center['yc'] / self.image.height
         return {'xc': xc_rel, 'yc': yc_rel}
 
     def get_relative_vector_element(self, key):
@@ -181,23 +180,23 @@ class Annotation(models.Model):
 
     @property
     def relative_width(self):
-        rel_width = self.width/self.image.width
+        rel_width = self.width / self.image.width
         return rel_width
 
     @property
     def relative_height(self):
-        rel_height = self.height/self.image.height
+        rel_height = self.height / self.image.height
         return rel_height
 
     @cached_property
     def relative_radius(self):
-        rel_rad_w = self.radius/self.image.width
-        rel_rad_h = self.radius/self.image.height
-        return (rel_rad_h + rel_rad_w)/2
+        rel_rad_w = self.radius / self.image.width
+        rel_rad_h = self.radius / self.image.height
+        return (rel_rad_h + rel_rad_w) / 2
 
     @property
     def relative_diameter(self):
-        return self.relative_radius*2
+        return self.relative_radius * 2
 
     @property
     def not_in_image(self) -> bool:
@@ -268,17 +267,17 @@ class Annotation(models.Model):
               (vector->>'y2')::INT BETWEEN %(min_y2)s AND %(max_y2)s
             '''
             query_params = {
-                    'annotation_type_id': annotation_type.pk,
-                    'image_id': image.pk,
-                    'min_x1': vector.get('x1', 0) - max_similarity,
-                    'max_x1': vector.get('x1', 0) + max_similarity,
-                    'min_x2': vector.get('x2', 0) - max_similarity,
-                    'max_x2': vector.get('x2', 0) + max_similarity,
-                    'min_y1': vector.get('y1', 0) - max_similarity,
-                    'max_y1': vector.get('y1', 0) + max_similarity,
-                    'min_y2': vector.get('y2', 0) - max_similarity,
-                    'max_y2': vector.get('y2', 0) + max_similarity,
-                }
+                'annotation_type_id': annotation_type.pk,
+                'image_id': image.pk,
+                'min_x1': vector.get('x1', 0) - max_similarity,
+                'max_x1': vector.get('x1', 0) + max_similarity,
+                'min_x2': vector.get('x2', 0) - max_similarity,
+                'max_x2': vector.get('x2', 0) + max_similarity,
+                'min_y1': vector.get('y1', 0) - max_similarity,
+                'max_y1': vector.get('y1', 0) + max_similarity,
+                'min_y2': vector.get('y2', 0) - max_similarity,
+                'max_y2': vector.get('y2', 0) + max_similarity,
+            }
             if exclude:
                 query += ' AND a.id NOT IN %(exclude)s'
                 query_params['exclude'] = tuple(exclude)
@@ -353,10 +352,8 @@ class Annotation(models.Model):
                     'Annotation': Annotation._meta.db_table,
                 }), query_params)
                 return cursor.fetchone() is not None
-        elif annotation_type.vector_type in (
-                AnnotationType.VECTOR_TYPE.POLYGON,
-                AnnotationType.VECTOR_TYPE.MULTI_LINE
-            ):
+        elif annotation_type.vector_type in (AnnotationType.VECTOR_TYPE.POLYGON,
+                                             AnnotationType.VECTOR_TYPE.MULTI_LINE):
             # TODO: make sure, the vector format (point 1 left, upper) is consistent
             query = '''
             SELECT

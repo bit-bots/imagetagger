@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -72,8 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'imagetagger.wsgi.application'
 
-
-
 FILE_UPLOAD_HANDLERS = (
     "django.core.files.uploadhandler.MemoryFileUploadHandler",
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
@@ -105,7 +104,7 @@ AUTH_USER_MODEL = 'users.User'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Berlin' #Timezone of your server
+TIME_ZONE = 'Europe/Berlin'  # Timezone of your server
 
 USE_I18N = True
 
@@ -117,7 +116,6 @@ USE_TZ = True
 LOGIN_URL = '/user/login/'
 LOGIN_REDIRECT_URL = '/images/'
 
-from django.contrib.messages import constants as messages
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 MESSAGE_TAGS = {
     messages.INFO: 'info',
@@ -141,4 +139,3 @@ IMAGE_EXTENSION = {
     'png',
     'jpeg',
 }
-

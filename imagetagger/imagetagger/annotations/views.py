@@ -1,13 +1,11 @@
 import datetime
 
-import os
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -135,6 +133,7 @@ def manage_annotations(request, image_set_id):
         'annotation_count': annotations.count(),
     })
 
+
 @login_required
 def delete_annotations(request, image_set_id):
     filter = request.POST.get("filter", None)
@@ -169,6 +168,7 @@ def delete_annotations(request, image_set_id):
     else:
         messages.warning(request, 'No permission')
     return redirect(reverse('annotations:manage_annotations', args=(image_set_id,)))
+
 
 @login_required
 def annotate_set(request, imageset_id):
@@ -493,7 +493,6 @@ def edit_exportformat(request, format_id):
                         edited_export_format.annotations_types.add(annotation_type)
                     edited_export_format.save()
 
-
                 messages.success(request, _('The export format was edited successfully.'))
         else:
             messages.error(request, _('There was an error editing the export format'))
@@ -538,7 +537,6 @@ def api_delete_annotation(request) -> Response:
     return Response({
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
-
 
 
 @login_required
@@ -747,6 +745,7 @@ def load_filtered_set_annotations(request) -> Response:
         'annotations': serializer.data,
     }, status=HTTP_200_OK)
 
+
 @login_required
 @api_view(['GET'])
 def load_annotation(request) -> Response:
@@ -763,10 +762,10 @@ def load_annotation(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     serializer = AnnotationSerializer(annotation,
-        context={
-            'request': request,
-        },
-        many=False)
+                                      context={
+                                          'request': request,
+                                      },
+                                      many=False)
     return Response({
         'annotation': serializer.data,
     }, status=HTTP_200_OK)
@@ -893,6 +892,5 @@ def api_verify_annotation(request) -> Response:
                 'detail': 'the user already verified this annotation and rejected it now',
             }, status=HTTP_200_OK)
         return Response({
-                'detail': 'you rejected the last annotation',
+            'detail': 'you rejected the last annotation',
         }, status=HTTP_200_OK)
-

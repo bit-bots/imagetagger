@@ -22,6 +22,7 @@ class Tool(models.Model):
                                 related_name='tool_creator',
                                 null=True,
                                 blank=True)
+
     @property
     def internal_filename(self):
         return '{0}_{1}'.format(self.id, self.name)
@@ -76,4 +77,3 @@ class ToolVote(models.Model):
                              blank=True)
     time = models.DateTimeField(auto_now_add=True)
     positive = models.BooleanField(default=0)
-

@@ -15,8 +15,6 @@ class UserRegistrationForm(RegistrationForm):
         ]
 
 
-
-
 class TeamCreationForm(forms.ModelForm):
     class Meta:
         model = Team

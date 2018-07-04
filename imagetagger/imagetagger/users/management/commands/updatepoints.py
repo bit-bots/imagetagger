@@ -1,7 +1,4 @@
-from datetime import timedelta
-
 from django.core.management import BaseCommand
-from django.utils import timezone
 
 from imagetagger.annotations.models import Verification
 from imagetagger.users.models import User

@@ -3,7 +3,6 @@ from typing import Set
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.contrib.auth.models import Group
 import os
 
 from imagetagger.users.models import Team
@@ -53,10 +52,10 @@ class ImageSet(models.Model):
         null=True,
     )
     creator = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             default=None,
-                             on_delete=models.SET_NULL,
-                             null=True,
-                             blank=True)
+                                default=None,
+                                on_delete=models.SET_NULL,
+                                null=True,
+                                blank=True)
     public = models.BooleanField(default=False)
     public_collaboration = models.BooleanField(default=False)
     image_lock = models.BooleanField(default=False)
@@ -154,4 +153,3 @@ class ImageSet(models.Model):
 class SetTag(models.Model):
     name = models.CharField(max_length=100, unique=True)
     imagesets = models.ManyToManyField(ImageSet, related_name='set_tags')
-
