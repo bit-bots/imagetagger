@@ -137,27 +137,28 @@
                 <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                           <h3 class="panel-title">Imagetagger stats <span class="glyphicon glyphicon-stats"></span></h3>
+                           <h3 class="panel-title"><span class="glyphicon glyphicon-stats"></span> Imagetagger Stats</h3>
                         </div>
                         <table class="panel-body table">
                             <tr>
                                 <td>
                                 </td>
                                 <th>
-                                    images
+                                    Images
                                 </th>
                                 <th>
-                                    imagesets
+                                    Imagesets
                                 </th>
                                 {% for annotation_type in stats.annotation_types %}
                                     <th>
-                                        {{ annotation_type.name }}
+                                        {{ annotation_type.name.capitalize }}
+                                        {{ annotation_type.0.capitalize }}
                                     </th>
                                 {% endfor %}
                             </tr>
                             <tr>
                                 <td>
-                                    all
+                                    All
                                 </td>
                                 <td>
                                     {{ stats.all_images }}
@@ -173,7 +174,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    public
+                                    Public
                                 </td>
                                 <td>
                                     {{ stats.public_images }}
@@ -192,18 +193,18 @@
                         <table class="panel-body table">
                             <tr>
                                 <th>
-                                    all users
+                                    All Users
                                 </th>
                                 <th>
-                                    active users <br>
+                                    Active Users <br>
                                     (50+ Points)
                                 </th>
                                 <th>
-                                    all teams
+                                    All Teams
                                 </th>
                                 <th>
-                                    active teams <br>
-                                    (2+ active users)
+                                    Active Teams <br>
+                                    (2+ Active Users)
                                 </th>
                             </tr>
                             <tr>
