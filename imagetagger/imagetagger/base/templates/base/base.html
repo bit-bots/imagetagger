@@ -54,6 +54,7 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
+            <noscript><div class="alert alert-danger">Appearently, you have JavaScript disabled. This website will not work properly without JavaScript</div></noscript>
             {% block bodyblock %}{% endblock %}
         </div>
         <footer class="footer">
