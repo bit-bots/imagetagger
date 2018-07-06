@@ -256,7 +256,7 @@ def view_team(request, team_id):
         'imagesets': imagesets,
         'date_imagesets': sorted(imagesets, key=lambda i: i.time, reverse=True),
         'size_imagesets': sorted(imagesets, key=lambda i: i.image_count, reverse=True),
-        'test_imagesets': [imageset for imageset in imagesets if 'test' in imageset.name],
+        'test_imagesets': [imageset for imageset in imagesets if 'test' in imageset.name.lower()],
         'imageset_creation_form': ImageSetCreationForm(),
         'team_perms': team.get_perms(request.user),
         'export_formats_forms': export_format_forms,
