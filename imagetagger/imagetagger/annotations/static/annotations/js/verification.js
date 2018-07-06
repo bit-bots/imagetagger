@@ -110,13 +110,17 @@ function calculateImageScale() {
     if (state) {
       strState = 'accept';
     }
+    let blurred = $('#blurred').is(':checked');
+    let concealed = $('#concealed').is(':checked');
     let annotation = gAnnotationList.filter(function(e) {
       return e.id === id;
     })[0];
     annotation.verified_by_user = true;
     let data = {
       annotation_id: id,
-      state: strState
+      state: strState,
+      concealed: concealed,
+      blurred: blurred
     };
     $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/verify/', {
       type: 'POST',
@@ -125,6 +129,8 @@ function calculateImageScale() {
       data: JSON.stringify(data),
       success: function (data) {
         displayFeedback($('#feedback_verify_successful'));
+        annotation.concealed = concealed;
+        annotation.blurred = blurred;
       },
       error: function () {
         displayFeedback($('#feedback_connection_error'));
@@ -299,8 +305,13 @@ function calculateImageScale() {
     }
 
     annotationIndex += offset;
-    if (annotationIndex < 0 || annotationIndex >= annotationIndexList.length) {
+    if (annotationIndex < 0) {
       displayFeedback($('#feedback_last_annotation'));
+      drawAnnotation(gAnnotationList[0]);
+      return;
+    } else if (annotationIndex >= annotationIndexList.length) {
+      displayFeedback($('#feedback_last_annotation'));
+      drawAnnotation(gAnnotationList[gAnnotationList.length - 1]);
       return;
     }
 
@@ -357,11 +368,13 @@ function calculateImageScale() {
     } else {
       $('#concealed_label').hide()
     }
+    $('#concealed').prop('checked', annotation.concealed);
     if (annotation.blurred) {
       $('#blurred_label').show()
     } else {
       $('#blurred_label').hide()
     }
+    $('#blurred').prop('checked', annotation.blurred);
     drawAnnotation(annotation);
   }
 
@@ -479,7 +492,32 @@ function calculateImageScale() {
 
   function handleAnnotationTypeSelectChange() {
     loadFilteredAnnotationList(gImageSetId);
+  }
 
+  function handleConcealedChange() {
+    let annotation = gAnnotationList.filter(function(e) {
+      return e.id === gAnnotationId;
+    })[0];
+    annotation.concealed = $('#concealed').is(':checked');
+    if (annotation.concealed) {
+      $('#concealed_label').show()
+    } else {
+      $('#concealed_label').hide()
+    }
+    drawAnnotation(annotation);
+  }
+
+  function handleBlurredChange() {
+    let annotation = gAnnotationList.filter(function(e) {
+      return e.id === gAnnotationId;
+    })[0];
+    annotation.blurred = $('#blurred').is(':checked');
+    if (annotation.blurred) {
+      $('#blurred_label').show()
+    } else {
+      $('#blurred_label').hide()
+    }
+    drawAnnotation(annotation);
   }
 
   $(function() {
@@ -525,6 +563,8 @@ function calculateImageScale() {
     $('#next_button').click(function(event) {
       loadAdjacentAnnotation(1);
     });
+    $('#concealed').click(handleConcealedChange);
+    $('#blurred').click(handleBlurredChange);
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
     });
@@ -545,6 +585,12 @@ function calculateImageScale() {
           break;
         case 75: //k
           $('#reject_button').click();
+          break;
+        case 66: //b
+          $('#blurred').click();
+          break;
+        case 67: //c
+          $('#concealed').click();
           break;
       }
     });

@@ -859,6 +859,8 @@ def api_verify_annotation(request) -> Response:
             state = False
         else:
             raise ParseError
+        concealed = request.data['concealed']
+        blurred = request.data['blurred']
 
     except (KeyError, TypeError, ValueError):
         raise ParseError
@@ -871,7 +873,11 @@ def api_verify_annotation(request) -> Response:
         }, status=HTTP_403_FORBIDDEN)
 
     if state:
-        annotation.verify(request.user, True)
+        with transaction.atomic():
+            annotation._concealed = concealed
+            annotation._blurred = blurred
+            annotation.save()
+            annotation.verify(request.user, True)
         if Verification.objects.filter(
                 user=request.user,
                 verified=state,
