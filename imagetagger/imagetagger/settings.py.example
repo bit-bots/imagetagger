@@ -54,6 +54,10 @@ LANGUAGE_CODE = 'en-us'
 
 USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance
 
+# The 'report a problem' page on an internal server error can either be a custom url or a text that can be defined here.
+# PROBLEMS_URL = 'https://problems.example.com'
+# PROBLEMS_TEXT = 'To report a problem, contact admin@example.com'
+
 USE_IMPRINT = False
 IMPRINT_NAME = ''
 IMPRINT_URL = ''

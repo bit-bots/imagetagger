@@ -67,7 +67,7 @@
                     <a target="_blank" href="https://github.com/bit-bots/imagetagger">
                         This project on GitHub
                     </a>&nbsp;&nbsp;&nbsp;&nbsp;
-                    <a target="_blank" href="https://github.com/bit-bots/imagetagger/issues">
+                    <a target="_blank" href="{% url 'base:problem' %}">
                         Report an issue
                     </a>&nbsp;&nbsp;&nbsp;&nbsp;
                     {% if USE_IMPRINT %}
@@ -78,10 +78,6 @@
         </footer>
         <script type="text/javascript" src="{% static 'scripts/jquery-3.2.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'scripts/bootstrap.min.js' %}"></script>
-        <script type="text/javascript">
-            {# TODO: This block is deprecated. Should be within additional_js (or, actually, there should not be any inline javascript usage at all!) #}
-            {% block individual_script %}{% endblock individual_script %}
-        </script>
         {% block additional_js %}{% endblock additional_js %}
     </body>
 </html>
