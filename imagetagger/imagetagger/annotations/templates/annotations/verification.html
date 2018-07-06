@@ -43,14 +43,24 @@
         </div>
         <div class="col-sm-3 col-sm-push-3">
             <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 id="annotation-type-title" class="panel-title"></h3>
+                    <div id="labels">
+                        <span id="blurred_label" class="label label-info">Blurred</span>
+                        <span id="concealed_label" class="label label-warning">Concealed</span>
+                    </div>
+                </div>
                 <div class="panel-body" id="verification_form">
                     <div class="row">
                         <div class="col-md-12">
-                            <h4 id="annotation-type-title"></h4>
-                            <p id="labels">
-                                <span id="blurred_label" class="label label-info">Blurred</span>
-                                <span id="concealed_label" class="label label-warning">Concealed</span>
-                            </p>
+                            <div id='concealed_p'>
+                                <input type='checkbox' id='concealed' name="concealed">
+                                <label for='concealed'>concealed (c)</label>
+                            </div>
+                            <div id='blurred_p'>
+                                <input type='checkbox' id='blurred' name="blurred">
+                                <label for='blurred'>blurred (b)</label>
+                            </div>
                         </div>
                         <div class="col-md-6 col-md-offset-6 hidden-xs">
                             <button class="btn btn-warning btn-block" type='button' id='edit_button'>
