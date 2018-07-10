@@ -110,8 +110,6 @@ function calculateImageScale() {
     if (state) {
       strState = 'accept';
     }
-    let blurred = $('#blurred').is(':checked');
-    let concealed = $('#concealed').is(':checked');
     let annotation = gAnnotationList.filter(function(e) {
       return e.id === id;
     })[0];
@@ -119,8 +117,6 @@ function calculateImageScale() {
     let data = {
       annotation_id: id,
       state: strState,
-      concealed: concealed,
-      blurred: blurred
     };
     $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/verify/', {
       type: 'POST',
@@ -129,8 +125,6 @@ function calculateImageScale() {
       data: JSON.stringify(data),
       success: function (data) {
         displayFeedback($('#feedback_verify_successful'));
-        annotation.concealed = concealed;
-        annotation.blurred = blurred;
       },
       error: function () {
         displayFeedback($('#feedback_connection_error'));
@@ -487,7 +481,6 @@ function calculateImageScale() {
 
   function handleFilterSwitchChange() {
     loadFilteredAnnotationList(gImageSetId);
-
   }
 
   function handleAnnotationTypeSelectChange() {
@@ -505,6 +498,7 @@ function calculateImageScale() {
       $('#concealed_label').hide()
     }
     drawAnnotation(annotation);
+    apiBlurredConcealed();
   }
 
   function handleBlurredChange() {
@@ -518,6 +512,30 @@ function calculateImageScale() {
       $('#blurred_label').hide()
     }
     drawAnnotation(annotation);
+    apiBlurredConcealed();
+  }
+
+  function apiBlurredConcealed() {
+    let annotation = gAnnotationList.filter(function(e) {
+      return e.id === gAnnotationId;
+    })[0];
+    let data = {
+      annotation_id: annotation.id,
+      blurred: annotation.blurred,
+      concealed: annotation.concealed
+    };
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/blurred_concealed/', {
+      method: 'POST',
+      headers: gHeaders,
+      dataType: 'json',
+      data: JSON.stringify(data),
+      success: function() {
+        displayFeedback($('#feedback_update_successful'));
+      },
+      error: function() {
+        displayFeedback($('#feedback_connection_error'));
+      }
+    });
   }
 
   $(function() {
