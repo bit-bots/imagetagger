@@ -406,6 +406,11 @@ class Canvas {
     this.drawings.push(this.currentDrawing);
   }
 
+  drawCross(color) {
+    this.drawLine({"x1": 0, "y1": 0, "x2": globals.image.width(), "y2": globals.image.height()}, 0, false, color);
+    this.drawLine({"x1": 0, "y1": globals.image.height(), "x2": globals.image.width(), "y2": 0}, 1, false, color);
+  }
+
   drawPolygon(points, id, mutable, numberOfPoints, closed, color) {
     color = color || globals.stdColor;
     this.currentDrawing = new Polygon(this, points, id, mutable, numberOfPoints, color);

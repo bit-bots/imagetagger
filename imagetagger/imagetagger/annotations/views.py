@@ -647,7 +647,7 @@ def api_load_set_annotations(request) -> Response:
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.filter(image__in=images,
-                                            annotation_type__active=True)
+                                            annotation_type__active=True).order_by('id')
 
     if not imageset.has_perm('read', request.user):
         return Response({
@@ -730,6 +730,8 @@ def api_load_filtered_set_annotations(request) -> Response:
         annotations = annotations.filter(annotation_type__id=annotation_type_id)
     if verified:
         annotations = [annotation for annotation in annotations if not user_verifications.filter(annotation=annotation).exists()]
+
+    annotations = annotations.order_by('id')
 
     if not imageset.has_perm('read', request.user):
         return Response({
