@@ -17,7 +17,6 @@ function calculateImageScale() {
   const EDIT_ANNOTATION_URL = '/annotations/%s/';
   const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
   const FEEDBACK_DISPLAY_TIME = 3000;
-  const VERIFY_URL = "/annotations/%s/verify/";
   const PRELOAD_FORWARD = 5;
   const PRELOAD_BACKWARD = 2;
 
@@ -185,7 +184,6 @@ function calculateImageScale() {
 
       let link = $('<a>');
       link.attr('id', 'annotation_link_' + annotation.id);
-      link.attr('href', VERIFY_URL.replace('%s', annotation.id));
       link.addClass('annotation_link');
       if (annotation.id === gAnnotation.id) {
         link.addClass('active');
