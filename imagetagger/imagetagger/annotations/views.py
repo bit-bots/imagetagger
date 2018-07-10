@@ -541,7 +541,7 @@ def api_delete_annotation(request) -> Response:
 
 @login_required
 @api_view(['POST'])
-def create_annotation(request) -> Response:
+def api_create_annotation(request) -> Response:
     try:
         image_id = int(request.data['image_id'])
         annotation_type_id = int(request.data['annotation_type_id'])
@@ -612,7 +612,7 @@ def create_annotation(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def load_annotations(request) -> Response:
+def api_load_annotations(request) -> Response:
     try:
         image_id = int(request.query_params['image_id'])
     except (KeyError, TypeError, ValueError):
@@ -638,7 +638,7 @@ def load_annotations(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def load_set_annotations(request) -> Response:
+def api_load_set_annotations(request) -> Response:
     try:
         imageset_id = int(request.query_params['imageset_id'])
     except (KeyError, TypeError, ValueError):
@@ -666,7 +666,7 @@ def load_set_annotations(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def load_annotation_types(request) -> Response:
+def api_load_annotation_types(request) -> Response:
 
     annotation_types = AnnotationType.objects.filter(active=True)
     serializer = AnnotationTypeSerializer(
@@ -681,7 +681,7 @@ def load_annotation_types(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def load_set_annotation_types(request) -> Response:
+def api_load_set_annotation_types(request) -> Response:
     try:
         imageset_id = int(request.query_params['imageset_id'])
     except (KeyError, TypeError, ValueError):
@@ -713,7 +713,7 @@ def load_set_annotation_types(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def load_filtered_set_annotations(request) -> Response:
+def api_load_filtered_set_annotations(request) -> Response:
     try:
         imageset_id = int(request.query_params['imageset_id'])
         verified = request.query_params['verified'] == 'true'
@@ -748,7 +748,7 @@ def load_filtered_set_annotations(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def load_annotation(request) -> Response:
+def api_load_annotation(request) -> Response:
     try:
         annotation_id = int(request.query_params['annotation_id'])
     except (KeyError, TypeError, ValueError):
@@ -773,7 +773,7 @@ def load_annotation(request) -> Response:
 
 @login_required
 @api_view(['POST'])
-def update_annotation(request) -> Response:
+def api_update_annotation(request) -> Response:
     try:
         annotation_id = int(request.data['annotation_id'])
         image_id = int(request.data['image_id'])
