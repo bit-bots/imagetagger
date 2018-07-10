@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^api/annotation/loadone/$', views.load_annotation, name='load_annotation'),
     url(r'^api/annotation/verify/$', views.api_verify_annotation, name='verify_annotation'),
     url(r'^api/annotation/update/$', views.update_annotation, name='update_annotations'),
+    url(r'^api/annotation/blurred_concealed/$', views.api_blurred_concealed_annotation, name='blurred_concealed_annotation'),
 ]

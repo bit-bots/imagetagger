@@ -900,3 +900,30 @@ def api_verify_annotation(request) -> Response:
         return Response({
             'detail': 'you rejected the last annotation',
         }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['POST'])
+def api_blurred_concealed_annotation(request) -> Response:
+    try:
+        annotation_id = int(request.data['annotation_id'])
+        blurred = request.data['blurred']
+        concealed = request.data['concealed']
+
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    annotation = get_object_or_404(Annotation, pk=annotation_id)
+
+    if not annotation.image.image_set.has_perm('edit_annotation', request.user):
+        return Response({
+            'detail': 'permission for verifying annotations in this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    with transaction.atomic():
+        annotation._concealed = concealed
+        annotation._blurred = blurred
+        annotation.save()
+    return Response({
+        'detail': 'you updated the last annotation',
+    }, status=HTTP_200_OK)
