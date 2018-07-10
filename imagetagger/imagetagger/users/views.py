@@ -30,7 +30,7 @@ def create_team(request):
                 form.instance.save()
                 form.instance.memberships.create(user=request.user,
                                                  is_admin=True)
-            return redirect(reverse('users:team', args=(form.instance.id,)))
+            return redirect(reverse('users:view_team', args=(form.instance.id,)))
     return render(request, 'users/create_team.html', {
         'form': form,
     })
@@ -46,7 +46,7 @@ def revoke_team_admin(request, team_id, user_id):
         messages.warning(
             request, _('You can not revoke your own admin privileges.').format(
                 team.name))
-        return redirect(reverse('users:team', args=(team.id,)))
+        return redirect(reverse('users:view_team', args=(team.id,)))
 
     if team.has_perm('user_management', request.user):
         team.memberships.filter(user=user).update(is_admin=False)
@@ -56,7 +56,7 @@ def revoke_team_admin(request, team_id, user_id):
             _('You do not have permission to revoke this users admin '
               'privileges in the team {}.').format(team.name))
 
-    return redirect(reverse('users:team', args=(team.id,)))
+    return redirect(reverse('users:view_team', args=(team.id,)))
 
 
 @login_required
@@ -78,7 +78,7 @@ def grant_team_admin(request, team_id, user_id):
             request,
             _('You do not have permission to grant this user admin '
               'privileges in the team {}.').format(team.name))
-    return redirect(reverse('users:team', args=(team.id,)))
+    return redirect(reverse('users:view_team', args=(team.id,)))
 
 
 @login_required
@@ -135,7 +135,7 @@ def leave_team(request, team_id, user_id=None):
     try:
         user_id = int(user_id)
     except ValueError:
-        return redirect(reverse('users:team', args=(team.id,)))
+        return redirect(reverse('users:view_team', args=(team.id,)))
 
     if user_id and user_id != request.user.pk:
         user = get_object_or_404(User, id=user_id)
@@ -145,11 +145,11 @@ def leave_team(request, team_id, user_id=None):
             messages.warning(
                 request,
                 _('You do not have the permission to kick other users from this team.'))
-            return redirect(reverse('users:team', args=(team.id,)))
+            return redirect(reverse('users:view_team', args=(team.id,)))
 
     if not team.members.filter(pk=user.pk).exists():
         messages.warning(request, warning)
-        return redirect(reverse('users:team', args=(team.id,)))
+        return redirect(reverse('users:view_team', args=(team.id,)))
 
     if request.method == 'POST':
         team.memberships.filter(user=user).delete()
@@ -161,7 +161,7 @@ def leave_team(request, team_id, user_id=None):
             team.delete()
         if user == request.user:
             return redirect(reverse('users:explore_team'))
-        return redirect(reverse('users:team', args=(team.id,)))
+        return redirect(reverse('users:view_team', args=(team.id,)))
 
     return render(request, 'users/leave_team.html', {
         'user': user,
@@ -183,19 +183,19 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
             request, _(
                 'You do not have the permission to add users to the team {}.')
             .format(team.name))
-        return redirect(reverse('users:team', args=(team_id,)))
+        return redirect(reverse('users:view_team', args=(team_id,)))
 
     user = User.objects.filter(username=username).first()
     if not user:
         messages.warning(request, _('The user {} does not exist.')
                          .format(username))
-        return redirect(reverse('users:team', args=(team_id,)))
+        return redirect(reverse('users:view_team', args=(team_id,)))
 
     if team.members.filter(pk=user.pk).exists():
         messages.info(request, _(
             'The user {} is already a member of the team {}.').format(
             username, team.name))
-        return redirect(reverse('users:team', args=(team_id,)))
+        return redirect(reverse('users:view_team', args=(team_id,)))
 
     team.memberships.create(user=user)
 
@@ -203,7 +203,7 @@ def add_team_member(request: HttpRequest, team_id: int) -> HttpResponse:
                      _('The user {} has been added to the team successfully.')
                      .format(username))
 
-    return redirect(reverse('users:team', args=(team_id,)))
+    return redirect(reverse('users:view_team', args=(team_id,)))
 
 
 @login_required

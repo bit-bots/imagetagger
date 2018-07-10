@@ -36,7 +36,7 @@
                                         <b>
                                             Team:
                                         </b>
-                                        <a href="{% url 'users:team' tool.team.id %}">
+                                        <a href="{% url 'users:view_team' tool.team.id %}">
                                             {{ tool.team.name }}
                                         </a>
                                     </p>
@@ -46,7 +46,7 @@
                                         <b>
                                             Creator:
                                         </b>
-                                        <a href="{% url 'users:user' tool.creator.id %}">
+                                        <a href="{% url 'users:view_user' tool.creator.id %}">
                                             {{ tool.creator }}
                                         </a>
                                     </p>

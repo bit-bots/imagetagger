@@ -421,7 +421,7 @@ def create_imageset(request):
             request,
             _('You do not have permission to create image sets in the team {}.')
             .format(team.name))
-        return redirect(reverse('users:team', args=(team.id,)))
+        return redirect(reverse('users:view_team', args=(team.id,)))
 
     form = ImageSetCreationForm()
 
@@ -493,7 +493,7 @@ def delete_imageset(request, imageset_id):
     if request.method == 'POST':
         shutil.rmtree(imageset.root_path())
         imageset.delete()
-        return redirect(reverse('users:team', args=(imageset.team.id,)))
+        return redirect(reverse('users:view_team', args=(imageset.team.id,)))
 
     return render(request, 'images/delete_imageset.html', {
         'imageset': imageset,

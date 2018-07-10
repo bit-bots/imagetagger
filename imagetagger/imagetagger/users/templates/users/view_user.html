@@ -14,7 +14,7 @@
                     <h3>Teams:</h3>
                     <ul>
                         {% for team in teams %}
-                            <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
+                            <li><a href="{% url 'view_users:view_team' team.id %}">{{team.name}}</a></li>
                         {% endfor %}
                     </ul>
                 </div>

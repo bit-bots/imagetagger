@@ -177,7 +177,7 @@
                                                 {% if member in team.admins %}
                                                     <span class="glyphicon glyphicon-king"></span>
                                                 {% endif %}
-                                                <a href="{% url 'users:user' member.id %}">{{member.username}}</a>
+                                                <a href="{% url 'users:view_user' member.id %}">{{member.username}}</a>
                                             </td>
                                             <td>
                                                 {{member.points}}
@@ -221,7 +221,7 @@
                                         {% for member in members_30 %}
                                             <tr>
                                                 <td>
-                                                    <a href="{% url 'users:user' member.id %}">{{member.username}}&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                                    <a href="{% url 'users:view_user' member.id %}">{{member.username}}&nbsp;&nbsp;&nbsp;&nbsp;</a>
                                                 </td>
                                                 <td>
                                                     {% if member.points_30 %}

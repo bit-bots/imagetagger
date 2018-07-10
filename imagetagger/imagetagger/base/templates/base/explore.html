@@ -47,7 +47,7 @@
                                         <td>
                                             <dt>
                                                 {% if imageset.team %}
-                                                    <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a>
+                                                    <a href="{% url 'users:view_team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a>
                                                 {% else %}
                                                     <a href="{% url 'images:view_imageset' imageset.id %}">{{imageset.name}}</a>
                                                 {% endif %}
@@ -67,7 +67,7 @@
                                     <tr>
                                         <td>
                                             <dt>
-                                                <a href="{% url 'users:team' team.id %}">{{team.name}}</a>
+                                                <a href="{% url 'users:view_team' team.id %}">{{team.name}}</a>
                                             </dt>
                                         </td>
                                     </tr>
@@ -76,7 +76,7 @@
                                     <tr>
                                         <td>
                                             <dt>
-                                                <a href="{% url 'users:user' user.id %}">{{user.username}}</a>
+                                                <a href="{% url 'users:view_user' user.id %}">{{user.username}}</a>
                                             </dt>
                                         </td>
                                         <td class="align-right">

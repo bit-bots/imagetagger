@@ -10,7 +10,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            <h1>Manage annotations of {% if selected_image_set.team %} <a href="{% url 'users:team' selected_image_set.team_id%}">{{selected_image_set.team.name}}</a>/{% endif %}<a href="{% url 'images:view_imageset' selected_image_set.id %}">{{selected_image_set.name}}</a></h1>
+            <h1>Manage annotations of {% if selected_image_set.team %} <a href="{% url 'users:view_team' selected_image_set.team_id%}">{{selected_image_set.team.name}}</a>/{% endif %}<a href="{% url 'images:view_imageset' selected_image_set.id %}">{{selected_image_set.name}}</a></h1>
             {% if annotations.has_other_pages %}
                 <h4>
                     Page {{ annotations.number }} of {{ annotations.paginator.num_pages }}

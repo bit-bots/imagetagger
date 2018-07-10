@@ -456,7 +456,7 @@ def create_exportformat(request):
                     if mode == '0':
                         return redirect(reverse('images:view_imageset', args=(object_id,)))
                     if mode == '1':
-                        return redirect(reverse('users:team', args=(object_id,)))
+                        return redirect(reverse('users:view_team', args=(object_id,)))
             return redirect(reverse('base:index'))
     else:
         form = ExportFormatCreationForm()
@@ -497,7 +497,7 @@ def edit_exportformat(request, format_id):
         else:
             messages.error(request, _('There was an error editing the export format'))
 
-    return redirect(reverse('users:team', args=(export_format.team.id,)))
+    return redirect(reverse('users:view_team', args=(export_format.team.id,)))
 
 
 @login_required
@@ -508,7 +508,7 @@ def delete_exportformat(request, format_id):
         messages.success(request, _('Deleted export format successfully.'))
     else:
         messages.error(request, _('You are not permitted to delete export formats of this team!'))
-    return redirect(reverse('users:team', args=(export_format.team.id,)))
+    return redirect(reverse('users:view_team', args=(export_format.team.id,)))
 
 
 @login_required

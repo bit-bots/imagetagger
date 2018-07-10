@@ -26,7 +26,7 @@
                 </p>
             {% endblocktrans %}
         {% endif %}
-        <a href="{% url 'users:team' team.pk %}" class="btn btn-default">{% trans 'Cancel' %}</a>
+        <a href="{% url 'users:view_team' team.pk %}" class="btn btn-default">{% trans 'Cancel' %}</a>
         <input type="submit" class="btn btn-danger" value="{% if user == request.user %}{% trans 'Leave team' %}{% else %}{% trans 'Kick user' %}{% endif %}" />
     </form>
 {% endblock bodyblock %}

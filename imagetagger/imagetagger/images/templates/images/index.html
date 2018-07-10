@@ -37,7 +37,7 @@
                                     {% if not imageset.public %}
                                         <span class="glyphicon glyphicon-lock"></span>
                                     {% endif %}
-                                    <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
+                                    <a href="{% url 'users:view_team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
                                     ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                     {% for tag in imageset.set_tags.all %}
                                         <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}, " class="label label-info">{{ tag.name }}</a>
@@ -54,7 +54,7 @@
                                     {% if not imageset.public %}
                                         <span class="glyphicon glyphicon-lock"></span>
                                     {% endif %}
-                                    <a href="{% url 'users:team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
+                                    <a href="{% url 'users:view_team' imageset.team.id %}">{{imageset.team.name}}</a>/<a href="{% url 'images:view_imageset' imageset.id%}">{{ imageset.name }}</a>
                                     ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                     {% for tag in imageset.set_tags.all %}
                                         <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}, " class="label label-info">{{ tag.name }}</a>
@@ -77,7 +77,7 @@
                         <div class="panel-body">
                             <ul>
                                 {% for team in userteams %}
-                                    <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
+                                    <li><a href="{% url 'users:view_team' team.id %}">{{team.name}}</a></li>
                                 {% endfor %}
                             </ul>
                             <hr>
