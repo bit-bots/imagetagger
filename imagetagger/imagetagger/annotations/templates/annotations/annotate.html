@@ -284,7 +284,7 @@
                 Do you really want to permanently delete this image from the imageset?
             </div>
             <div class="modal-footer">
-                <form method="post" action="{% url 'images:delete_images' selected_image.id %}">
+                <form method="post" action="{% url 'images:delete_image' selected_image.id %}">
                     {% csrf_token %}
                     <input id="next-image-id" type="hidden" name="next-image-id" value="{{ set_images.first.id }}">
                     <div class="input-group" role="group" aria-label="delete-image">

@@ -334,7 +334,7 @@ def list_images(request, image_set_id):
 
 
 @login_required
-def delete_images(request, image_id):
+def delete_image(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if image.image_set.has_perm('delete_images', request.user) and not image.image_set.image_lock:
         os.remove(os.path.join(settings.IMAGE_PATH, image.path()))
@@ -655,7 +655,7 @@ def dl_script(request):
 
 @login_required
 @api_view(['GET'])
-def load_image_set(request) -> Response:
+def api_load_image_set(request) -> Response:
     try:
         image_set_id = int(request.query_params['image_set_id'])
         filter_annotation_type_id = request.query_params.get(
@@ -691,7 +691,7 @@ def load_image_set(request) -> Response:
 
 @login_required
 @api_view(['POST'])
-def tag_image_set(request) -> Response:
+def api_tag_image_set(request) -> Response:
     try:
         image_set_id = int(request.data['image_set_id'])
         tag_name = str(request.data['tag_name']).lower()
@@ -734,7 +734,7 @@ def tag_image_set(request) -> Response:
 
 @login_required
 @api_view(['DELETE'])
-def remove_image_set_tag(request) -> Response:
+def api_remove_image_set_tag(request) -> Response:
     try:
         image_set_id = int(request.data['image_set_id'])
         tag_name = str(request.data['tag_name']).lower()
@@ -768,7 +768,7 @@ def remove_image_set_tag(request) -> Response:
 
 @login_required
 @api_view(['GET'])
-def autocomplete_image_set_tag(request) -> Response:
+def api_autocomplete_image_set_tag(request) -> Response:
     try:
         tag_name_query = str(request.GET['query']).lower()
     except (KeyError, TypeError, ValueError):
