@@ -743,7 +743,7 @@ def remove_image_set_tag(request) -> Response:
     tag.imagesets.remove(image_set)
     serializer = SetTagSerializer(tag)
     serializer_data = serializer.data
-    if not tag.imagesets.all():
+    if not tag.imagesets.exists() and tag.name != 'test':
         tag.delete()
     else:
         tag.save()
