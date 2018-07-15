@@ -5,18 +5,21 @@ from django.db import migrations
 
 def set_test_tag(apps, schema_editor):
     SetTag = apps.get_model('images', 'SetTag')
-    if SetTag.objects.filter(name='test').exists():
-        test_tag = SetTag.objects.get(name='test')
+
+    db_alias = schema_editor.connection.alias
+
+    if SetTag.objects.using(db_alias).filter(name='test').exists():
+        test_tag = SetTag.objects.using(db_alias).get(name='test')
     else:
         test_tag = SetTag(name='test')
-        test_tag.save()
+        test_tag.save(using=db_alias)
 
     ImageSet = apps.get_model('images', 'ImageSet')
-    for imageset in ImageSet.objects.all():
+    for imageset in ImageSet.objects.using(db_alias).all():
         if 'test' in imageset.name.lower():
             test_tag.imagesets.add(imageset)
 
-    test_tag.save()
+    test_tag.save(using=db_alias)
 
 
 class Migration(migrations.Migration):
