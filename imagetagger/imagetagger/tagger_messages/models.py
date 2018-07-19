@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Count, Q
 from django.db import models
 from django.contrib.auth.models import Group
 import os
@@ -23,6 +24,7 @@ class Message(models.Model):
     def __str__(self):
         return u'Message: {0}'.format(str(self.title))
 
+
 class TeamMessage(Message):
     team = models.ForeignKey(
         Team,
@@ -31,7 +33,17 @@ class TeamMessage(Message):
     )
     admins_only = models.BooleanField(default=False)
 
+    @staticmethod
+    def get_messages_for_user(user):
+        userteams = Team.objects.filter(members=user)
+        adminteams = userteams
+        return TeamMessage.objects.filter(Q(team__in=adminteams, admins_only=True) | Q(team__in=userteams, admins_only=False))
+
 class GlobalMessage(Message):
     team_admins_only = models.BooleanField(default=False)
     staff_only = models.BooleanField(default=False)
+
+    @staticmethod
+    def get():
+        pass       
     

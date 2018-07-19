@@ -28,6 +28,7 @@ from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
+from imagetagger.tagger_messages.models import TeamMessage
 
 import os
 import shutil
@@ -124,15 +125,20 @@ def index(request):
     }
 
     team_message_creation_form = TeamMessageCreationForm()
-    team_message_creation_form.fields['team'].queryset = user_admin_teams
+    team_message_creation_form.fields['team'].queryset = userteams
+    
+    usermessages = TeamMessage.get_messages_for_user(request.user)
+
     return TemplateResponse(
         request, 'images/index.html', {
             'team_creation_form': team_creation_form,
             'imageset_creation_form': imageset_creation_form,
+            'team_message_creation_form': team_message_creation_form,
             'image_sets': imagesets,
             'userteams': userteams,
             'stats': stats,
             'team_message_creation_form': team_message_creation_form,
+            'usermessages': usermessages,
         })
 
 
