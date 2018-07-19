@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^annotations/', include('imagetagger.annotations.urls')),
     url(r'^images/', include('imagetagger.images.urls')),
     url(r'^users/', include('imagetagger.users.urls')),
+    url(r'^users/', include('imagetagger.tagger_messages.urls')),
     url(r'^tools/', include('imagetagger.tools.urls')),
 ]
 
