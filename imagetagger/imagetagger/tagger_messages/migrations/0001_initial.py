@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=100)),
                 ('content', models.TextField()),
                 ('creation_time', models.DateTimeField(auto_now_add=True)),
-                ('start_time', models.BinaryField()),
+                ('start_time', models.DateTimeField()),
                 ('expire_time', models.DateTimeField()),
             ],
         ),

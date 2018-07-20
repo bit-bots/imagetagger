@@ -21,20 +21,20 @@
                         <li><a href="{% url 'images:index' %}">Home</a></li>
                         {% block navblock %}{% endblock %}
                         {% if request.user.is_authenticated %}
-                            <li><a href="{% url 'images:explore_imageset' %}">Explore</a></li>
-                            {% if TOOLS_ENABLED %}
-                                <li><a href="{% url 'tools:overview' %}">Tools</a></li>
-                            {% endif %}
-                            {% if my_teams %}
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">My Teams <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    {% for team in my_teams %}
-                                    <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
+                        <li><a href="{% url 'images:explore_imageset' %}">Explore</a></li>
+                        {% if TOOLS_ENABLED %}
+                        <li><a href="{% url 'tools:overview' %}">Tools</a></li>
+                        {% endif %}
+                        {% if my_teams %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">My Teams <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                {% for team in my_teams %}
+                                <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% endif %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
                             <ul class="dropdown-menu">
@@ -44,7 +44,7 @@
                             </ul>
                         </li>
                         {% else %}
-                            <li><a href="{% url 'login' %}">Login</a></li>
+                        <li><a href="{% url 'login' %}">Login</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -52,7 +52,7 @@
         </nav>
         <div class="content container-fluid">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
             <noscript><div class="alert alert-danger">Appearently, you have JavaScript disabled. This website will not work properly without JavaScript</div></noscript>
             {% block bodyblock %}{% endblock %}
@@ -61,9 +61,9 @@
             <div class="container">
                 <p class="text-muted text-right">
                     {% if user.is_staff %}
-                        <a href="{% url 'administration:index' %}">
-                            Administration
-                        </a>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="{% url 'administration:index' %}">
+                        Administration
+                    </a>&nbsp;&nbsp;&nbsp;&nbsp;
                     {% endif %}
                     <a target="_blank" href="https://github.com/bit-bots/imagetagger">
                         This project on GitHub
@@ -72,7 +72,7 @@
                         Report an issue
                     </a>&nbsp;&nbsp;&nbsp;&nbsp;
                     {% if USE_IMPRINT %}
-                        <a href="{{ IMPRINT_URL }}">{{ IMPRINT_NAME }}</a>
+                    <a href="{{ IMPRINT_URL }}">{{ IMPRINT_NAME }}</a>
                     {% endif %}
                 </p>
             </div>
