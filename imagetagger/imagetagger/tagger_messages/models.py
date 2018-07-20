@@ -37,7 +37,7 @@ class TeamMessage(Message):
     def get_messages_for_user(user):
         userteams = Team.objects.filter(members=user)
         adminteams = userteams
-        return TeamMessage.objects.filter(Q(team__in=adminteams, admins_only=True) | Q(team__in=userteams, admins_only=False))
+        return TeamMessage.objects.filter(Q(team__in=adminteams, admins_only=True) | Q(team__in=userteams, admins_only=False)).order_by('start_time').reverse()
 
 class GlobalMessage(Message):
     team_admins_only = models.BooleanField(default=False)
