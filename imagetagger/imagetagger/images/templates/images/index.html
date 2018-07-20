@@ -16,8 +16,10 @@
                 </div>
                 <div class="panel-body">
                     With our last update, we added a lot of features to the ImageTagger.
-                    They include the annotation of polygons, lines and points, their import and export, an edit function for export types (in the team view) and image preloading in the verification view.
-                    There might be some bugs left and if you find one, please notify us via <a target="_blank" href="https://github.com/bit-bots/imagetagger">GitHub</a>.
+                    They include the annotation of polygons, lines and points, their import and export, an edit function
+                    for export types (in the team view) and image preloading in the verification view.
+                    There might be some bugs left and if you find one, please notify us via <a target="_blank"
+                                                                                               href="https://github.com/bit-bots/imagetagger">GitHub</a>.
                 </div>
             </div>
         </div>
@@ -63,7 +65,8 @@
                             {% endfor %}
                         </ul>
                     {% endif %}
-                    Additional public imagesets, not belonging to any of your teams, can be found in the <a href="{% url 'images:explore_imageset' %}">explore view</a> .
+                    Additional public imagesets, not belonging to any of your teams, can be found in the <a
+                        href="{% url 'images:explore_imageset' %}">explore view</a> .
                 </div>
             </div>
         </div>
@@ -77,7 +80,7 @@
                         <div class="panel-body">
                             <ul>
                                 {% for team in userteams %}
-                                    <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
+                                <li><a href="{% url 'users:team' team.id %}">{{team.name}}</a></li>
                                 {% endfor %}
                             </ul>
                             <hr>
@@ -99,88 +102,127 @@
                 <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Messages</h3>
+                            <h3 class="panel-title">
+                                    Messages
+                            </h3>
                         </div>
                         <div class="panel-body">
-                            <h3>
+
+                            <h3 style="margin-bottom: 1em; margin-top: 0em;">
                                 Posteingang
+                                <div style="float: right">
+                                    <input name="create_format" class="btn btn-default" value="New Message" data-toggle="modal" data-target="#newMessageModal" type="button">
+                                </div>
                             </h3>
+                            <div class="modal fade" id="newMessageModal" tabindex="-1" role="dialog">
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <form method="post" action="{% url 'tagger_messages:send_team_message' %}">
+                                      <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">New Message</h4>
+                                      </div>
+                                      <div class="modal-body">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="id_title">{{ team_message_creation_form.title.label }}: </label>
+                                                {% render_field team_message_creation_form.title class+='form-control' placeholder=team_message_creation_form.title.label %}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="id_content">{{ team_message_creation_form.content.label }}: </label>
+                                                {% render_field team_message_creation_form.content class+='form-control' placeholder=team_message_creation_form.content.label %}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="id_team">{{ team_message_creation_form.team.label }}: </label>
+                                                {% render_field team_message_creation_form.team class+='form-control'%}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="id_start_time">{{ team_message_creation_form.start_time.label }}: </label>
+                                                {% render_field team_message_creation_form.start_time class+='form-control'%}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="id_expire_time">{{ team_message_creation_form.expire_time.label }}: </label>
+                                                {% render_field team_message_creation_form.expire_time class+='form-control'%}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="id_admins_only">{{ team_message_creation_form.admins_only.label }}: </label>
+                                                {% render_field team_message_creation_form.admins_only %}
+                                            </div>
+                                            <input name="source" type="hidden" value="{% url 'images:index' %}">
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button class="btn btn-primary" type="submit">Send</button>
+                                      </div>
+                                    </form>
+                                </div>
+                              </div>
+                            </div>
                             {% for message in usermessages %}
-                                <h4>{{message.title}}<</h4>
-                                <p>{{message.content}}</p>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    {{message.creator}}: {{message.title}}
+                                </div>
+                                <div class="panel-body">
+                                    <p>{{message.content}}</p>
+                                    <hr style="margin-bottom: 0.8em">
+                                    <sub class="pull-left">
+                                        {{message.team}}
+                                    </sub>
+                                    <sub class="pull-right">
+                                        {{message.start_time}}
+                                    </sub>
+                                </div>
+                            </div>
                             {% endfor %}
-                            <hr>
-                            <h3>Publish new Message</h3>
-                            <form method="post" action="{% url 'tagger_messages:send_team_message' %}">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="id_title">{{ team_message_creation_form.title.label }}: </label>
-                                    {% render_field team_message_creation_form.title class+='form-control' placeholder=team_message_creation_form.title.label %}
-                                </div>
-                                <div class="form-group">
-                                    <label for="id_content">{{ team_message_creation_form.content.label }}: </label>
-                                    {% render_field team_message_creation_form.content class+='form-control' placeholder=team_message_creation_form.content.label %}
-                                </div>
-                                <div class="form-group">
-                                    <label for="id_team">{{ team_message_creation_form.team.label }}: </label>
-                                    {% render_field team_message_creation_form.team class+='form-control'%}
-                                </div>
-                                <div class="form-group">
-                                    <label for="id_start_time">{{ team_message_creation_form.start_time.label }}: </label>
-                                    {% render_field team_message_creation_form.start_time class+='form-control'%}
-                                </div>
-                                <div class="form-group">
-                                    <label for="id_expire_time">{{ team_message_creation_form.expire_time.label }}: </label>
-                                    {% render_field team_message_creation_form.expire_time class+='form-control'%}
-                                </div>
-                                <div class="form-group">
-                                    <label for="id_admins_only">{{ team_message_creation_form.admins_only.label }}: </label>
-                                    {% render_field team_message_creation_form.admins_only %}
-                                </div>
-                                <input name="source" type="hidden" value="{% url 'images:index' %}">
-                                <input class="btn btn-primary pull-right" type="submit" value="Send">
-                            </form>
                         </div>
                     </div>
                 </div>
             </div>
             {% if userteams %}
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                               <h3 class="panel-title">Create imageset</h3>
-                            </div>
-                            <div class="panel-body">
-                                <form method="post" action="{% url 'images:create_imageset' %}">
-                                    {% csrf_token %}
-                                    <div class="form-group">
-                                        <label for="id_name">{{ imageset_creation_form.name.label }}</label>
-                                        {% render_field imageset_creation_form.name class+='form-control' placeholder=imageset_creation_form.name.label %}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="id_team">{{ imageset_creation_form.team.label }}</label>
-                                        {% render_field imageset_creation_form.team class+='form-control' %}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="id_location">{{ imageset_creation_form.location.label }}</label>
-                                        {% render_field imageset_creation_form.location class+='form-control' placeholder=imageset_creation_form.location.label %}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="id_public">{{ imageset_creation_form.public.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to read the imageset "></span></label>
-                                        {% render_field imageset_creation_form.public %}
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="id_public_collaboration">
-                                            {{ imageset_creation_form.public_collaboration.label }} <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="Enables public users to annotate and verify in the imageset, when it is set public "></span> </label>
-                                        {% render_field imageset_creation_form.public_collaboration %}
-                                    </div>
-                                    <input class="btn btn-primary" type="submit" value="Create">
-                                </form>
-                            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Create imageset</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form method="post" action="{% url 'images:create_imageset' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="id_name">{{ imageset_creation_form.name.label }}</label>
+                                    {% render_field imageset_creation_form.name class+='form-control' placeholder=imageset_creation_form.name.label %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_team">{{ imageset_creation_form.team.label }}</label>
+                                    {% render_field imageset_creation_form.team class+='form-control' %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_location">{{ imageset_creation_form.location.label }}</label>
+                                    {% render_field imageset_creation_form.location class+='form-control' placeholder=imageset_creation_form.location.label %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_public">{{ imageset_creation_form.public.label }} <span
+                                            class="glyphicon glyphicon-question-sign" data-toggle="tooltip"
+                                            data-placement="right"
+                                            title="Enables public users to read the imageset "></span></label>
+                                    {% render_field imageset_creation_form.public %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_public_collaboration">
+                                        {{ imageset_creation_form.public_collaboration.label }} <span
+                                            class="glyphicon glyphicon-question-sign" data-toggle="tooltip"
+                                            data-placement="right"
+                                            title="Enables public users to annotate and verify in the imageset, when it is set public "></span>
+                                    </label>
+                                    {% render_field imageset_creation_form.public_collaboration %}
+                                </div>
+                                <input class="btn btn-primary" type="submit" value="Create">
+                            </form>
                         </div>
                     </div>
                 </div>
+            </div>
             {% endif %}
             <div class="row">
                 <div class="col-md-12">

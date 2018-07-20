@@ -14,6 +14,7 @@ def send_team_message(request):
         if form.is_valid():
             with transaction.atomic():
                 form.instance.save() #TODO fake
+                #form.instance.
                 form.instance.read_by.add(request.user)
                 form.save()
             return redirect(request.POST['source'])
