@@ -87,11 +87,13 @@ def index(request):
     imageset_creation_form.fields['team'].queryset = userteams
     all_images = Image.objects.all().select_related('image_set')
     public_images = all_images.filter(image_set__public=True)
-    annotation_types = AnnotationType.objects.annotate(
-        annotation_count=Count('annotation'),
-        public_annotation_count=Count(
-            Coalesce(Subquery(Annotation.objects.filter(
-                image__image_set__public=True, annotation_type_id=OuterRef('pk')).values('annotation_type_id').annotate(count=Count('pk')).values('count')), 0))).order_by('annotation_count')
+    # This querry is running over 1,5 hours on our productiv database @nils 26.7.18
+    annotation_types = []  # workround: return emty stats
+    # annotation_types = AnnotationType.objects.annotate(
+    #    annotation_count=Count('annotation'),
+    #    public_annotation_count=Count(
+    #        Coalesce(Subquery(Annotation.objects.filter(
+    #            image__image_set__public=True, annotation_type_id=OuterRef('pk')).values('annotation_type_id').annotate(count=Count('pk')).values('count')), 0))).order_by('annotation_count')
     all_imagesets = ImageSet.objects.all()
     all_users = User.objects.all()
     active_users = all_users.filter(points__gte=50)
