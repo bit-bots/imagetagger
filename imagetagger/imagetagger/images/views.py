@@ -81,9 +81,11 @@ def index(request):
 
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members=request.user)
-    imagesets = ImageSet.objects.annotate(
+    imagesets = ImageSet.objects.filter(team__in=userteams).annotate(
         image_count_agg=Count('images')
-    ).select_related('team').filter(team__in=userteams).order_by('-priority', '-time')
+    ).select_related('team').prefetch_related('set_tags') \
+        .order_by('-priority', '-time')
+
     imageset_creation_form = ImageSetCreationFormWT()  # the user provides the team manually
     imageset_creation_form.fields['team'].queryset = userteams
     all_images = Image.objects.all().select_related('image_set')
