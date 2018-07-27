@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, OuterRef, Subquery, Q
+from django.db.models.expressions import F
 from django.db.models.functions import Coalesce
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -87,13 +88,10 @@ def index(request):
     imageset_creation_form.fields['team'].queryset = userteams
     all_images = Image.objects.all().select_related('image_set')
     public_images = all_images.filter(image_set__public=True)
-    # This querry is running over 1,5 hours on our productiv database @nils 26.7.18
-    annotation_types = []  # workround: return emty stats
-    # annotation_types = AnnotationType.objects.annotate(
-    #    annotation_count=Count('annotation'),
-    #    public_annotation_count=Count(
-    #        Coalesce(Subquery(Annotation.objects.filter(
-    #            image__image_set__public=True, annotation_type_id=OuterRef('pk')).values('annotation_type_id').annotate(count=Count('pk')).values('count')), 0))).order_by('annotation_count')
+    annotation_types = Annotation.objects.values('annotation_type').annotate(
+        annotation_count=Count('pk'),
+        public_annotation_count=Count('pk', filter=Q(image__image_set__public=True)),
+        name=F('annotation_type__name'))
     all_imagesets = ImageSet.objects.all()
     all_users = User.objects.all()
     active_users = all_users.filter(points__gte=50)
