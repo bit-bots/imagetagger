@@ -92,7 +92,11 @@ def index(request):
         annotation_count=Count('pk'),
         public_annotation_count=Count('pk', filter=Q(image__image_set__public=True)),
         name=F('annotation_type__name'))
-    all_imagesets = ImageSet.objects.all()
+
+    imageset_stats = ImageSet.objects.aggregate(
+        total_count=Count('pk'),
+        public_count=Count('pk', filter=Q(public=True)))
+
     all_users = User.objects.all()
     active_users = all_users.filter(points__gte=50)
     all_teams = Team.objects.all()
@@ -100,8 +104,8 @@ def index(request):
     stats = {
         'all_images': all_images.count(),
         'public_images': public_images.count(),
-        'all_imagesets': all_imagesets.count(),
-        'public_imagesets': all_imagesets.filter(public=True).count(),
+        'all_imagesets': imageset_stats.get('total_count', 0),
+        'public_imagesets': imageset_stats.get('public_count', 0),
         'all_users': all_users.count(),
         'active_users': active_users.count(),
         'all_teams': all_teams.count(),
