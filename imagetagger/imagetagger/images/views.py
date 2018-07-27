@@ -88,30 +88,36 @@ def index(request):
 
     imageset_creation_form = ImageSetCreationFormWT()  # the user provides the team manually
     imageset_creation_form.fields['team'].queryset = userteams
-    all_images = Image.objects.all().select_related('image_set')
-    public_images = all_images.filter(image_set__public=True)
     annotation_types = Annotation.objects.values('annotation_type').annotate(
         annotation_count=Count('pk'),
         public_annotation_count=Count('pk', filter=Q(image__image_set__public=True)),
         name=F('annotation_type__name'))
 
+    image_stats = Image.objects.aggregate(
+        total_count=Count('pk'),
+        public_count=Count('pk', filter=Q(image_set__public=True)))
     imageset_stats = ImageSet.objects.aggregate(
         total_count=Count('pk'),
         public_count=Count('pk', filter=Q(public=True)))
+    user_stats = User.objects.aggregate(
+        total_count=Count('pk'),
+        active_count=Count('pk', filter=Q(points__gte=50)))
+    team_stats = Team.objects.aggregate(
+        total_count=Count('pk'),
+        active_count=Count('pk', filter=Q(
+            pk__in=Team.objects.filter(
+                memberships__user__in=User.objects.filter(
+                    points__gte=50)))))
 
-    all_users = User.objects.all()
-    active_users = all_users.filter(points__gte=50)
-    all_teams = Team.objects.all()
-    active_teams = Team.objects.annotate(mc=Count('members', filter=Q(memberships__user__in=User.objects.filter(points__gte=50)))).filter(mc__gte=2)
     stats = {
-        'all_images': all_images.count(),
-        'public_images': public_images.count(),
-        'all_imagesets': imageset_stats.get('total_count', 0),
-        'public_imagesets': imageset_stats.get('public_count', 0),
-        'all_users': all_users.count(),
-        'active_users': active_users.count(),
-        'all_teams': all_teams.count(),
-        'active_teams': active_teams.count(),
+        'all_images': image_stats.get('total_count', 0) or 0,
+        'public_images': image_stats.get('public_count', 0) or 0,
+        'all_imagesets': imageset_stats.get('total_count', 0) or 0,
+        'public_imagesets': imageset_stats.get('public_count', 0) or 0,
+        'all_users': user_stats.get('total_count', 0) or 0,
+        'active_users': user_stats.get('active_count', 0) or 0,
+        'all_teams': team_stats.get('total_count', 0) or 0,
+        'active_teams': team_stats.get('active_count', 0) or 0,
         'annotation_types': annotation_types[:3],
     }
     return TemplateResponse(
