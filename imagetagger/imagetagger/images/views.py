@@ -3,9 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, OuterRef, Subquery, Q
+from django.db.models import Count, Q
 from django.db.models.expressions import F
-from django.db.models.functions import Coalesce
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
