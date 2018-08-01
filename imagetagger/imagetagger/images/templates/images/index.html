@@ -110,9 +110,11 @@
 
                             <h3 style="margin-bottom: 1em; margin-top: 0em;">
                                 Posteingang
+                                {% if user_has_admin_teams %}
                                 <div style="float: right">
                                     <input name="create_format" class="btn btn-default" value="New Message" data-toggle="modal" data-target="#newMessageModal" type="button">
                                 </div>
+                                {% endif %}
                             </h3>
                             <div class="modal fade" id="newMessageModal" tabindex="-1" role="dialog">
                               <div class="modal-dialog" role="document">

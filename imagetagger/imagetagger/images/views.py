@@ -83,7 +83,7 @@ def index(request):
 
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members=request.user)
-    user_admin_teams = Team.objects.filter(admins=request.user)
+    user_admin_teams = Team.objects.filter(memberships__user=request.user, memberships__is_admin=True)
     imagesets = ImageSet.objects.filter(team__in=userteams).annotate(
         image_count_agg=Count('images')
     ).select_related('team').prefetch_related('set_tags') \
@@ -125,8 +125,8 @@ def index(request):
     }
 
     team_message_creation_form = TeamMessageCreationForm()
-    team_message_creation_form.fields['team'].queryset = userteams
-    
+    team_message_creation_form.fields['team'].queryset = user_admin_teams
+
     usermessages = TeamMessage.get_messages_for_user(request.user)
 
     return TemplateResponse(
@@ -135,9 +135,9 @@ def index(request):
             'imageset_creation_form': imageset_creation_form,
             'team_message_creation_form': team_message_creation_form,
             'image_sets': imagesets,
+            'user_has_admin_teams': user_admin_teams.exists(),
             'userteams': userteams,
             'stats': stats,
-            'team_message_creation_form': team_message_creation_form,
             'usermessages': usermessages,
         })
 
