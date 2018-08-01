@@ -13,8 +13,8 @@ def send_team_message(request):
         form = TeamMessageCreationForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
+                form.instance.creator = request.user
                 form.instance.save() #TODO fake
-                #form.instance.
                 form.instance.read_by.add(request.user)
                 form.save()
             return redirect(request.POST['source'])
