@@ -12,7 +12,6 @@ class Message(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     creator = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             default=None,
                              on_delete=models.SET_NULL,
                              null=True,
                              blank=False)
