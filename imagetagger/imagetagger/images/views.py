@@ -22,7 +22,8 @@ from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
-from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
+from imagetagger.tagger_messages.forms import TeamMessageCreationForm
+
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
