@@ -140,11 +140,11 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="id_start_time">{{ team_message_creation_form.start_time.label }}: </label>
-                                                {% render_field team_message_creation_form.start_time class+='form-control'%}
+                                                {% render_field team_message_creation_form.start_time class+='form-control' type='date'%}
                                             </div>
                                             <div class="form-group">
                                                 <label for="id_expire_time">{{ team_message_creation_form.expire_time.label }}: </label>
-                                                {% render_field team_message_creation_form.expire_time class+='form-control'%}
+                                                {% render_field team_message_creation_form.expire_time class+='form-control' type='date'%}
                                             </div>
                                             <div class="form-group">
                                                 <label for="id_admins_only">{{ team_message_creation_form.admins_only.label }}: </label>
