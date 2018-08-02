@@ -32,7 +32,7 @@ class TeamMessage(Message):
     @staticmethod
     def get_messages_for_user(user):
         userteams = Team.objects.filter(members=user)
-        adminteams = userteams
+        adminteams = Team.objects.filter(memberships__user=user, memberships__is_admin=True)
         return TeamMessage.objects.filter(Q(team__in=adminteams, admins_only=True) | Q(team__in=userteams, admins_only=False)).order_by('start_time').reverse()
 
 

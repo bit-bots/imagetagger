@@ -30,6 +30,7 @@ from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
+from imagetagger.tagger_messages.models import TeamMessage
 
 import os
 import shutil
