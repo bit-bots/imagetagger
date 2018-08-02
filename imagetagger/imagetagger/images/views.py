@@ -24,12 +24,12 @@ from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormW
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
+from imagetagger.tagger_messages.models import TeamMessage
 
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
-from imagetagger.tagger_messages.models import TeamMessage
 
 import os
 import shutil
@@ -39,6 +39,7 @@ import zipfile
 import hashlib
 import json
 import imghdr
+from datetime import date, timedelta
 
 
 @login_required
@@ -125,7 +126,11 @@ def index(request):
         'annotation_types': annotation_types[:3],
     }
 
-    team_message_creation_form = TeamMessageCreationForm()
+    team_message_creation_form = TeamMessageCreationForm(
+        initial={
+            'start_time': str(date.today()),
+            'expire_time': str(date.today() + timedelta(days=1)),
+        })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
     usermessages = TeamMessage.get_messages_for_user(request.user)

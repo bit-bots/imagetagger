@@ -1,7 +1,6 @@
 from django import forms
 
 from imagetagger.tagger_messages.models import GlobalMessage, TeamMessage
-from datetimewidget.widgets import DateTimeWidget
 
 
 class TeamMessageCreationForm(forms.ModelForm):
@@ -15,10 +14,6 @@ class TeamMessageCreationForm(forms.ModelForm):
             'admins_only',
             'team'
         ]
-
-        widgets = {
-            'start_time': DateTimeWidget(attrs={'id': "id_start_time"}, usel10n=True, bootstrap_version=3),
-        }
 
 
 class GlobalMessageCreationForm(forms.ModelForm):
