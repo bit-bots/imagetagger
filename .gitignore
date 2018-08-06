@@ -64,7 +64,6 @@ target/
 .pyenv
 .venv
 .idea
-.vscode
 db.sqlite3
 
 
@@ -74,3 +73,7 @@ imagetagger/tools
 
 categories.json
 confusables.json
+
+# VS Code stuff
+.vscode
+*.code-workspace
