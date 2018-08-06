@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
+from django.template import loader
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
@@ -135,8 +136,8 @@ def index(request):
 
     usermessages = TeamMessage.get_messages_for_user(request.user)
 
-    return TemplateResponse(
-        request, 'images/index.html', {
+    template = loader.get_template('images/index.html')
+    context = {
             'team_creation_form': team_creation_form,
             'imageset_creation_form': imageset_creation_form,
             'team_message_creation_form': team_message_creation_form,
@@ -145,7 +146,17 @@ def index(request):
             'userteams': userteams,
             'stats': stats,
             'usermessages': usermessages,
-        })
+        }
+    
+    rendered_page = template.render(context, request)
+
+    current_user = User.objects.get(username=request.user.username)
+
+    # Needs to be added after page is rendered, otherwise all messages are read.
+    current_user.read_messages.add(*usermessages)
+    current_user.save()
+
+    return HttpResponse(rendered_page)
 
 
 @login_required
