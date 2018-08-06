@@ -134,7 +134,7 @@ def index(request):
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
-    usermessages = TeamMessage.get_messages_for_user(request.user)
+    usermessages = TeamMessage.get_messages_for_user(request.user).filter(expire_time__gt=date.today(), start_time__lte=date.today())
 
     template = loader.get_template('images/index.html')
     context = {
