@@ -23,14 +23,14 @@ from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
-from imagetagger.tagger_messages.forms import TeamMessageCreationForm
+from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
 from imagetagger.tagger_messages.models import TeamMessage
 
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
-from imagetagger.tagger_messages.models import Message, TeamMessage
+from imagetagger.tagger_messages.models import Message, TeamMessage, GlobalMessage
 
 import os
 import shutil
@@ -127,6 +127,14 @@ def index(request):
         'annotation_types': annotation_types[:3],
     }
 
+    global_message_creation_form = GlobalMessageCreationForm(
+        initial={
+            'start_time': str(date.today()),
+            'expire_time': str(date.today() + timedelta(days=1)),
+        })
+    
+    global_annoucements = GlobalMessage.get(request.user)
+
     team_message_creation_form = TeamMessageCreationForm(
         initial={
             'start_time': str(date.today()),
@@ -134,18 +142,21 @@ def index(request):
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
-    usermessages = Message.get_range(TeamMessage.get_messages_for_user(request.user), date.today(), date.today())
+    usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user))
 
     template = loader.get_template('images/index.html')
     context = {
+            'user': request.user,
             'team_creation_form': team_creation_form,
             'imageset_creation_form': imageset_creation_form,
             'team_message_creation_form': team_message_creation_form,
+            'global_message_creation_form': global_message_creation_form,
             'image_sets': imagesets,
             'user_has_admin_teams': user_admin_teams.exists(),
             'userteams': userteams,
             'stats': stats,
             'usermessages': usermessages,
+            'global_annoucements': global_annoucements,
         }
     
     rendered_page = template.render(context, request)
