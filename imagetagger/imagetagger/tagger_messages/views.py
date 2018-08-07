@@ -1,5 +1,5 @@
 from django.db import transaction
-from imagetagger.tagger_messages.forms import TeamMessageCreationForm
+from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -18,6 +18,19 @@ def send_team_message(request):
                 form.instance.save()
                 # form.instance.read_by.add(request.user)
                 #form.instance.save()
+            return redirect(request.POST['source'])
+        messages.error(request, 'Invalid message form')
+    if 'source' in request.POST:
+        return redirect(request.POST['source'])
+    else:
+        return redirect(reverse('images:index'))
+
+@login_required
+def send_global_message(request):
+    if request.method == 'POST':
+        form = GlobalMessageCreationForm(request.POST)
+        if (form.is_valid() ): # TODO Check if creator is staff member
+            form.instance.save()
             return redirect(request.POST['source'])
         messages.error(request, 'Invalid message form')
     if 'source' in request.POST:
