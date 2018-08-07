@@ -8,22 +8,39 @@
             <h1>Home</h1>
         </div>
     </div>
+    {% for message in global_annoucements %}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h2 class="panel-title">Update Note</h2>
+                    <div class="panel-title">
+                        {{message.title}}
+                        <div class="pull-right">
+                            <a href="{% url 'tagger_messages:read_message' message.id %}">
+                                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                            </a>
+                            {% if user == message.creator %}
+                            <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-body">
-                    With our last update, we added a lot of features to the ImageTagger.
-                    They include the annotation of polygons, lines and points, their import and export, an edit function
-                    for export types (in the team view) and image preloading in the verification view.
-                    There might be some bugs left and if you find one, please notify us via <a target="_blank"
-                                                                                               href="https://github.com/bit-bots/imagetagger">GitHub</a>.
+                    {{message.content}}
+                    <hr style="margin-bottom: 0.8em">
+                    <sub class="pull-left">
+                        {{message.creator}}
+                    </sub>
+                    <sub class="pull-right">
+                        {{message.start_time}}
+                    </sub>
                 </div>
             </div>
         </div>
     </div>
+    {% endfor %}
     <div class="row">
         <div class="col-md-8">
             <div class="panel panel-default">
@@ -115,6 +132,11 @@
                                     <input name="create_format" class="btn btn-default" value="New Message" data-toggle="modal" data-target="#newMessageModal" type="button">
                                 </div>
                                 {% endif %}
+                                {% if user.is_staff %}
+                                <div style="float: right; margin-right:1em;">
+                                    <input name="create_format" class="btn btn-default" value="New Global Announcement" data-toggle="modal" data-target="#newGlobalAnnouncementModal" type="button">
+                                </div>
+                                {% endif %}
                             </h3>
                             <div class="modal fade" id="newMessageModal" tabindex="-1" role="dialog">
                               <div class="modal-dialog" role="document">
@@ -160,10 +182,61 @@
                                 </div>
                               </div>
                             </div>
+                            <div class="modal fade" id="newGlobalAnnouncementModal" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                      <form method="post" action="{% url 'tagger_messages:send_global_message' %}">
+                                        <div class="modal-header">
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                          <h4 class="modal-title" id="myModalLabel">New global announcement</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                              {% csrf_token %}
+                                              <div class="form-group">
+                                                  <label for="id_title">{{ global_message_creation_form.title.label }}: </label>
+                                                  {% render_field global_message_creation_form.title class+='form-control' placeholder=global_message_creation_form.title.label %}
+                                              </div>
+                                              <div class="form-group">
+                                                  <label for="id_content">{{ team_message_creation_form.content.label }}: </label>
+                                                  {% render_field global_message_creation_form.content class+='form-control' placeholder=global_message_creation_form.content.label %}
+                                              </div>
+                                              <div class="form-group">
+                                                  <label for="id_start_time">{{ team_message_creation_form.start_time.label }}: </label>
+                                                  {% render_field global_message_creation_form.start_time class+='form-control' type='date'%}
+                                              </div>
+                                              <div class="form-group">
+                                                  <label for="id_expire_time">{{ team_message_creation_form.expire_time.label }}: </label>
+                                                  {% render_field global_message_creation_form.expire_time class+='form-control' type='date'%}
+                                              </div>
+                                              <div class="form-group">
+                                                  <label for="id_team_admins_only">Team admins only: </label>
+                                                  {% render_field global_message_creation_form.team_admins_only %}
+                                              </div>
+                                              <div class="form-group">
+                                                <label for="id_staff_only">Staff only: </label>
+                                                {% render_field global_message_creation_form.team_admins_only %}
+                                              </div>
+                                              <input name="source" type="hidden" value="{% url 'images:index' %}">
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                          <button class="btn btn-primary" type="submit">Send</button>
+                                        </div>
+                                      </form>
+                                  </div>
+                                </div>
+                              </div>
                             {% for message in usermessages %}
                             <div class="panel panel-default">
                                 <div class="panel-heading" {% if not user in message.read_by %} style="font-weight: bold;" {% endif %} >
-                                    {{message.read_by}}{{message.creator}}: {{message.title}}
+                                    {{message.creator}}: {{message.title}}
+                                    <div class="pull-right">
+                                        {% if user == message.creator or user.is_staff %}
+                                        <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                        </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <div class="panel-body">
                                     <p>{{message.content}}</p>

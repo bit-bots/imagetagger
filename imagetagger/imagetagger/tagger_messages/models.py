@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.db.models import Q
 from django.db import models
-
 from imagetagger.users.models import Team
+from datetime import date
 
 
 class Message(models.Model):
@@ -21,8 +21,8 @@ class Message(models.Model):
         return u'Message: {0}'.format(str(self.title))
 
     @staticmethod
-    def get_range(message, start, end):
-        return message.filter(expire_time__gt=start, start_time__lte=end)
+    def in_range(message):
+        return message.filter(expire_time__gt=date.today(), start_time__lte=date.today())
 
 
 class TeamMessage(Message):
@@ -45,5 +45,9 @@ class GlobalMessage(Message):
     staff_only = models.BooleanField(default=False)
 
     @staticmethod
-    def get():
-        pass
+    def get(user):
+        is_admin = Team.objects.filter(memberships__user=user, memberships__is_admin=True).exists()
+        is_staff = user.is_staff
+        return Message.in_range(GlobalMessage.objects.filter(
+            Q(team_admins_only=False) | Q(team_admins_only=is_admin), Q(staff_only=False) | Q(staff_only=is_staff)
+        ).order_by('start_time').reverse())
