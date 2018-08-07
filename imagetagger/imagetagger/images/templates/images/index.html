@@ -162,8 +162,8 @@
                             </div>
                             {% for message in usermessages %}
                             <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    {{message.creator}}: {{message.title}}
+                                <div class="panel-heading" {% if not user in message.read_by %} style="font-weight: bold;" {% endif %} >
+                                    {{message.read_by}}{{message.creator}}: {{message.title}}
                                 </div>
                                 <div class="panel-body">
                                     <p>{{message.content}}</p>
