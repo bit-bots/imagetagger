@@ -30,7 +30,7 @@ from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
-from imagetagger.tagger_messages.models import TeamMessage
+from imagetagger.tagger_messages.models import Message, TeamMessage
 
 import os
 import shutil
@@ -134,7 +134,7 @@ def index(request):
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
-    usermessages = TeamMessage.get_messages_for_user(request.user).filter(expire_time__gt=date.today(), start_time__lte=date.today())
+    usermessages = Message.get_range(TeamMessage.get_messages_for_user(request.user), date.today(), date.today())
 
     template = loader.get_template('images/index.html')
     context = {

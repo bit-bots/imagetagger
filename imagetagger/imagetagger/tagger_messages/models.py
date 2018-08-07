@@ -20,6 +20,10 @@ class Message(models.Model):
     def __str__(self):
         return u'Message: {0}'.format(str(self.title))
 
+    @staticmethod
+    def get_range(message, start, end):
+        return message.filter(expire_time__gt=start, start_time__lte=end)
+
 
 class TeamMessage(Message):
     team = models.ForeignKey(
