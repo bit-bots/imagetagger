@@ -5,12 +5,15 @@
 
 {% block taggerimports %}
 
+{% if "edit_set" in imageset_perms and not imageset.image_lock %}
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
 <link rel="stylesheet" href="{% static 'jQuery-File-Upload/css/jquery.fileupload.css' %}">
 <link rel="stylesheet" href="{% static 'jQuery-File-Upload/css/jquery.fileupload-ui.css' %}">
+{% endif %}
 {% endblock taggerimports %}
 
 {% block additional_js %}
+{% if "edit_set" in imageset_perms and not imageset.image_lock %}
 <!-- The template to display files available for upload -->
 {% verbatim %}
 <script id="template-upload" type="text/x-tmpl">
@@ -110,10 +113,12 @@
 <script src="{% static 'jQuery-File-Upload/js/jquery.fileupload-validate.js' %}"></script>
 <!-- The File Upload user interface plugin -->
 <script src="{% static 'jQuery-File-Upload/js/jquery.fileupload-ui.js' %}"></script>
-<!-- An additional form script -->
-<script src="{% static 'scripts/pub_coll.js' %}"></script>
 <!-- The main application script -->
 <script src="{% static 'jQuery-File-Upload/js/main.js' %}"></script>
+{% endif %}
+
+<!-- An additional form script -->
+<script src="{% static 'scripts/pub_coll.js' %}"></script>
 <script type="text/javascript" src="{% static 'scripts/tags.js' %}"></script>
 <script type="text/javascript" src="{% static 'scripts/jquery.autocomplete.js' %}"></script>
 <![endif]-->
