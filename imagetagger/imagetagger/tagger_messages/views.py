@@ -126,6 +126,7 @@ def overview_sent(request):
 
 @login_required
 def overview_global(request):
+    user_admin_teams = Team.objects.filter(memberships__user=request.user, memberships__is_admin=True).exists()
     # Gets all global announcements for the user, even from the past and future
     global_annoucements = GlobalMessage.get(request.user)
 
@@ -140,4 +141,5 @@ def overview_global(request):
         'global_annoucements': global_annoucements,
         'user': request.user,
         'global_message_creation_form': global_message_creation_form,
+        'user_has_admin_teams': user_admin_teams,
     })

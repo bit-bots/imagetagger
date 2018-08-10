@@ -23,7 +23,7 @@ from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, 
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
-from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
+from imagetagger.tagger_messages.forms import TeamMessageCreationForm
 from imagetagger.tagger_messages.models import TeamMessage
 
 from .models import ImageSet, Image, SetTag
@@ -127,6 +127,8 @@ def index(request):
         'active_teams': team_stats.get('active_count', 0) or 0,
         'annotation_types': annotation_types[:3],
     }
+
+    global_annoucements = Message.in_range(GlobalMessage.get(request.user).filter(~Q(read_by=request.user)))
 
     # Inits message creation form
     team_message_creation_form = TeamMessageCreationForm(
