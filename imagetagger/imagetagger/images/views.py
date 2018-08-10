@@ -10,7 +10,6 @@ from django.urls import reverse
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
-from django.template import loader
 from django.utils.translation import ugettext_lazy as _
 from json import JSONDecodeError
 from rest_framework.decorators import api_view
@@ -25,7 +24,6 @@ from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormW
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
-from imagetagger.tagger_messages.models import TeamMessage
 
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
@@ -155,6 +153,7 @@ def index(request):
         'usermessages': usermessages,
         'global_annoucements': global_annoucements,
     })
+
 
 @login_required
 @require_http_methods(["POST", ])
