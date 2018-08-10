@@ -87,6 +87,7 @@ def index(request):
 
     # needed to show the list of the users imagesets
     userteams = Team.objects.filter(members=request.user)
+    # get all teams where the user is an admin
     user_admin_teams = Team.objects.filter(memberships__user=request.user, memberships__is_admin=True)
     imagesets = ImageSet.objects.filter(team__in=userteams).annotate(
         image_count_agg=Count('images')
@@ -128,21 +129,16 @@ def index(request):
         'annotation_types': annotation_types[:3],
     }
 
-    global_message_creation_form = GlobalMessageCreationForm(
-        initial={
-            'start_time': str(date.today()),
-            'expire_time': str(date.today() + timedelta(days=1)),
-        })
-    
-    global_annoucements = Message.in_range(GlobalMessage.get(request.user).filter(~Q(read_by=request.user)))
-
+    # Inits message creation form
     team_message_creation_form = TeamMessageCreationForm(
         initial={
             'start_time': str(date.today()),
             'expire_time': str(date.today() + timedelta(days=1)),
         })
+
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
+    # Gets all unread messages
     usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
 
     return TemplateResponse(request, 'images/index.html', {
@@ -150,7 +146,6 @@ def index(request):
         'team_creation_form': team_creation_form,
         'imageset_creation_form': imageset_creation_form,
         'team_message_creation_form': team_message_creation_form,
-        'global_message_creation_form': global_message_creation_form,
         'image_sets': imagesets,
         'user_has_admin_teams': user_admin_teams.exists(),
         'userteams': userteams,

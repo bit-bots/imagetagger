@@ -1,6 +1,3 @@
-from django.db import transaction
-from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
-from imagetagger.tagger_messages.models import Message, TeamMessage, GlobalMessage
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -9,6 +6,9 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.http import HttpResponseRedirect
+from django.db import transaction
+from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
+from imagetagger.tagger_messages.models import Message, TeamMessage, GlobalMessage
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
 from imagetagger.users.models import TeamMembership
 from imagetagger.users.models import User, Team
@@ -86,6 +86,7 @@ def overview_unread(request):
 
 @login_required
 def overview_all(request):
+    # Gets all team messages for the user, even from the past and future
     usermessages = TeamMessage.get_messages_for_user(request.user)
     user_admin_teams =  Team.objects.filter(memberships__user=request.user, memberships__is_admin=True)  
 
@@ -106,6 +107,7 @@ def overview_all(request):
 @login_required
 def overview_sent(request):
     usermessages = TeamMessage.get_messages_for_user(request.user).filter(creator=request.user)
+    # get all teams where the user is an admin
     user_admin_teams = Team.objects.filter(memberships__user=request.user, memberships__is_admin=True)
     
     team_message_creation_form = TeamMessageCreationForm(
@@ -124,6 +126,7 @@ def overview_sent(request):
 
 @login_required
 def overview_global(request):
+    # Gets all global announcements for the user, even from the past and future
     global_annoucements = GlobalMessage.get(request.user)
 
     global_message_creation_form = GlobalMessageCreationForm(
