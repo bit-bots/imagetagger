@@ -11,7 +11,9 @@
                     <div class="list-group">
                         <a class="list-group-item {% if mode == 'unread' %} active{% endif %}" href="{% url 'tagger_messages:overview_unread' %}">Unread messages</a>
                         <a class="list-group-item {% if mode == 'all' %} active{% endif %}" href="{% url 'tagger_messages:overview_all' %}">All messages</a>
+                        {% if user_has_admin_teams %}
                         <a class="list-group-item {% if mode == 'sent' %} active{% endif %}" href="{% url 'tagger_messages:overview_sent' %}">Sent messages</a>
+                        {% endif %}
                         <a class="list-group-item {% if mode == 'global' %} active{% endif %}" href="{% url 'tagger_messages:overview_global' %}">Global announcements</a>
                     </div>
                     {% if user_has_admin_teams and team_message_creation_form %}
