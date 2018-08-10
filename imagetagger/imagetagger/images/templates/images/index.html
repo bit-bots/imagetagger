@@ -127,18 +127,26 @@
                         <div class="panel-body">
 
                             <h3 style="margin-bottom: 1em; margin-top: 0em;">
-                                Posteingang
+                                Postbox
                                 {% if user_has_admin_teams %}
                                 <div style="float: right">
                                     <input name="create_format" class="btn btn-default" value="New Message" data-toggle="modal" data-target="#newMessageModal" type="button">
                                 </div>
                                 {% endif %}
+                                <div style="float: right; margin-left:1em;">
+                                    <input class="btn btn-default" value="Read All" onclick="location.href = '{% url 'tagger_messages:read_all_messages' %}'" type="button">
+                                </div>
                             </h3>
                             {% for message in usermessages %}
                             <div class="panel panel-default">
                                 <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
                                     {{message.creator}}: {{message.title}}
                                     <div class="pull-right">
+                                        {% if not user in message.read_by.all %}
+                                        <a href="{% url 'tagger_messages:read_message' message.id %}">
+                                            <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                        </a>
+                                        {% endif %}
                                         {% if user == message.creator or user.is_staff %}
                                         <a href="{% url 'tagger_messages:delete_message' message.id %}">
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
