@@ -45,7 +45,6 @@ def read_message(request, message_id):
     message = Message.objects.get(id=message_id)
     message.read_by.add(request.user)
     message.save()
-    print(message.read_by)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @login_required
