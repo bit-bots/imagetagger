@@ -228,7 +228,7 @@
                               </div>
                             {% for message in usermessages %}
                             <div class="panel panel-default">
-                                <div class="panel-heading" {% if not user in message.read_by %} style="font-weight: bold;" {% endif %} >
+                                <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
                                     {{message.creator}}: {{message.title}}
                                     <div class="pull-right">
                                         {% if user == message.creator or user.is_staff %}
