@@ -134,7 +134,7 @@ def index(request):
             'expire_time': str(date.today() + timedelta(days=1)),
         })
     
-    global_annoucements = GlobalMessage.get(request.user)
+    global_annoucements = Message.in_range(GlobalMessage.get(request.user).filter(~Q(read_by=request.user)))
 
     team_message_creation_form = TeamMessageCreationForm(
         initial={
@@ -143,7 +143,7 @@ def index(request):
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
-    usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user))
+    usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
 
     template = loader.get_template('images/index.html')
     context = {
@@ -165,8 +165,8 @@ def index(request):
     current_user = User.objects.get(username=request.user.username)
 
     # Needs to be added after page is rendered, otherwise all messages are read.
-    current_user.read_messages.add(*usermessages)
-    current_user.save()
+    # current_user.read_messages.add(*usermessages)
+    # current_user.save()
 
     return HttpResponse(rendered_page)
 

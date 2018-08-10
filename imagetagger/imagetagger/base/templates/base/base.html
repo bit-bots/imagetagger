@@ -26,7 +26,7 @@
                             <div style="height:50px">
                                 <a class="upper-bandage-parent" href="{% url 'tagger_messages:overview' %}">
                                 Messages 
-                                {% if unread_message_count or True %}
+                                {% if unread_message_count %}
                                 <span class="badge upper-bandage">
                                     {{unread_message_count}}
                                 </span>
