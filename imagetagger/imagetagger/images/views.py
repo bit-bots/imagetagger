@@ -144,31 +144,19 @@ def index(request):
 
     usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
 
-    template = loader.get_template('images/index.html')
-    context = {
-            'user': request.user,
-            'team_creation_form': team_creation_form,
-            'imageset_creation_form': imageset_creation_form,
-            'team_message_creation_form': team_message_creation_form,
-            'global_message_creation_form': global_message_creation_form,
-            'image_sets': imagesets,
-            'user_has_admin_teams': user_admin_teams.exists(),
-            'userteams': userteams,
-            'stats': stats,
-            'usermessages': usermessages,
-            'global_annoucements': global_annoucements,
-        }
-    
-    rendered_page = template.render(context, request)
-
-    current_user = User.objects.get(username=request.user.username)
-
-    # Needs to be added after page is rendered, otherwise all messages are read.
-    # current_user.read_messages.add(*usermessages)
-    # current_user.save()
-
-    return HttpResponse(rendered_page)
-
+    return TemplateResponse(request, 'images/index.html', {
+        'user': request.user,
+        'team_creation_form': team_creation_form,
+        'imageset_creation_form': imageset_creation_form,
+        'team_message_creation_form': team_message_creation_form,
+        'global_message_creation_form': global_message_creation_form,
+        'image_sets': imagesets,
+        'user_has_admin_teams': user_admin_teams.exists(),
+        'userteams': userteams,
+        'stats': stats,
+        'usermessages': usermessages,
+        'global_annoucements': global_annoucements,
+    })
 
 @login_required
 @require_http_methods(["POST", ])
