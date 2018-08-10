@@ -10,6 +10,7 @@ def base_data(request):
         unread_message_count = TeamMessage.in_range(TeamMessage.get_messages_for_user(request.user).filter(~Q(read_by=request.user))).count()
     else:
         my_teams = None
+        unread_message_count = 0
 
     return {
         'IMPRINT_URL': settings.IMPRINT_URL,
