@@ -1,0 +1,82 @@
+{% extends 'base/base.html' %}
+{% load widget_tweaks %}
+
+{% block bodyblock %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Messages</h1>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="list-group">
+                        <a class="list-group-item {% if mode == 'unread' %} active{% endif %}" href="{% url 'tagger_messages:overview_unread' %}">Unread messages</a>
+                        <a class="list-group-item {% if mode == 'all' %} active{% endif %}" href="{% url 'tagger_messages:overview_all' %}">All messages</a>
+                        <a class="list-group-item {% if mode == 'sent' %} active{% endif %}" href="{% url 'tagger_messages:overview_sent' %}">Sent messages</a>
+                        <a class="list-group-item {% if mode == 'global' %} active{% endif %}" href="{% url 'tagger_messages:overview_global' %}">Global announcements</a>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            {% for message in usermessages %}
+                            <div class="panel panel-default">
+                                <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
+                                    {{message.creator}}: {{message.title}}
+                                    <div class="pull-right">
+                                        {% if user == message.creator or user.is_staff %}
+                                        <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <p>{{message.content}}</p>
+                                    <hr style="margin-bottom: 0.8em">
+                                    <sub class="pull-left">
+                                        {{message.team}}
+                                    </sub>
+                                    <sub class="pull-right">
+                                        {{message.start_time}}
+                                    </sub>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% for message in global_annoucements %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <div class="panel-title">
+                                                {{message.title}}
+                                                <div class="pull-right">
+                                                    {% if user == message.creator %}
+                                                    <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body">
+                                            {{message.content}}
+                                            <hr style="margin-bottom: 0.8em">
+                                            <sub class="pull-left">
+                                                {{message.creator}}
+                                            </sub>
+                                            <sub class="pull-right">
+                                                {{message.start_time}}
+                                            </sub>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
