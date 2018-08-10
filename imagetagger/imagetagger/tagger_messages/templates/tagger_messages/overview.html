@@ -14,6 +14,21 @@
                         <a class="list-group-item {% if mode == 'sent' %} active{% endif %}" href="{% url 'tagger_messages:overview_sent' %}">Sent messages</a>
                         <a class="list-group-item {% if mode == 'global' %} active{% endif %}" href="{% url 'tagger_messages:overview_global' %}">Global announcements</a>
                     </div>
+                    {% if user_has_admin_teams and team_message_creation_form %}
+                    <div style="float: left; margin-right:1em;">
+                        <input name="create_message1" class="btn btn-default" value="New Message" data-toggle="modal" data-target="#newMessageModal" type="button">
+                    </div>
+                    {% endif %}
+                    {% if user.is_staff and global_message_creation_form %}
+                    <div style="float: left; margin-right:1em;">
+                        <input name="create_ga" class="btn btn-default" value="New Global Announcement" data-toggle="modal" data-target="#newGlobalAnnouncementModal" type="button">
+                    </div>
+                    {% endif %}
+                    {% if mode != 'global' %}
+                    <div style="float: left; margin-right:1em;">
+                        <input class="btn btn-default" value="Read All" onclick="location.href = '{% url 'tagger_messages:read_all_messages' %}'" type="button">
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="col-md-9">
                     <div class="panel panel-default">
@@ -23,6 +38,11 @@
                                 <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
                                     {{message.creator}}: {{message.title}}
                                     <div class="pull-right">
+                                        {% if not user in message.read_by.all %}
+                                        <a href="{% url 'tagger_messages:read_message' message.id %}">
+                                            <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                        </a>
+                                        {% endif %}
                                         {% if user == message.creator or user.is_staff %}
                                         <a href="{% url 'tagger_messages:delete_message' message.id %}">
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
@@ -42,6 +62,18 @@
                                 </div>
                             </div>
                             {% endfor %}
+                            {% if not usermessages and not global_message_creation_form %}
+                            <h3>
+                                There are no
+                                {% if mode == 'unread' %}
+                                    unread
+                                {% endif %}
+                                 messages.                              
+                            </h3>
+                            {% if user_has_admin_teams and mode != 'unread' %}
+                            <input name="create_message2" class="btn btn-default" value="Create One" data-toggle="modal" data-target="#newMessageModal" type="button">
+                            {% endif %}
+                            {% endif %}
                             {% for message in global_annoucements %}
                             <div class="row">
                                 <div class="col-md-12">
@@ -79,4 +111,94 @@
         </div>
     </div>
 </div>
+{% if team_message_creation_form %}
+<div class="modal fade" id="newMessageModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="post" action="{% url 'tagger_messages:send_team_message' %}">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">New Message</h4>
+            </div>
+            <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_title">{{ team_message_creation_form.title.label }}: </label>
+                        {% render_field team_message_creation_form.title class+='form-control' placeholder=team_message_creation_form.title.label %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_content">{{ team_message_creation_form.content.label }}: </label>
+                        {% render_field team_message_creation_form.content class+='form-control' placeholder=team_message_creation_form.content.label %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_team">{{ team_message_creation_form.team.label }}: </label>
+                        {% render_field team_message_creation_form.team class+='form-control'%}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_start_time">{{ team_message_creation_form.start_time.label }}: </label>
+                        {% render_field team_message_creation_form.start_time class+='form-control' type='date'%}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_expire_time">{{ team_message_creation_form.expire_time.label }}: </label>
+                        {% render_field team_message_creation_form.expire_time class+='form-control' type='date'%}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_admins_only">{{ team_message_creation_form.admins_only.label }}: </label>
+                        {% render_field team_message_creation_form.admins_only %}
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if global_message_creation_form %}
+<div class="modal fade" id="newGlobalAnnouncementModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <form method="post" action="{% url 'tagger_messages:send_global_message' %}">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">New global announcement</h4>
+            </div>
+            <div class="modal-body">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_title">{{ global_message_creation_form.title.label }}: </label>
+                    {% render_field global_message_creation_form.title class+='form-control' placeholder=global_message_creation_form.title.label %}
+                </div>
+                <div class="form-group">
+                    <label for="id_content">{{ team_message_creation_form.content.label }}: </label>
+                    {% render_field global_message_creation_form.content class+='form-control' placeholder=global_message_creation_form.content.label %}
+                </div>
+                <div class="form-group">
+                    <label for="id_start_time">{{ team_message_creation_form.start_time.label }}: </label>
+                    {% render_field global_message_creation_form.start_time class+='form-control' type='date'%}
+                </div>
+                <div class="form-group">
+                    <label for="id_expire_time">{{ team_message_creation_form.expire_time.label }}: </label>
+                    {% render_field global_message_creation_form.expire_time class+='form-control' type='date'%}
+                </div>
+                <div class="form-group">
+                    <label for="id_team_admins_only">Team admins only: </label>
+                    {% render_field global_message_creation_form.team_admins_only %}
+                </div>
+                <div class="form-group">
+                    <label for="id_staff_only">Staff only: </label>
+                    {% render_field global_message_creation_form.team_admins_only %}
+                </div>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+ </div>
+</div>
+{% endif %}
 {% endblock %}
