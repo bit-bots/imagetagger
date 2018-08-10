@@ -17,7 +17,7 @@
                         {{message.title}}
                         <div class="pull-right">
                             <a href="{% url 'tagger_messages:read_message' message.id %}">
-                                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                                <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
                             </a>
                             {% if user == message.creator %}
                             <a href="{% url 'tagger_messages:delete_message' message.id %}">

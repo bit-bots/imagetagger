@@ -22,6 +22,16 @@
                         {% block navblock %}{% endblock %}
                         {% if request.user.is_authenticated %}
                         <li><a href="{% url 'images:explore_imageset' %}">Explore</a></li>
+                        <li>
+                            <div style="height:50px">
+                                <a class="upper-bandage-parent" href="{% url 'tagger_messages:overview' %}">
+                                Messages 
+                                <span class="badge upper-bandage">
+                                    42
+                                </span>
+                            </a>
+                            </div>
+                        </li>
                         {% if TOOLS_ENABLED %}
                         <li><a href="{% url 'tools:overview' %}">Tools</a></li>
                         {% endif %}
