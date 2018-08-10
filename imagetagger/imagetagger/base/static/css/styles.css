@@ -183,7 +183,15 @@ input.form-control[type="checkbox"] {
   display: inline-block;
   position: relative;
   padding: 3px 10px;
+  color: #777;
+  text-decoration: none;
 }
+
+.upper-bandage-parent:hover {
+  color: #333;
+  text-decoration: none;
+}
+
 
 
 /* Autocomplete (from https://www.devbridge.com/sourcery/components/jquery-autocomplete/) */
