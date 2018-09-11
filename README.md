@@ -36,7 +36,7 @@ FIEDLER, Niklas, et al. ImageTagger: An Open Source Online Platform for Collabor
    author={Fiedler, Niklas and Bestmann, Marc and Hendrich, Norman},
    year={2018},
    title={ImageTagger: An Open Source Online Platform for Collaborative Image Labeling},
-   booktitle={RoboCup 2018: Robot World Cup XXII}
+   booktitle={RoboCup 2018: Robot World Cup XXII},
    organization={Springer}
 }
 ```
