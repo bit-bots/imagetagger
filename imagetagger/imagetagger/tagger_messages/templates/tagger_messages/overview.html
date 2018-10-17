@@ -38,15 +38,21 @@
                         <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
                             {{message.creator}}: {{message.title}}
                             <div class="pull-right">
-                                {% if not user in message.read_by.all %}
-                                <a href="{% url 'tagger_messages:read_message' message.id %}">
-                                    <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
-                                </a>
-                                {% endif %}
                                 {% if user == message.creator or user.is_staff %}
-                                <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                    <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
-                                </a>
+                                <form method="post" class="form-inline" action="{% url 'tagger_messages:delete_message' message.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link" style="padding: 0px; margin-right: 1em;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
+                                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% if not user in message.read_by.all %}
+                                <form method="post" class="form-inline" action="{% url 'tagger_messages:read_message' message.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Mark message as read">
+                                        <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                    </button>
+                                </form>
                                 {% endif %}
                             </div>
                         </div>
@@ -67,15 +73,21 @@
                         <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
                             [Expired] {{message.creator}}: {{message.title}}
                             <div class="pull-right">
-                                {% if not user in message.read_by.all %}
-                                <a href="{% url 'tagger_messages:read_message' message.id %}">
-                                    <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
-                                </a>
-                                {% endif %}
                                 {% if user == message.creator or user.is_staff %}
-                                <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                    <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
-                                </a>
+                                <form method="post" class="form-inline" action="{% url 'tagger_messages:delete_message' message.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link" style="padding: 0px; margin-right: 1em;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
+                                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% if not user in message.read_by.all %}
+                                <form method="post" class="form-inline" action="{% url 'tagger_messages:read_message' message.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Mark message as read">
+                                        <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                    </button>
+                                </form>
                                 {% endif %}
                             </div>
                         </div>
@@ -100,9 +112,12 @@
                                         {{message.title}}
                                         <div class="pull-right">
                                             {% if user == message.creator %}
-                                            <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                                <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
-                                            </a>
+                                            <form method="post" class="form-inline" action="{% url 'tagger_messages:delete_message' message.id %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
+                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
+                                                </button>
+                                            </form>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -130,9 +145,12 @@
                                         [Expired] {{message.title}}
                                         <div class="pull-right">
                                             {% if user == message.creator %}
-                                            <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                                <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
-                                            </a>
+                                            <form method="post" class="form-inline" action="{% url 'tagger_messages:delete_message' message.id %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
+                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
+                                                </button>
+                                            </form>
                                             {% endif %}
                                         </div>
                                     </div>
