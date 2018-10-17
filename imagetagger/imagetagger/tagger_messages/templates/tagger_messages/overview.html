@@ -62,6 +62,35 @@
                         </div>
                     </div>
                     {% endfor %}
+                    {% for message in usermessages_expired %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
+                            [Expired] {{message.creator}}: {{message.title}}
+                            <div class="pull-right">
+                                {% if not user in message.read_by.all %}
+                                <a href="{% url 'tagger_messages:read_message' message.id %}">
+                                    <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                </a>
+                                {% endif %}
+                                {% if user == message.creator or user.is_staff %}
+                                <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <p>{{message.content}}</p>
+                            <hr style="margin-bottom: 0.8em">
+                            <sub class="pull-left">
+                                {{message.team}}
+                            </sub>
+                            <sub class="pull-right">
+                                {{message.start_time}}
+                            </sub>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% for message in global_annoucements %}
                     <div class="row">
                         <div class="col-md-12">
@@ -69,6 +98,36 @@
                                 <div class="panel-heading">
                                     <div class="panel-title">
                                         {{message.title}}
+                                        <div class="pull-right">
+                                            {% if user == message.creator %}
+                                            <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    {{message.content}}
+                                    <hr style="margin-bottom: 0.8em">
+                                    <sub class="pull-left">
+                                        {{message.creator}}
+                                    </sub>
+                                    <sub class="pull-right">
+                                        {{message.start_time}}
+                                    </sub>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% for message in global_annoucements_expired %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <div class="panel-title">
+                                        [Expired] {{message.title}}
                                         <div class="pull-right">
                                             {% if user == message.creator %}
                                             <a href="{% url 'tagger_messages:delete_message' message.id %}">

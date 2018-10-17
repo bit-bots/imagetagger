@@ -48,6 +48,6 @@ class GlobalMessage(Message):
     def get(user):
         is_admin = Team.objects.filter(memberships__user=user, memberships__is_admin=True).exists()
         is_staff = user.is_staff
-        return Message.in_range(GlobalMessage.objects.filter(
+        return GlobalMessage.objects.filter(
             Q(team_admins_only=False) | Q(team_admins_only=is_admin), Q(staff_only=False) | Q(staff_only=is_staff)
-        ).order_by('start_time').reverse())
+        ).order_by('start_time').reverse()
