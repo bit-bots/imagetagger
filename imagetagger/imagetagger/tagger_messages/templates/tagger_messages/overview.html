@@ -45,7 +45,7 @@
                                 {% endif %}
                                 {% if user == message.creator or user.is_staff %}
                                 <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
                                 </a>
                                 {% endif %}
                             </div>
@@ -74,7 +74,7 @@
                                 {% endif %}
                                 {% if user == message.creator or user.is_staff %}
                                 <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
                                 </a>
                                 {% endif %}
                             </div>
@@ -101,7 +101,7 @@
                                         <div class="pull-right">
                                             {% if user == message.creator %}
                                             <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
                                             </a>
                                             {% endif %}
                                         </div>
@@ -131,7 +131,7 @@
                                         <div class="pull-right">
                                             {% if user == message.creator %}
                                             <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Delete message"></span></span>
                                             </a>
                                             {% endif %}
                                         </div>
