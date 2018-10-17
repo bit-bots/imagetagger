@@ -28,7 +28,11 @@
                                 Messages 
                                 {% if unread_message_count %}
                                 <span class="badge upper-bandage">
-                                    {{unread_message_count}}
+                                    {% if unread_message_count < 10 %}
+                                        {{unread_message_count}}
+                                    {% else %}
+                                        9+
+                                    {% endif %}
                                 </span>
                                 {% endif %}
                             </a>
