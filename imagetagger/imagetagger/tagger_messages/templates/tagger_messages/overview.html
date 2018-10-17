@@ -33,81 +33,77 @@
                     {% endif %}
                 </div>
                 <div class="col-md-9">
+                    {% for message in usermessages %}
                     <div class="panel panel-default">
+                        <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
+                            {{message.creator}}: {{message.title}}
+                            <div class="pull-right">
+                                {% if not user in message.read_by.all %}
+                                <a href="{% url 'tagger_messages:read_message' message.id %}">
+                                    <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                </a>
+                                {% endif %}
+                                {% if user == message.creator or user.is_staff %}
+                                <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
                         <div class="panel-body">
-                            {% for message in usermessages %}
+                            <p>{{message.content}}</p>
+                            <hr style="margin-bottom: 0.8em">
+                            <sub class="pull-left">
+                                {{message.team}}
+                            </sub>
+                            <sub class="pull-right">
+                                {{message.start_time}}
+                            </sub>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% for message in global_annoucements %}
+                    <div class="row">
+                        <div class="col-md-12">
                             <div class="panel panel-default">
-                                <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
-                                    {{message.creator}}: {{message.title}}
-                                    <div class="pull-right">
-                                        {% if not user in message.read_by.all %}
-                                        <a href="{% url 'tagger_messages:read_message' message.id %}">
-                                            <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
-                                        </a>
-                                        {% endif %}
-                                        {% if user == message.creator or user.is_staff %}
-                                        <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                                        </a>
-                                        {% endif %}
+                                <div class="panel-heading">
+                                    <div class="panel-title">
+                                        {{message.title}}
+                                        <div class="pull-right">
+                                            {% if user == message.creator %}
+                                            <a href="{% url 'tagger_messages:delete_message' message.id %}">
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                            </a>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="panel-body">
-                                    <p>{{message.content}}</p>
+                                    {{message.content}}
                                     <hr style="margin-bottom: 0.8em">
                                     <sub class="pull-left">
-                                        {{message.team}}
+                                        {{message.creator}}
                                     </sub>
                                     <sub class="pull-right">
                                         {{message.start_time}}
                                     </sub>
                                 </div>
                             </div>
-                            {% endfor %}
-                            {% if not usermessages and not global_message_creation_form %}
-                            <h3>
-                                There are no
-                                {% if mode == 'unread' %}
-                                    unread
-                                {% endif %}
-                                 messages.                              
-                            </h3>
-                            {% if user_has_admin_teams and mode != 'unread' %}
-                            <input name="create_message2" class="btn btn-default" value="Create One" data-toggle="modal" data-target="#newMessageModal" type="button">
-                            {% endif %}
-                            {% endif %}
-                            {% for message in global_annoucements %}
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <div class="panel-title">
-                                                {{message.title}}
-                                                <div class="pull-right">
-                                                    {% if user == message.creator %}
-                                                    <a href="{% url 'tagger_messages:delete_message' message.id %}">
-                                                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                                                    </a>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="panel-body">
-                                            {{message.content}}
-                                            <hr style="margin-bottom: 0.8em">
-                                            <sub class="pull-left">
-                                                {{message.creator}}
-                                            </sub>
-                                            <sub class="pull-right">
-                                                {{message.start_time}}
-                                            </sub>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
                         </div>
                     </div>
+                    {% endfor %}
+                    {% if not usermessages and not global_message_creation_form %}
+                    <div class="alert alert-info" role="alert">
+                        There are no
+                        {% if mode == 'unread' %}
+                            unread
+                        {% endif %}
+                            messages.                              
+                    {% if user_has_admin_teams and mode != 'unread' %}
+                    <input name="create_message2" class="btn btn-default pull-right" style="margin-top: -0.5em" value="Create One" data-toggle="modal" data-target="#newMessageModal" type="button">
+                    </div>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
