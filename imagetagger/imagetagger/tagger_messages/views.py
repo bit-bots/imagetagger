@@ -23,7 +23,6 @@ def send_team_message(request):
                 form.instance.creator = request.user
                 form.instance.save()
                 form.instance.read_by.add(request.user)
-                form.instance.save()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         messages.error(request, 'Invalid message form')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -46,7 +45,6 @@ def send_global_message(request):
 def read_message(request, message_id):
     message = Message.objects.get(id=message_id)
     message.read_by.add(request.user)
-    message.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
@@ -55,7 +53,6 @@ def read_all_messages(request):
     messages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
     current_user = User.objects.get(username=request.user.username)
     current_user.read_messages.add(*messages)
-    current_user.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
@@ -147,7 +144,7 @@ def overview_global(request):
     user_admin_teams = Team.objects.filter(memberships__user=request.user, memberships__is_admin=True).exists()
     # Gets all global announcements for the user, even from the past and future
     global_annoucements_all = GlobalMessage.get(request.user)
-    
+
     global_annoucements = Message.in_range(global_annoucements_all)
     global_annoucements_expired = global_annoucements_all.filter(~Q(pk__in=global_annoucements))
 
