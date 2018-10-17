@@ -60,7 +60,7 @@
                             </ul>
                         </li>
                         {% else %}
-                        <li><a href="{% url 'login' %}">Login</a></li>
+                            <li><a href="{% url 'login' %}">Login</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -68,7 +68,7 @@
         </nav>
         <div class="content container-fluid">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
             <noscript><div class="alert alert-danger">Appearently, you have JavaScript disabled. This website will not work properly without JavaScript</div></noscript>
             {% block bodyblock %}{% endblock %}
@@ -77,9 +77,9 @@
             <div class="container">
                 <p class="text-muted text-right">
                     {% if user.is_staff %}
-                    <a href="{% url 'administration:index' %}">
-                        Administration
-                    </a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="{% url 'administration:index' %}">
+                            Administration
+                        </a>&nbsp;&nbsp;&nbsp;&nbsp;
                     {% endif %}
                     <a target="_blank" href="https://github.com/bit-bots/imagetagger">
                         This project on GitHub
@@ -88,7 +88,7 @@
                         Report an issue
                     </a>&nbsp;&nbsp;&nbsp;&nbsp;
                     {% if USE_IMPRINT %}
-                    <a href="{{ IMPRINT_URL }}">{{ IMPRINT_NAME }}</a>
+                        <a href="{{ IMPRINT_URL }}">{{ IMPRINT_NAME }}</a>
                     {% endif %}
                 </p>
             </div>

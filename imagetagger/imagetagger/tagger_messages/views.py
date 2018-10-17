@@ -31,7 +31,7 @@ def send_team_message(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@require_POST 
+@require_POST
 @staff_member_required
 def send_global_message(request):
     if request.method == 'POST':
