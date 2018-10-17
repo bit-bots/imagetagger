@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Q
@@ -10,8 +11,10 @@ from imagetagger.tagger_messages.models import Message, TeamMessage, GlobalMessa
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm, GlobalMessageCreationForm
 from imagetagger.users.models import TeamMembership
 from imagetagger.users.models import User, Team
+from django.conf import settings
 
 
+@require_POST
 @login_required
 def send_team_message(request):
     if request.method == 'POST':
@@ -28,6 +31,7 @@ def send_team_message(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@require_POST 
 @staff_member_required
 def send_global_message(request):
     if request.method == 'POST':
@@ -41,6 +45,7 @@ def send_global_message(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@require_POST
 @login_required
 def read_message(request, message_id):
     message = Message.objects.get(id=message_id)
@@ -48,6 +53,7 @@ def read_message(request, message_id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@require_POST
 @login_required
 def read_all_messages(request):
     messages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
@@ -56,6 +62,7 @@ def read_all_messages(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@require_POST
 @login_required
 def delete_message(request, message_id):
     if request.user.is_staff:
@@ -76,7 +83,7 @@ def overview_unread(request):
     team_message_creation_form = TeamMessageCreationForm(
         initial={
             'start_time': str(date.today()),
-            'expire_time': str(date.today() + timedelta(days=1)),
+            'expire_time': str(date.today() + timedelta(days=settings.DEFAULT_EXPIRE_TIME)),
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
@@ -101,7 +108,7 @@ def overview_all(request):
     team_message_creation_form = TeamMessageCreationForm(
         initial={
             'start_time': str(date.today()),
-            'expire_time': str(date.today() + timedelta(days=1)),
+            'expire_time': str(date.today() + timedelta(days=settings.DEFAULT_EXPIRE_TIME)),
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
@@ -126,7 +133,7 @@ def overview_sent(request):
     team_message_creation_form = TeamMessageCreationForm(
         initial={
             'start_time': str(date.today()),
-            'expire_time': str(date.today() + timedelta(days=1)),
+            'expire_time': str(date.today() + timedelta(days=settings.DEFAULT_EXPIRE_TIME)),
         })
     team_message_creation_form.fields['team'].queryset = user_admin_teams
 
@@ -151,7 +158,7 @@ def overview_global(request):
     global_message_creation_form = GlobalMessageCreationForm(
         initial={
             'start_time': str(date.today()),
-            'expire_time': str(date.today() + timedelta(days=1)),
+            'expire_time': str(date.today() + timedelta(days=settings.DEFAULT_EXPIRE_TIME)),
         })
 
     return TemplateResponse(request, 'tagger_messages/overview.html', {

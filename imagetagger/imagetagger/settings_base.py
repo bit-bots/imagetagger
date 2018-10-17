@@ -144,3 +144,6 @@ IMAGE_EXTENSION = {
     'png',
     'jpeg',
 }
+
+# Sets the default expire time for new messages in days
+DEFAULT_EXPIRE_TIME = 7

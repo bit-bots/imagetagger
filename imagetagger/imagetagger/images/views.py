@@ -132,7 +132,7 @@ def index(request):
     team_message_creation_form = TeamMessageCreationForm(
         initial={
             'start_time': str(date.today()),
-            'expire_time': str(date.today() + timedelta(days=1)),
+            'expire_time': str(date.today() + timedelta(days=settings.DEFAULT_EXPIRE_TIME)),
         })
 
     team_message_creation_form.fields['team'].queryset = user_admin_teams
