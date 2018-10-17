@@ -22,7 +22,8 @@ class Message(models.Model):
 
     @staticmethod
     def in_range(message):
-        return message.filter(expire_time__gt=date.today(), start_time__lte=date.today())
+        today = date.today()
+        return message.filter(expire_time__gt=today, start_time__lte=today)
 
 
 class TeamMessage(Message):
@@ -37,7 +38,7 @@ class TeamMessage(Message):
     def get_messages_for_user(user):
         userteams = Team.objects.filter(members=user)
         adminteams = Team.objects.filter(memberships__user=user, memberships__is_admin=True)
-        return TeamMessage.objects.filter(Q(team__in=adminteams, admins_only=True) | Q(team__in=userteams, admins_only=False)).order_by('start_time').reverse()
+        return TeamMessage.objects.filter(Q(team__in=adminteams, admins_only=True) | Q(team__in=userteams, admins_only=False)).order_by('-start_time')
 
 
 class GlobalMessage(Message):
@@ -50,4 +51,4 @@ class GlobalMessage(Message):
         is_staff = user.is_staff
         return GlobalMessage.objects.filter(
             Q(team_admins_only=False) | Q(team_admins_only=is_admin), Q(staff_only=False) | Q(staff_only=is_staff)
-        ).order_by('start_time').reverse()
+        ).order_by('-start_time')
