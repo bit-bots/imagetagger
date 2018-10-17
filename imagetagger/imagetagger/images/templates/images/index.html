@@ -120,23 +120,24 @@
                     {% if usermessages %}
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">
-                                    Messages
-                            </h3>
-                        </div>
-                        <div class="panel-body">
-
-                            <h3 style="margin-bottom: 1em; margin-top: 0em;">
-                                Postbox
+                            <div class="panel-title pull-left">
+                                <h3 style="margin: 0em; margin-top: 0.1em;">
+                                    Postbox
+                                </h3>
+                            </div>
+                            <div class="panel-title pull-right">
                                 {% if user_has_admin_teams %}
-                                <div style="float: right">
+                                <div style="float: right; margin-left:1em;">
                                     <input name="create_format" class="btn btn-default" value="New Message" data-toggle="modal" data-target="#newMessageModal" type="button">
                                 </div>
                                 {% endif %}
-                                <div style="float: right; margin-right:1em;">
+                                <div style="float: right;">
                                     <input class="btn btn-default" value="Mark all as read" onclick="location.href = '{% url 'tagger_messages:read_all_messages' %}'" type="button">
                                 </div>
-                            </h3>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="panel-body">
                             <div class="modal fade" id="newMessageModal" tabindex="-1" role="dialog">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
