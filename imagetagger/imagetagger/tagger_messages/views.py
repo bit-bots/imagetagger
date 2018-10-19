@@ -34,15 +34,14 @@ def send_team_message(request):
 @require_POST
 @staff_member_required
 def send_global_message(request):
-    if request.method == 'POST':
-        form = GlobalMessageCreationForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                team_message = form.save(commit=False)
-                team_message.creator = request.user
-                team_message.save()
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        messages.error(request, 'Invalid message form')
+    form = GlobalMessageCreationForm(request.POST)
+    if form.is_valid():
+        with transaction.atomic():
+            team_message = form.save(commit=False)
+            team_message.creator = request.user
+            team_message.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    messages.error(request, 'Invalid message form')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
