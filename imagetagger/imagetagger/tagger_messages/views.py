@@ -22,9 +22,10 @@ def send_team_message(request):
             user=request.user, team=form.instance.team, is_admin=True
     ).exists()):
         with transaction.atomic():
-            form.instance.creator = request.user
-            form.instance.save()
-            form.instance.read_by.add(request.user)
+            team_message = form.save(commit=False)
+            team_message.creator = request.user
+            team_message.save()
+            team_message.read_by.add(request.user)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     messages.error(request, 'Invalid message form')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -37,8 +38,9 @@ def send_global_message(request):
         form = GlobalMessageCreationForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                form.instance.creator = request.user
-                form.instance.save()
+                team_message = form.save(commit=False)
+                team_message.creator = request.user
+                team_message.save()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         messages.error(request, 'Invalid message form')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
