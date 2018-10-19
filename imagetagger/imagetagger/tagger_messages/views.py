@@ -17,17 +17,16 @@ from django.conf import settings
 @require_POST
 @login_required
 def send_team_message(request):
-    if request.method == 'POST':
-        form = TeamMessageCreationForm(request.POST)
-        if (form.is_valid() and TeamMembership.objects.filter(
-                user=request.user, team=form.instance.team, is_admin=True
-        ).exists()):
-            with transaction.atomic():
-                form.instance.creator = request.user
-                form.instance.save()
-                form.instance.read_by.add(request.user)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        messages.error(request, 'Invalid message form')
+    form = TeamMessageCreationForm(request.POST)
+    if (form.is_valid() and TeamMembership.objects.filter(
+            user=request.user, team=form.instance.team, is_admin=True
+    ).exists()):
+        with transaction.atomic():
+            form.instance.creator = request.user
+            form.instance.save()
+            form.instance.read_by.add(request.user)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    messages.error(request, 'Invalid message form')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
