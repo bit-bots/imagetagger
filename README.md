@@ -29,7 +29,7 @@ For a short overview of the functions please have a look at the following poster
 
 This paper describes the Bit-Bots Imagetagger more in depth. Please cite if you use this tool in your research:
 
-FIEDLER, Niklas, et al. ImageTagger: An Open Source Online Platform for Collaborative Image Labeling. In: RoboCup 2018: Robot World Cup XXII. Springer, 2018.
+FIEDLER, Niklas, et al. [ImageTagger: An Open Source Online Platform for Collaborative Image Labeling.](https://robocup.informatik.uni-hamburg.de/wp-content/uploads/2018/11/imagetagger_paper.pdf) In: RoboCup 2018: Robot World Cup XXII. Springer, 2018.
 
 ```
 @inproceedings{imagetagger2018,
