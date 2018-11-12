@@ -24,6 +24,7 @@ from imagetagger.annotations.serializers import AnnotationSerializer, Annotation
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
+
 def export_auth(request, export_id):
     if request.user.is_authenticated():
         return HttpResponse('authenticated')

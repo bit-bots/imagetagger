@@ -48,14 +48,15 @@ def create_annotation_type(request):
     else:
         return redirect(reverse('administration:annotation_types'))
 
+
 @staff_member_required
 def create_annotation_type_view(request):
-    annotation_types = AnnotationType.objects.all()
     return render(request, 'administration/annotation_type_create.html', {
         'annotation_types': AnnotationType.objects.all().order_by('name'),
         'create_form': AnnotationTypeCreationForm(),
         'creation': True
     })
+
 
 @staff_member_required
 def edit_annotation_type(request, annotation_type_id):
