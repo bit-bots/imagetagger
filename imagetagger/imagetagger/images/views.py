@@ -19,6 +19,10 @@ from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
     HTTP_201_CREATED
 from PIL import Image as PIL_Image
 
+import bleach
+from bleach_whitelist import markdown_tags, markdown_attrs
+import markdown
+
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
@@ -432,10 +436,12 @@ def view_imageset(request, image_set_id):
     user_teams = Team.objects.filter(members=request.user)
     imageset_edit_form = ImageSetEditForm(instance=imageset)
     imageset_edit_form.fields['main_annotation_type'].queryset = AnnotationType.objects.filter(active=True)
+    imageset_description_md = bleach.clean(markdown.markdown(imageset.description), markdown_tags, markdown_attrs)
     return render(request, 'images/imageset.html', {
         'images': images,
         'annotationcount': len(annotations),
         'imageset': imageset,
+        'imageset_description' : imageset_description_md,
         'annotationtypes': annotation_types,
         'annotation_types': annotation_types,
         'all_annotation_types': all_annotation_types,
