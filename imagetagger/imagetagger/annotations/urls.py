@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
@@ -27,4 +28,6 @@ urlpatterns = [
     url(r'^api/annotation/verify/$', views.api_verify_annotation, name='verify_annotation'),
     url(r'^api/annotation/update/$', views.update_annotation, name='update_annotations'),
     url(r'^api/annotation/blurred_concealed/$', views.api_blurred_concealed_annotation, name='blurred_concealed_annotation'),
+    path('api/annotation_types/<str:annotation_type>/', views.api_annotation_type_description, name='annotation_type_description'),
+    url(r'^descriptions/$', views.descriptions, name='descriptions'),
 ]

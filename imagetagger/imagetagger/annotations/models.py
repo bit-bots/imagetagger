@@ -8,7 +8,6 @@ from django.db import models, connection
 from django.db.models import Subquery, F, IntegerField, OuterRef, Count
 from django.db.models.functions import Coalesce
 from django.utils.functional import cached_property
-
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 from imagetagger.annotations.fields import NonStrippingTextField
@@ -408,6 +407,7 @@ class AnnotationType(models.Model):
     node_count = models.IntegerField(default=0)
     enable_concealed = models.BooleanField(default=True)
     enable_blurred = models.BooleanField(default=True)
+    md_description = models.TextField(default='', blank=True)
 
     def __str__(self):
         if self.active:

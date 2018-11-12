@@ -29,7 +29,19 @@ function calculateImageScale() {
   globals.imageScaleHeight = globals.image.get(0).naturalHeight / globals.image.height();
 }
 
-(function() {
+/**
+ * Hide popover on click
+ */
+$('html').click(function (e) {
+  $('#popover-marker').popover('hide');
+});
+
+$('#popover-marker').popover().click(function (e) {
+  $(this).popover('toggle');
+  e.stopPropagation();
+});
+
+(function () {
   const API_ANNOTATIONS_BASE_URL = '/annotations/api/';
   const API_IMAGES_BASE_URL = '/images/api/';
   const FEEDBACK_DISPLAY_TIME = 3000;
@@ -1135,10 +1147,21 @@ function calculateImageScale() {
   /**
    * Handle the selection change of the annotation type.
    */
-
   function handleAnnotationTypeChange() {
-    gAnnotationType = parseInt($('#annotation_type_id').val());
-    globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
+    let annotation_type_select = $('#annotation_type_id');
+    gAnnotationType = parseInt(annotation_type_select.val());
+    // Change link to see all annotation type descriptions and jump to paragraph
+    let annotation_type_name = annotation_type_select.children(':selected').attr('name');
+    if (annotation_type_name === undefined) {
+      $('#all_descritpions_link').attr('href', '/annotations/descriptions/');
+      $('#description_btn').addClass('disabled');
+      $('#popover-marker').attr('data-content', '<i>Please select annotation type!</i>');
+    } else {
+      $('#all_descritpions_link').attr('href', '/annotations/descriptions/#' + annotation_type_name);
+      $('#description_btn').removeClass('disabled');
+      $('#popover-marker').attr('data-content', '<iframe id="description-frame" src="/annotations/api/annotation_types/' + annotation_type_name + '/"></iframe>');
+    }
+    globals.currentAnnotations = globals.allAnnotations.filter(function (e) {
       return e.annotation_type.id === gAnnotationType;
     });
     setupCBCheckboxes();

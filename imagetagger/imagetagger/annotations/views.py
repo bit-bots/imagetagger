@@ -14,7 +14,9 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_200_OK, \
     HTTP_403_FORBIDDEN
-
+import bleach
+from bleach_whitelist import markdown_tags, markdown_attrs
+import markdown
 from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
@@ -22,11 +24,36 @@ from imagetagger.annotations.serializers import AnnotationSerializer, Annotation
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
-
 def export_auth(request, export_id):
     if request.user.is_authenticated():
         return HttpResponse('authenticated')
     return HttpResponseForbidden('authentication denied')
+
+
+@login_required
+def descriptions(request):
+    annotation_types = AnnotationType.objects.filter(active=True).order_by('name')
+    annotation_types_list = [(annotation_type.name, bleach.clean(markdown.markdown(annotation_type.md_description), markdown_tags, markdown_attrs)) for annotation_type in
+                             annotation_types if annotation_type.md_description]
+    no_descriptions_available = len(annotation_types_list) == 0
+    return render(request, 'annotations/descriptions.html', {
+        'annotation_types': annotation_types_list,
+        'no_descriptions_available': no_descriptions_available,
+    })
+
+
+@login_required
+def api_annotation_type_description(request, annotation_type):
+    annotation_types = AnnotationType.objects.filter(active=True)
+    description = ''
+    for atype in annotation_types:
+        if atype.name == annotation_type:
+            description = bleach.clean(markdown.markdown(atype.md_description), markdown_tags, markdown_attrs)
+    if not description:
+        description = '<i>No description available!</i>'
+    return render(request, 'annotations/api_descriptions.html', {
+        'description': description,
+    })
 
 
 @login_required
@@ -111,7 +138,8 @@ def manage_annotations(request, image_set_id):
             date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
             annotations = annotations.filter(time__date__gt=date)
         elif filter == 'latest-change-by' and value != '':
-            annotations = annotations.filter((Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
+            annotations = annotations.filter(
+                (Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
         elif filter == 'verifications-min':
             annotations = annotations.filter(verification_difference__gte=value)
         elif filter == 'verifications-max':
@@ -140,8 +168,8 @@ def delete_annotations(request, image_set_id):
     value = request.POST.get("value", None)
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.annotate_verification_difference()\
-        .select_related('image', 'user', 'last_editor', 'annotation_type')\
+    annotations = Annotation.objects.annotate_verification_difference() \
+        .select_related('image', 'user', 'last_editor', 'annotation_type') \
         .filter(image__in=images, annotation_type__active=True)
     print(filter, value)
     if imageset.has_perm('edit_set', request.user):
@@ -155,7 +183,8 @@ def delete_annotations(request, image_set_id):
                 date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
                 annotations = annotations.filter(time__date__gt=date)
             elif filter == 'latest-change-by' and value != '':
-                annotations = annotations.filter((Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
+                annotations = annotations.filter(
+                    (Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
             elif filter == 'verifications-min':
                 annotations = annotations.filter(verification_difference__gte=value)
             elif filter == 'verifications-max':
@@ -238,7 +267,7 @@ def export_format(export_format_name, imageset):
         '%%setlocation': imageset.location,
     }
     for key, value in placeholders_filename.items():
-                        file_name = file_name.replace(key, str(value))
+        file_name = file_name.replace(key, str(value))
 
     min_verifications = export_format.min_verifications
     annotation_counter = 0
@@ -246,10 +275,10 @@ def export_format(export_format_name, imageset):
     if export_format_name.image_aggregation:
         image_content = '\n'
         for image in images:
-            annotations = Annotation.objects.annotate_verification_difference()\
+            annotations = Annotation.objects.annotate_verification_difference() \
                 .filter(image=image,
                         verification_difference__gte=min_verifications,
-                        annotation_type__in=export_format.annotations_types.all())\
+                        annotation_type__in=export_format.annotations_types.all()) \
                 .select_related('image')
             if not export_format.include_blurred:
                 annotations = annotations.exclude(_blurred=True)
@@ -286,10 +315,14 @@ def export_format(export_format_name, imageset):
                                 vector_line = vector_line.replace(key, str(value))
                             formatted_vector += vector_line
                         formatted_annotation = export_format.annotation_format
-                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred', annotation.blurred)
-                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred', not annotation.blurred)
-                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed', annotation.concealed)
-                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed', not annotation.concealed)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred',
+                                                                 annotation.blurred)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred',
+                                                                 not annotation.blurred)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed',
+                                                                 annotation.concealed)
+                        formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed',
+                                                                 not annotation.concealed)
                         placeholders_annotation = {
                             '%%imageset': imageset.name,
                             '%%imagewidth': image.width,
@@ -322,7 +355,7 @@ def export_format(export_format_name, imageset):
                             '%%relheight': annotation.relative_height,
                         }
                     for key, value in placeholders_annotation.items():
-                        formatted_annotation = formatted_annotation\
+                        formatted_annotation = formatted_annotation \
                             .replace(key, str(value))
                     annotation_content += formatted_annotation + '\n'
 
@@ -340,7 +373,7 @@ def export_format(export_format_name, imageset):
                 image_content += formatted_image + '\n'
         formatted_content = image_content
     else:
-        annotations = Annotation.objects.annotate_verification_difference()\
+        annotations = Annotation.objects.annotate_verification_difference() \
             .filter(image__in=images,
                     verification_difference__gte=min_verifications,
                     annotation_type__in=export_format.annotations_types.all())
@@ -381,7 +414,8 @@ def export_format(export_format_name, imageset):
                 formatted_annotation = apply_conditional(formatted_annotation, '%%ifblurred', annotation.blurred)
                 formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotblurred', not annotation.blurred)
                 formatted_annotation = apply_conditional(formatted_annotation, '%%ifconcealed', annotation.concealed)
-                formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed', not annotation.concealed)
+                formatted_annotation = apply_conditional(formatted_annotation, '%%ifnotconcealed',
+                                                         not annotation.concealed)
                 placeholders_annotation = {
                     '%%imageset': imageset.name,
                     '%%imagewidth': annotation.image.width,
@@ -437,8 +471,8 @@ def create_exportformat(request):
     print(mode)
     if request.method == 'POST' and \
             'manage_export_formats' in \
-            get_object_or_404(Team, id=request.POST['team'])\
-            .get_perms(request.user):
+            get_object_or_404(Team, id=request.POST['team']) \
+                    .get_perms(request.user):
         form = ExportFormatCreationForm(request.POST)
 
         if form.is_valid():
@@ -562,7 +596,7 @@ def create_annotation(request) -> Response:
     if not annotation_type.validate_vector(vector):
         serializer = AnnotationSerializer(
             image.annotations.filter(annotation_type__active=True).select_related()
-            .order_by('annotation_type__name'),
+                .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -575,7 +609,7 @@ def create_annotation(request) -> Response:
     if Annotation.similar_annotations(vector, image, annotation_type):
         serializer = AnnotationSerializer(
             image.annotations.filter(annotation_type__active=True).select_related()
-            .order_by('annotation_type__name'),
+                .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -600,7 +634,7 @@ def create_annotation(request) -> Response:
 
     serializer = AnnotationSerializer(
         annotation.image.annotations.filter(annotation_type__active=True).select_related()
-        .order_by('annotation_type__name'),
+            .order_by('annotation_type__name'),
         context={
             'request': request,
         },
@@ -667,7 +701,6 @@ def load_set_annotations(request) -> Response:
 @login_required
 @api_view(['GET'])
 def load_annotation_types(request) -> Response:
-
     annotation_types = AnnotationType.objects.filter(active=True)
     serializer = AnnotationTypeSerializer(
         annotation_types,
@@ -693,7 +726,7 @@ def load_set_annotation_types(request) -> Response:
                                             annotation_type__active=True)
     annotation_types = AnnotationType.objects.filter(
         active=True,
-        annotation__in=annotations)\
+        annotation__in=annotations) \
         .distinct()
 
     if not imageset.has_perm('read', request.user):
@@ -729,7 +762,8 @@ def load_filtered_set_annotations(request) -> Response:
     if annotation_type_id > -1:
         annotations = annotations.filter(annotation_type__id=annotation_type_id)
     if verified:
-        annotations = [annotation for annotation in annotations if not user_verifications.filter(annotation=annotation).exists()]
+        annotations = [annotation for annotation in annotations if
+                       not user_verifications.filter(annotation=annotation).exists()]
 
     if not imageset.has_perm('read', request.user):
         return Response({
@@ -798,7 +832,7 @@ def update_annotation(request) -> Response:
     if not annotation_type.validate_vector(vector):
         serializer = AnnotationSerializer(
             annotation.image.annotations.filter(annotation_type__active=True).select_related()
-            .order_by('annotation_type__name'),
+                .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -813,7 +847,7 @@ def update_annotation(request) -> Response:
         annotation.delete()
         serializer = AnnotationSerializer(
             annotation.image.annotations.filter(annotation_type__active=True).select_related()
-            .order_by('annotation_type__name'),
+                .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -837,8 +871,8 @@ def update_annotation(request) -> Response:
 
     serializer = AnnotationSerializer(
         annotation.image.annotations.filter(annotation_type__active=True).select_related()
-        .filter(annotation_type__active=True)
-        .order_by('annotation_type__name'),
+            .filter(annotation_type__active=True)
+            .order_by('annotation_type__name'),
         context={
             'request': request,
         },

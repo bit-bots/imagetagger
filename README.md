@@ -161,6 +161,8 @@ server {
 
 The ImageTagger relies on the following plugins, libraries and frameworks:
 
+- [Bleach](https://github.com/mozilla/bleach)
+- [bleach-whitelist](https://github.com/yourcelf/bleach-whitelist)
 - [Bootstrap](https://getbootstrap.com/)
 - [Django](https://www.djangoproject.com/)
 - [Django REST Framework](http://www.django-rest-framework.org/)
@@ -171,6 +173,7 @@ The ImageTagger relies on the following plugins, libraries and frameworks:
 - [jQuery](https://jquery.com/)
 - [jQuery-Autocomplete](https://github.com/devbridge/jquery-Autocomplete)
 - [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload)
+- [Markdown](https://python-markdown.github.io/)
 - [Pillow](https://github.com/python-pillow/Pillow)
 - [PostgreSQL](https://www.postgresql.org/)
 

@@ -1,8 +1,17 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h3 class="panel-title">
-            Annotation Types
-        </h3>
+        <div class="panel-title pull-left">
+            <h3 style="margin-top: 0.2em">Edit annotation Types</h3>
+        </div>
+        {% if not creation %}
+            <div class="panel-title pull-right">
+                <a href="{% url 'administration:create_annotation_type_view' %}"
+                   class="glyphicon glyphicon-plus btn btn-default">
+                    <span style="font-family: sans-serif">New…</span>
+                </a>
+            </div>
+        {% endif %}
+        <div class="clearfix"></div>
     </div>
     <div class="panel-body">
         <ul>

@@ -1,0 +1,46 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block additional_css %}
+    <link type="text/css" href="{% static 'annotations/css/descriptions.css' %}" rel="stylesheet"/>
+{% endblock additional_css %}
+{% block additional_js %}
+    <script type="text/javascript" src="{% static 'annotations/js/descriptions.js' %}"></script>
+{% endblock additional_js %}
+
+{% block bodyblock %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Annotation type – Descriptions:</h1>
+                <hr>
+            </div>
+        </div>
+        {% if no_descriptions_available %}
+            <div class="alert alert-info">No descriptions available!</div>
+        {% else %}
+            <div class="row">
+                <div class="col-lg-3 hidden-md hidden-sm" id="content-list">
+                    <ul class="nav nav-tabs nav-stacked" data-spy="affix" data-offset-top="89">
+                        {% for annotation_type in annotation_types %}
+                            <li class="list_element"><a href="#{{ annotation_type.0 }}">{{ annotation_type.0 }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-lg-9">
+                    {% for annotation_type in annotation_types %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title jump-section"
+                                    id="{{ annotation_type.0 }}">{{ annotation_type.0 }}</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p>{{ annotation_type.1 | safe }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

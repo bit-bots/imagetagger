@@ -1,0 +1,40 @@
+ul.nav-tabs{
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.067);
+}
+ul.nav-tabs li {
+    margin: 0;
+    border-top: 1px solid #ddd;
+}
+ul.nav-tabs li:first-child {
+    border-top: none;
+}
+ul.nav-tabs li a {
+    margin: 0;
+    padding: 8px 16px;
+    border-radius: 0;
+}
+ul.nav-tabs li.active a, ul.nav-tabs li.active a:hover {
+    color: #fff;
+    background: #2e6da4;
+    border: 1px solid #2e6da4;
+}
+ul.nav-tabs li:first-child a {
+    border-radius: 4px 4px 0 0;
+}
+ul.nav-tabs li:last-child a {
+    border-radius: 0 0 4px 4px;
+}
+ul.nav-tabs.affix {
+    width: 23%;
+    top: 70px; /* Set the top position of pinned element */
+}
+
+ .jump-section:before {
+    padding-top: 5em;
+    margin-top: -5em;
+    content: "";
+    display: block;
+}

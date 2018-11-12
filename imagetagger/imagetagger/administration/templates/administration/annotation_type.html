@@ -1,204 +1,277 @@
 {% extends 'base/base.html' %}
 {% load widget_tweaks %}
 
-
 {% block bodyblock %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            {% if annotation_type %}
-                <h2>Annotation Type "{{ annotation_type.name }}"</h2>
-            {% else %}
-                <h2>Annotation Types</h2>
-            {% endif %}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-3">
-            {% include "administration/annotation_types_list.html" %}
-        </div>
-        {% if annotation_type %}
-            <div class="col-md-5">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Edit "{{ annotation_type.name }}"</h3>
-                    </div>
-                    <table class="table table-striped">
-                        <tbody>
-                            <form action="{% url "administration:edit_annotation_type" annotation_type.id %}" method="POST">
-                                {% csrf_token %}
-                                <tr>
-                                    <td>
-                                        <label for="id_name">{{ edit_form.name.label }}</label>
-                                    </td>
-                                    <td>
-                                        {% render_field edit_form.name class+='form-control' %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="id_active">{{ edit_form.active.label }}</label>
-                                    </td>
-                                    <td>
-                                        {% render_field edit_form.active class+='form-control' %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="id_active">{{ edit_form.enable_blurred.label }}</label>
-                                    </td>
-                                    <td>
-                                        {% render_field edit_form.enable_blurred class+='form-control' %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="id_active">{{ edit_form.enable_concealed.label }}</label>
-                                    </td>
-                                    <td>
-                                        {% render_field edit_form.enable_concealed class+='form-control' %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <b>Vector Type</b>
-                                    </td>
-                                    <td>
-                                        {{ vector_type_name }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <b>Node count</b>
-                                    </td>
-                                    <td>
-                                        {{ annotation_type.node_count }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                    <td align="right">
-                                        <input class="btn btn-primary right" type="submit" value="Save">
-                                    </td>
-                                </tr>
-
-                            </form>
-                        </tbody>
-                    </table>
-                    {% if annotation_type.vector_type == 1 %}
-                        <div class="panel-body">
-                            Changing the vector type requires a migration of the annotations. <br>
-                            <div class="alert alert-danger"> It is a non reversible process. No warranties!</div>
-                            <!-- Button trigger modal -->
-                            <button type="button" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#migrationModal">
-                                Migrate
-                            </button>
-
-                            <!-- Modal -->
-                            <div class="modal fade" id="migrationModal" tabindex="-1" role="dialog" aria-labelledby="migrationModalLabel">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title" id="migrationModalLabel">Migrate Annotation Type</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                            You can migrate the Annotation Type to a polygon with ether unlimited or 4 nodes.<br>
-                                            Again: <br>
-                                            <div class="alert alert-danger"> It is a non reversible process. No warranties!</div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                            <a class="btn btn-danger" href="{% url 'administration:migrate_bbt0p' annotation_type.id %}">Unlimited Nodes</a>
-                                            <a class="btn btn-danger" href="{% url 'administration:migrate_bbt4p' annotation_type.id %}">4 Nodes</a>
-                                        </div>
-                                    </div>
-                                  </div>
-                                </div>
-                            </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-4">
-        {% else %}
-            <div class="col-md-4 col-md-offset-5">
-        {% endif %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Create a new Annotation Type</h3>
-                </div>
-                <table class="table table-striped">
-                    <tbody>
-                        <form action="{% url "administration:create_annotation_type" %}" method="POST">
-                            {% csrf_token %}
-                            <tr>
-                                <td>
-                                    <label for="id_name">{{ create_form.name.label }}</label>
-                                </td>
-                                <td>
-                                    {% render_field create_form.name class+='form-control' %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="id_active">{{ create_form.active.label }}</label>
-                                </td>
-                                <td>
-                                    {% render_field create_form.active class+='form-control' %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="id_active">{{ create_form.enable_blurred.label }}</label>
-                                </td>
-                                <td>
-                                    {% render_field create_form.enable_blurred class+='form-control' %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="id_active">{{ create_form.enable_concealed.label }}</label>
-                                </td>
-                                <td>
-                                    {% render_field create_form.enable_concealed class+='form-control' %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="id_vector_type">{{ create_form.vector_type.label }}</label>
-                                </td>
-                                <td>
-                                    <select name="{{ create_form.vector_type.name }}">
-                                        <option value="1" selected>Bounding Box</option>
-                                        <option value="2" >Point</option>
-                                        <option value="3" >Line</option>
-                                        <option value="4" >Multiline</option>
-                                        <option value="5" >Polygon</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="id_node_count">{{ create_form.node_count.label }} <span data-toggle="tooltip" data-placement="right" title="The number of nodes in a polygon. 0 allows an arbitrary node count. This has no effect on other vector types." class="glyphicon glyphicon-question-sign"></span></label>
-                                </td>
-                                <td>
-                                    {% render_field create_form.node_count class+='form-control' %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input class="btn btn-danger" type="reset" value="Reset">
-                                </td>
-                                <td align="right">
-                                    <input class="btn btn-primary right" type="submit" value="Create">
-                                </td>
-                            </tr>
-                        </form>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+	{% if annotation_type %}
+	    <h2>Annotation Type "{{ annotation_type.name }}"</h2>
+	{% else %}
+	    <h2>Annotation Types</h2>
+	{% endif %}
     </div>
 </div>
+<div class="row" style="margin-top: 1em">
+    <div class="col-md-3">
+	{% include "administration/annotation_types_list.html" %}
+    </div>
+    {% if annotation_type %}
+	<div class="col-md-9">
+	    <div class="panel panel-default">
+		<div class="panel-heading">
+		    <h3 class="panel-title">Edit "{{ annotation_type.name }}"</h3>
+		</div>
+		<div class="panel-body">
+		    <form action="{% url "administration:edit_annotation_type" annotation_type.id %}"
+			  method="POST">
+			<table class="table table-striped">
+			    <tbody>
+			    {% csrf_token %}
+			    <tr>
+				<td>
+				    <label for="id_name">{{ edit_form.name.label }}</label>
+				</td>
+				<td>
+				    {% render_field edit_form.name class+='form-control' %}
+				</td>
+			    </tr>
+			    <tr>
+				<td>
+				    <label for="id_active">{{ edit_form.active.label }}</label>
+				</td>
+				<td>
+				    {% render_field edit_form.active class+='form-control' %}
+				</td>
+			    </tr>
+			    <tr>
+				<td>
+				    <label for="id_enable_blurred">{{ edit_form.enable_blurred.label }}</label>
+				</td>
+				<td>
+				    {% render_field edit_form.enable_blurred class+='form-control' %}
+				</td>
+			    </tr>
+			    <tr>
+				<td>
+				    <label for="id_enable_concealed">{{ edit_form.enable_concealed.label }}</label>
+				</td>
+				<td>
+				    {% render_field edit_form.enable_concealed class+='form-control' %}
+				</td>
+			    </tr>
+			    <tr>
+				<td>
+				    <b>Vector Type</b>
+				</td>
+				<td>
+				    {{ vector_type_name }}
+				</td>
+			    </tr>
+			    <tr>
+				<td>
+				    <b>Node count</b>
+				</td>
+				<td>
+				    {{ annotation_type.node_count }}
+				</td>
+			    </tr>
+			    </tbody>
+			</table>
+			<hr>
+			<label for="id_md_description">Description</label>
+			<span data-toggle="tooltip" data-placement="right"
+			      title="Support for markdown-language."
+			      class="glyphicon glyphicon-question-sign"></span>
+			<p class="pull-right">
+			    <button type="button" class="btn btn-info" data-toggle="modal"
+				    data-target="#guide">
+				Open markdown guide
+			    </button>
+			    <!-- Modal -->
+			<div class="modal fade" id="guide" tabindex="-1" role="dialog"
+			     aria-labelledby="guideModalLabel">
+			    <div class="modal-dialog" role="document">
+				<div class="modal-content">
+				    <div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close"><span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="guideModalLabel">Markdown guide</h4>
+				    </div>
+				    <div class="modal-body">
+					<table class="table table-striped">
+					    <thead>
+					    <tr>
+						<th>Code</th>
+						<th><em>Alternative</em></th>
+						<th>Output</th>
+					    </tr>
+					    </thead>
+					    <tbody>
+					    <tr>
+						<td>*Italic*</td>
+						<td>_Italic_</td>
+						<td><em>Italic</em></td>
+					    </tr>
+					    <tr>
+						<td>**Bold**</td>
+						<td>__Bold__</td>
+						<td><strong>Bold</strong></td>
+					    </tr>
+					    <tr>
+						<td># Heading 1</td>
+						<td>Heading 1<br>========</td>
+						<td><h1>Heading 1</h1></td>
+					    </tr>
+					    <tr>
+						<td>## Heading 2</td>
+						<td>Heading 2<br>--------------</td>
+						<td><h2>Heading 2</h2></td>
+					    </tr>
+					    <tr>
+						<td>&gt; Blockquote</td>
+						<td></td>
+						<td>
+						    <blockquote>Blockquote</blockquote>
+						</td>
+					    </tr>
+					    <tr>
+						<td>A paragraph.<br><br> A paragraph after 1 blank line.</td>
+						<td></td>
+						<td>A paragraph.<br>A paragraph after 1 blank line.</td>
+					    </tr>
+					    <tr>
+						<td>* List<br> * List<br> * List</td>
+						<td>- List<br> - List<br> - List</td>
+						<td>
+						    <ul>
+							<li>List</li>
+							<li>List</li>
+							<li>List</li>
+						    </ul>
+						</td>
+					    </tr>
+					    <tr>
+						<td>1. One<br> 2. Two<br> 3. Three</td>
+						<td></td>
+						<td>
+						    <ol>
+							<li>One</li>
+							<li>Two</li>
+							<li>Three</li>
+						    </ol>
+						</td>
+					    </tr>
+					    <tr>
+						<td>Horizontal Rule<br><br> -----------</td>
+						<td>Horizontal Rule<br><br> ***********</td>
+						<td>Horizontal Rule
+						    <hr>
+						</td>
+					    </tr>
+					    <tr>
+						<td>`Inline code` with backticks</td>
+						<td></td>
+						<td><code>Inline code</code> with backticks</td>
+					    </tr>
+					    <tr>
+						<td>[Link](http://url.org)</td>
+						<td></td>
+						<td><a href="#">Link</a></td>
+					    </tr>
+					    <tr>
+						<td>![Image](http://url/image.png)</td>
+						<td></td>
+						<td><img
+							src="http://localhost:8000/static/symbols/bitbots-logo.png"
+							alt="Image"></td>
+					    </tr>
+					    </tbody>
+					</table>
+					<hr>
+					<em>Template by <a target="_blank" rel="noopener noreferrer"
+							   href="https://github.com/agusmakmun/django-markdown-editor#martor-commands-refference">agusmakmun</a>.
+					</em>
+				    </div>
+				    <div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+					    Close
+					</button>
+				    </div>
+				</div>
+			    </div>
+			</div>
+			</p>
+			{% render_field edit_form.md_description class+='form-control' %}
+			<hr>
+			<div align="right">
+			    <input class="btn btn-primary right" type="submit" value="Save">
+			</div>
+		    </form>
+		    {% if annotation_type.vector_type == 1 %}
+			<div class="panel-body">
+			    Changing the vector type requires a migration of the annotations. <br>
+			    <div class="alert alert-danger"> It is a non reversible process. No warranties!
+			    </div>
+			    <!-- Button trigger modal -->
+			    <button type="button" class="btn btn-danger btn-lg" data-toggle="modal"
+				    data-target="#migrationModal">
+				Migrate
+			    </button>
+
+			    <!-- Modal -->
+			    <div class="modal fade" id="migrationModal" tabindex="-1" role="dialog"
+				 aria-labelledby="migrationModalLabel">
+				<div class="modal-dialog" role="document">
+				    <div class="modal-content">
+					<div class="modal-header">
+					    <button type="button" class="close" data-dismiss="modal"
+						    aria-label="Close"><span aria-hidden="true">&times;</span>
+					    </button>
+					    <h4 class="modal-title" id="migrationModalLabel">Migrate Annotation
+						Type</h4>
+					</div>
+					<div class="modal-body">
+					    You can migrate the Annotation Type to a polygon with ether
+					    unlimited or
+					    4 nodes.<br>
+					    Again: <br>
+					    <div class="alert alert-danger"> It is a non reversible process. No
+						warranties!
+					    </div>
+					</div>
+					<div class="modal-footer">
+					    <button type="button" class="btn btn-default" data-dismiss="modal">
+						Close
+					    </button>
+					    <a class="btn btn-danger"
+					       href="{% url 'administration:migrate_bbt0p' annotation_type.id %}">Unlimited
+						Nodes</a>
+					    <a class="btn btn-danger"
+					       href="{% url 'administration:migrate_bbt4p' annotation_type.id %}">4
+						Nodes</a>
+					</div>
+				    </div>
+				</div>
+				<div class="modal-footer">
+				    <button type="button" class="btn btn-default" data-dismiss="modal">Close
+				    </button>
+				    <a class="btn btn-danger"
+				       href="{% url 'administration:migrate_bbt0p' annotation_type.id %}">Unlimited
+					Nodes</a>
+				    <a class="btn btn-danger"
+				       href="{% url 'administration:migrate_bbt4p' annotation_type.id %}">4
+					Nodes</a>
+				</div>
+			    </div>
+			</div>
+		    {% endif %}
+		</div>
+	    </div>
+	</div>
+    {% endif %}
+</div>
+</div>
+{{ create_form.media }}
 {% endblock %}

@@ -13,7 +13,7 @@ from imagetagger.annotations.models import Annotation, AnnotationType
 def annotation_types(request):
     return render(request, 'administration/annotation_type.html', {
         'annotation_types': AnnotationType.objects.all().order_by('name'),
-        'create_form': AnnotationTypeCreationForm,
+        'create_form': AnnotationTypeCreationForm(),
     })
 
 
@@ -33,7 +33,6 @@ def annotation_type(request, annotation_type_id):
 def create_annotation_type(request):
     if request.method == 'POST':
         form = AnnotationTypeCreationForm(request.POST)
-
         if form.is_valid():
             if AnnotationType.objects.filter(name=form.cleaned_data.get('name')).exists():
                 form.add_error(
@@ -49,22 +48,32 @@ def create_annotation_type(request):
     else:
         return redirect(reverse('administration:annotation_types'))
 
+@staff_member_required
+def create_annotation_type_view(request):
+    annotation_types = AnnotationType.objects.all()
+    return render(request, 'administration/annotation_type_create.html', {
+        'annotation_types': AnnotationType.objects.all().order_by('name'),
+        'create_form': AnnotationTypeCreationForm(),
+        'creation': True
+    })
 
 @staff_member_required
 def edit_annotation_type(request, annotation_type_id):
     selected_annotation_type = get_object_or_404(AnnotationType, id=annotation_type_id)
     if request.method == 'POST':
-        if not request.POST['name'] == selected_annotation_type.name and AnnotationType.objects.filter(name=request.POST['name']).exists():
+        if not request.POST['name'] == selected_annotation_type.name and AnnotationType.objects.filter(
+                name=request.POST['name']).exists():
             messages.error(request, _('The name is already in use by an annotation type.'))
         else:
             selected_annotation_type.name = request.POST['name']
             selected_annotation_type.active = 'active' in request.POST.keys()
             selected_annotation_type.enable_concealed = 'enable_concealed' in request.POST.keys()
             selected_annotation_type.enable_blurred = 'enable_blurred' in request.POST.keys()
+            selected_annotation_type.md_description = request.POST['md_description']
             selected_annotation_type.save()
 
             messages.success(request, _('The annotation type was edited successfully.'))
-    return redirect(reverse('administration:annotation_type', args=(annotation_type_id, )))
+    return redirect(reverse('administration:annotation_type', args=(annotation_type_id,)))
 
 
 @staff_member_required
@@ -90,7 +99,7 @@ def migrate_bounding_box_to_0_polygon(request, annotation_type_id):
         selected_annotation_type.vector_type = AnnotationType.VECTOR_TYPE.POLYGON
         selected_annotation_type.node_count = 0
         selected_annotation_type.save()
-    return redirect(reverse('administration:annotation_type', args=(annotation_type_id, )))
+    return redirect(reverse('administration:annotation_type', args=(annotation_type_id,)))
 
 
 @staff_member_required
@@ -116,4 +125,4 @@ def migrate_bounding_box_to_4_polygon(request, annotation_type_id):
         selected_annotation_type.vector_type = AnnotationType.VECTOR_TYPE.POLYGON
         selected_annotation_type.node_count = 4
         selected_annotation_type.save()
-    return redirect(reverse('administration:annotation_type', args=(annotation_type_id, )))
+    return redirect(reverse('administration:annotation_type', args=(annotation_type_id,)))

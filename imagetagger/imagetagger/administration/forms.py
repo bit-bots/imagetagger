@@ -13,6 +13,7 @@ class AnnotationTypeCreationForm(forms.ModelForm):
             'vector_type',
             'enable_concealed',
             'enable_blurred',
+            'md_description',
         ]
 
 
@@ -24,4 +25,5 @@ class AnnotationTypeEditForm(forms.ModelForm):
             'active',
             'enable_concealed',
             'enable_blurred',
+            'md_description',
         ]

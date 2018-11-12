@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'widget_tweaks',
     'friendlytagloader',
+    'markdown',
+    'bleach',
+    'bleach_whitelist',
 ]
 
 MIDDLEWARE = [

@@ -5,24 +5,38 @@
 {% block additional_annotation_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'annotations/css/bounding_boxes.css' %}" />
     <style>
-    {% if not "delete_annotation" in imageset_perms %}
-        .annotation_delete_button {
-            visibility: hidden;
-            display: none;
+        {% if not "delete_annotation" in imageset_perms %}
+            .annotation_delete_button {
+                visibility: hidden;
+                display: none;
+            }
+        {%  endif %}
+
+        {% if not "verify" in imageset_perms %}
+            .annotation_verify_button {
+                visibility: hidden;
+                display: none;
+            }
+        {%  endif %}
+
+        {% if not "edit_annotation" in imageset_perms %}
+            .annotation_edit_button {
+                visibility: hidden;
+                display: none;
+            }
+        {%  endif %}
+
+        #all_descritpions_link {
+            text-decoration: none !important;
         }
-    {%  endif %}
-    {% if not "verify" in imageset_perms %}
-        .annotation_verify_button {
-            visibility: hidden;
-            display: none;
+
+        #description-frame {
+            border: none;
         }
-    {%  endif %}
-    {% if not "edit_annotation" in imageset_perms %}
-        .annotation_edit_button {
-            visibility: hidden;
-            display: none;
-    }
-    {%  endif %}
+
+        .popover {
+            max-width: none !important;
+        }
     </style>
 {% endblock additional_annotation_css %}
 
@@ -169,7 +183,32 @@
                               <input type='checkbox' id='keep_selection' name="keep_selection" checked>
                               <label for='keep_selection'>Keep selection for next image</label>
                             </p>
+                            <p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="popover-marker" data-toggle="popover" data-trigger="manual"
+                                         data-html=true data-placement="bottom"
+                                         data-content="<i>Please select annotation type!</i>">
+                                        <div id="description_btn" type="button"
+                                             class="btn btn-default btn-block btn-info disabled">
+                                            <span class="glyphicon glyphicon-info-sign"></span>
+                                            See description
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <a id="all_descritpions_link" target="_blank"
+                                       href="{% url 'annotations:descriptions' %}">
+                                        <button id="all_descritpions_btn" type="button"
+                                                class="btn btn-default btn-block btn-info">
+                                            <span class="glyphicon glyphicon-info-sign"></span>
+                                            See all descriptions
+                                        </button>
+                                    </a>
+                                </div>
+                            </div>
                             <hr>
+                            </p>
                             <p>
                               <input type='checkbox' name='not_in_image' id='not_in_image'>
                               <label for='not_in_image'>Not in the image (g)</label>
