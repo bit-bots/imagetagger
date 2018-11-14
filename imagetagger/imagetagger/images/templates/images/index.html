@@ -225,6 +225,9 @@
                                 </div>
                             </div>
                             {% endfor %}
+                            {% if too_many_messages %}
+                                <div class="text-center"><a href="{% url 'tagger_messages:overview_unread' %}">[more]</a></div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
