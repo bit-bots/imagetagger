@@ -5,7 +5,7 @@ from django.db.models import TextField
 
 class NonStrippingTextField(TextField):
     """A TextField that does not strip whitespace at the beginning/end of
-    it's value.  Might be important for markup/code."""
+    its value.  Might be important for markup/code."""
 
     def formfield(self, **kwargs):
         kwargs['strip'] = False
