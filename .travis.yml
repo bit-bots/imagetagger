@@ -4,4 +4,4 @@ python:
 install:
     - pip install flake8
 script:
-    flake8 --ignore=E501,F403,F405 --exclude=static,migrations imagetagger/imagetagger
+    flake8 --ignore=E501,F403,F405,W504 --exclude=static,migrations imagetagger/imagetagger

@@ -11,6 +11,7 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequ
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
+from json import JSONDecodeError
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -588,7 +589,7 @@ def label_upload(request, imageset_id):
                     else:
                         try:
                             vector = json.loads(line_frags[2])
-                        except Exception as error:
+                        except JSONDecodeError:
                             report_list.append("In image \"{}\" the annotation:"
                                                " \"{}\" was not accepted as valid JSON".format(line_frags[0], line_frags[2]))
 
