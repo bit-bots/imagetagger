@@ -141,6 +141,14 @@ def index(request):
     # Gets all unread messages
     usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
 
+    too_many_messages = False
+
+    front_page_messages = 5
+
+    if usermessages.count() > front_page_messages:
+        usermessages = usermessages[:front_page_messages]
+        too_many_massages = True        
+
     return TemplateResponse(request, 'images/index.html', {
         'user': request.user,
         'team_creation_form': team_creation_form,
@@ -151,6 +159,7 @@ def index(request):
         'userteams': userteams,
         'stats': stats,
         'usermessages': usermessages,
+        'too_many_messages': too_many_massages,
         'global_annoucements': global_annoucements,
     })
 
