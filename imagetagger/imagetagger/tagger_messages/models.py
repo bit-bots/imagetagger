@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.db import models
 from imagetagger.users.models import Team
-from datetime import date
+from django.utils import timezone
 
 
 class Message(models.Model):
@@ -22,8 +22,8 @@ class Message(models.Model):
 
     @staticmethod
     def in_range(message):
-        today = date.today()
-        return message.filter(expire_time__gt=today, start_time__lte=today)
+        now = timezone.now()
+        return message.filter(expire_time__gt=now, start_time__lte=now)
 
 
 class TeamMessage(Message):
