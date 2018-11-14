@@ -12,9 +12,9 @@
                         <a class="list-group-item {% if mode == 'unread' %} active{% endif %}" href="{% url 'tagger_messages:overview_unread' %}">Unread messages</a>
                         <a class="list-group-item {% if mode == 'all' %} active{% endif %}" href="{% url 'tagger_messages:overview_all' %}">All messages</a>
                         {% if user_has_admin_teams %}
-                        <a class="list-group-item {% if mode == 'sent' %} active{% endif %}" href="{% url 'tagger_messages:overview_sent' %}">Sent messages</a>
+                        <a class="list-group-item {% if mode == 'sent_active' or mode == 'sent_hidden' %} active{% endif %}" href="{% url 'tagger_messages:overview_sent' %}">Sent messages</a>
                         {% endif %}
-                        <a class="list-group-item {% if mode == 'global' %} active{% endif %}" href="{% url 'tagger_messages:overview_global' %}">Global announcements</a>
+                        <a class="list-group-item {% if mode == 'global_active' or mode == 'global_hidden' %} active{% endif %}" href="{% url 'tagger_messages:overview_global' %}">Global announcements</a>
                     </div>
                     {% if user_has_admin_teams and team_message_creation_form %}
                     <div style="float: left; margin-right:1em;">
@@ -34,26 +34,36 @@
                     {% endif %}
                 </div>
                 <div class="col-md-9">
+                    {% if mode == 'sent_active' or mode == 'sent_hidden' %}
+                    <ul class="nav nav-tabs" style="margin-bottom:1em;">
+                        <li class="{% if mode == 'sent_active' %}active{% endif %}" role="presentation">
+                            <a href="{% url 'tagger_messages:overview_sent_active' %}">Active Messages</a>
+                        </li>
+                        <li class="{% if mode == 'sent_hidden' %}active{% endif %}" role="presentation">
+                            <a href="{% url 'tagger_messages:overview_sent_hidden' %}">Hidden Messages</a>
+                        </li>
+                    </ul>
+                    {% endif %}
                     {% for message in usermessages %}
                     <div class="panel panel-default">
                         <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
-                            {{message.creator}}: {{message.title}}
+                                {{message.creator}}: {{message.title}}
                             <div class="pull-right">
                                 {% if user == message.creator or user.is_staff %}
                                 <form method="post" class="form-inline" style="margin: 0px; margin-left: 1em;" action="{% url 'tagger_messages:delete_message' message.id %}">
-                                    {% csrf_token %}
-                                    <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
-                                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
+                                        {% csrf_token %}
+                                        <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
                                     </button>
                                 </form>
                                 {% endif %}
                                 {% if not user in message.read_by.all %}
                                 <form method="post" class="form-inline" style="margin: 0px; margin-left: 1em;" action="{% url 'tagger_messages:read_message' message.id %}">
-                                    {% csrf_token %}
-                                    <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Mark message as read">
-                                        <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
-                                    </button>
-                                </form>
+                                        {% csrf_token %}
+                                        <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Mark message as read">
+                                                <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
+                                            </button>
+                                        </form>
                                 {% endif %}
                             </div>
                         </div>
@@ -64,46 +74,48 @@
                                 {{message.team}}
                             </sub>
                             <sub class="pull-right">
+                                {% if mode != 'sent_hidden' %}
                                 {{message.start_time}}
+                                {% else %}
+                                [Out of range] {{message.start_time}} to {{message.expire_time}}
+                                {% endif %}
                             </sub>
                         </div>
                     </div>
                     {% endfor %}
-                    {% for message in usermessages_expired %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading" {% if not user in message.read_by.all %} style="font-weight: bold;" {% endif %} >
-                            [Expired] {{message.creator}}: {{message.title}}
-                            <div class="pull-right">
-                                {% if user == message.creator or user.is_staff %}
-                                <form method="post" class="form-inline" style="margin: 0px; margin-left: 1em;" action="{% url 'tagger_messages:delete_message' message.id %}">
-                                    {% csrf_token %}
-                                    <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
-                                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
-                                    </button>
-                                </form>
+                    {% if usermessages %}
+                    <div class="pagination">
+                        <span class="step-links">
+                            <div class="btn-group" role="group" aria-label="btn-group">
+                                {% if usermessages.has_previous %}
+                                    <a class="btn btn-default" href="?page=1">&laquo; first</a>
+                                    <a class="btn btn-default" href="?page={{ usermessages.previous_page_number }}">previous</a>
                                 {% endif %}
-                                {% if not user in message.read_by.all %}
-                                <form method="post" class="form-inline" style="margin: 0px; margin-left: 1em;" action="{% url 'tagger_messages:read_message' message.id %}">
-                                    {% csrf_token %}
-                                    <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Mark message as read">
-                                        <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
-                                    </button>
-                                </form>
+                                {% if usermessages.has_other_pages %}
+                                    <span class="current btn btn-default">
+                                        Page {{ usermessages.number }} of {{ usermessages.paginator.num_pages }}
+                                    </span>
+                                {% endif %}
+                                {% if usermessages.has_next %}
+                                    <a class="btn btn-default" href="?page={{ usermessages.next_page_number }}">next</a>
+                                    <a class="btn btn-default" href="?page={{ usermessages.paginator.num_pages }}">last &raquo;</a>
                                 {% endif %}
                             </div>
-                        </div>
-                        <div class="panel-body">
-                            <p>{{message.content}}</p>
-                            <hr style="margin-bottom: 0.8em">
-                            <sub class="pull-left">
-                                {{message.team}}
-                            </sub>
-                            <sub class="pull-right">
-                                {{message.start_time}}
-                            </sub>
-                        </div>
+                        </span>
                     </div>
-                    {% endfor %}
+                    {% endif %}
+                    {% if user.is_staff %}
+                    {% if mode == 'global_active' or mode == 'global_hidden' %}
+                    <ul class="nav nav-tabs" style="margin-bottom:1em;">
+                        <li class="{% if mode == 'global_active' %}active{% endif %}" role="presentation">
+                            <a href="{% url 'tagger_messages:overview_global_active' %}">Active Annoucements</a>
+                        </li>
+                        <li class="{% if mode == 'global_hidden' %}active{% endif %}" role="presentation">
+                            <a href="{% url 'tagger_messages:overview_global_hidden' %}">Hidden Annoucements</a>
+                        </li>
+                    </ul>
+                    {% endif %}
+                    {% endif %}
                     {% for message in global_annoucements %}
                     <div class="row">
                         <div class="col-md-12">
@@ -130,46 +142,38 @@
                                         {{message.creator}}
                                     </sub>
                                     <sub class="pull-right">
+                                        {% if mode != 'global_hidden' %}
                                         {{message.start_time}}
+                                        {% else %}
+                                        [Out of range] {{message.start_time}} to {{message.expire_time}}
+                                        {% endif %}
                                     </sub>
                                 </div>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
-                    {% for message in global_annoucements_expired %}
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <div class="panel-title">
-                                        [Expired] {{message.title}}
-                                        <div class="pull-right">
-                                            {% if user == message.creator %}
-                                            <form method="post" class="form-inline" action="{% url 'tagger_messages:delete_message' message.id %}">
-                                                {% csrf_token %}
-                                                <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
-                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
-                                                </button>
-                                            </form>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel-body">
-                                    {{message.content}}
-                                    <hr style="margin-bottom: 0.8em">
-                                    <sub class="pull-left">
-                                        {{message.creator}}
-                                    </sub>
-                                    <sub class="pull-right">
-                                        {{message.start_time}}
-                                    </sub>
-                                </div>
+                    {% if global_annoucements %}
+                    <div class="pagination">
+                        <span class="step-links">
+                            <div class="btn-group" role="group" aria-label="btn-group">
+                                {% if global_annoucements.has_previous %}
+                                    <a class="btn btn-default" href="?page=1">&laquo; first</a>
+                                    <a class="btn btn-default" href="?page={{ global_annoucements.previous_page_number }}">previous</a>
+                                {% endif %}
+                                {% if global_annoucements.has_other_pages %}
+                                    <span class="current btn btn-default">
+                                        Page {{ global_annoucements.number }} of {{ global_annoucements.paginator.num_pages }}
+                                    </span>
+                                {% endif %}
+                                {% if global_annoucements.has_next %}
+                                    <a class="btn btn-default" href="?page={{ global_annoucements.next_page_number }}">next</a>
+                                    <a class="btn btn-default" href="?page={{ global_annoucements.paginator.num_pages }}">last &raquo;</a>
+                                {% endif %}
                             </div>
-                        </div>
+                        </span>
                     </div>
-                    {% endfor %}
+                    {% endif %}
                     {% if not usermessages and not usermessages_expired and not global_message_creation_form %}
                     <div class="alert alert-info" role="alert">
                         There are no

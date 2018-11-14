@@ -147,3 +147,6 @@ IMAGE_EXTENSION = {
 
 # Sets the default expire time for new messages in days
 DEFAULT_EXPIRE_TIME = 7
+
+# Sets the default number of messages per page
+MESSAGES_PER_PAGE = 10
