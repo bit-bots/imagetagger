@@ -25,6 +25,11 @@ class Message(models.Model):
         now = timezone.now()
         return message.filter(expire_time__gt=now, start_time__lte=now)
 
+    @staticmethod
+    def not_in_range(message):
+        now = timezone.now()
+        return message.filter(Q(expire_time__lt=now) | Q(start_time__gt=now))
+
 
 class TeamMessage(Message):
     team = models.ForeignKey(
