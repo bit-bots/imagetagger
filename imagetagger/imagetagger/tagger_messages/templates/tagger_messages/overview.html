@@ -75,7 +75,7 @@
                             [Expired] {{message.creator}}: {{message.title}}
                             <div class="pull-right">
                                 {% if user == message.creator or user.is_staff %}
-                                <form method="post" class="form-inline" action="{% url 'tagger_messages:delete_message' message.id %}">
+                                <form method="post" class="form-inline" style="margin: 0px; margin-left: 1em;" action="{% url 'tagger_messages:delete_message' message.id %}">
                                     {% csrf_token %}
                                     <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Delete message">
                                         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span>
@@ -83,7 +83,7 @@
                                 </form>
                                 {% endif %}
                                 {% if not user in message.read_by.all %}
-                                <form method="post" class="form-inline" action="{% url 'tagger_messages:read_message' message.id %}">
+                                <form method="post" class="form-inline" style="margin: 0px; margin-left: 1em;" action="{% url 'tagger_messages:read_message' message.id %}">
                                     {% csrf_token %}
                                     <button class="btn btn-link" style="padding: 0px;" type="submit" data-toggle="tooltip" data-placement="bottom" title="Mark message as read">
                                         <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>
