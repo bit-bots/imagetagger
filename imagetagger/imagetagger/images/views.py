@@ -148,6 +148,10 @@ def index(request):
         usermessages = usermessages[:front_page_messages]
         too_many_massages = True        
 
+    many_annoucements = False
+    if global_annoucements.count() > 5:
+        many_annoucements = True
+
     return TemplateResponse(request, 'images/index.html', {
         'user': request.user,
         'team_creation_form': team_creation_form,
@@ -159,6 +163,7 @@ def index(request):
         'stats': stats,
         'usermessages': usermessages,
         'too_many_messages': too_many_massages,
+        'many_annoucements': many_annoucements,
         'global_annoucements': global_annoucements,
     })
 

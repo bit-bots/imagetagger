@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^send_message/global_message/$', views.send_global_message, name='send_global_message'),
     url(r'^read_message/(\d+)/$', views.read_message, name='read_message'),
     url(r'^read_message/all/$', views.read_all_messages, name='read_all_messages'),
+    url(r'^read_message/global_message/all/$', views.read_all_annoucements, name='read_all_annoucements'),
     url(r'^delete_message/(\d+)/$', views.delete_message, name='delete_message'),
     url(r'^overview/$', views.overview_unread, name='overview'),
     url(r'^overview/unread/$', views.overview_unread, name='overview_unread'),

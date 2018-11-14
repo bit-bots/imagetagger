@@ -65,6 +65,16 @@ def read_all_messages(request):
 
 @require_POST
 @login_required
+def read_all_annoucements(request):
+    global_annoucements_all = GlobalMessage.get(request.user).filter(~Q(read_by=request.user))
+    global_annoucements = Message.in_range(global_annoucements_all)
+    current_user = User.objects.get(username=request.user.username)
+    current_user.read_messages.add(*global_annoucements)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@require_POST
+@login_required
 def delete_message(request, message_id):
     if request.user.is_staff:
         Message.objects.get(id=message_id).delete()

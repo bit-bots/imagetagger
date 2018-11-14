@@ -5,7 +5,15 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            <h1>Home</h1>
+            <h1>
+                Home
+                {% if many_annoucements %}
+                <form method="post" style="margin: 0px" action="{% url 'tagger_messages:read_all_annoucements' %}" class="form-inline pull-right">
+                    {% csrf_token %}
+                    <input class="btn btn-default" type="submit" value="Mark all as read">
+                </form>
+                {% endif %}
+            </h1>
         </div>
     </div>
     {% for message in global_annoucements %}
