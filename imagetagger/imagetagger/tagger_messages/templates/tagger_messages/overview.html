@@ -170,7 +170,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                    {% if not usermessages and not global_message_creation_form %}
+                    {% if not usermessages and not usermessages_expired and not global_message_creation_form %}
                     <div class="alert alert-info" role="alert">
                         There are no
                         {% if mode == 'unread' %}
