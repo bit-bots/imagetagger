@@ -140,7 +140,7 @@ def index(request):
     # Gets all unread messages
     usermessages = Message.in_range(TeamMessage.get_messages_for_user(request.user)).filter(~Q(read_by=request.user))
 
-    too_many_messages = False
+    too_many_massages = False
 
     front_page_messages = 5
 
