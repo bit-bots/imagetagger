@@ -147,7 +147,7 @@ def index(request):
 
     if usermessages.count() > front_page_messages:
         usermessages = usermessages[:front_page_messages]
-        too_many_massages = True        
+        too_many_massages = True
 
     many_annoucements = False
     if global_annoucements.count() > 5:
