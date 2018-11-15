@@ -141,8 +141,8 @@ def manage_annotations(request, image_set_id):
             date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
             annotations = annotations.filter(time__date__gt=date)
         elif filter == 'latest-change-by' and value != '':
-            annotations = annotations.filter((Q(user__username=value)
-                                              & Q(last_editor=None)) | Q(last_editor__username=value))
+            annotations = annotations.filter((Q(user__username=value) & Q(last_editor=None)) |
+                                             Q(last_editor__username=value))
         elif filter == 'verifications-min':
             annotations = annotations.filter(verification_difference__gte=value)
         elif filter == 'verifications-max':
@@ -186,8 +186,8 @@ def delete_annotations(request, image_set_id):
                 date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
                 annotations = annotations.filter(time__date__gt=date)
             elif filter == 'latest-change-by' and value != '':
-                annotations = annotations.filter((Q(user__username=value)
-                                                  & Q(last_editor=None)) | Q(last_editor__username=value))
+                annotations = annotations.filter((Q(user__username=value) & Q(last_editor=None)) |
+                                                 Q(last_editor__username=value))
             elif filter == 'verifications-min':
                 annotations = annotations.filter(verification_difference__gte=value)
             elif filter == 'verifications-max':
@@ -472,10 +472,8 @@ def create_exportformat(request):
     object_id = request.GET.get("id", None)
     mode = request.GET.get("mode", None)
     print(mode)
-    if request.method == 'POST' and \
-            'manage_export_formats' in \
-            get_object_or_404(Team, id=request.POST['team']) \
-                .get_perms(request.user):
+    if (request.method == 'POST' and
+            'manage_export_formats' in get_object_or_404(Team, id=request.POST['team']).get_perms(request.user)):
         form = ExportFormatCreationForm(request.POST)
 
         if form.is_valid():
@@ -599,7 +597,7 @@ def create_annotation(request) -> Response:
     if not annotation_type.validate_vector(vector):
         serializer = AnnotationSerializer(
             image.annotations.filter(annotation_type__active=True).select_related()
-                .order_by('annotation_type__name'),
+                             .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -612,7 +610,7 @@ def create_annotation(request) -> Response:
     if Annotation.similar_annotations(vector, image, annotation_type):
         serializer = AnnotationSerializer(
             image.annotations.filter(annotation_type__active=True).select_related()
-                .order_by('annotation_type__name'),
+                             .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -637,7 +635,7 @@ def create_annotation(request) -> Response:
 
     serializer = AnnotationSerializer(
         annotation.image.annotations.filter(annotation_type__active=True).select_related()
-            .order_by('annotation_type__name'),
+                                    .order_by('annotation_type__name'),
         context={
             'request': request,
         },
@@ -835,7 +833,7 @@ def update_annotation(request) -> Response:
     if not annotation_type.validate_vector(vector):
         serializer = AnnotationSerializer(
             annotation.image.annotations.filter(annotation_type__active=True).select_related()
-                .order_by('annotation_type__name'),
+                                        .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -850,7 +848,7 @@ def update_annotation(request) -> Response:
         annotation.delete()
         serializer = AnnotationSerializer(
             annotation.image.annotations.filter(annotation_type__active=True).select_related()
-                .order_by('annotation_type__name'),
+                                        .order_by('annotation_type__name'),
             context={
                 'request': request,
             },
@@ -874,8 +872,8 @@ def update_annotation(request) -> Response:
 
     serializer = AnnotationSerializer(
         annotation.image.annotations.filter(annotation_type__active=True).select_related()
-            .filter(annotation_type__active=True)
-            .order_by('annotation_type__name'),
+                                    .filter(annotation_type__active=True)
+                                    .order_by('annotation_type__name'),
         context={
             'request': request,
         },

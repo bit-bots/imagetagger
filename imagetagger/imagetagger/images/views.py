@@ -441,7 +441,7 @@ def view_imageset(request, image_set_id):
         'images': images,
         'annotationcount': len(annotations),
         'imageset': imageset,
-        'imageset_description' : imageset_description_md,
+        'imageset_description': imageset_description_md,
         'annotationtypes': annotation_types,
         'annotation_types': annotation_types,
         'all_annotation_types': all_annotation_types,

@@ -413,7 +413,7 @@ class AnnotationType(models.Model):
     import bleach
     from bleach_whitelist import markdown_tags, markdown_attrs
     import markdown
-    
+
     bleach.clean(markdown.markdown(annotation_type.md_description), markdown_tags, markdown_attrs))
     *************
     """
