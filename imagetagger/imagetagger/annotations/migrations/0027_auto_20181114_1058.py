@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='exportformat',
             name='vector_format',
-            field=imagetagger.annotations.fields.NonStrippingTextField(default='x%%count1: %%x%%bry%%count1: %%y%%br', max_length=200),
+            field=imagetagger.annotations.fields.NonStrippingTextField(default='x%%count1: %%x%%bry%%count1: %%y%%br'),
         ),
     ]
