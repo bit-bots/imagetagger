@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from imagetagger.users.models import User, Team, TeamMembership
-from imagetagger.tagger_messages.models import TeamMessage
+from imagetagger.tagger_messages.models import TeamMessage, GlobalMessage
 from datetime import timedelta
 from django.utils import timezone
 from random import randint
@@ -12,19 +12,21 @@ class Command(BaseCommand):
     help = 'Test database performance for the messages'
 
     def handle(self, *args, **options):
-        user_count = 200
+        user_count = 5000
         team_count = 30
-        message_count = 20000
+        message_count = 50000
+        announcement_count = 5000
         if self.confirm():
             self.create_users(user_count)
             self.create_teams(team_count)
-            self.create_messages(message_count)        
+            self.create_messages(message_count) 
+            self.create_announcements(announcement_count)       
 
     def create_users(self, user_count):
         User.objects.all().delete()
         for i in range(user_count):
             fake_name = faker.user_name()
-            while User.objects.get(username=fake_name).exists():
+            while User.objects.filter(username=fake_name).exists():
                 fake_name = faker.user_name()
             User.objects.create(username=fake_name)
     
@@ -53,7 +55,20 @@ class Command(BaseCommand):
             offset = timedelta(days=randint(-200,200))
             start_date = timezone.now() + timedelta(days=randint(-20,0)) + offset
             exp_date = timezone.now() + timedelta(days=randint(0,30)) + offset
-            TeamMessage.objects.create(team=team_obj, creator=user_obj, start_time=start_date, expire_time=exp_date)
+            TeamMessage.objects.create(title=faker.sentences(nb=1, ext_word_list=None)[0], \
+                                        content=faker.text(max_nb_chars=200, ext_word_list=None), \
+                                        team=team_obj, creator=user_obj, start_time=start_date, \
+                                        expire_time=exp_date)
+
+    def create_announcements(self, announcement_count):
+        GlobalMessage.objects.all().delete()
+        user_count = User.objects.all().count()
+        for i in range(announcement_count):
+            user_obj = User.objects.all()[randint(0,user_count - 1)]
+            offset = timedelta(days=randint(-200,200))
+            start_date = timezone.now() + timedelta(days=randint(-20,0)) + offset
+            exp_date = timezone.now() + timedelta(days=randint(0,30)) + offset
+            GlobalMessage.objects.create(title=faker.sentences(nb=1, ext_word_list=None)[0], creator=user_obj, start_time=start_date, expire_time=exp_date)
 
     def confirm(self):
         print("Do you realy want flush the Database!!! (yes/no)")
