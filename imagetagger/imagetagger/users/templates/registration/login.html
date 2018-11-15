@@ -5,7 +5,7 @@
 {% block bodyblock %}
     <div class="row">
         <div class="col-md-4 col-md-offset-4">
-            <div class="panel panel-primary">
+            <div class="panel panel-primary login-panel">
                 <div class="panel-heading">
                     <h1 class="panel-title">Login</h1>
                 </div>
@@ -31,7 +31,10 @@
                         {% endfor %}
                         <input type="submit" class="btn btn-primary" name="login" value="Log in"/>
                     </form>
-                <a href="{% url 'registration_register' %}">Register a new User</a> - <a href="{% url 'password_reset' %}">Password Reset</a>                </div>
+                    <div class="login-panel-footer">
+                        <a href="{% url 'registration_register' %}">Register a new User</a> - <a href="{% url 'password_reset' %}">Password Reset</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

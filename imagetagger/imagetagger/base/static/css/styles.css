@@ -252,3 +252,11 @@ body {
 .container .text-muted {
   margin: 20px 0;
 }
+
+.login-panel-footer {
+  margin-top: 1em;
+}
+
+.login-panel {
+  margin-top: 2em;
+}
