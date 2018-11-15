@@ -34,8 +34,10 @@ def export_auth(request, export_id):
 @login_required
 def descriptions(request):
     annotation_types = AnnotationType.objects.filter(active=True).order_by('name')
-    annotation_types_list = [(annotation_type.name, bleach.clean(markdown.markdown(annotation_type.md_description), markdown_tags, markdown_attrs)) for annotation_type in
-                             annotation_types if annotation_type.md_description]
+    annotation_types_list = [(annotation_type.name,
+                              bleach.clean(markdown.markdown(annotation_type.md_description),
+                                           markdown_tags, markdown_attrs))
+                             for annotation_type in annotation_types if annotation_type.md_description]
     no_descriptions_available = len(annotation_types_list) == 0
     return render(request, 'annotations/descriptions.html', {
         'annotation_types': annotation_types_list,
@@ -139,8 +141,8 @@ def manage_annotations(request, image_set_id):
             date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
             annotations = annotations.filter(time__date__gt=date)
         elif filter == 'latest-change-by' and value != '':
-            annotations = annotations.filter(
-                (Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
+            annotations = annotations.filter((Q(user__username=value)
+                                              & Q(last_editor=None)) | Q(last_editor__username=value))
         elif filter == 'verifications-min':
             annotations = annotations.filter(verification_difference__gte=value)
         elif filter == 'verifications-max':
@@ -184,8 +186,8 @@ def delete_annotations(request, image_set_id):
                 date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
                 annotations = annotations.filter(time__date__gt=date)
             elif filter == 'latest-change-by' and value != '':
-                annotations = annotations.filter(
-                    (Q(user__username=value) & Q(last_editor=None)) | Q(last_editor__username=value))
+                annotations = annotations.filter((Q(user__username=value)
+                                                  & Q(last_editor=None)) | Q(last_editor__username=value))
             elif filter == 'verifications-min':
                 annotations = annotations.filter(verification_difference__gte=value)
             elif filter == 'verifications-max':
@@ -473,7 +475,7 @@ def create_exportformat(request):
     if request.method == 'POST' and \
             'manage_export_formats' in \
             get_object_or_404(Team, id=request.POST['team']) \
-                    .get_perms(request.user):
+                .get_perms(request.user):
         form = ExportFormatCreationForm(request.POST)
 
         if form.is_valid():
@@ -763,8 +765,8 @@ def load_filtered_set_annotations(request) -> Response:
     if annotation_type_id > -1:
         annotations = annotations.filter(annotation_type__id=annotation_type_id)
     if verified:
-        annotations = [annotation for annotation in annotations if
-                       not user_verifications.filter(annotation=annotation).exists()]
+        annotations = [annotation for annotation in annotations
+                       if not user_verifications.filter(annotation=annotation).exists()]
 
     if not imageset.has_perm('read', request.user):
         return Response({
