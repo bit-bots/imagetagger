@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('annotations', '0026_index_verification_time'),
+        ('annotations', '0027_auto_20181114_1058'),
     ]
 
     operations = [
