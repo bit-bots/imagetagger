@@ -1,5 +1,6 @@
 {% extends 'base/base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 
 {% block bodyblock %}
@@ -199,7 +200,7 @@
                                                     <td>![Image](http://url/image.png)</td>
                                                     <td></td>
                                                     <td>
-                                                        <img src="http://localhost:8000/static/symbols/bitbots-logo.png"
+                                                        <img src="{% static 'symbols/bitbots-logo.png' %}"
                                                              alt="Image">
                                                     </td>
                                                 </tr>
