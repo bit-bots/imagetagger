@@ -43,6 +43,16 @@ class ImageSet(models.Model):
     path = models.CharField(max_length=100, unique=True, null=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100, null=True, blank=True)
+    """
+    FOR SAFETY REASONS: use this description field to render html as seen below:
+    *************
+    import bleach
+    from bleach_whitelist import markdown_tags, markdown_attrs
+    import markdown
+
+    bleach.clean(markdown.markdown(imageset.description), markdown_tags, markdown_attrs))
+    *************
+    """
     description = models.TextField(max_length=1000, null=True, blank=True)
     time = models.DateTimeField(auto_now_add=True)
     team = models.ForeignKey(
