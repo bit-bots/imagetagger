@@ -174,14 +174,18 @@
                         </span>
                     </div>
                     {% endif %}
-                    {% if not usermessages and not usermessages_expired and not global_message_creation_form %}
+                    {% if not usermessages and not global_annoucements %}
                     <div class="alert alert-info" role="alert">
                         There are no
                         {% if mode == 'unread' %}
                             unread
                         {% endif %}
-                            messages.                              
-                    {% if user_has_admin_teams and mode != 'unread' %}
+                            {% if global_message_creation_form %}
+                            global annoucements.
+                            {% else %}
+                            messages.
+                            {% endif %}                              
+                    {% if user_has_admin_teams and mode != 'unread' and not global_message_creation_form %}
                     <input name="create_message2" class="btn btn-default pull-right" style="margin-top: -0.5em" value="Create One" data-toggle="modal" data-target="#newMessageModal" type="button">
                     </div>
                     {% endif %}
