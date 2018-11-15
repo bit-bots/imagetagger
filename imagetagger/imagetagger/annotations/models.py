@@ -407,6 +407,16 @@ class AnnotationType(models.Model):
     node_count = models.IntegerField(default=0)
     enable_concealed = models.BooleanField(default=True)
     enable_blurred = models.BooleanField(default=True)
+    """
+    FOR SAFETY REASONS: use this description field to render html as seen below:
+    *************
+    import bleach
+    from bleach_whitelist import markdown_tags, markdown_attrs
+    import markdown
+    
+    bleach.clean(markdown.markdown(annotation_type.md_description), markdown_tags, markdown_attrs))
+    *************
+    """
     md_description = models.TextField(default='', blank=True)
 
     def __str__(self):
