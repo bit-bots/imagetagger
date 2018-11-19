@@ -53,7 +53,7 @@ class ImageSet(models.Model):
     bleach.clean(markdown.markdown(imageset.description), markdown_tags, markdown_attrs))
     *************
     """
-    description = models.TextField(max_length=1000, null=True, blank=True)
+    description = models.TextField(max_length=2000, default="", blank=True)
     time = models.DateTimeField(auto_now_add=True)
     team = models.ForeignKey(
         Team,
