@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^imageset/(\d+)/pin/$', views.toggle_pin_imageset, name='pin_imageset'),
     url(r'^imageset/(\d+)/edit/$', views.edit_imageset, name='edit_imageset'),
     url(r'^imageset/(\d+)/$', views.view_imageset, name='view_imageset'),
+    url(r'^imageset/(\d+)/download/$', views.download_imageset_zip, name='download_imageset'),
     url(r'^imageset/explore/$', views.explore_imageset, name='explore_imageset'),
     url(r'^imageset/imagetagger_dl_script.py$', views.dl_script, name='dl_script'),
     url(r'^api/imageset/load/$', views.load_image_set, name='load_image_set'),

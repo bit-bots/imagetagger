@@ -1,6 +1,7 @@
 Django>=2.0,<2.1
 djangorestframework
 django-widget-tweaks
+fasteners
 Pillow
 psycopg2-binary
 # Using a fork of django-registration to be compatible with django 2.0

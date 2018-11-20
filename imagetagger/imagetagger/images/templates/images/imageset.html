@@ -218,10 +218,29 @@
                                         </ul>
                                     </td>
                                 </tr>
+                                {% if imageset.images.count > 0 %}
                                 <tr>
                                     <td>Download</td>
-                                    <td><a href="{% url 'images:dl_script' %}">Download Script</a> Image Download via <pre>./imagetagger_dl_script.py {{ imageset.id }}</pre> to current directory</td>
+                                    <td>
+                                        {% if enable_zip_download %}
+                                        <ul>
+                                            <li>
+                                                {% if imageset.zip_state == imageset.ZipState.READY %}
+                                                    <a href="{% url 'images:download_imageset' imageset.id %}">Download zip</a>
+                                                {% else %}
+                                                    Download zip (processing, wait a few moments)
+                                                {% endif %}
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'images:dl_script' %}">Download Script</a> Image Download via <pre>./imagetagger_dl_script.py {{ imageset.id }}</pre> to current directory
+                                            </li>
+                                        </ul>
+                                        {% else %}
+                                            <a href="{% url 'images:dl_script' %}">Download Script</a> Image Download via <pre>./imagetagger_dl_script.py {{ imageset.id }}</pre> to current directory
+                                        {% endif %}
+                                    </td>
                                 </tr>
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>

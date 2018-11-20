@@ -7,7 +7,8 @@ from django.db.models import Count, Q
 from django.db.models.expressions import F
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse, \
+    FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
@@ -16,7 +17,7 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
-    HTTP_201_CREATED
+    HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 from PIL import Image as PIL_Image
 
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
@@ -448,6 +449,7 @@ def view_imageset(request, image_set_id):
         'export_formats': ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams)),
         'label_upload_form': LabelUploadForm(),
         'upload_notice': settings.UPLOAD_NOTICE,
+        'enable_zip_download': settings.ENABLE_ZIP_DOWNLOAD,
     })
 
 
@@ -690,6 +692,37 @@ def dl_script(request):
     return TemplateResponse(request, 'images/download.py', context={
                             'base_url': settings.DOWNLOAD_BASE_URL,
                             }, content_type='text/plain')
+
+
+def download_imageset_zip(request, image_set_id):
+    image_set = get_object_or_404(ImageSet, id=image_set_id)
+
+    if not settings.ENABLE_ZIP_DOWNLOAD:
+        return HttpResponse(status=HTTP_404_NOT_FOUND)
+
+    if not image_set.has_perm('read', request.user):
+        return HttpResponseForbidden()
+
+    if image_set.image_count == 0:
+        # It should not be possible to download empty image sets. This
+        # is already blocked in the UI, but it should also be checked
+        # on the server side.
+        return HttpResponse(status=HTTP_204_NO_CONTENT)
+
+    if image_set.zip_state != ImageSet.ZipState.READY:
+        return HttpResponse(content=b'Imageset is currently processed', status=HTTP_202_ACCEPTED)
+
+    if settings.USE_NGINX_IMAGE_PROVISION:
+        response = HttpResponse()
+        response["Content-Disposition"] = "attachment; filename={0}".format(image_set.zip_name())
+        response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image_set.zip_path())
+        return response
+    else:
+        file_path = os.path.join(settings.IMAGE_PATH, image_set.zip_path())
+        response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
+        response['Content-Length'] = os.path.getsize(file_path)
+        response['Content-Disposition'] = "attachment; filename={}".format(image_set.zip_name())
+        return response
 
 
 @login_required

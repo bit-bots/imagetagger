@@ -2,7 +2,7 @@ from typing import Set
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
 import os
 
 from imagetagger.users.models import Team
@@ -24,6 +24,18 @@ class Image(models.Model):
     def relative_path(self):
         return os.path.join(self.image_set.path, self.filename)
 
+    def delete(self, *args, **kwargs):
+        with transaction.atomic():
+            self.image_set.zip_state = ImageSet.ZipState.INVALID
+            self.image_set.save()
+        super(Image, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.image_set.zip_state = ImageSet.ZipState.INVALID
+            self.image_set.save()
+        super(Image, self).save(*args, **kwargs)
+
     def __str__(self):
         return u'Image: {0}'.format(self.name)
 
@@ -34,10 +46,21 @@ class ImageSet(models.Model):
             'name',
             'team',
         ]
+
+    class ZipState:
+        READY = 0
+        PROCESSING = 1
+        INVALID = 2
+
     PRIORITIES = (
         (1, 'High'),
         (0, 'Normal'),
         (-1, 'Low'),
+    )
+    ZIP_STATES = (
+        (ZipState.READY, 'ready'),
+        (ZipState.PROCESSING, 'processing'),
+        (ZipState.INVALID, 'invalid'),
     )
 
     path = models.CharField(max_length=100, unique=True, null=True)
@@ -68,9 +91,16 @@ class ImageSet(models.Model):
         default=None
     )
     pinned_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pinned_sets')
+    zip_state = models.IntegerField(choices=ZIP_STATES, default=ZipState.INVALID)
 
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)
+
+    def zip_path(self):
+        return os.path.join(self.path, self.zip_name())
+
+    def zip_name(self):
+        return "imageset_{}.zip".format(self.id)
 
     @property
     def image_count(self):
