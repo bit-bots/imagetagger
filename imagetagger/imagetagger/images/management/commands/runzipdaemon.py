@@ -5,7 +5,6 @@ from time import sleep
 import zipfile
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
-from django.db import transaction
 from django.db.models import Q
 
 from imagetagger.images.models import ImageSet
