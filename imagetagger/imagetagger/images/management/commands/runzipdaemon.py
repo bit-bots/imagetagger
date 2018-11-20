@@ -30,15 +30,17 @@ class Command(BaseCommand):
                                'If this problem persists, delete {}.\n'.format(lock.path))
 
     def _regenerate_zip(self, imageset):
-        imageset.zip_state = ImageSet.ZipState.PROCESSING
-        imageset.save(update_fields=('zip_state',))
+        updated = ImageSet.objects.filter(pk=imageset.pk) \
+            .filter(~Q(zip_state=ImageSet.ZipState.READY)) \
+            .update(zip_state=ImageSet.ZipState.PROCESSING)
+        if not updated:
+            self.stderr.write('skipping regeneration of ready imageset {}'.format(imageset.name))
+            return
 
         with zipfile.ZipFile(os.path.join(settings.IMAGE_PATH, imageset.zip_path()), 'w') as f:
             for image in imageset.images.all():
                 f.write(image.path(), image.name)
 
-        imageset.refresh_from_db(fields=('zip_state',))
-        if imageset.zip_state == ImageSet.ZipState.PROCESSING:
-            # The image set has not been set to invalid during the zipping process
-            imageset.zip_state = ImageSet.ZipState.READY
-            imageset.save(update_fields=('zip_state',))
+        # Set state to ready if image set has not been set to invalid during regeneration
+        ImageSet.objects.filter(pk=imageset.pk, zip_state=ImageSet.ZipState.PROCESSING) \
+            .update(zip_state=ImageSet.ZipState.READY)
