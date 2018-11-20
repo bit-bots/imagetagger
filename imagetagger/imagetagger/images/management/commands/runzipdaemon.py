@@ -38,6 +38,7 @@ class Command(BaseCommand):
             for image in imageset.images.all():
                 f.write(image.path(), image.name)
 
+        imageset.refresh_from_db(fields=('zip_state',))
         if imageset.zip_state == ImageSet.ZipState.PROCESSING:
             # The image set has not been set to invalid during the zipping process
             imageset.zip_state = ImageSet.ZipState.READY
