@@ -25,15 +25,13 @@ class Image(models.Model):
         return os.path.join(self.image_set.path, self.filename)
 
     def delete(self, *args, **kwargs):
-        with transaction.atomic():
-            self.image_set.zip_state = ImageSet.ZipState.INVALID
-            self.image_set.save()
+        self.image_set.zip_state = ImageSet.ZipState.INVALID
+        self.image_set.save(update_fields=('zip_state',))
         super(Image, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        with transaction.atomic():
-            self.image_set.zip_state = ImageSet.ZipState.INVALID
-            self.image_set.save()
+        self.image_set.zip_state = ImageSet.ZipState.INVALID
+        self.image_set.save(update_fields=('zip_state',))
         super(Image, self).save(*args, **kwargs)
 
     def __str__(self):

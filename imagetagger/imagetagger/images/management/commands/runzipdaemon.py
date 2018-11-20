@@ -31,9 +31,8 @@ class Command(BaseCommand):
                                'If this problem persists, delete {}.\n'.format(lock.path))
 
     def _regenerate_zip(self, imageset):
-        with transaction.atomic():
-            imageset.zip_state = ImageSet.ZipState.PROCESSING
-            imageset.save()
+        imageset.zip_state = ImageSet.ZipState.PROCESSING
+        imageset.save(update_fields=('zip_state',))
 
         with zipfile.ZipFile(os.path.join(settings.IMAGE_PATH, imageset.zip_path()), 'w') as f:
             for image in imageset.images.all():
@@ -41,6 +40,5 @@ class Command(BaseCommand):
 
         if imageset.zip_state == ImageSet.ZipState.PROCESSING:
             # The image set has not been set to invalid during the zipping process
-            with transaction.atomic():
-                imageset.zip_state = ImageSet.ZipState.READY
-                imageset.save()
+            imageset.zip_state = ImageSet.ZipState.READY
+            imageset.save(update_fields=('zip_state',))
