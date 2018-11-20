@@ -1,11 +1,10 @@
 import fasteners
 import os
-import sys
 from time import sleep
 
 import zipfile
 from django.conf import settings
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import Q
 
@@ -17,8 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not settings.ENABLE_ZIP_DOWNLOAD:
-            sys.stderr.write('To enable zip download, set ENABLE_ZIP_DOWNLOAD to True in settings.py\n')
-            return
+            raise CommandError('To enable zip download, set ENABLE_ZIP_DOWNLOAD to True in settings.py')
 
         lock = fasteners.InterProcessLock(os.path.join(settings.IMAGE_PATH, 'zip.lock'))
         gotten = lock.acquire(blocking=False)
@@ -28,9 +26,9 @@ class Command(BaseCommand):
                     self._regenerate_zip(imageset)
                 sleep(10)
         else:
-            sys.stderr.write('The lockfile is present. There seems to be another instance of the zip daemon running.'
-                             'Please stop it before starting a new one.\n'
-                             'If this problem persists, delete {}.\n'.format(lock.path))
+            raise CommandError('The lockfile is present. There seems to be another instance of the zip daemon running.\n'
+                               'Please stop it before starting a new one.\n'
+                               'If this problem persists, delete {}.\n'.format(lock.path))
 
     def _regenerate_zip(self, imageset):
         with transaction.atomic():
