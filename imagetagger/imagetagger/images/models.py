@@ -46,9 +46,9 @@ class ImageSet(models.Model):
         ]
 
     class ZipState:
-        READY = 0
-        PROCESSING = 1
-        INVALID = 2
+        INVALID = 0
+        READY = 1
+        PROCESSING = 2
 
     PRIORITIES = (
         (1, 'High'),
@@ -56,9 +56,9 @@ class ImageSet(models.Model):
         (-1, 'Low'),
     )
     ZIP_STATES = (
+        (ZipState.INVALID, 'invalid'),
         (ZipState.READY, 'ready'),
         (ZipState.PROCESSING, 'processing'),
-        (ZipState.INVALID, 'invalid'),
     )
 
     path = models.CharField(max_length=100, unique=True, null=True)
