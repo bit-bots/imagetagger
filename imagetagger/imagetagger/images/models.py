@@ -100,6 +100,9 @@ class ImageSet(models.Model):
     def zip_name(self):
         return "imageset_{}.zip".format(self.id)
 
+    def tmp_zip_path(self):
+        return os.path.join(self.path, ".tmp." + self.zip_name())
+
     @property
     def image_count(self):
         if hasattr(self, 'image_count_agg'):

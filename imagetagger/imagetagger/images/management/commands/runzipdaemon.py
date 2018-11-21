@@ -37,9 +37,12 @@ class Command(BaseCommand):
             self.stderr.write('skipping regeneration of ready imageset {}'.format(imageset.name))
             return
 
-        with zipfile.ZipFile(os.path.join(settings.IMAGE_PATH, imageset.zip_path()), 'w') as f:
+        with zipfile.ZipFile(os.path.join(settings.IMAGE_PATH, imageset.tmp_zip_path()), 'w') as f:
             for image in imageset.images.all():
                 f.write(image.path(), image.name)
+
+        os.rename(os.path.join(settings.IMAGE_PATH, imageset.tmp_zip_path()),
+                  os.path.join(settings.IMAGE_PATH, imageset.zip_path()))
 
         # Set state to ready if image set has not been set to invalid during regeneration
         ImageSet.objects.filter(pk=imageset.pk, zip_state=ImageSet.ZipState.PROCESSING) \
