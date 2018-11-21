@@ -695,6 +695,11 @@ def dl_script(request):
 
 
 def download_imageset_zip(request, image_set_id):
+    """
+    Get a zip archive containing the images of the imageset with id image_set_id.
+    If the zip file generation is still in progress, a HTTP status 202 (ACCEPTED) is returned.
+    For empty image sets, status 204 (NO CONTENT) is returned instead of an empty zip file.
+    """
     image_set = get_object_or_404(ImageSet, id=image_set_id)
 
     if not settings.ENABLE_ZIP_DOWNLOAD:

@@ -160,6 +160,10 @@ server {
 If you want to provide zip files of image sets, set `ENABLE_ZIP_DOWNLOAD = True` in your `settings.py`.
 A daemon that creates and updates the zip files is necessary, you can start it with `./manage.py runzipdaemon`.
 
+Zip archive download via a script is also possible. The URL is `/images/imageset/<id>/download/`. A successful request
+returns HTTP 200 OK and the zip file. When the file generation is still in progress, HTTP 202 ACCEPTED is returned.
+For an empty image set, HTTP 204 NO CONTENT is returned instead of an empty zip archive.
+
 ## Used dependencies
 
 The ImageTagger relies on the following plugins, libraries and frameworks:
