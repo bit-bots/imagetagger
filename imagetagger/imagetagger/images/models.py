@@ -24,6 +24,16 @@ class Image(models.Model):
     def relative_path(self):
         return os.path.join(self.image_set.path, self.filename)
 
+    def delete(self, *args, **kwargs):
+        self.image_set.zip_state = ImageSet.ZipState.INVALID
+        self.image_set.save(update_fields=('zip_state',))
+        super(Image, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.image_set.zip_state = ImageSet.ZipState.INVALID
+        self.image_set.save(update_fields=('zip_state',))
+        super(Image, self).save(*args, **kwargs)
+
     def __str__(self):
         return u'Image: {0}'.format(self.name)
 
@@ -34,10 +44,21 @@ class ImageSet(models.Model):
             'name',
             'team',
         ]
+
+    class ZipState:
+        INVALID = 0
+        READY = 1
+        PROCESSING = 2
+
     PRIORITIES = (
         (1, 'High'),
         (0, 'Normal'),
         (-1, 'Low'),
+    )
+    ZIP_STATES = (
+        (ZipState.INVALID, 'invalid'),
+        (ZipState.READY, 'ready'),
+        (ZipState.PROCESSING, 'processing'),
     )
 
     path = models.CharField(max_length=100, unique=True, null=True)
@@ -68,9 +89,19 @@ class ImageSet(models.Model):
         default=None
     )
     pinned_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pinned_sets')
+    zip_state = models.IntegerField(choices=ZIP_STATES, default=ZipState.INVALID)
 
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)
+
+    def zip_path(self):
+        return os.path.join(self.path, self.zip_name())
+
+    def zip_name(self):
+        return "imageset_{}.zip".format(self.id)
+
+    def tmp_zip_path(self):
+        return os.path.join(self.path, ".tmp." + self.zip_name())
 
     @property
     def image_count(self):

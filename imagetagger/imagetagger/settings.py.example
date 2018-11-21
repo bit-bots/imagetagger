@@ -69,6 +69,8 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 UPLOAD_FS_GROUP = 33  # www-data on debian
 
+ENABLE_ZIP_DOWNLOAD = False  # If enabled, run manage.py runzipdaemon to create the zip files and keep them up to date
+
 # Test mail functionality by printing mails to console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TOOLS_ENABLED = True
