@@ -2,10 +2,10 @@ import fasteners
 import os
 from time import sleep
 
-import zipfile
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
+from zipfile import ZipFile
 
 from imagetagger.images.models import ImageSet
 
@@ -37,7 +37,7 @@ class Command(BaseCommand):
             self.stderr.write('skipping regeneration of ready imageset {}'.format(imageset.name))
             return
 
-        with zipfile.ZipFile(os.path.join(settings.IMAGE_PATH, imageset.tmp_zip_path()), 'w') as f:
+        with ZipFile(os.path.join(settings.IMAGE_PATH, imageset.tmp_zip_path()), 'w') as f:
             for image in imageset.images.all():
                 f.write(image.path(), image.name)
 
