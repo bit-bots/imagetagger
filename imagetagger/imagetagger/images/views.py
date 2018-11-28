@@ -353,15 +353,17 @@ def view_image(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if not image.image_set.has_perm('read', request.user):
         return HttpResponseForbidden()
-    if settings.USE_NGINX_IMAGE_PROVISION:
-        response = HttpResponse()
-        response["Content-Disposition"] = "attachment; filename={0}".format(
-            image.name)
-        response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image.relative_path())
-        return response
-    with open(os.path.join(settings.IMAGE_PATH, image.path()), "rb") as f:
-        return HttpResponse(f.read(), content_type="image/jpeg")
 
+    file_path = os.path.join(settings.IMAGE_PATH, image.path())
+
+    if settings.USE_NGINX_IMAGE_PROVISION:
+        response = HttpResponse(content_type='image')
+        response['X-Accel-Redirect'] = "/ngx_static_dn/{}".format(image.relative_path())
+    else:
+        response =  FileResponse(open(file_path, 'rb'), content_type="image")
+
+    response["Content-Length"] = os.path.getsize(file_path)
+    return response
 
 @login_required
 def list_images(request, image_set_id):
@@ -717,17 +719,17 @@ def download_imageset_zip(request, image_set_id):
     if image_set.zip_state != ImageSet.ZipState.READY:
         return HttpResponse(content=b'Imageset is currently processed', status=HTTP_202_ACCEPTED)
 
+    file_path = os.path.join(settings.IMAGE_PATH, image_set.zip_path())
+
     if settings.USE_NGINX_IMAGE_PROVISION:
-        response = HttpResponse()
-        response["Content-Disposition"] = "attachment; filename={0}".format(image_set.zip_name())
+        response = HttpResponse(content_type='application/zip')
         response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image_set.zip_path())
-        return response
     else:
-        file_path = os.path.join(settings.IMAGE_PATH, image_set.zip_path())
         response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
-        response['Content-Length'] = os.path.getsize(file_path)
-        response['Content-Disposition'] = "attachment; filename={}".format(image_set.zip_name())
-        return response
+
+    response['Content-Length'] = os.path.getsize(file_path)
+    response['Content-Disposition'] = "attachment; filename={}".format(image_set.zip_name())
+    return response
 
 
 @login_required
