@@ -19,12 +19,14 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
     HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 from PIL import Image as PIL_Image
+from PIL.ExifTags import TAGS
 
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
 from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
+import json
 
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
@@ -173,6 +175,13 @@ def index(request):
 @login_required
 @require_http_methods(["POST", ])
 def upload_image(request, imageset_id):
+    def extract_metadata(img):
+        metadata = dict()
+        if img._getexif() is not None:
+            for (tag, value) in img._getexif().items():
+                metadata[TAGS.get(tag)] = value
+        return json.dumps(metadata, default=str)
+    
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     if request.method == 'POST' \
             and imageset.has_perm('edit_set', request.user) \
@@ -235,6 +244,8 @@ def upload_image(request, imageset_id):
                                 try:
                                     with PIL_Image.open(file_path) as image:
                                         width, height = image.size
+                                        # extracting metadata info
+                                        metadata = extract_metadata(image_file)
                                     file_new_path = os.path.join(imageset.root_path(), img_fname)
                                     shutil.move(file_path, file_new_path)
                                     shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
@@ -243,7 +254,8 @@ def upload_image(request, imageset_id):
                                                       filename=img_fname,
                                                       checksum=fchecksum,
                                                       width=width,
-                                                      height=height
+                                                      height=height,
+                                                      metadata=metadata
                                                       )
                                     new_image.save()
                                 except (OSError, IOError):
@@ -283,8 +295,11 @@ def upload_image(request, imageset_id):
                         try:
                             with PIL_Image.open(image.path()) as image_file:
                                 width, height = image_file.size
+                                # extracting metadata info
+                                metadata = extract_metadata(image_file)
                             image.height = height
                             image.width = width
+                            image.metadata = metadata
                             image.save()
                         except (OSError, IOError):
                             error['damaged'] = True
