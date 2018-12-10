@@ -3,299 +3,368 @@
 {% load static %}
 
 {% block additional_annotation_css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'annotations/css/bounding_boxes.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'annotations/css/bounding_boxes.css' %}"/>
     <style>
-    {% if not "delete_annotation" in imageset_perms %}
-        .annotation_delete_button {
-            visibility: hidden;
-            display: none;
-        }
-    {%  endif %}
-    {% if not "verify" in imageset_perms %}
-        .annotation_verify_button {
-            visibility: hidden;
-            display: none;
-        }
-    {%  endif %}
-    {% if not "edit_annotation" in imageset_perms %}
-        .annotation_edit_button {
-            visibility: hidden;
-            display: none;
-    }
-    {%  endif %}
+        {% if not "delete_annotation" in imageset_perms %}
+            .annotation_delete_button {
+                visibility: hidden;
+                display: none;
+            }
+        {%  endif %}
+
+        {% if not "verify" in imageset_perms %}
+            .annotation_verify_button {
+                visibility: hidden;
+                display: none;
+            }
+        {%  endif %}
+
+        {% if not "edit_annotation" in imageset_perms %}
+            .annotation_edit_button {
+                visibility: hidden;
+                display: none;
+            }
+        {%  endif %}
     </style>
 {% endblock additional_annotation_css %}
 
 {% block additional_annotation_js %}
-<script type="text/javascript" src="{% static 'annotations/js/boundingboxes.js' %}"></script>
-<script type="text/javascript" src="{% static 'annotations/js/canvas.js' %}"></script>
-<script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
+    <script type="text/javascript" src="{% static 'annotations/js/boundingboxes.js' %}"></script>
+    <script type="text/javascript" src="{% static 'annotations/js/canvas.js' %}"></script>
+    <script type="text/javascript" src="{% static 'annotations/js/annotations.js' %}"></script>
 {% endblock additional_annotation_js %}
 {% block bodyblock %}
-<div class="container-fluid">
-  <div id="feedback_annotation_created" class="js_feedback alert alert-success hidden">
-    {% trans 'The annotation was successfully created.' %}
-  </div>
-  <div id="feedback_annotation_deleted" class="js_feedback alert alert-success hidden">
-    {% trans 'The annotation was successfully deleted.' %}
-  </div>
-  <div id="feedback_annotation_exists" class="js_feedback alert alert-info hidden">
-    {% trans 'A similar annotation exists already.' %}
-  </div>
-  <div id="feedback_annotation_exists_deleted" class="js_feedback alert alert-warning hidden">
-    {% trans 'A similar annotation exists already. The edited annotation was deleted.' %}
-  </div>
-  <div id="feedback_annotation_invalid" class="js_feedback alert alert-warning hidden">
-    {% trans 'The annotation is invalid.' %}
-  </div>
-  <div id="feedback_annotation_type_missing" class="js_feedback alert alert-warning hidden">
-    {% trans 'You have to choose a type for the annotation.' %}
-  </div>
-  <div id="feedback_connection_error" class="js_feedback alert alert-danger hidden">
-    {% trans 'There was an unhandled error during the connection.' %}
-  </div>
-  <div id="feedback_save_successful" class="js_feedback alert alert-success hidden">
-    {% trans 'The annotation was successfully saved.' %}
-  </div>
-  <div id="feedback_annotation_updated" class="js_feedback alert alert-success hidden">
-    {% trans 'The annotation was successfully updated.' %}
-  </div>
-  <div id="feedback_image_set_empty" class="js_feedback alert alert-danger hidden">
-    {% trans 'The image set is empty with that filter applied.' %}
-  </div>
-  <div id="feedback_multiline_information" class="js_feedback alert alert-info hidden">
-    {% trans 'Press ESC to end the line.' %}
-  </div>
-    <div class="row">
-      <div class="col-md-3">
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
-              <h3 class="panel-title"><u>{{selected_image.image_set.name}}</u></h3></a>
-          </div>
-          <div class="panel-body">
-            <div class="input-group">
-            <select id="filter_annotation_type" class="form-control">
-              <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
-            </select>
-            <span class="input-group-btn">
-              <button class="btn btn-primary" id="filter_update_btn"><span class="glyphicon glyphicon-refresh"></span></button>
-            </span>
-            </div>
-            <br>
-            <div id="image_list">
-                {% for set_image in set_images %}
-                  <a id="annotate_image_link_{{ set_image.id }}"
-                     href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
-                     class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
-                     data-imageid="{{ set_image.id }}">
-                    {{set_image.name}}
-                  </a>
-                {% endfor %}
-            </div>
-          </div>
+    <div class="container-fluid">
+        <div id="feedback_annotation_created" class="js_feedback alert alert-success hidden">
+            {% trans 'The annotation was successfully created.' %}
         </div>
-      </div>
-    <div id="edit_active" class="alert alert-warning hidden">
-      <p>
-        {% trans 'You are currently editing an annotation.' %}
-      </p>
-      <button id="cancel_edit_button" class="btn btn-danger">{% trans 'Cancel' %}</button>
-    </div>
-
-        <div class="col-md-6">
-            <div id="image_col">
-                <img id="image" src="{% url 'images:view_image' selected_image.id %}" alt="Picture {{selected_image.name}} not found!" data-imageid="{{ selected_image.id }}"></br>
-                <canvas id="image_canvas" class="hidden">Unable to load canvas for picture {{selected_image.name}}!</canvas>
-                <div id="boundingBoxes"></div>
-            </div>
-            <hr color="silver" width="100%">
-            <p>
-              <u>Annotations:</u>
-            </p>
-            <div id="existing_annotations">
-              {% for annotation in image_annotations %}
-                <div id="annotation_{{ annotation.id }}" class="annotation">
-                  {{ annotation.annotation_type.name }}:
-                  <div style="float: right;">
-                      <a href="{% url 'annotations:verify' annotation.id%}">
-                        <img src="{% static "symbols/checkmark.png" %}" alt="verify" class="annotation_verify_button" data-annotationid="{{ annotation.id }}">
-                      </a>
-                      <a href="#" class="annotation_edit_button" id="annotation_edit_button_{{ annotation.id }}" data-annotationid="{{ annotation.id }}" data-annotationtypeid="{{ annotation.annotation_type_id }}" data-escapedvector="{{ annotation.vector_as_json }}">
-                        <img src="{% static "symbols/pencil.png" %}" alt="edit">
-                      </a>
-                      <a href="{% url 'annotations:delete_annotation' annotation.id%}" class="annotation_delete_button" data-annotationid="{{ annotation.id }}">
-                        <img src="{% static "symbols/bin.png" %}" alt="delete">
-                      </a>
-                  </div>
-                  <br>
-                  {% if annotation.vector is not None %}
-                    {% for key, value in annotation.vector.items %}
-                      {% if forloop.counter0 > 0 %}
-                        &bull;
-                      {% endif %}
-                      <em>{{ key }}</em>: {{ value }}
-                    {% endfor %}
-                  {% else %}
-                    {{annotation.content}}
-                  {% endif %}
-                </div>
-              {% endfor %}
-            </div>
-            <div id="no_annotations" class="alert alert-warning{% if image_annotations %} hidden{% endif %}">{% trans 'No annotations found.' %}</div>
-            <div id="annotations_loading" class="alert alert-info hidden">{% trans 'Loading ...' %}</div>
+        <div id="feedback_annotation_deleted" class="js_feedback alert alert-success hidden">
+            {% trans 'The annotation was successfully deleted.' %}
         </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 id="active_image_name" class="panel-title">{{selected_image.name}}</h3>
-                </div>
-                <div class="panel-body">
-                    <form id="annotation_form" action="{% url 'annotations:annotate' selected_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}" enctype="multipart/form-data" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="image_id" value="{{ selected_image.id }}">
-                        <p>
-                          <select id="annotation_type_id" name="selected_annotation_type" class="form-control">
-                            <option value="-1">{% trans 'Annotation Type' %}</option>
-                          </select>
-                        </p>
-                        <p>
-                          <input type='checkbox' id='draw_annotations' name="draw_annotations" checked>
-                          <label for='draw_annotations'>Draw annotations of selected type</label>
-                        </p>
-                        {% if 'annotate' in imageset_perms %}
-                            <p>
-                              <input type='checkbox' id='keep_selection' name="keep_selection" checked>
-                              <label for='keep_selection'>Keep selection for next image</label>
-                            </p>
-                            <hr>
-                            <p>
-                              <input type='checkbox' name='not_in_image' id='not_in_image'>
-                              <label for='not_in_image'>Not in the image (g)</label>
-                            </p>
-                            <p id='concealed_p'>
-                              <input type='checkbox' id='concealed' name="concealed">
-                              <label for='concealed'>concealed (c)</label>
-                            </p>
-                            <p id='blurred_p'>
-                              <input type='checkbox' id='blurred' name="blurred">
-                              <label for='blurred'>blurred (b)</label>
-                            </p>
-                        <p data-toggle="tooltip" data-placement="right" title="Same layout as the arrow keys. Increasing the bounding box size is possible with shift+i/l . Decreasing is possible with shift+j/k .">The bounding box can be moved<b> and resized</b> with <b>i j k l</b> <span class="glyphicon glyphicon-question-sign"></span></p>
-                            <div class="row" id="coordinate_table">
-                              {% for field in vector_fields %}
-                                <div id="{{ field }}Box">
-                                  <div class="col-xs-2" style="max-width: 3em">
-                                    <label for="{{ field }}Field">
-                                        {{ field }}
-                                    </label>
-                                  </div>
-                                  <div class="col-xs-10">
-                                      <input id="{{ field }}Field"
-                                             class="Coordinates annotation_value form-control"
-                                             type="text" name="{{ field }}Field" value="0" min="0" disabled>
-                                  </div>
-                                  <div class="col-xs-12"></div>
-                                </div>
-                              {% endfor %}
-                            </div>
-                        {% endif %}
-                        <br>
-                        <div class="row ">
-                          <input type="hidden" name="annotate">
-                            {% if 'annotate' in imageset_perms %}
-                              <div class="col-md-6">
-                                <button type="submit" class="annotate_button btn btn-default btn-block" id="save_button">
-                                    <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Save (v)
-                                </button>
-                              </div>
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="reset_button">
-                                    <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>Reset (r)
-                                </button>
-                              </div>
-                              <div class="col-sm-12"><p></p></div>
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="last_button">
-                                    <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                                    <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last (a)
-                                </button>
-                              </div>
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="back_button">
-                                    <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
-                                </button>
-                              </div>
-                              <div class="col-sm-12"><p></p></div>
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="skip_button">
-                                    <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
-                                </button>
-                              </div>
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="next_button">
-                                    <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
-                                    <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next (f)
-                                </button>
-                              </div>
-                            {% else %}
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="back_button">
-                                    <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back (s)
-                                </button>
-                              </div>
-                              <div class="col-md-6">
-                                <button type="button" class="annotate_button btn btn-default btn-block" id="skip_button">
-                                    <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip (d)
-                                </button>
-                              </div>
-                            {% endif %}
-                            {% if 'delete_images' in imageset_perms and not imageset_lock %}
-                            <div class="col-sm-12"><p>{{ imageset.image_lock }}</p></div>
-                            <div class="col-md-12">
-                                <button type="button" class="btn btn-danger" id="delete-button" data-toggle="modal" data-target="#deleteModal" style="width: 100%">
-                                    <span class="glyphicon glyphicon-trash" aria-hidden="true" style="padding-right: 3px;"></span>Remove image from imageset
-                                </button>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div id="feedback_annotation_exists" class="js_feedback alert alert-info hidden">
+            {% trans 'A similar annotation exists already.' %}
         </div>
-    </div>
-</div>
+        <div id="feedback_annotation_exists_deleted" class="js_feedback alert alert-warning hidden">
+            {% trans 'A similar annotation exists already. The edited annotation was deleted.' %}
+        </div>
+        <div id="feedback_annotation_invalid" class="js_feedback alert alert-warning hidden">
+            {% trans 'The annotation is invalid.' %}
+        </div>
+        <div id="feedback_annotation_type_missing" class="js_feedback alert alert-warning hidden">
+            {% trans 'You have to choose a type for the annotation.' %}
+        </div>
+        <div id="feedback_connection_error" class="js_feedback alert alert-danger hidden">
+            {% trans 'There was an unhandled error during the connection.' %}
+        </div>
+        <div id="feedback_save_successful" class="js_feedback alert alert-success hidden">
+            {% trans 'The annotation was successfully saved.' %}
+        </div>
+        <div id="feedback_annotation_updated" class="js_feedback alert alert-success hidden">
+            {% trans 'The annotation was successfully updated.' %}
+        </div>
+        <div id="feedback_image_set_empty" class="js_feedback alert alert-danger hidden">
+            {% trans 'The image set is empty with that filter applied.' %}
+        </div>
+        <div id="feedback_multiline_information" class="js_feedback alert alert-info hidden">
+            {% trans 'Press ESC to end the line.' %}
+        </div>
+        <div class="row">
+            <div class="col-md-3">
 
-  <span id="image_id" class="hidden">{{ selected_image.id }}</span>
-  <span id="image_set_id" class="hidden">{{ selected_image.image_set.id }}</span>
-  <span id="main_annotation_type_id" class="hidden">{% if selected_image.image_set.main_annotation_type.id %}{{ selected_image.image_set.main_annotation_type.id }}{% else %}-1{% endif %}</span>
-{% if 'delete_images' in imageset_perms and not imageset_lock %}
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">
-                    Delete the image
-                </h4>
-            </div>
-            <div class="modal-body">
-                Do you really want to permanently delete this image from the imageset?
-            </div>
-            <div class="modal-footer">
-                <form method="post" action="{% url 'images:delete_images' selected_image.id %}">
-                    {% csrf_token %}
-                    <input id="next-image-id" type="hidden" name="next-image-id" value="{{ set_images.first.id }}">
-                    <div class="input-group" role="group" aria-label="delete-image">
-                        <button type="submit" class="btn btn-danger">Yes</button>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
+                            <h3 class="panel-title"><u>{{ selected_image.image_set.name }}</u></h3></a>
                     </div>
-                </form>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <select id="filter_annotation_type" class="form-control">
+                                <option value="" class="bold">{% trans 'Filter for missing annotations' %}</option>
+                            </select>
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" id="filter_update_btn"><span
+                                        class="glyphicon glyphicon-refresh"></span></button>
+                            </span>
+                        </div>
+                        <br>
+                        <div id="image_list">
+                            {% for set_image in set_images %}
+                                <a id="annotate_image_link_{{ set_image.id }}"
+                                   href="
+
+
+
+                                           {% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
+                                   class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
+                                   data-imageid="{{ set_image.id }}">
+                                    {{ set_image.name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="edit_active" class="alert alert-warning hidden">
+                <p>
+                    {% trans 'You are currently editing an annotation.' %}
+                </p>
+                <button id="cancel_edit_button" class="btn btn-danger">{% trans 'Cancel' %}</button>
+            </div>
+
+            <div class="col-md-6">
+                <div id="image_col">
+                    <img id="image" src="{% url 'images:view_image' selected_image.id %}"
+                         alt="Picture {{ selected_image.name }} not found!" data-imageid="{{ selected_image.id }}"></br>
+                    <canvas id="image_canvas" class="hidden">Unable to load canvas for picture {{ selected_image.name }}!</canvas>
+                    <div id="boundingBoxes"></div>
+                </div>
+                <hr color="silver" width="100%">
+                <div class="col-md-6">
+                    <p>
+                        <u>Annotations:</u>
+                    </p>
+                    <div id="existing_annotations">
+                        {% for annotation in image_annotations %}
+                            <div id="annotation_{{ annotation.id }}" class="annotation">
+                                {{ annotation.annotation_type.name }}:
+                                <div style="float: right;">
+                                    <a href="{% url 'annotations:verify' annotation.id %}">
+                                        <img src="{% static "symbols/checkmark.png" %}" alt="verify"
+                                             class="annotation_verify_button" data-annotationid="{{ annotation.id }}">
+                                    </a>
+                                    <a href="#" class="annotation_edit_button"
+                                       id="annotation_edit_button_{{ annotation.id }}"
+                                       data-annotationid="{{ annotation.id }}"
+                                       data-annotationtypeid="{{ annotation.annotation_type_id }}"
+                                       data-escapedvector="{{ annotation.vector_as_json }}">
+                                        <img src="{% static "symbols/pencil.png" %}" alt="edit">
+                                    </a>
+                                    <a href="{% url 'annotations:delete_annotation' annotation.id %}"
+                                       class="annotation_delete_button" data-annotationid="{{ annotation.id }}">
+                                        <img src="{% static "symbols/bin.png" %}" alt="delete">
+                                    </a>
+                                </div>
+                                <br>
+                                {% if annotation.vector is not None %}
+                                    {% for key, value in annotation.vector.items %}
+                                        {% if forloop.counter0 > 0 %}
+                                            &bull;
+                                        {% endif %}
+                                        <em>{{ key }}</em>: {{ value }}
+                                    {% endfor %}
+                                {% else %}
+                                    {{ annotation.content }}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div id="no_annotations"
+                         class="alert alert-warning{% if image_annotations %} hidden{% endif %}">{% trans 'No annotations found.' %}</div>
+                    <div id="annotations_loading" class="alert alert-info hidden">{% trans 'Loading ...' %}</div>
+                </div>
+                <div class="col-md-6 table-responsive">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for data, values in selected_image.metadata.items %}
+                            <tr>
+                                <td>{{ data }}</td>
+                                <td>{{ values }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 id="active_image_name" class="panel-title">{{ selected_image.name }}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form id="annotation_form" action="
+
+
+
+
+
+
+
+
+                                {% url 'annotations:annotate' selected_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
+                              enctype="multipart/form-data" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="image_id" value="{{ selected_image.id }}">
+                            <p>
+                                <select id="annotation_type_id" name="selected_annotation_type" class="form-control">
+                                    <option value="-1">{% trans 'Annotation Type' %}</option>
+                                </select>
+                            </p>
+                            <p>
+                                <input type='checkbox' id='draw_annotations' name="draw_annotations" checked>
+                                <label for='draw_annotations'>Draw annotations of selected type</label>
+                            </p>
+                            {% if 'annotate' in imageset_perms %}
+                                <p>
+                                    <input type='checkbox' id='keep_selection' name="keep_selection" checked>
+                                    <label for='keep_selection'>Keep selection for next image</label>
+                                </p>
+                                <hr>
+                                <p>
+                                    <input type='checkbox' name='not_in_image' id='not_in_image'>
+                                    <label for='not_in_image'>Not in the image (g)</label>
+                                </p>
+                                <p id='concealed_p'>
+                                    <input type='checkbox' id='concealed' name="concealed">
+                                    <label for='concealed'>concealed (c)</label>
+                                </p>
+                                <p id='blurred_p'>
+                                    <input type='checkbox' id='blurred' name="blurred">
+                                    <label for='blurred'>blurred (b)</label>
+                                </p>
+                                <p data-toggle="tooltip" data-placement="right"
+                                   title="Same layout as the arrow keys. Increasing the bounding box size is possible with shift+i/l . Decreasing is possible with shift+j/k .">
+                                    The bounding box can be moved<b> and resized</b> with <b>i j k l</b> <span
+                                        class="glyphicon glyphicon-question-sign"></span></p>
+                                <div class="row" id="coordinate_table">
+                                    {% for field in vector_fields %}
+                                        <div id="{{ field }}Box">
+                                            <div class="col-xs-2" style="max-width: 3em">
+                                                <label for="{{ field }}Field">
+                                                    {{ field }}
+                                                </label>
+                                            </div>
+                                            <div class="col-xs-10">
+                                                <input id="{{ field }}Field"
+                                                       class="Coordinates annotation_value form-control"
+                                                       type="text" name="{{ field }}Field" value="0" min="0" disabled>
+                                            </div>
+                                            <div class="col-xs-12"></div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <br>
+                            <div class="row ">
+                                <input type="hidden" name="annotate">
+                                {% if 'annotate' in imageset_perms %}
+                                    <div class="col-md-6">
+                                        <button type="submit" class="annotate_button btn btn-default btn-block"
+                                                id="save_button">
+                                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Save
+                                            (v)
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="reset_button">
+                                            <span class="glyphicon glyphicon-erase" aria-hidden="true"></span>Reset (r)
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-12"><p></p></div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="last_button">
+                                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Last
+                                            (a)
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="back_button">
+                                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back
+                                            (s)
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-12"><p></p></div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="skip_button">
+                                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip
+                                            (d)
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="next_button">
+                                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>Next
+                                            (f)
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="back_button">
+                                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Back
+                                            (s)
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="annotate_button btn btn-default btn-block"
+                                                id="skip_button">
+                                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>Skip
+                                            (d)
+                                        </button>
+                                    </div>
+                                {% endif %}
+                                {% if 'delete_images' in imageset_perms and not imageset_lock %}
+                                    <div class="col-sm-12"><p>{{ imageset.image_lock }}</p></div>
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-danger" id="delete-button"
+                                                data-toggle="modal" data-target="#deleteModal" style="width: 100%">
+                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"
+                                                  style="padding-right: 3px;"></span>Remove image from imageset
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% endif %}
+
+    <span id="image_id" class="hidden">{{ selected_image.id }}</span>
+    <span id="image_set_id" class="hidden">{{ selected_image.image_set.id }}</span>
+    <span id="main_annotation_type_id" class="hidden">{% if selected_image.image_set.main_annotation_type.id %}
+        {{ selected_image.image_set.main_annotation_type.id }}{% else %}-1{% endif %}</span>
+    {% if 'delete_images' in imageset_perms and not imageset_lock %}
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Delete the image
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        Do you really want to permanently delete this image from the imageset?
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" action="{% url 'images:delete_images' selected_image.id %}">
+                            {% csrf_token %}
+                            <input id="next-image-id" type="hidden" name="next-image-id"
+                                   value="{{ set_images.first.id }}">
+                            <div class="input-group" role="group" aria-label="delete-image">
+                                <button type="submit" class="btn btn-danger">Yes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 

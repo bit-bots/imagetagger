@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -32,6 +33,8 @@ def export_auth(request, export_id):
 @login_required
 def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
+    if selected_image is not None:
+        selected_image.metadata = json.loads(selected_image.metadata)
     imageset_perms = selected_image.image_set.get_perms(request.user)
     if 'read' in imageset_perms:
         set_images = selected_image.image_set.images.all().order_by('name')
