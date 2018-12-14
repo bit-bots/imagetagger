@@ -301,6 +301,7 @@ def export_format(export_format_name, imageset):
                             '%%imagewidth': image.width,
                             '%%imageheight': image.height,
                             '%%imagename': image.name,
+                            '%%imagemetadata': json.loads(image.metadata),
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                             '%%vector': formatted_vector,
@@ -338,6 +339,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': image.width,
                     '%%imageheight': image.height,
                     '%%imagename': image.name,
+                    '%%imagemetadata': json.loads(image.metadata),
                     '%%annotations': annotation_content,
                     '%%annoamount': annotations.count(),
                 }
@@ -393,6 +395,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
                     '%%imagename': annotation.image.name,
+                    '%%imagemetadata': json.loads(annotation.image.metadata),
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                     '%%vector': formatted_vector,
