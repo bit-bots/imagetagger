@@ -22,7 +22,7 @@ from PIL import Image as PIL_Image
 from PIL.ExifTags import TAGS
 
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
-from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
+from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm, ImageMetadataForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
@@ -43,6 +43,35 @@ import hashlib
 import json
 import imghdr
 from datetime import date, timedelta
+
+
+@login_required
+def metadata_create(request):
+    if request.method == 'POST':
+        form = ImageMetadataForm(request.POST)
+        if form.is_valid():
+            data = request.POST
+            img = get_object_or_404(Image, pk=data['image'])
+            metadata = json.loads(img.metadata)
+            metadata[data['name']] = data['value']
+            img.metadata = json.dumps(metadata)
+            img.save()
+            messages.info(request,
+                          _("Successfully updated \'{}\' in metadata".format(data['name'])))
+            return redirect(reverse('annotations:annotate', args=(img.pk,)))
+    return redirect(reverse('annotations:annotate', args=(request.POST['image'],)))
+
+
+@login_required
+def metadata_delete(request, image_id):
+    img = get_object_or_404(Image, id=image_id)
+    metadata = json.loads(img.metadata)
+    metadata.pop(request.POST['key'])
+    img.metadata = json.dumps(metadata)
+    img.save()
+    messages.info(request,
+                  _("Successfully deleted \'{}\' in metadata".format(request.POST['key'])))
+    return redirect(reverse('annotations:annotate', args=(image_id,)))
 
 
 @login_required

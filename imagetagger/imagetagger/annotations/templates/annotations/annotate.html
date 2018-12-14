@@ -70,7 +70,6 @@
         </div>
         <div class="row">
             <div class="col-md-3">
-
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <a href="{% url 'images:view_imageset' selected_image.image_set.id %}">
@@ -91,9 +90,6 @@
                             {% for set_image in set_images %}
                                 <a id="annotate_image_link_{{ set_image.id }}"
                                    href="
-
-
-
                                            {% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
                                    class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
                                    data-imageid="{{ set_image.id }}">
@@ -119,7 +115,92 @@
                     <div id="boundingBoxes"></div>
                 </div>
                 <hr color="silver" width="100%">
-                <div class="col-md-6">
+                <div class="col-md-12">
+                    <p>
+                        <u>Metadata:</u>
+                        <button type="button" class="btn btn-primary btn-xs pull-right" data-toggle="modal"
+                                data-target="#addMeta">Add/Edit Metadata
+                        </button>
+                    </p>
+                    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="headingOne">
+                                <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" data-parent="#accordion"
+                                       href="#metadata-table"
+                                       aria-expanded="true" aria-controls="collapseOne">
+                                        Show more...
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="metadata-table" class="panel-collapse collapse" role="tabpanel"
+                                 aria-labelledby="headingOne">
+                                <div class="panel-body table-responsive">
+                                    <table class="table table-bordered table-condensed">
+                                        <thead>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for data, values in selected_image.metadata.items %}
+                                            <tr>
+                                                <td>
+                                                    <form id="del-metadata-{{ data }}"
+                                                          action="{% url 'images:metadata_delete' selected_image.pk %}"
+                                                          method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="key" value="{{ data }}"/>
+                                                        <button type="submit" class="btn btn-danger">
+                                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"
+                                                                  style="padding-right: 3px;"></span>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                <td>{{ data }}</td>
+                                                <td>{{ values }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="addMeta" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">Create New Metadata</h4>
+                                </div>
+                                <form id="metadata_new" action="{% url 'images:metadata_create' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="image" value="{{ selected_image.pk }}"/>
+                                    <div class="modal-body">
+                                        {% for field in metadata_form %}
+                                            <div class="form-group">
+                                                <label for="{{ field.label }}">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close
+                                        </button>
+                                        <button type="submit" class="btn btn-success pull-right">Create</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr color="silver" width="100%">
+                <div class="col-md-12">
                     <p>
                         <u>Annotations:</u>
                     </p>
@@ -162,25 +243,6 @@
                          class="alert alert-warning{% if image_annotations %} hidden{% endif %}">{% trans 'No annotations found.' %}</div>
                     <div id="annotations_loading" class="alert alert-info hidden">{% trans 'Loading ...' %}</div>
                 </div>
-                <div class="col-md-6 table-responsive">
-                    <table class="table table-bordered table-condensed">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for data, values in selected_image.metadata.items %}
-                            <tr>
-                                <td>{{ data }}</td>
-                                <td>{{ values }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-
-                </div>
             </div>
             <div class="col-md-3">
                 <div class="panel panel-default">
@@ -188,16 +250,9 @@
                         <h3 id="active_image_name" class="panel-title">{{ selected_image.name }}</h3>
                     </div>
                     <div class="panel-body">
-                        <form id="annotation_form" action="
-
-
-
-
-
-
-
-
-                                {% url 'annotations:annotate' selected_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
+                        <form id="annotation_form"
+                              action="{% url 'annotations:annotate' selected_image.id %}
+                                {% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
                               enctype="multipart/form-data" method="post">
                             {% csrf_token %}
                             <input type="hidden" name="image_id" value="{{ selected_image.id }}">

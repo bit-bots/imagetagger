@@ -22,6 +22,7 @@ from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
 from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
+from imagetagger.images.forms import ImageMetadataForm
 
 
 def export_auth(request, export_id):
@@ -40,10 +41,12 @@ def annotate(request, image_id):
         set_images = selected_image.image_set.images.all().order_by('name')
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
         imageset_lock = selected_image.image_set.image_lock
+        metadataForm = ImageMetadataForm()
         return render(request, 'annotations/annotate.html', {
             'selected_image': selected_image,
             'imageset_perms': imageset_perms,
             'imageset_lock': imageset_lock,
+            'metadata_form': metadataForm,
             'set_images': set_images,
             'annotation_types': annotation_types,
         })
@@ -627,7 +630,8 @@ def load_annotations(request) -> Response:
         return Response({
             'detail': 'permission for reading this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
-
+    if image is not None:
+        image.metadata = json.loads(image.metadata)
     serializer = AnnotationSerializer(
         image.annotations.select_related().filter(annotation_type__active=True).order_by('annotation_type__name'),
         context={
