@@ -630,8 +630,6 @@ def load_annotations(request) -> Response:
         return Response({
             'detail': 'permission for reading this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
-    if image is not None:
-        image.metadata = json.loads(image.metadata)
     serializer = AnnotationSerializer(
         image.annotations.select_related().filter(annotation_type__active=True).order_by('annotation_type__name'),
         context={
@@ -640,6 +638,7 @@ def load_annotations(request) -> Response:
         many=True)
     return Response({
         'annotations': serializer.data,
+        'metadata': json.loads(image.metadata)
     }, status=HTTP_200_OK)
 
 
