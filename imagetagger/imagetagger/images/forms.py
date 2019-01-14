@@ -1,6 +1,6 @@
 from django import forms
 
-from imagetagger.images.models import ImageSet, Image
+from imagetagger.images.models import ImageSet
 
 
 class ImageMetadataForm(forms.Form):
@@ -11,7 +11,7 @@ class ImageMetadataForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     image = forms.HiddenInput()
-    
+
 
 class ImageSetCreationForm(forms.ModelForm):
     class Meta:

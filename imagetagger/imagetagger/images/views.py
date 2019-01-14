@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q
 from django.db.models.expressions import F
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.urls import reverse
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse, \
     FileResponse
@@ -26,7 +26,6 @@ from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormW
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
-import json
 
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
@@ -50,7 +49,7 @@ def metadata_create(request):
     if request.method == 'POST':
         form = ImageMetadataForm(request.POST)
         if form.is_valid():
-            data = request.POST
+            data = form.cleaned_data
             img = get_object_or_404(Image, pk=data['image'])
             metadata = json.loads(img.metadata)
             metadata[data['name']] = data['value']
@@ -62,15 +61,19 @@ def metadata_create(request):
     return redirect(reverse('annotations:annotate', args=(request.POST['image'],)))
 
 
-@login_required
+@require_POST
 def metadata_delete(request, image_id):
     img = get_object_or_404(Image, id=image_id)
     metadata = json.loads(img.metadata)
-    metadata.pop(request.POST['key'])
+    if request.POST['key'] in metadata:
+        metadata.pop(request.POST['key'])
+        messages.info(request,
+                      _("Successfully deleted \'{}\' in metadata".format(request.POST['key'])))
+    else:
+        messages.info(request,
+                      _("Error! \'{}\' was not found in metadata!".format(request.POST['key'])))
     img.metadata = json.dumps(metadata)
     img.save()
-    messages.info(request,
-                  _("Successfully deleted \'{}\' in metadata".format(request.POST['key'])))
     return redirect(reverse('annotations:annotate', args=(image_id,)))
 
 
@@ -210,7 +213,7 @@ def upload_image(request, imageset_id):
             for (tag, value) in img._getexif().items():
                 metadata[TAGS.get(tag)] = value
         return json.dumps(metadata, default=str)
-    
+
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     if request.method == 'POST' \
             and imageset.has_perm('edit_set', request.user) \
@@ -274,7 +277,7 @@ def upload_image(request, imageset_id):
                                     with PIL_Image.open(file_path) as image:
                                         width, height = image.size
                                         # extracting metadata info
-                                        metadata = extract_metadata(image_file)
+                                        metadata = extract_metadata(image)
                                     file_new_path = os.path.join(imageset.root_path(), img_fname)
                                     shutil.move(file_path, file_new_path)
                                     shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
@@ -306,7 +309,7 @@ def upload_image(request, imageset_id):
                     fchecksum.update(chunk)
                 fchecksum = fchecksum.digest()
                 # tests for duplicats in  imageset
-                if Image.objects.filter(checksum=fchecksum, image_set=imageset)\
+                if Image.objects.filter(checksum=fchecksum, image_set=imageset) \
                         .count() == 0:
                     fname = ('_'.join(fname[:-1]) + '_' +
                              ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
@@ -404,10 +407,11 @@ def view_image(request, image_id):
         response = HttpResponse(content_type='image')
         response['X-Accel-Redirect'] = "/ngx_static_dn/{}".format(image.relative_path())
     else:
-        response =  FileResponse(open(file_path, 'rb'), content_type="image")
+        response = FileResponse(open(file_path, 'rb'), content_type="image")
 
     response["Content-Length"] = os.path.getsize(file_path)
     return response
+
 
 @login_required
 def list_images(request, image_set_id):
@@ -507,7 +511,7 @@ def create_imageset(request):
         messages.warning(
             request,
             _('You do not have permission to create image sets in the team {}.')
-            .format(team.name))
+                .format(team.name))
         return redirect(reverse('users:team', args=(team.id,)))
 
     form = ImageSetCreationForm()
@@ -516,7 +520,7 @@ def create_imageset(request):
         form = ImageSetCreationForm(request.POST)
 
         if form.is_valid():
-            if team.image_sets\
+            if team.image_sets \
                     .filter(name=form.cleaned_data.get('name')).exists():
                 form.add_error(
                     'name',
@@ -666,7 +670,7 @@ def label_upload(request, imageset_id):
                         if len(test_flags) > 0:
                             report_list.append(
                                 'unknown flags: \"{}\" for image: \"{}\"'
-                                .format(test_flags, line_frags[0])
+                                    .format(test_flags, line_frags[0])
                             )
                         blurred = 'b' in flags
                         concealed = 'c' in flags
@@ -678,7 +682,8 @@ def label_upload(request, imageset_id):
                             vector = json.loads(line_frags[2])
                         except JSONDecodeError:
                             report_list.append("In image \"{}\" the annotation:"
-                                               " \"{}\" was not accepted as valid JSON".format(line_frags[0], line_frags[2]))
+                                               " \"{}\" was not accepted as valid JSON".format(line_frags[0],
+                                                                                               line_frags[2]))
 
                     if annotation_type.validate_vector(vector):
                         if not Annotation.similar_annotations(vector, image, annotation_type):
@@ -706,7 +711,7 @@ def label_upload(request, imageset_id):
                         report_list.append(
                             'For the image ' + line_frags[0] + ' the annotation ' +
                             line_frags[2] + ' was not a valid vector or '
-                            'bounding box for the annotation type'
+                                            'bounding box for the annotation type'
                         )
                 else:
                     error_count += 1
@@ -725,19 +730,19 @@ def label_upload(request, imageset_id):
             messages.warning(
                 request,
                 _('The label upload ended with {} errors and {} similar existing labels.')
-                .format(error_count, similar_count))
+                    .format(error_count, similar_count))
         else:
             messages.success(
                 request,
                 _('The label upload ended with {} errors and {} similar existing labels.')
-                .format(error_count, similar_count))
+                    .format(error_count, similar_count))
     return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
 
 def dl_script(request):
     return TemplateResponse(request, 'images/download.py', context={
-                            'base_url': settings.DOWNLOAD_BASE_URL,
-                            }, content_type='text/plain')
+        'base_url': settings.DOWNLOAD_BASE_URL,
+    }, content_type='text/plain')
 
 
 def download_imageset_zip(request, image_set_id):
@@ -897,7 +902,8 @@ def autocomplete_image_set_tag(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
     tag_suggestions = list(SetTag.objects.filter(name__startswith=tag_name_query))
-    tag_suggestions.extend(list(SetTag.objects.filter(~Q(name__startswith=tag_name_query) & Q(name__contains=tag_name_query))))
+    tag_suggestions.extend(
+        list(SetTag.objects.filter(~Q(name__startswith=tag_name_query) & Q(name__contains=tag_name_query))))
     tag_suggestions = [tag_suggestion.name for tag_suggestion in tag_suggestions]
     print(tag_suggestions)
 

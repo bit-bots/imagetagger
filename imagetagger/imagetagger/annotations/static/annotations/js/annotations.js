@@ -17,7 +17,7 @@ globals = {
   mouseDownY: undefined,
   currentAnnotations: undefined,
   allAnnotations: undefined,
-    allMetadata: undefined,
+  allMetadata: undefined,
   stdColor: '#CC4444',
   mutColor: '#CC0000'
 };
