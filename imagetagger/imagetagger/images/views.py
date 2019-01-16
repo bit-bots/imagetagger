@@ -511,7 +511,7 @@ def create_imageset(request):
         messages.warning(
             request,
             _('You do not have permission to create image sets in the team {}.')
-                .format(team.name))
+            .format(team.name))
         return redirect(reverse('users:team', args=(team.id,)))
 
     form = ImageSetCreationForm()
@@ -670,7 +670,7 @@ def label_upload(request, imageset_id):
                         if len(test_flags) > 0:
                             report_list.append(
                                 'unknown flags: \"{}\" for image: \"{}\"'
-                                    .format(test_flags, line_frags[0])
+                                .format(test_flags, line_frags[0])
                             )
                         blurred = 'b' in flags
                         concealed = 'c' in flags
@@ -730,12 +730,12 @@ def label_upload(request, imageset_id):
             messages.warning(
                 request,
                 _('The label upload ended with {} errors and {} similar existing labels.')
-                    .format(error_count, similar_count))
+                .format(error_count, similar_count))
         else:
             messages.success(
                 request,
                 _('The label upload ended with {} errors and {} similar existing labels.')
-                    .format(error_count, similar_count))
+                .format(error_count, similar_count))
     return redirect(reverse('images:view_imageset', args=(imageset_id,)))
 
 
