@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 class User(AbstractUser):
     # points are updated by database triggers
     points = models.IntegerField(default=0)
+    teams = models.ManyToManyField('Team', through='TeamMembership')
 
 
 class Team(models.Model):

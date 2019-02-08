@@ -1,5 +1,7 @@
+coreapi
 Django<3.0
 djangorestframework
+djangorestframework-camel-case
 django-widget-tweaks
 fasteners
 Pillow

@@ -544,7 +544,7 @@ class Verification(models.Model):
                              on_delete=models.SET_NULL,
                              null=True)
     time = models.DateTimeField(auto_now_add=True)
-    verified = models.BooleanField(default=0)
+    verified = models.BooleanField(default=False)
 
 
 class ExportFormat(models.Model):
