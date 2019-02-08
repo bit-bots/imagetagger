@@ -172,6 +172,10 @@ class ImageSet(models.Model):
         return u'Imageset: {0}'.format(self.name)
 
     @property
+    def tag_names(self):
+        return [tag.name for tag in self.set_tags.all()]
+
+    @property
     def prio_symbol(self):
         if self.priority is -1:
             return '<span class="glyphicon glyphicon-download" data-toggle="tooltip" data-placement="right" title="Low labeling priority"></span>'

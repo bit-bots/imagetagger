@@ -41,24 +41,19 @@ class ImageSetSerializer(serializers.ModelSerializer):
         model = ImageSet
         fields = ('id', 'name', 'location', 'description', 'time', 'public',
                   'public_collaboration', 'image_lock', 'priority', 'zip_state',
-                  'images', 'main_annotation_type',
-                  'team', 'creator')  # TODO add permissions, tags, zip_url
-
-
-class PermissionSerializer:
-    pass
+                  'images', 'main_annotation_type', 'tag_names', 'team', 'creator')
 
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('id', 'name', 'width', 'height')  # TODO add url
+        fields = ('id', 'name', 'width', 'height')
 
 
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ('id', 'name', 'members', 'admins', 'website')  # TODO add permissions
+        fields = ('id', 'name', 'members', 'admins', 'website')
 
     members = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     admins = serializers.PrimaryKeyRelatedField(many=True, read_only=True)

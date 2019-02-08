@@ -1,10 +1,17 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.response import Response
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
 from imagetagger.api.serializers import ImageSerializer, AnnotationSerializer, AnnotationTypeSerializer, \
     ExportFormatSerializer, ExportSerializer, ImageSetSerializer, TeamSerializer, UserSerializer, VerificationSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team, User
+
+
+TEAM_PERMISSIONS = ('create_set', 'user_management', 'manage_export_formats')
+IMAGE_SET_PERMISSIONS = ('verify', 'annotate', 'create_export', 'delete_annotation', 'delete_export',
+                         'delete_set', 'delete_images', 'edit_annotation', 'edit_set', 'read')
 
 
 class AnnotationViewSet(viewsets.ModelViewSet):
@@ -28,8 +35,22 @@ class ExportViewSet(viewsets.ModelViewSet):
 
 
 class ImageSetViewSet(viewsets.ModelViewSet):
-    queryset = ImageSet.objects.all()
+    queryset = ImageSet.objects.prefetch_related('set_tags')
     serializer_class = ImageSetSerializer
+
+    @staticmethod
+    def add_permissions(user, image_set, data):
+        permissions = dict()
+        for permission in IMAGE_SET_PERMISSIONS:
+            permissions[permission] = image_set.has_perm(permission, user)
+        data['permissions'] = permissions
+        return data
+
+    def retrieve(self, request, pk=None):
+        image_set = get_object_or_404(ImageSet, pk=pk)
+        serializer = ImageSetSerializer(image_set)
+        data = self.add_permissions(request.user, image_set, serializer.data)
+        return Response(data)
 
 
 class ImageViewSet(viewsets.ModelViewSet):
@@ -40,6 +61,20 @@ class ImageViewSet(viewsets.ModelViewSet):
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
+
+    @staticmethod
+    def add_permissions(user, team, data):
+        permissions = dict()
+        for permission in TEAM_PERMISSIONS:
+            permissions[permission] = team.has_perm(permission, user)
+        data['permissions'] = permissions
+        return data
+
+    def retrieve(self, request, pk=None):
+        team = get_object_or_404(Team, pk=pk)
+        serializer = TeamSerializer(team)
+        data = self.add_permissions(request.user, team, serializer.data)
+        return Response(data)
 
 
 class UserViewSet(viewsets.ModelViewSet):
