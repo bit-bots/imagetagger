@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
@@ -80,6 +82,15 @@ class TeamViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.prefetch_related('teams', 'pinned_sets')
     serializer_class = UserSerializer
+
+    @action(('GET',), detail=False)
+    def me(self, request):
+        """
+        Get information about the currently logged in user
+        """
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 
 class VerificationViewSet(viewsets.ModelViewSet):
