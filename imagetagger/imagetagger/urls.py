@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import render
 from django_registration.backends.activation.views import RegistrationView
@@ -37,6 +38,12 @@ urlpatterns = [
     url(r'^api/', include('imagetagger.api.urls')),
     path('docs/', include_docs_urls(title='Documentation', authentication_classes=[], permission_classes=[])),
 ]
+
+if settings.DEBUG and 'debug_toolbar' in settings.INSTALLED_APPS:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
 
 
 def handler500(request):

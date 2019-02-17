@@ -56,6 +56,10 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
+MIDDLEWARE_CLASSES = [
+    # currently no middleware classes
+]
+
 ROOT_URLCONF = 'imagetagger.urls'
 
 TEMPLATES = [

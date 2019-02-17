@@ -77,6 +77,12 @@ TOOLS_ENABLED = True
 TOOLS_PATH = os.path.join(BASE_DIR, 'tools')
 TOOL_UPLOAD_NOTICE = ''
 
+# Debug toolbar
+# INSTALLED_APPS += ['debug_toolbar']
+# MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+# MIDDLEWARE_CLASSES += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+# INTERNAL_IPS = ['127.0.0.1']
+
 # Use ldap login
 #
 # import ldap
