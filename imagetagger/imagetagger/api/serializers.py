@@ -59,10 +59,18 @@ class TeamSerializer(serializers.ModelSerializer):
     admins = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
 
+class ShortTeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = ('id', 'name')
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'points', 'pinned_sets', 'teams')
+
+    teams = ShortTeamSerializer(many=True)
 
 
 class VerificationSerializer(serializers.ModelSerializer):
