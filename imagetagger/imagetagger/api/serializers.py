@@ -26,7 +26,7 @@ class ExportFormatSerializer(serializers.ModelSerializer):
         model = ExportFormat
         fields = ('id', 'name', 'last_change_time', 'public', 'base_format', 'image_format',
                   'annotation_format', 'vector_format', 'not_in_image_format', 'name_format',
-                  'min_verification', 'image_aggregation', 'include_blurred', 'include_concealed')
+                  'min_verifications', 'image_aggregation', 'include_blurred', 'include_concealed')
 
 
 class ExportSerializer(serializers.ModelSerializer):
@@ -34,6 +34,8 @@ class ExportSerializer(serializers.ModelSerializer):
         model = Export
         fields = ('id', 'time', 'annotation_count', 'url', 'deprecated',
                   'format', 'image_set', 'creator')
+
+    creator = serializers.PrimaryKeyRelatedField(source='user', read_only=True)
 
 
 class ImageSetSerializer(serializers.ModelSerializer):
