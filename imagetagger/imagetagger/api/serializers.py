@@ -69,6 +69,7 @@ class ImageSetInUserSerializer(serializers.ModelSerializer):
         model = ImageSet
         fields = ('id', 'name', 'priority', 'tags', 'team')
 
+    tags = serializers.ListField(source='tag_names')
     team = TeamInImageSetSerializer()
 
 
