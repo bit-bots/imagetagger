@@ -1,3 +1,4 @@
+from django.urls import reverse
 from rest_framework import serializers
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
@@ -83,7 +84,12 @@ class ImageSetInUserSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('id', 'name', 'width', 'height')
+        fields = ('id', 'name', 'width', 'height', 'url')
+
+    def get_url(self, instance):
+        return reverse('images:view_image', args=(instance.id,))
+
+    url = serializers.SerializerMethodField(source='url')
 
 
 class TeamSerializer(serializers.ModelSerializer):
