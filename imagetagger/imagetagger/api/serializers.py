@@ -64,6 +64,14 @@ class ImageSetSerializer(serializers.ModelSerializer):
     team = TeamInImageSetSerializer()
 
 
+class ImageSetInUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageSet
+        fields = ('id', 'name', 'priority', 'tags', 'team')
+
+    team = TeamInImageSetSerializer()
+
+
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
@@ -91,6 +99,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'points', 'pinned_sets', 'teams')
 
     teams = ShortTeamSerializer(many=True)
+    pinned_sets = ImageSetInUserSerializer(many=True)
 
 
 class VerificationSerializer(serializers.ModelSerializer):
