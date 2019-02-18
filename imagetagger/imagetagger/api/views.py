@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_200_OK
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
 from imagetagger.api.serializers import ImageSerializer, AnnotationSerializer, AnnotationTypeSerializer, \
@@ -54,6 +54,24 @@ class ImageSetViewSet(viewsets.ModelViewSet):
         data = self.add_permissions(request.user, image_set, serializer.data)
         data['isPinned'] = request.user in image_set.pinned_by.all()
         return Response(data)
+
+    @action(methods=('PUT', 'DELETE'), detail=True)
+    def pin(self, request, pk=None):
+        image_set = get_object_or_404(ImageSet, pk=pk)
+        user = request.user
+        if 'read' in image_set.get_perms(request.user):
+            if request.method == 'PUT' and user not in image_set.pinned_by.all():
+                image_set.pinned_by.add(request.user)
+                image_set.save()
+                return Response(status=HTTP_201_CREATED)
+            elif request.method == 'DELETE' and user in image_set.pinned_by.all():
+                image_set.pinned_by.remove(request.user)
+                image_set.save()
+                return Response(status=HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=HTTP_200_OK)
+        else:
+            return Response(status=HTTP_403_FORBIDDEN)
 
 
 class ImageViewSet(viewsets.ModelViewSet):
