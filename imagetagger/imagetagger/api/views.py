@@ -8,8 +8,7 @@ from imagetagger.annotations.models import Annotation, AnnotationType, ExportFor
 from imagetagger.api.serializers import ImageSerializer, AnnotationSerializer, AnnotationTypeSerializer, \
     ExportFormatSerializer, ExportSerializer, ImageSetSerializer, TeamSerializer, UserSerializer, VerificationSerializer
 from imagetagger.images.models import Image, ImageSet
-from imagetagger.users.models import Team, User
-
+from imagetagger.users.models import Team, User, TeamMembership
 
 TEAM_PERMISSIONS = ('create_set', 'user_management', 'manage_export_formats')
 IMAGE_SET_PERMISSIONS = ('verify', 'annotate', 'create_export', 'delete_annotation', 'delete_export',
@@ -96,6 +95,13 @@ class TeamViewSet(viewsets.ModelViewSet):
         serializer = TeamSerializer(team)
         data = self.add_permissions(request.user, team, serializer.data)
         return Response(data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = TeamSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        team = serializer.save()
+        TeamMembership.objects.create(team=team, user=request.user, is_admin=True)
+        return Response(serializer.data, status=HTTP_201_CREATED)
 
 
 class UserViewSet(viewsets.ModelViewSet):
