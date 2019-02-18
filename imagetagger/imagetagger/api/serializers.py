@@ -52,6 +52,12 @@ class TeamInImageSetSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class ImageInImageSetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('id', 'name')
+
+
 class ImageSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSet
@@ -62,6 +68,7 @@ class ImageSetSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(source='tag_names')
     creator = UserInImageSetSerializer()
     team = TeamInImageSetSerializer()
+    images = ImageInImageSetSerializer(many=True)
 
 
 class ImageSetInUserSerializer(serializers.ModelSerializer):
