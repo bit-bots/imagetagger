@@ -30,7 +30,7 @@ class ExportFormatViewSet(viewsets.ModelViewSet):
     serializer_class = ExportFormatSerializer
 
 
-class ExportViewSet(viewsets.ModelViewSet):
+class ExportViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Export.objects.all()
     serializer_class = ExportSerializer
 
@@ -73,7 +73,7 @@ class ImageSetViewSet(viewsets.ModelViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
 
 
-class ImageViewSet(viewsets.ModelViewSet):
+class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
 
@@ -104,7 +104,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=HTTP_201_CREATED)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.prefetch_related('teams', 'pinned_sets')
     serializer_class = UserSerializer
 
