@@ -52,6 +52,7 @@ class ImageSetViewSet(viewsets.ModelViewSet):
         image_set = get_object_or_404(ImageSet, pk=pk)
         serializer = ImageSetSerializer(image_set)
         data = self.add_permissions(request.user, image_set, serializer.data)
+        data['isPinned'] = request.user in image_set.pinned_by.all()
         return Response(data)
 
 
