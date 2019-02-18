@@ -38,12 +38,23 @@ class ExportSerializer(serializers.ModelSerializer):
     creator = serializers.PrimaryKeyRelatedField(source='user', read_only=True)
 
 
+class UserInImageSetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'name')
+
+    name = serializers.CharField(source='username')
+
+
 class ImageSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSet
         fields = ('id', 'name', 'location', 'description', 'time', 'public',
                   'public_collaboration', 'image_lock', 'priority', 'zip_state',
-                  'images', 'main_annotation_type', 'tag_names', 'team', 'creator')
+                  'images', 'main_annotation_type', 'tags', 'team', 'creator')
+
+    tags = serializers.ListField(source='tag_names')
+    creator = UserInImageSetSerializer()
 
 
 class ImageSerializer(serializers.ModelSerializer):
