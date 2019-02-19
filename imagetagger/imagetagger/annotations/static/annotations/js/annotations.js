@@ -256,7 +256,7 @@ function calculateImageScale() {
         // update current annotations
         globals.allAnnotations = data.annotations;
         globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
+          return e.annotationType.id === gAnnotationType;
         });
         gAnnotationCache[gImageId] = globals.allAnnotations;
 
@@ -285,7 +285,7 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function (data) {
-        displayAnnotationTypeOptions(data.annotation_types);
+        displayAnnotationTypeOptions(data.annotationTypes);
       },
       error: function () {
         displayFeedback($('#feedback_connection_error'))
@@ -349,7 +349,7 @@ function calculateImageScale() {
       success: function(data) {
         globals.allAnnotations = data.annotations;
         globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
+          return e.annotationType.id === gAnnotationType;
         });
         gAnnotationCache[gImageId] = globals.allAnnotations;
         // redraw the annotations
@@ -422,7 +422,7 @@ function calculateImageScale() {
         annotation.content += ' <span id="concealed_label" class="label label-warning">Concealed</span>';
       }
 
-      newAnnotation.append(annotation.annotation_type.name + ':');
+      newAnnotation.append(annotation.annotationType.name + ':');
 
       var annotationLinks = $('<div style="float: right;">');
       var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
@@ -439,7 +439,7 @@ function calculateImageScale() {
       editButton.click(function(event) {
         editAnnotation(event, this, annotationId);
       });
-      editButton.data('annotationtypeid', annotation.annotation_type.id);
+      editButton.data('annotationtypeid', annotation.annotationType.id);
       editButton.data('annotationid', annotation.id);
       editButton.data('vector', annotation.vector);
       editButton.data('blurred', annotation.blurred);
@@ -908,7 +908,7 @@ function calculateImageScale() {
       // image is in cache.
       globals.allAnnotations = gAnnotationCache[imageId];
       globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-        return e.annotation_type.id === gAnnotationType;
+        return e.annotationType.id === gAnnotationType;
       });
       loading.addClass('hidden');
       displayExistingAnnotations(globals.allAnnotations);
@@ -1139,7 +1139,7 @@ function calculateImageScale() {
   function handleAnnotationTypeChange() {
     gAnnotationType = parseInt($('#annotation_type_id').val());
     globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-      return e.annotation_type.id === gAnnotationType;
+      return e.annotationType.id === gAnnotationType;
     });
     setupCBCheckboxes();
     setTool();
