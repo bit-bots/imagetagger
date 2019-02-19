@@ -90,15 +90,22 @@ class ImageSetInUserSerializer(serializers.ModelSerializer):
     team = TeamInImageSetSerializer()
 
 
+class AnnotationInImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Annotation
+        fields = ('id', 'concealed', 'blurred', 'closed', 'vector', 'annotation_type')
+
+
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('id', 'name', 'width', 'height', 'url')
+        fields = ('id', 'name', 'width', 'height', 'url', 'annotations')
 
     def get_url(self, instance):
         return reverse('images:view_image', args=(instance.id,))
 
     url = serializers.SerializerMethodField(source='url')
+    annotations = AnnotationInImageSerializer(many=True)
 
 
 class TeamSerializer(serializers.ModelSerializer):
