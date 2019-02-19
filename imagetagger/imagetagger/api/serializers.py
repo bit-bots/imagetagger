@@ -94,10 +94,11 @@ class ImageSetRetrieveSerializer(serializers.ModelSerializer):
 class ImageSetInUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSet
-        fields = ('id', 'name', 'priority', 'tags', 'team')
+        fields = ('id', 'name', 'priority', 'tags', 'team', 'number_of_images')
 
     tags = serializers.ListField(source='tag_names')
     team = TeamInImageSetSerializer()
+    number_of_images = serializers.SerializerMethodField()
 
 
 class AnnotationInImageSerializer(serializers.ModelSerializer):
