@@ -248,7 +248,7 @@ def view_team(request, team_id):
         imagesets = imagesets.filter(public=True)
 
     export_format_forms = (ExportFormatEditForm(instance=format_instance) for format_instance in export_formats)
-    test_imagesets = ImageSet.objects.filter(set_tags__name='test').order_by('-public', 'name')
+    test_imagesets = imagesets.filter(set_tags__name='test').order_by('-public', 'name')
 
     return render(request, 'users/view_team.html', {
         'team': team,
