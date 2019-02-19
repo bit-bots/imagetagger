@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.db.models.expressions import F
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -388,18 +388,6 @@ def delete_images(request, image_id):
             return redirect(reverse('annotations:annotate', args=(next_image,)))
 
 
-def count_annotations_of_type(annotations, annotation_type):
-    annotations = annotations.filter(annotation_type=annotation_type)
-    annotation_count = annotations.count()
-    neg_annotation_count = annotations.filter(vector=None).count()
-    return (
-        annotation_type.name,
-        annotation_count,
-        annotation_count - neg_annotation_count,
-        neg_annotation_count,
-    )
-
-
 @login_required
 def view_imageset(request, image_set_id):
     imageset = get_object_or_404(ImageSet, id=image_set_id)
@@ -419,30 +407,24 @@ def view_imageset(request, image_set_id):
             annotations__annotation_type_id=request.POST.get("selected_annotation_type"))
     # a list of annotation types used in the imageset
     all_annotation_types = AnnotationType.objects.filter(active=True)
-    annotation_types = set()
-    annotations = Annotation.objects.select_related().filter(
+    annotations = Annotation.objects.filter(
         image__in=images,
         annotation_type__active=True).order_by("id")
-    annotation_types = annotation_types.union(
-        [annotation.annotation_type for annotation in annotations])
-    annotation_type_count = sorted(list(
-        map(
-            lambda at: count_annotations_of_type(annotations, at),
-            annotation_types)),
-        key=lambda at_tuple: at_tuple[1],
-        reverse=True)
+    annotation_types = AnnotationType.objects.filter(annotation__image__image_set=imageset, active=True).distinct()\
+        .annotate(count=Count('annotation'),
+                  in_image_count=Count('annotation', filter=Q(annotation__vector__isnull=False)),
+                  not_in_image_count=Count('annotation', filter=Q(annotation__vector__isnull=True)))
     first_annotation = annotations.first()
     user_teams = Team.objects.filter(members=request.user)
     imageset_edit_form = ImageSetEditForm(instance=imageset)
     imageset_edit_form.fields['main_annotation_type'].queryset = AnnotationType.objects.filter(active=True)
     return render(request, 'images/imageset.html', {
         'images': images,
-        'annotationcount': len(annotations),
+        'annotationcount': annotations.count(),
         'imageset': imageset,
         'annotationtypes': annotation_types,
         'annotation_types': annotation_types,
         'all_annotation_types': all_annotation_types,
-        'annotation_type_count': annotation_type_count,
         'first_annotation': first_annotation,
         'exports': exports,
         'filtered': filtered,

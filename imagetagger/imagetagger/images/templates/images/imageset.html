@@ -210,9 +210,9 @@
                                     <td>
                                         {{annotationcount}}<br>
                                         <ul>
-                                            {% for atc in annotation_type_count %}
+                                            {% for at in annotation_types %}
                                                 <li>
-                                                    {{ atc.0}}: <b>{{ atc.1 }}</b> (<b><span class="text-success">{{ atc.2 }}</span></b>/<b><span class="text-danger">{{ atc.3 }}</span></b>)
+                                                    {{ at.name }}: <b>{{ at.count }}</b> (<b><span class="text-success">{{ at.in_image_count }}</span></b>/<b><span class="text-danger">{{ at.not_in_image_count }}</span></b>)
                                                 </li>
                                             {% endfor %}
                                         </ul>
