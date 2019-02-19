@@ -238,7 +238,8 @@ def view_team(request, team_id):
     admins = team.admins
 
     imagesets = ImageSet.objects.filter(team=team).annotate(
-        image_count_agg=Count('images')).order_by('-public', 'name')
+        image_count_agg=Count('images')).prefetch_related('set_tags').\
+        order_by('-public', 'name')
     export_formats = ExportFormat.objects.filter(
         team=team).prefetch_related('annotations_types').order_by('name')
 
