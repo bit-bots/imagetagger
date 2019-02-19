@@ -50,10 +50,11 @@ class ImageSetViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def add_permissions(user, image_set, data):
-        permissions = dict()
+        permission_set = image_set.get_perms(user)
+        permission_dict = dict()
         for permission in IMAGE_SET_PERMISSIONS:
-            permissions[permission] = image_set.has_perm(permission, user)
-        data['permissions'] = permissions
+            permission_dict[permission] = permission in permission_set
+        data['permissions'] = permission_dict
         return data
 
     def retrieve(self, request, pk=None):
@@ -93,10 +94,11 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def add_permissions(user, team, data):
-        permissions = dict()
+        permission_set = team.get_perms(user)
+        permission_dict = dict()
         for permission in TEAM_PERMISSIONS:
-            permissions[permission] = team.has_perm(permission, user)
-        data['permissions'] = permissions
+            permission_dict[permission] = permission in permission_set
+        data['permissions'] = permission_dict
         return data
 
     def retrieve(self, request, pk=None):
