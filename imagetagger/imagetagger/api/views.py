@@ -6,7 +6,8 @@ from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
 from imagetagger.api.serializers import ImageSerializer, AnnotationSerializer, AnnotationTypeSerializer, \
-    ExportFormatSerializer, ExportSerializer, ImageSetSerializer, TeamSerializer, UserSerializer, VerificationSerializer
+    ExportFormatSerializer, ExportSerializer, ImageSetListSerializer, TeamSerializer, UserSerializer, \
+    VerificationSerializer, ImageSetRetrieveSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team, User, TeamMembership
 
@@ -36,8 +37,16 @@ class ExportViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ImageSetViewSet(viewsets.ModelViewSet):
-    queryset = ImageSet.objects.prefetch_related('set_tags')
-    serializer_class = ImageSetSerializer
+    queryset = ImageSet.objects.prefetch_related('set_tags').select_related('team')
+
+    def get_serializer(self, *args, **kwargs):
+        if kwargs.get('many', False):
+            serializer_class = ImageSetListSerializer
+        else:
+            serializer_class = ImageSetRetrieveSerializer
+
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
 
     @staticmethod
     def add_permissions(user, image_set, data):
@@ -49,7 +58,7 @@ class ImageSetViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None):
         image_set = get_object_or_404(ImageSet, pk=pk)
-        serializer = ImageSetSerializer(image_set)
+        serializer = self.get_serializer(image_set)
         data = self.add_permissions(request.user, image_set, serializer.data)
         data['isPinned'] = request.user in image_set.pinned_by.all()
         return Response(data)

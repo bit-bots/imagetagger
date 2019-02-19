@@ -59,7 +59,17 @@ class ImageInImageSetSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class ImageSetSerializer(serializers.ModelSerializer):
+class ImageSetListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageSet
+        fields = ('id', 'name', 'public', 'public_collaboration', 'image_lock',
+                  'priority', 'tags', 'team')
+
+    tags = serializers.ListField(source='tag_names')
+    team = TeamInImageSetSerializer()
+
+
+class ImageSetRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSet
         fields = ('id', 'name', 'location', 'description', 'time', 'public',
