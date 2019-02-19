@@ -64,12 +64,16 @@ class ImageSetSerializer(serializers.ModelSerializer):
         model = ImageSet
         fields = ('id', 'name', 'location', 'description', 'time', 'public',
                   'public_collaboration', 'image_lock', 'priority', 'zip_state',
-                  'images', 'main_annotation_type', 'tags', 'team', 'creator')
+                  'images', 'main_annotation_type', 'tags', 'team', 'creator', 'zip_url')
+
+    def get_zip_url(self, instance):
+        return reverse('images:download_imageset', args=(instance.id,))
 
     tags = serializers.ListField(source='tag_names')
     creator = UserInImageSetSerializer()
     team = TeamInImageSetSerializer()
     images = ImageInImageSetSerializer(many=True)
+    zip_url = serializers.SerializerMethodField(source='zip_url')
 
 
 class ImageSetInUserSerializer(serializers.ModelSerializer):
