@@ -94,9 +94,12 @@ class ImageSetInUserSerializer(serializers.ModelSerializer):
         model = ImageSet
         fields = ('id', 'name', 'priority', 'tags', 'team', 'number_of_images')
 
+    def get_number_of_images(self, instance):
+        return Image.objects.filter(image_set=instance).count()
+
     tags = serializers.ListField(source='tag_names')
     team = TeamInImageSetSerializer()
-    number_of_images = serializers.IntegerField()
+    number_of_images = serializers.SerializerMethodField()
 
 
 class AnnotationInImageSerializer(serializers.ModelSerializer):
