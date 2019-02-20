@@ -63,10 +63,11 @@ class ImageSetListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSet
         fields = ('id', 'name', 'public', 'public_collaboration', 'image_lock',
-                  'priority', 'tags', 'team')
+                  'priority', 'tags', 'team', 'number_of_images')
 
     tags = serializers.ListField(source='tag_names')
     team = TeamInImageSetSerializer()
+    number_of_images = serializers.IntegerField()
 
 
 class ImageSetRetrieveSerializer(serializers.ModelSerializer):
@@ -80,15 +81,12 @@ class ImageSetRetrieveSerializer(serializers.ModelSerializer):
     def get_zip_url(self, instance):
         return reverse('images:download_imageset', args=(instance.id,))
 
-    def get_number_of_images(self, instance):
-        return Image.objects.filter(image_set=instance).count()
-
     tags = serializers.ListField(source='tag_names')
     creator = UserInImageSetSerializer()
     team = TeamInImageSetSerializer()
     images = ImageInImageSetSerializer(many=True)
     zip_url = serializers.SerializerMethodField(source='zip_url')
-    number_of_images = serializers.SerializerMethodField()
+    number_of_images = serializers.IntegerField()
 
 
 class ImageSetInUserSerializer(serializers.ModelSerializer):
@@ -96,12 +94,9 @@ class ImageSetInUserSerializer(serializers.ModelSerializer):
         model = ImageSet
         fields = ('id', 'name', 'priority', 'tags', 'team', 'number_of_images')
 
-    def get_number_of_images(self, instance):
-        return Image.objects.filter(image_set=instance).count()
-
     tags = serializers.ListField(source='tag_names')
     team = TeamInImageSetSerializer()
-    number_of_images = serializers.SerializerMethodField()
+    number_of_images = serializers.IntegerField()
 
 
 class AnnotationInImageSerializer(serializers.ModelSerializer):

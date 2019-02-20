@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -37,7 +38,7 @@ class ExportViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ImageSetViewSet(viewsets.ModelViewSet):
-    queryset = ImageSet.objects.prefetch_related('set_tags').select_related('team')
+    queryset = ImageSet.objects.prefetch_related('set_tags').select_related('team').annotate(number_of_images=Count('images'))
 
     def get_serializer(self, *args, **kwargs):
         if kwargs.get('many', False):
@@ -57,8 +58,8 @@ class ImageSetViewSet(viewsets.ModelViewSet):
         data['permissions'] = permission_dict
         return data
 
-    def retrieve(self, request, pk=None):
-        image_set = get_object_or_404(ImageSet, pk=pk)
+    def retrieve(self, request, *args, **kwargs):
+        image_set = self.get_object()
         serializer = self.get_serializer(image_set)
         data = self.add_permissions(request.user, image_set, serializer.data)
         data['isPinned'] = request.user in image_set.pinned_by.all()
@@ -101,14 +102,14 @@ class TeamViewSet(viewsets.ModelViewSet):
         data['permissions'] = permission_dict
         return data
 
-    def retrieve(self, request, pk=None):
-        team = get_object_or_404(Team, pk=pk)
+    def retrieve(self, request, *args, **kwargs):
+        team = self.get_object()
         serializer = TeamSerializer(team)
         data = self.add_permissions(request.user, team, serializer.data)
         return Response(data)
 
     def create(self, request, *args, **kwargs):
-        serializer = TeamSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         team = serializer.save()
         TeamMembership.objects.create(team=team, user=request.user, is_admin=True)
@@ -125,7 +126,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         Get information about the currently logged in user
         """
         user = request.user
-        serializer = UserSerializer(user)
+        serializer = self.get_serializer(user)
         return Response(serializer.data)
 
 
