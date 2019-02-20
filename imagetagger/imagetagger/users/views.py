@@ -238,7 +238,8 @@ def view_team(request, team_id):
     admins = team.admins
 
     imagesets = ImageSet.objects.filter(team=team).annotate(
-        image_count_agg=Count('images')).order_by('-public', 'name')
+        image_count_agg=Count('images')).prefetch_related('set_tags').\
+        order_by('-public', 'name')
     export_formats = ExportFormat.objects.filter(
         team=team).prefetch_related('annotations_types').order_by('name')
 
@@ -247,7 +248,7 @@ def view_team(request, team_id):
         imagesets = imagesets.filter(public=True)
 
     export_format_forms = (ExportFormatEditForm(instance=format_instance) for format_instance in export_formats)
-    test_imagesets = ImageSet.objects.filter(set_tags__name='test').order_by('-public', 'name')
+    test_imagesets = imagesets.filter(set_tags__name='test').order_by('-public', 'name')
 
     return render(request, 'users/view_team.html', {
         'team': team,
