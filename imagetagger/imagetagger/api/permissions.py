@@ -63,9 +63,9 @@ class AnnotationPermission(ImageTaggerPermission):
                 TeamMembership.objects.filter(team=obj.image_set.team, user=request.user))
 
     def has_destroy_permission(self, request, obj):
-        return (obj.image_set.public_collaboration or
-                obj.image_set.creator == request.user or
-                TeamMembership.objects.filter(team=obj.image_set.team, user=request.user))
+        return (obj.image.image_set.public_collaboration or
+                obj.image.image_set.creator == request.user or
+                TeamMembership.objects.filter(team=obj.image.image_set.team, user=request.user))
 
 
 class VerificationPermission(ImageTaggerPermission):
