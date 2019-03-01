@@ -9,6 +9,7 @@ from imagetagger.annotations.models import Annotation, AnnotationType, ExportFor
 from imagetagger.api.serializers import ImageSerializer, AnnotationSerializer, AnnotationTypeSerializer, \
     ExportFormatSerializer, ExportSerializer, ImageSetListSerializer, TeamSerializer, UserSerializer, \
     VerificationSerializer, ImageSetRetrieveSerializer
+from imagetagger.api.permissions import ImageSetPermission, AnnotationPermission, VerificationPermission
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team, User, TeamMembership
 
@@ -20,6 +21,7 @@ IMAGE_SET_PERMISSIONS = ('verify', 'annotate', 'create_export', 'delete_annotati
 class AnnotationViewSet(viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
+    permission_classes = (AnnotationPermission,)
 
 
 class AnnotationTypeViewSet(viewsets.ModelViewSet):
@@ -39,6 +41,7 @@ class ExportViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ImageSetViewSet(viewsets.ModelViewSet):
     queryset = ImageSet.objects.prefetch_related('set_tags').select_related('team').annotate(number_of_images=Count('images'))
+    permission_classes = (ImageSetPermission,)
 
     def get_serializer(self, *args, **kwargs):
         if kwargs.get('many', False):
@@ -133,3 +136,4 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class VerificationViewSet(viewsets.ModelViewSet):
     queryset = Verification.objects.all()
     serializer_class = VerificationSerializer
+    permission_classes = (VerificationPermission,)
