@@ -9,10 +9,17 @@ from imagetagger.users.models import Team, User
 class AnnotationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Annotation
-        fields = ('id', 'concealed', 'blurred', 'closed', 'last_edit_time',
+        fields = ('id', 'concealed', 'blurred', 'last_edit_time', 'user', 'not_in_image',
                   'vector', 'image', 'annotation_type', 'creator', 'last_editor')
 
+    def get_not_in_image(self, instance):
+        return instance.vector is None
+
     creator = serializers.PrimaryKeyRelatedField(source='user', read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    concealed = serializers.BooleanField(source='_concealed')
+    blurred = serializers.BooleanField(source='_blurred')
+    not_in_image = serializers.SerializerMethodField(read_only=True)
 
 
 class AnnotationTypeSerializer(serializers.ModelSerializer):
