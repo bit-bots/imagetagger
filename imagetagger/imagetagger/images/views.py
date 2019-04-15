@@ -189,8 +189,7 @@ def upload_image(request, imageset_id):
                 'unsupported': False,
                 'zip': False,
             }
-            fname = f.name.split('.')
-            if fname[-1] == 'zip':
+            if f.peek(4) == b'PK\x03\x04':  # ZIP file magic number
                 error['zip'] = True
                 zipname = ''.join(random.choice(string.ascii_uppercase +
                                                 string.ascii_lowercase +
@@ -267,6 +266,7 @@ def upload_image(request, imageset_id):
                 # tests for duplicats in  imageset
                 if Image.objects.filter(checksum=fchecksum, image_set=imageset)\
                         .count() == 0:
+                    fname = f.name.split('.')
                     fname = ('_'.join(fname[:-1]) + '_' +
                              ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
                                      for _ in range(6)) + '.' + fname[-1])
