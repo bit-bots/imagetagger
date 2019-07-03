@@ -137,8 +137,8 @@ class Annotation(models.Model):
                 AnnotationType.VECTOR_TYPE.BOUNDING_BOX,
                 AnnotationType.VECTOR_TYPE.LINE,
                 AnnotationType.VECTOR_TYPE.POLYGON):
-            yc = self.vector['y1'] + (self.height / 2)
-            xc = self.vector['x1'] + (self.width / 2)
+            yc = self.min_y + (self.height / 2)
+            xc = self.min_x + (self.width / 2)
         elif self.annotation_type.vector_type is AnnotationType.VECTOR_TYPE.POINT:
             yc = self.vector['y1']
             xc = self.vector['x1']
