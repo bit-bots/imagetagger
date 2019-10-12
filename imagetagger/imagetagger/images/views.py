@@ -189,7 +189,9 @@ def upload_image(request, imageset_id):
                 'unsupported': False,
                 'zip': False,
             }
-            if f.peek(4) == b'PK\x03\x04':  # ZIP file magic number
+            magic_number = f.read(4)
+            f.seek(0)  # reset file cursor to the beginning of the file
+            if magic_number == b'PK\x03\x04':  # ZIP file magic number
                 error['zip'] = True
                 zipname = ''.join(random.choice(string.ascii_uppercase +
                                                 string.ascii_lowercase +
