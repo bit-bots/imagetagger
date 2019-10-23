@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.db.models.expressions import F
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.urls import reverse
 from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequest, JsonResponse, \
     FileResponse
@@ -19,9 +19,10 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
     HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 from PIL import Image as PIL_Image
+from PIL.ExifTags import TAGS
 
 from imagetagger.images.serializers import ImageSetSerializer, ImageSerializer, SetTagSerializer
-from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm
+from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormWT, ImageSetEditForm, ImageMetadataForm
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
@@ -41,6 +42,39 @@ import hashlib
 import json
 import imghdr
 from datetime import date, timedelta
+
+
+@login_required
+def metadata_create(request):
+    if request.method == 'POST':
+        form = ImageMetadataForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            img = get_object_or_404(Image, pk=data['image'])
+            metadata = json.loads(img.metadata)
+            metadata[data['name']] = data['value']
+            img.metadata = json.dumps(metadata)
+            img.save()
+            messages.info(request,
+                          _("Successfully updated \'{}\' in metadata".format(data['name'])))
+            return redirect(reverse('annotations:annotate', args=(img.pk,)))
+    return redirect(reverse('annotations:annotate', args=(request.POST['image'],)))
+
+
+@require_POST
+def metadata_delete(request, image_id):
+    img = get_object_or_404(Image, id=image_id)
+    metadata = json.loads(img.metadata)
+    if request.POST['key'] in metadata:
+        metadata.pop(request.POST['key'])
+        messages.info(request,
+                      _("Successfully deleted \'{}\' in metadata".format(request.POST['key'])))
+    else:
+        messages.info(request,
+                      _("Error! \'{}\' was not found in metadata!".format(request.POST['key'])))
+    img.metadata = json.dumps(metadata)
+    img.save()
+    return redirect(reverse('annotations:annotate', args=(image_id,)))
 
 
 @login_required
@@ -173,6 +207,13 @@ def index(request):
 @login_required
 @require_http_methods(["POST", ])
 def upload_image(request, imageset_id):
+    def extract_metadata(img):
+        metadata = dict()
+        if img._getexif() is not None:
+            for (tag, value) in img._getexif().items():
+                metadata[TAGS.get(tag)] = value
+        return json.dumps(metadata, default=str)
+
     imageset = get_object_or_404(ImageSet, id=imageset_id)
     if request.method == 'POST' \
             and imageset.has_perm('edit_set', request.user) \
@@ -236,6 +277,8 @@ def upload_image(request, imageset_id):
                                 try:
                                     with PIL_Image.open(file_path) as image:
                                         width, height = image.size
+                                        # extracting metadata info
+                                        metadata = extract_metadata(image)
                                     file_new_path = os.path.join(imageset.root_path(), img_fname)
                                     shutil.move(file_path, file_new_path)
                                     shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
@@ -244,7 +287,8 @@ def upload_image(request, imageset_id):
                                                       filename=img_fname,
                                                       checksum=fchecksum,
                                                       width=width,
-                                                      height=height
+                                                      height=height,
+                                                      metadata=metadata
                                                       )
                                     new_image.save()
                                 except (OSError, IOError):
@@ -266,7 +310,7 @@ def upload_image(request, imageset_id):
                     fchecksum.update(chunk)
                 fchecksum = fchecksum.digest()
                 # tests for duplicats in  imageset
-                if Image.objects.filter(checksum=fchecksum, image_set=imageset)\
+                if Image.objects.filter(checksum=fchecksum, image_set=imageset) \
                         .count() == 0:
                     fname = f.name.split('.')
                     fname = ('_'.join(fname[:-1]) + '_' +
@@ -285,8 +329,11 @@ def upload_image(request, imageset_id):
                         try:
                             with PIL_Image.open(image.path()) as image_file:
                                 width, height = image_file.size
+                                # extracting metadata info
+                                metadata = extract_metadata(image_file)
                             image.height = height
                             image.width = width
+                            image.metadata = metadata
                             image.save()
                         except (OSError, IOError):
                             error['damaged'] = True
@@ -362,10 +409,11 @@ def view_image(request, image_id):
         response = HttpResponse(content_type='image')
         response['X-Accel-Redirect'] = "/ngx_static_dn/{}".format(image.relative_path())
     else:
-        response =  FileResponse(open(file_path, 'rb'), content_type="image")
+        response = FileResponse(open(file_path, 'rb'), content_type="image")
 
     response["Content-Length"] = os.path.getsize(file_path)
     return response
+
 
 @login_required
 def list_images(request, image_set_id):
@@ -456,7 +504,7 @@ def create_imageset(request):
         form = ImageSetCreationForm(request.POST)
 
         if form.is_valid():
-            if team.image_sets\
+            if team.image_sets \
                     .filter(name=form.cleaned_data.get('name')).exists():
                 form.add_error(
                     'name',
@@ -618,7 +666,8 @@ def label_upload(request, imageset_id):
                             vector = json.loads(line_frags[2])
                         except JSONDecodeError:
                             report_list.append("In image \"{}\" the annotation:"
-                                               " \"{}\" was not accepted as valid JSON".format(line_frags[0], line_frags[2]))
+                                               " \"{}\" was not accepted as valid JSON".format(line_frags[0],
+                                                                                               line_frags[2]))
 
                     if annotation_type.validate_vector(vector):
                         if not Annotation.similar_annotations(vector, image, annotation_type):
@@ -646,7 +695,7 @@ def label_upload(request, imageset_id):
                         report_list.append(
                             'For the image ' + line_frags[0] + ' the annotation ' +
                             line_frags[2] + ' was not a valid vector or '
-                            'bounding box for the annotation type'
+                                            'bounding box for the annotation type'
                         )
                 else:
                     error_count += 1
@@ -676,8 +725,8 @@ def label_upload(request, imageset_id):
 
 def dl_script(request):
     return TemplateResponse(request, 'images/download.py', context={
-                            'base_url': settings.DOWNLOAD_BASE_URL,
-                            }, content_type='text/plain')
+        'base_url': settings.DOWNLOAD_BASE_URL,
+    }, content_type='text/plain')
 
 
 def download_imageset_zip(request, image_set_id):
@@ -837,7 +886,8 @@ def autocomplete_image_set_tag(request) -> Response:
     except (KeyError, TypeError, ValueError):
         raise ParseError
     tag_suggestions = list(SetTag.objects.filter(name__startswith=tag_name_query))
-    tag_suggestions.extend(list(SetTag.objects.filter(~Q(name__startswith=tag_name_query) & Q(name__contains=tag_name_query))))
+    tag_suggestions.extend(
+        list(SetTag.objects.filter(~Q(name__startswith=tag_name_query) & Q(name__contains=tag_name_query))))
     tag_suggestions = [tag_suggestion.name for tag_suggestion in tag_suggestions]
     print(tag_suggestions)
 

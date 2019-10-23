@@ -17,6 +17,7 @@ globals = {
   mouseDownY: undefined,
   currentAnnotations: undefined,
   allAnnotations: undefined,
+  allMetadata: undefined,
   stdColor: '#CC4444',
   mutColor: '#CC0000'
 };
@@ -35,6 +36,7 @@ function calculateImageScale() {
   const FEEDBACK_DISPLAY_TIME = 3000;
   const ANNOTATE_URL = '/annotations/%s/';
   const IMAGE_SET_URL = '/images/imageset/%s/';
+    const IMAGE_METADATA_DEL_URL = '/images/image/metadata/delete/';
   const PRELOAD_BACKWARD = 2;
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
@@ -51,6 +53,7 @@ function calculateImageScale() {
   var gMousepos;
   let gAnnotationType = -1;
   let gAnnotationCache = {};
+    let gMetadataCache = {};
   let gHighlightedAnnotation;
 
   var gShiftDown;
@@ -259,7 +262,7 @@ function calculateImageScale() {
           return e.annotation_type.id === gAnnotationType;
         });
         gAnnotationCache[gImageId] = globals.allAnnotations;
-
+          gMetadataCache[gImageId] = globals.allMetadata;
         tool.drawExistingAnnotations(globals.currentAnnotations);
 
         globals.editedAnnotationsId = undefined;
@@ -364,6 +367,53 @@ function calculateImageScale() {
       }
     });
   }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    /**
+     * Display metadata on current page.
+     *
+     * @param annotations
+     */
+    function displayImageMetadata(data, imageId) {
+        if (data != undefined) {
+            let table = $('#metadata > tbody');
+            table.empty();
+            let csrftoken = getCookie('csrftoken');
+            for (k in data) {
+                table.append(
+                    '<tr>' +
+                    '<td>' +
+                    '<form id="del-metadata-' + k + '" action="' + IMAGE_METADATA_DEL_URL + imageId + '/" method="POST">' +
+                    '<input type="hidden" name="csrfmiddlewaretoken" value="' + csrftoken + '">' +
+                    '<input type="hidden" name="key" value="' + k + '"/>' +
+                    '<button type="submit" class="btn btn-danger">' +
+                    '<span class="glyphicon glyphicon-trash" aria-hidden="true" style="padding-right: 3px;"></span>' +
+                    '</button>' +
+                    '</form>' +
+                    '</td>' +
+                    '<td>' + k + '</td>' +
+                    '<td>' + data[k] + '</td>' +
+                    '</tr>'
+                );
+            }
+        }
+
+    }
 
   /**
    * Display  existing annotations on current page.
@@ -881,6 +931,7 @@ function calculateImageScale() {
     $('#annotation_type_id').val(gAnnotationType);
 
     displayImage(imageId);
+      displayImageMetadata(gMetadataCache[imageId], imageId);
     if (!$('#keep_selection').prop('checked')) {
       $('#concealed').prop('checked', false);
       $('#blurred').prop('checked', false);
@@ -1028,6 +1079,7 @@ function calculateImageScale() {
       success: function(data) {
         // save the current annotations to the cache
         gAnnotationCache[imageId] = data.annotations;
+          gMetadataCache[imageId] = data.metadata;
         console.log("Saving annotations for", imageId);
       },
       error: function() {
@@ -1100,6 +1152,12 @@ function calculateImageScale() {
         delete gAnnotationCache[imageId];
       }
     }
+      for (var imageId in gMetadataCache) {
+          imageId = parseInt(imageId);
+          if (gMetadataCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
+              delete gMetadataCache[imageId];
+          }
+      }
   }
 
   /**

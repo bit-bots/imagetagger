@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -21,6 +22,7 @@ from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
 from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
+from imagetagger.images.forms import ImageMetadataForm
 
 
 def export_auth(request, export_id):
@@ -32,15 +34,19 @@ def export_auth(request, export_id):
 @login_required
 def annotate(request, image_id):
     selected_image = get_object_or_404(Image, id=image_id)
+    if selected_image is not None:
+        selected_image.metadata = json.loads(selected_image.metadata)
     imageset_perms = selected_image.image_set.get_perms(request.user)
     if 'read' in imageset_perms:
         set_images = selected_image.image_set.images.all().order_by('name')
         annotation_types = AnnotationType.objects.filter(active=True)  # for the dropdown option
         imageset_lock = selected_image.image_set.image_lock
+        metadataForm = ImageMetadataForm()
         return render(request, 'annotations/annotate.html', {
             'selected_image': selected_image,
             'imageset_perms': imageset_perms,
             'imageset_lock': imageset_lock,
+            'metadata_form': metadataForm,
             'set_images': set_images,
             'annotation_types': annotation_types,
         })
@@ -295,6 +301,7 @@ def export_format(export_format_name, imageset):
                             '%%imagewidth': image.width,
                             '%%imageheight': image.height,
                             '%%imagename': image.name,
+                            '%%imagemetadata': json.loads(image.metadata),
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                             '%%vector': formatted_vector,
@@ -332,6 +339,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': image.width,
                     '%%imageheight': image.height,
                     '%%imagename': image.name,
+                    '%%imagemetadata': json.loads(image.metadata),
                     '%%annotations': annotation_content,
                     '%%annoamount': annotations.count(),
                 }
@@ -387,6 +395,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
                     '%%imagename': annotation.image.name,
+                    '%%imagemetadata': json.loads(annotation.image.metadata),
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                     '%%vector': formatted_vector,
@@ -624,7 +633,6 @@ def load_annotations(request) -> Response:
         return Response({
             'detail': 'permission for reading this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
-
     serializer = AnnotationSerializer(
         image.annotations.select_related().filter(annotation_type__active=True).order_by('annotation_type__name'),
         context={
@@ -633,6 +641,7 @@ def load_annotations(request) -> Response:
         many=True)
     return Response({
         'annotations': serializer.data,
+        'metadata': json.loads(image.metadata)
     }, status=HTTP_200_OK)
 
 

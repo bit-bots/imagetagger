@@ -2,6 +2,7 @@ from typing import Set
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 import os
 
@@ -17,6 +18,7 @@ class Image(models.Model):
     checksum = models.BinaryField()
     width = models.IntegerField(default=800)
     height = models.IntegerField(default=600)
+    metadata = JSONField(default=dict)
 
     def path(self):
         return os.path.join(self.image_set.root_path(), self.filename)
@@ -90,6 +92,7 @@ class ImageSet(models.Model):
     )
     pinned_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pinned_sets')
     zip_state = models.IntegerField(choices=ZIP_STATES, default=ZipState.INVALID)
+    metadata = JSONField(default=dict)
 
     def root_path(self):
         return os.path.join(settings.IMAGE_PATH, self.path)
