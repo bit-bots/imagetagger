@@ -69,6 +69,7 @@
                                                     {{ imageset.name }}
                                                 </a>
                                                 ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
+                                                ({{annotationcount}}/{{imageset.image_count}})
                                                 {% for tag in imageset.set_tags.all %}
                                                     <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}," class="label label-info">{{ tag.name }}</a>
                                                 {% endfor %}
