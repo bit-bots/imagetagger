@@ -2,18 +2,18 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <link rel="shortcut icon" type="image/png" href="{% static 'symbols/bitbots-fav.ico' %}"/>
+        <link rel="shortcut icon" type="image/png" href="{% static 'symbols/logo.ico' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
         <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
         {% block taggerimports %}{% endblock %}
-        <title>Bit-Bots ImageTagger</title>
+        <title>ARUW ImageTagger</title>
     </head>
     <body>
         {% block selectorblock %}{% endblock %}
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container-fluid">
                 <div class="navbar-header">
-                  <a class="navbar-brand bitbot-logo" href="https://www.bit-bots.de" target="_blank"><img src="{% static 'symbols/bitbots-logo.png' %}" height="40px"></a>
+                  <a class="navbar-brand bitbot-logo" href="https://www.bit-bots.de" target="_blank"><img src="{% static 'symbols/logo.png' %}" height="40px"></a>
                   <a class="navbar-brand"  href="{% url 'images:index' %}">ImageTagger</a>
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
