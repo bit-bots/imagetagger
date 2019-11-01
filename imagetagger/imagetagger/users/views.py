@@ -15,9 +15,10 @@ from rest_framework.status import HTTP_200_OK
 from imagetagger.annotations.models import ExportFormat
 from imagetagger.annotations.forms import ExportFormatEditForm
 from imagetagger.images.forms import ImageSetCreationForm
-from imagetagger.images.models import ImageSet
+from imagetagger.images.models import ImageSet, Image
 from imagetagger.users.forms import TeamCreationForm
 from .models import Team, User
+from imagetagger.annotations.models import Annotation, Export
 
 
 @login_required
@@ -250,12 +251,33 @@ def view_team(request, team_id):
     export_format_forms = (ExportFormatEditForm(instance=format_instance) for format_instance in export_formats)
     test_imagesets = imagesets.filter(set_tags__name='test').order_by('-public', 'name')
 
+    for imageset in imagesets:
+        if not imageset.has_perm('read', request.user):
+            messages.warning(request, 'you do not have the permission to access this imageset')
+            return redirect(reverse('images:index'))
+        # images the imageset contains
+        images = Image.objects.filter(image_set=imageset).order_by('name')
+        # the saved exports of the imageset
+        # exports = Export.objects.filter(image_set=image_set_id).order_by('-id')[:5]
+        # filtered = False
+        # form_filter = request.POST.get('filter')
+        # if request.method == "POST" and form_filter is not None:
+        #     filtered = True
+        #     # filter images for missing annotationtype
+        # images.image_count = images.exclude(annotations__annotation_type_id="Plate").count()
+        annotations = Annotation.objects.filter(
+            image__in=images,
+            annotation_type__active=True).order_by("id")
+        imageset.annotation_count = annotations.count()
+
     return render(request, 'users/view_team.html', {
         'team': team,
         'members': members,
         'members_30': members_30,
         'admins': admins,
+        # 'images' : images,
         'imagesets': imagesets,
+        # 'annotationset': annotationset,
         'date_imagesets': sorted(imagesets, key=lambda i: i.time, reverse=True),
         'size_imagesets': sorted(imagesets, key=lambda i: i.image_count, reverse=True),
         'test_imagesets': test_imagesets,

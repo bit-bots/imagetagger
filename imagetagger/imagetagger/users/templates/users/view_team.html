@@ -68,10 +68,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
-                                                {% for at in annotation_types %}
-                                                    {{ at.name }}: <b>{{ at.count }}</b> (<b><span class="text-success">{{ at.in_image_count }}</span></b>:<b><span class="text-danger">{{ at.not_in_image_count }}</span></b>)
-                                                {% endfor %}
+                                                ({{ imageset.annotation_count }} annotations for {{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                                 {% for tag in imageset.set_tags.all %}
                                                     <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}," class="label label-info">{{ tag.name }}</a>
                                                 {% endfor %}
@@ -91,7 +88,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
+                                                ({{ imageset.annotation_count }} annotations for {{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                                 {% for tag in imageset.set_tags.all %}
                                                     <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}," class="label label-info">{{ tag.name }}</a>
                                                 {% endfor %}
@@ -111,7 +108,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
+                                                ({{ imageset.annotation_count }} annotations for {{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                                 {% for tag in imageset.set_tags.all %}
                                                     <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}," class="label label-info">{{ tag.name }}</a>
                                                 {% endfor %}
@@ -131,7 +128,7 @@
                                                 <a href="{% url 'images:view_imageset' imageset.id%}">
                                                     {{ imageset.name }}
                                                 </a>
-                                                ({{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
+                                                ({{ imageset.annotation_count }} annotations for {{ imageset.image_count }} images) {{ imageset.prio_symbol | safe }}
                                                 {% for tag in imageset.set_tags.all %}
                                                     <a href="{% url 'images:explore_imageset' %}?tags={{ tag.name }}," class="label label-info">{{ tag.name }}</a>
                                                 {% endfor %}
