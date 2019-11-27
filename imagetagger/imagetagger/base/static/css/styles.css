@@ -101,6 +101,10 @@ a.bitbot-logo{
 
 .annotate_image_link {
   display: block;
+  color: red;
+}
+.annotated {
+  color: green;
 }
 
 .annotate_image_link.active, .annotate_image_link.active:active,
@@ -151,7 +155,7 @@ table#coordinate_table tr td:nth-of-type(1) {
 
 .delete-annotations {
   float: right;
-  align: right;
+  text-align: right;
   margin: 3px;
 }
 
