@@ -10,7 +10,7 @@
                     <h2 class="panel-title">Create a new user</h2>
                 </div>
                 <div class="panel-body">
-                    <form action="{% url 'registration_register' %}" method="post">
+                    <form action="{% url 'django_registration_register' %}" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="id_username">{{ form.username.label }}</label>

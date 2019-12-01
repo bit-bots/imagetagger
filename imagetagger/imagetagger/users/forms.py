@@ -1,11 +1,11 @@
 from django import forms
-from registration.forms import RegistrationForm
+from django_registration.forms import RegistrationForm
 
 from .models import Team, User
 
 
 class UserRegistrationForm(RegistrationForm):
-    class Meta:
+    class Meta(RegistrationForm.Meta):
         model = User
         fields = [
             'username',
