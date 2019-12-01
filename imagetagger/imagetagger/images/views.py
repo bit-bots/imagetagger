@@ -98,7 +98,7 @@ def index(request):
     annotation_types = Annotation.objects.values('annotation_type').annotate(
         annotation_count=Count('pk'),
         public_annotation_count=Count('pk', filter=Q(image__image_set__public=True)),
-        name=F('annotation_type__name'))
+        name=F('annotation_type__name')).order_by('-public_annotation_count')
 
     image_stats = Image.objects.aggregate(
         total_count=Count('pk'),
