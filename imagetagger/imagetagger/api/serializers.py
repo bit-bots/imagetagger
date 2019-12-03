@@ -147,7 +147,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'points', 'pinned_sets', 'teams')
 
-    teams = ShortTeamSerializer(many=True)
+    # teams = ShortTeamSerializer(many=True)
     pinned_sets = ImageSetInUserSerializer(many=True)
 
 

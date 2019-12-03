@@ -1,6 +1,8 @@
 *.swp
 *.swo
 settings.py
+*/venv
+
 # ---> Python
 # Byte-compiled / optimized / DLL files
 __pycache__/
