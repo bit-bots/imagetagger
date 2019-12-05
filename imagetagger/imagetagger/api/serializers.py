@@ -73,7 +73,7 @@ class ImageSetListSerializer(serializers.ModelSerializer):
                   'priority', 'tags', 'team', 'number_of_images')
 
     tags = serializers.ListField(source='tag_names')
-    team = TeamInImageSetSerializer()
+    # team = TeamInImageSetSerializer()
     number_of_images = serializers.IntegerField()
 
 
@@ -148,7 +148,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'points', 'pinned_sets', 'teams')
 
     # teams = ShortTeamSerializer(many=True)
-    pinned_sets = ImageSetInUserSerializer(many=True)
+    # pinned_sets = ImageSetInUserSerializer(many=True)
 
 
 class VerificationSerializer(serializers.ModelSerializer):
