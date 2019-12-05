@@ -89,9 +89,9 @@ class ImageSetRetrieveSerializer(serializers.ModelSerializer):
         return reverse('images:download_imageset', args=(instance.id,))
 
     tags = serializers.ListField(source='tag_names')
-    creator = UserInImageSetSerializer()
-    team = TeamInImageSetSerializer()
-    images = ImageInImageSetSerializer(many=True)
+    # creator = UserInImageSetSerializer()
+    # team = TeamInImageSetSerializer()
+    # images = ImageInImageSetSerializer(many=True)
     zip_url = serializers.SerializerMethodField(source='zip_url')
     number_of_images = serializers.IntegerField()
 
