@@ -184,21 +184,6 @@
                             </p>
                         <p data-toggle="tooltip" data-placement="right" title="Same layout as the arrow keys. Increasing the bounding box size is possible with shift+i/l . Decreasing is possible with shift+j/k .">The bounding box can be moved<b> and resized</b> with <b>i j k l</b> <span class="glyphicon glyphicon-question-sign"></span></p>
                             <div class="row" id="coordinate_table">
-                              {% for field in vector_fields %}
-                                <div id="{{ field }}Box">
-                                  <div class="col-xs-2" style="max-width: 3em">
-                                    <label for="{{ field }}Field">
-                                        {{ field }}
-                                    </label>
-                                  </div>
-                                  <div class="col-xs-10">
-                                      <input id="{{ field }}Field"
-                                             class="Coordinates annotation_value form-control"
-                                             type="text" name="{{ field }}Field" value="0" min="0" disabled>
-                                  </div>
-                                  <div class="col-xs-12"></div>
-                                </div>
-                              {% endfor %}
                             </div>
                         {% endif %}
                         <br>
