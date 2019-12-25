@@ -87,7 +87,7 @@
             <div id="image_list">
                 {% for set_image in set_images %}
                   <a id="annotate_image_link_{{ set_image.id }}"
-                     href="{% url 'annotations:annotate' set_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}"
+                     href="{% url 'annotations:annotate' set_image.id %}"
                      class="annotate_image_link {% if set_image.id == selected_image.id %}active{% endif %}"
                      data-imageid="{{ set_image.id }}">
                     {{set_image.name}}
@@ -152,7 +152,7 @@
                     <h3 id="active_image_name" class="panel-title">{{selected_image.name}}</h3>
                 </div>
                 <div class="panel-body">
-                    <form id="annotation_form" action="{% url 'annotations:annotate' selected_image.id %}{% if filtered is not None %}?selected_annotation_type={{ filtered }}{% endif %}" enctype="multipart/form-data" method="post">
+                    <form id="annotation_form" action="{% url 'annotations:annotate' selected_image.id %}" enctype="multipart/form-data" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="image_id" value="{{ selected_image.id }}">
                         <p>
