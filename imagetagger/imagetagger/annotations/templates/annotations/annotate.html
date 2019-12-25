@@ -115,35 +115,8 @@
               <u>Annotations:</u>
             </p>
             <div id="existing_annotations">
-              {% for annotation in image_annotations %}
-                <div id="annotation_{{ annotation.id }}" class="annotation">
-                  {{ annotation.annotation_type.name }}:
-                  <div style="float: right;">
-                      <a href="{% url 'annotations:verify' annotation.id%}">
-                        <img src="{% static "symbols/checkmark.png" %}" alt="verify" class="annotation_verify_button" data-annotationid="{{ annotation.id }}">
-                      </a>
-                      <a href="#" class="annotation_edit_button" id="annotation_edit_button_{{ annotation.id }}" data-annotationid="{{ annotation.id }}" data-annotationtypeid="{{ annotation.annotation_type_id }}" data-escapedvector="{{ annotation.vector_as_json }}">
-                        <img src="{% static "symbols/pencil.png" %}" alt="edit">
-                      </a>
-                      <a href="{% url 'annotations:delete_annotation' annotation.id%}" class="annotation_delete_button" data-annotationid="{{ annotation.id }}">
-                        <img src="{% static "symbols/bin.png" %}" alt="delete">
-                      </a>
-                  </div>
-                  <br>
-                  {% if annotation.vector is not None %}
-                    {% for key, value in annotation.vector.items %}
-                      {% if forloop.counter0 > 0 %}
-                        &bull;
-                      {% endif %}
-                      <em>{{ key }}</em>: {{ value }}
-                    {% endfor %}
-                  {% else %}
-                    {{annotation.content}}
-                  {% endif %}
-                </div>
-              {% endfor %}
             </div>
-            <div id="no_annotations" class="alert alert-warning{% if image_annotations %} hidden{% endif %}">{% trans 'No annotations found.' %}</div>
+            <div id="no_annotations" class="alert alert-warning hidden">{% trans 'No annotations found.' %}</div>
             <div id="annotations_loading" class="alert alert-info hidden">{% trans 'Loading ...' %}</div>
         </div>
         <div class="col-md-3">
