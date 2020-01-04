@@ -84,7 +84,7 @@ The following settings should probably be changed:
 + The database settings
 + The UPLOAD\_FS\_GROUP to the id of the group that should access and create the uploaded images
 
-For the database, postgresql is used. Install it by running `sudo apt install postgresql` on debian based operating systems. A default database cluster is automatically initialized.
+For the database, postgresql is used. Install it by running `sudo apt install postgresql` on Debian based operating systems. A default database cluster is automatically initialized.
 
 Other systems may require different commands to install the package and the database cluster may
 have to be initialized manually (e.g. using `sudo -iu postgres initdb --locale en_US.UTF-8 -D '/var/lib/postgres/data'`).
