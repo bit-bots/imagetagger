@@ -123,12 +123,9 @@ module.exports = {
 		inline: true,
 		proxy: {
 			'/api/**': {
-                target: 'http://localhost:8000',
+                target: 'http://api.imagetagger.localhost:8000',
 				secure: false,
 				changeOrigin: true,
-				pathRewrite: {
-					'^/api': ''
-				}
 			},
 		},
 		contentBase: path.join(__dirname, 'public'),
@@ -166,3 +163,5 @@ module.exports.plugins = (module.exports.plugins || []).concat([
    new webpack.HotModuleReplacementPlugin(),
    new webpack.EvalSourceMapDevToolPlugin({})
 ])
+
+console.log(`Now serving http://${module.exports.devServer.public}:${module.exports.devServer.port}`)
