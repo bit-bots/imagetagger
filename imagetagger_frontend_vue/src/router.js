@@ -5,10 +5,12 @@ Vue.use(VueRouter)
 
 const routes = [
 	{
-		path: '/',
-		name: 'home',
-		component: loadView('Home')
+		path: '/imagesets/list/:filter',
+		name: 'dashboard',
+		component: loadView('Dashboard')
 	},
+
+	{path: '/', redirect: '/imagesets/list/public'},
 
 	{
 		path: '*',
