@@ -2,17 +2,7 @@
     <div>
         <Navbar/>
 
-        <section class="section">
-            <div class="container">
-                <img src="../assets/bit-bot.png">
-                <h1 class="title">
-                    Hello World
-                </h1>
-                <p class="subtitle">
-                    My first website with <strong>{{test}}</strong>!
-                </p>
-            </div>
-        </section>
+        <h1 class="title">Dashboard</h1>
     </div>
 </template>
 

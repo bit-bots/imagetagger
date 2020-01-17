@@ -20,6 +20,7 @@
                 <router-link to="/" class="navbar-item">Explore</router-link>
                 <router-link to="/" class="navbar-item">Messages</router-link>
                 <router-link to="/" class="navbar-item">Tools</router-link>
+                <router-link to="/not-found" class="navbar-item">404</router-link>
             </div>
         </div>
     </nav>
