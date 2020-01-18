@@ -1,5 +1,6 @@
 import VueRouter from 'vue-router'
 import Vue from 'vue'
+import {store} from "src/store";
 
 Vue.use(VueRouter)
 
@@ -21,7 +22,16 @@ const routes = [
 
 const router = new VueRouter({
 	mode: 'history',
-	routes
+	routes,
+})
+
+router.beforeEach((to, from, next) => {
+	store.commit('toggleCurrentlyLoading')
+	next()
+})
+
+router.afterEach((to, from) => {
+	store.commit('toggleCurrentlyLoading')
 })
 
 function loadView(name) {

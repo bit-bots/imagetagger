@@ -14,7 +14,8 @@
         </div>
 
         <div class="navbar-menu">
-            <div class="navbar-start"></div>
+            <div class="navbar-start">
+            </div>
             <div class="navbar-end">
                 <router-link to="/" class="navbar-item">Home</router-link>
                 <router-link to="/" class="navbar-item">Explore</router-link>
@@ -27,8 +28,10 @@
 </template>
 
 <script>
+    import PageLoadingBar from "components/PageLoadingBar";
     export default {
-        name: "Navbar"
+        name: "Navbar",
+        components: {PageLoadingBar}
     }
 </script>
 
