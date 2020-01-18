@@ -1,6 +1,6 @@
 import Vue from 'vue'
-import {router} from 'src/router'
-import {store} from 'src/store'
+import {router} from './router'
+import {store} from './store'
 import './main.scss'
 
 const app = new Vue({

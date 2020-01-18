@@ -1,6 +1,6 @@
 import VueRouter from 'vue-router'
 import Vue from 'vue'
-import {store} from "src/store";
+import {store} from "./store";
 
 Vue.use(VueRouter)
 
@@ -25,6 +25,7 @@ const router = new VueRouter({
 	routes,
 })
 
+
 router.beforeEach((to, from, next) => {
 	store.commit('toggleCurrentlyLoading')
 	next()
@@ -34,7 +35,9 @@ router.afterEach((to, from) => {
 	store.commit('toggleCurrentlyLoading')
 })
 
-function loadView(name) {
+
+function loadView(name: string) {
+	// @ts-ignore
 	return resolve => require(['views/' + name + '.vue'], resolve)
 }
 
