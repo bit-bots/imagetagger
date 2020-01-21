@@ -3,12 +3,12 @@
 </template>
 
 <script>
-    import { mapState } from "vuex"
+import {mapState} from "vuex"
 
-    export default {
-        name: "PageLoadingBar",
-        computed: mapState(['currentlyLoadingPage'])
-    }
+export default {
+    name: "PageLoadingBar",
+    computed: mapState(["currentlyLoadingPage"])
+}
 </script>
 
 <style scoped lang="scss">

@@ -1,46 +1,32 @@
-import VueRouter from 'vue-router'
-import Vue from 'vue'
-import {store} from "./store";
+import VueRouter from "vue-router"
+import Vue from "vue"
 
 Vue.use(VueRouter)
 
 const routes = [
-	{
-		path: '/imagesets/list/:filter',
-		name: 'dashboard',
-		component: loadView('Dashboard')
-	},
+    {
+        path: "/imagesets/list/:filter",
+        name: "dashboard",
+        component: loadView("Dashboard")
+    },
 
-	{path: '/', redirect: '/imagesets/list/public'},
+    {path: "/", redirect: "/imagesets/list/public"},
 
-	{
-		path: '*',
-		name: '404',
-		component: loadView('404')
-	}
+    {
+        path: "*",
+        name: "404",
+        component: loadView("NotFound")
+    }
 ]
 
 const router = new VueRouter({
-	mode: 'history',
-	routes,
+    mode: "history",
+    routes
 })
-
-
-router.beforeEach((to, from, next) => {
-	store.commit('toggleCurrentlyLoading')
-	next()
-})
-
-router.afterEach((to, from) => {
-	store.commit('toggleCurrentlyLoading')
-})
-
 
 function loadView(name: string) {
-	// @ts-ignore
-	return resolve => require(['views/' + name + '.vue'], resolve)
+    // @ts-ignore
+    return resolve => require(["views/" + name + ".vue"], resolve)
 }
 
-export {
-	router
-}
+export {router}
