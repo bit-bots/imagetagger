@@ -10,7 +10,13 @@ const routes = [
         component: loadView("Dashboard")
     },
 
-    {path: "/", redirect: "/imagesets/list/public"},
+    {
+        path: "/login",
+        name: "login",
+        component: loadView("Login")
+    },
+
+    {path: "/", name: "dashboard-public", redirect: "/imagesets/list/public"},
 
     {
         path: "*",

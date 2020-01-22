@@ -3,5 +3,5 @@
 </template>
 
 <style lang="scss">
-    @import "~bulma";
+    @import "~bootstrap";
 </style>

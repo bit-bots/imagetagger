@@ -8,7 +8,9 @@ module.exports = {
         "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
         "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
         semi: ["error", "never"],
-        indent: ["warn", 4],
+        indent: ["warn", 4, {
+            FunctionExpression: {parameters: "first"}
+        }],
         quotes: ["warn", "double"]
     },
     parserOptions: {

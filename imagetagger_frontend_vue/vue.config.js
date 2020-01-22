@@ -1,6 +1,8 @@
 var path = require("path")
 
 module.exports = {
+    lintOnSave: false,
+
     configureWebpack: config => {
         config.resolve.alias["views"] = path.resolve(__dirname, "src", "views")
         config.resolve.alias["components"] = path.resolve(

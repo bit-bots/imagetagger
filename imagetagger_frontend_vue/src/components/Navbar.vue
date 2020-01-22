@@ -1,49 +1,58 @@
 <template>
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <router-link
-                    class="navbar-item"
-                    :to="{ name: 'dashboard', params: { filter: 'all' } }"
-            >
-                <img src="../../src/assets/bit-bot.png" alt="bit-bots logo"/>
-                <span>ImageTagger</span>
-            </router-link>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="main navigation">
+        <!-- Logo with application name -->
+        <router-link v-bind:to="{name: 'dashboard', params: {filter: 'all'}}" class="navbar-brand">
+            <img src="../assets/bit-bot.png" alt="bit-bots logo">
+            <span>ImageTagger</span>
+        </router-link>
 
-            <a
-                    role="button"
-                    class="navbar-burger"
-                    aria-label="menu"
-                    aria-expanded="false"
-            >
-                <span aria-hidden="true"/>
-                <span aria-hidden="true"/>
-                <span aria-hidden="true"/>
-            </a>
-        </div>
+        <!-- Hamburger button for when the navbar is responsively collapsed -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"/>
+        </button>
 
-        <div class="navbar-menu">
-            <div class="navbar-start"></div>
-            <div class="navbar-end">
-                <router-link to="/" class="navbar-item">Home</router-link>
-                <router-link to="/" class="navbar-item">Explore</router-link>
-                <router-link to="/" class="navbar-item">Messages</router-link>
-                <router-link to="/" class="navbar-item">Tools</router-link>
-                <router-link to="/not-found" class="navbar-item">404</router-link>
-            </div>
+        <!-- Navbar buttons on right side -->
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <router-link v-bind:to="{name: 'dashboard', params: {filter: 'all'}}"
+                                 class="nav-link">Dashboard
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/" class="nav-link">Explore</router-link>
+                </li>
+                <li>
+                    <router-link to="/" class="nav-link">Messages</router-link>
+                </li>
+                <li>
+                    <router-link to="/" class="nav-link">Tools</router-link>
+                </li>
+                <li>
+                    <router-link
+                            v-if="isLoginVisible"
+                            v-bind:to="{name: 'login'}" class="nav-link">Login
+                    </router-link>
+                </li>
+            </ul>
         </div>
     </nav>
 </template>
 
 <script>
-//import PageLoadingBar from "components/PageLoadingBar"
 export default {
     name: "Navbar",
-    //components: { PageLoadingBar }
+    computed: {
+        isLoginVisible() {
+            return !this.$store.state.auth.loggedIn
+        }
+    }
 }
 </script>
 
 <style scoped lang="scss">
     .navbar-brand img {
+        height: 40px;
         padding-right: 6px;
     }
 </style>
