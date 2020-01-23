@@ -84,7 +84,6 @@ export default Vue.extend({
             })
         },
         navigateNext() {
-            console.log("success")
             this.$router.push(this.$store.state.auth.nextRoute)
         }
     },

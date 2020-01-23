@@ -4,7 +4,7 @@ import {RawLocation} from "vue-router"
 
 export const authModule = {
     state: {
-        loggedIn: "",
+        loggedIn: false,
         authToken: "",
         nextRoute: {name: "dashboard", params: {filter: "all"}} as RawLocation
     },
@@ -20,7 +20,7 @@ export const authModule = {
         /**
          * Restore authToken which is persistently saved in localStore and commit it to the store
          */
-        restorePersistentLogin: function(context) {
+        restorePersistentLogin: function (context) {
             const authToken = localStorage.getItem("authToken")
             if (authToken) {
                 context.commit("setAuthToken", authToken)
@@ -34,11 +34,15 @@ export const authModule = {
         login: async function (context,
                                payload: { username: string, password: string }): Promise<void> {
             return VueInstance.$http.post("auth/", payload)
+                // success
                 .then(async response => {
                     const token = (await response.json()).token
                     context.commit("setAuthToken", token)
                     return Promise.resolve()
-                }, response => {
+                },
+
+                // error
+                response => {
                     if (response.status == 400) {
                         return Promise.reject("Invalid login credentials")
                     } else {

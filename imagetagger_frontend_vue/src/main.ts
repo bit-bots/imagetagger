@@ -2,20 +2,16 @@ import Vue from "vue"
 import App from "./App.vue"
 import {router} from "@/router"
 import {store} from "@/store"
-import VueResource from "vue-resource"
-
-Vue.use(VueResource)
+import {http} from "@/resource"
 
 Vue.config.productionTip = false
 
 export const VueInstance = new Vue({
     router,
     store,
-    http: {
-        root: "http://localhost:8000/api"
-    },
+    http,
     render: h => h(App),
-    beforeCreate: function () {
+    created: function () {
         this.$store.dispatch("restorePersistentLogin")
     }
 }).$mount("#app")

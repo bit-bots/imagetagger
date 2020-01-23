@@ -1,5 +1,6 @@
 import VueRouter from "vue-router"
 import Vue from "vue"
+import {VueInstance} from "@/main"
 
 Vue.use(VueRouter)
 
@@ -28,6 +29,16 @@ const routes = [
 const router = new VueRouter({
     mode: "history",
     routes
+})
+
+router.beforeResolve((to, from, next) => {
+    if (VueInstance.$store.state.user.me.id == -1 && VueInstance.$store.state.auth.loggedIn) {
+        VueInstance.$store.dispatch("retrieveMeUser")
+            .catch(reason => alert(reason))
+            .finally(() => next())
+    } else {
+        next()
+    }
 })
 
 function loadView(name: string) {
