@@ -4,8 +4,8 @@ module.exports = {
     lintOnSave: false,
 
     configureWebpack: config => {
-        config.resolve.alias["views"] = path.resolve(__dirname, "src", "views")
-        config.resolve.alias["components"] = path.resolve(
+        config.resolve.alias["@views"] = path.resolve(__dirname, "src", "views")
+        config.resolve.alias["@components"] = path.resolve(
             __dirname,
             "src",
             "components"

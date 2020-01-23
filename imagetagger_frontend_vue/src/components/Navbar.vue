@@ -40,14 +40,15 @@
 </template>
 
 <script>
-export default {
-    name: "Navbar",
+import Vue from "vue"
+
+export default Vue.extend({
     computed: {
         isLoginVisible() {
             return !this.$store.state.auth.loggedIn
         }
     }
-}
+})
 </script>
 
 <style scoped lang="scss">

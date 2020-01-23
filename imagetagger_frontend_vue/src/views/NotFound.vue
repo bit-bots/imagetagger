@@ -15,10 +15,11 @@
     </div>
 </template>
 
-<script>
-import Navbar from "components/Navbar"
+<script lang="ts">
+import Vue from "vue"
+import Navbar from "@components/Navbar.vue"
 
-export default {
+export default Vue.extend({
     name: "NotFound",
     components: {Navbar},
     data() {
@@ -28,7 +29,7 @@ export default {
     computed: {},
 
     methods: {}
-}
+})
 </script>
 
 <style scoped lang="scss"></style>
