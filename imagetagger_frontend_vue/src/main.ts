@@ -14,7 +14,8 @@ export const VueInstance = new Vue({
     http: {
         root: "http://localhost:8000/api"
     },
-    render: h => h(App)
+    render: h => h(App),
+    beforeCreate: function () {
+        this.$store.dispatch("restorePersistentLogin")
+    }
 }).$mount("#app")
-
-
