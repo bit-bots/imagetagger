@@ -26,14 +26,18 @@
 import Vue from "vue"
 import VueTypes from "vue-types"
 import {CardTabDefinition} from "@/types"
+import Component from "vue-class-component"
 
-export default Vue.extend({
+@Component({
     props: {
         title: VueTypes.string,
         tabs: VueTypes.arrayOf(CardTabDefinition).def([]),
         activeTabName: VueTypes.string.def("")
     }
 })
+export default class Card extends Vue {
+
+}
 </script>
 
 <style scoped lang="scss">

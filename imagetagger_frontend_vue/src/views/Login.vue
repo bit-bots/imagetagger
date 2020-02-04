@@ -58,41 +58,38 @@
 
 <script lang="ts">
 import Vue from "vue"
+import Component from "vue-class-component"
 import Navbar from "@components/Navbar.vue"
 
-export default Vue.extend({
-    name: "Login",
-    components: {Navbar},
-    data: function () {
-        return {
-            username: "",
-            password: "",
-            rememberMe: true,
-            loginError: ""
-        }
-    },
-    methods: {
-        onSubmit() {
-            this.$store.dispatch("login", {
-                username: this.username,
-                password: this.password
-            }).then(() => {
-                this.loginError = ""
-                this.navigateNext()
-            }).catch(reason => {
-                this.loginError = reason
-            })
-        },
-        navigateNext() {
-            this.$router.push(this.$store.state.auth.nextRoute)
-        }
-    },
-    computed: {
-        isFormValid: function(): boolean {
-            return this.username != "" && this.password != ""
-        }
-    }
+@Component({
+    components: {Navbar}
 })
+export default class Login extends Vue {
+    username = ""
+    password = ""
+    rememberMe = true
+    loginError = ""
+
+    onSubmit(): void {
+        this.$store.dispatch("login", {
+            username: this.username,
+            password: this.password
+        }).then(() => {
+            this.loginError = ""
+            this.navigateNext()
+        }).catch(reason => {
+            this.loginError = reason
+        })
+    }
+
+    navigateNext(): void {
+        this.$router.push(this.$store.state.auth.nextRoute)
+    }
+
+    get isFormValid(): boolean {
+        return this.username != "" && this.password != ""
+    }
+}
 </script>
 
 <style scoped lang="scss">

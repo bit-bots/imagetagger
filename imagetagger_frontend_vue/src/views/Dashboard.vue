@@ -46,24 +46,26 @@
 
 <script lang="ts">
 import Vue from "vue"
+import Component from "vue-class-component"
 import Navbar from "@/components/Navbar.vue"
 import Card from "@/components/Card.vue"
 import {CardTabDefinition} from "@/types"
 
-export default Vue.extend({
-    components: {Card, Navbar},
-    computed: {
-        activeImagesetTab: function (): string {
-            return this.$route.params.filter
-        },
-        tabs: function (): CardTabDefinition[] {
-            return [
-                new CardTabDefinition("All", {name: "dashboard", params: {filter: "all"}}),
-                new CardTabDefinition("Public", {name: "dashboard", params: {filter: "public"}}),
-            ]
-        }
-    }
+@Component({
+    components: {Card, Navbar}
 })
+export default class Dashboard extends Vue {
+    get activeImagesetTab (): string {
+        return this.$route.params.filter
+    }
+
+    get tabs(): CardTabDefinition[] {
+        return [
+            new CardTabDefinition("All", {name: "dashboard", params: {filter: "all"}}),
+            new CardTabDefinition("Public", {name: "dashboard", params: {filter: "public"}})
+        ]
+    }
+}
 </script>
 
 <style lang="scss">

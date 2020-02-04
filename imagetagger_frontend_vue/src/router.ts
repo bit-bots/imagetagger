@@ -34,7 +34,7 @@ const router = new VueRouter({
 router.beforeResolve((to, from, next) => {
     if (VueInstance.$store.state.user.me.id == -1 && VueInstance.$store.state.auth.loggedIn) {
         VueInstance.$store.dispatch("retrieveMeUser")
-            .catch(reason => alert(reason))
+            .catch(reason => console.error(reason))
             .finally(() => next())
     } else {
         next()

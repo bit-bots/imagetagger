@@ -41,14 +41,14 @@
 
 <script lang="ts">
 import Vue from "vue"
+import Component from "vue-class-component"
 
-export default Vue.extend({
-    computed: {
-        isLoginVisible() {
-            return !this.$store.state.auth.loggedIn
-        }
+@Component({})
+export default class Navbar extends Vue {
+    get isLoginVisible() {
+        return !this.$store.state.auth.loggedIn
     }
-})
+}
 </script>
 
 <style scoped lang="scss">

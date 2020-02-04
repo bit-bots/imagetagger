@@ -17,19 +17,15 @@
 
 <script lang="ts">
 import Vue from "vue"
+import Component from "vue-class-component"
 import Navbar from "@components/Navbar.vue"
 
-export default Vue.extend({
-    name: "NotFound",
-    components: {Navbar},
-    data() {
-        return {}
-    },
-
-    computed: {},
-
-    methods: {}
+@Component({
+    components: {Navbar}
 })
+export default class NotFound extends Vue {
+
+}
 </script>
 
 <style scoped lang="scss"></style>
