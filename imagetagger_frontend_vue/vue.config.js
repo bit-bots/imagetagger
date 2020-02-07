@@ -11,5 +11,15 @@ module.exports = {
             "components"
         )
         config.resolve.alias["assets"] = path.resolve(__dirname, "src", "assets")
+    },
+
+    css: {
+        loaderOptions: {
+            sass: {
+                sassOptions: {
+                    includePaths: [path.resolve(__dirname, "node_modules")]
+                }
+            }
+        }
     }
 }

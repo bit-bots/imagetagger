@@ -9,7 +9,7 @@ class MeUser {
     teams: number[] = []
 }
 
-class UserState {
+export class UserState {
     me = new MeUser()
 }
 

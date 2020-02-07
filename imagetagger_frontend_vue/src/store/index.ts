@@ -1,18 +1,18 @@
 import Vue from "vue"
-import Vuex from "vuex"
+import Vuex, {Store} from "vuex"
 import {authModule} from "@/store/modules/auth"
 import {userModule} from "@/store/modules/user"
+import {contentFilterModule} from "@/store/modules/contentFilters"
 
 Vue.use(Vuex)
 
-const store = new Vuex.Store({
+export const store = new Vuex.Store({
     state: {},
     mutations: {},
     actions: {},
     modules: {
         auth: authModule,
-        user: userModule
+        user: userModule,
+        contentFilter: contentFilterModule
     }
 })
-
-export {store}

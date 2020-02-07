@@ -1,7 +1,18 @@
 <template>
     <div>
-        <Navbar/>
+        <navbar>
+            <navbar-search/>
+        </navbar>
 
+        <div class="mdc-layout-grid">
+            <div class="mdc-layout-grid__inner">
+                <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+                    test
+                </div>
+            </div>
+        </div>
+
+        <!--
         <div class="container-fluid">
             <div class="row">
                 <div class="col col-12"><h1>Dashboard</h1></div>
@@ -41,6 +52,7 @@
                 </div>
             </div>
         </div>
+        -->
     </div>
 </template>
 
@@ -50,9 +62,10 @@ import Component from "vue-class-component"
 import Navbar from "@/components/Navbar.vue"
 import Card from "@/components/Card.vue"
 import {CardTabDefinition} from "@/types"
+import NavbarSearch from "@/components/NavbarSearch.vue"
 
 @Component({
-    components: {Card, Navbar}
+    components: {NavbarSearch, Card, Navbar}
 })
 export default class Dashboard extends Vue {
     get activeImagesetTab (): string {

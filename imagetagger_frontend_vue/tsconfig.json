@@ -11,6 +11,7 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "baseUrl": ".",
+    "strictNullChecks": false,
     "types": [
       "webpack-env"
     ],

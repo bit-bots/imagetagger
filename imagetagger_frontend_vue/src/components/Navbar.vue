@@ -1,50 +1,51 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="main navigation">
-        <!-- Logo with application name -->
-        <router-link v-bind:to="{name: 'dashboard', params: {filter: 'all'}}" class="navbar-brand">
-            <img src="../assets/bit-bot.png" alt="bit-bots logo">
-            <span>ImageTagger</span>
-        </router-link>
+    <header class="mdc-top-app-bar" ref="elHeader">
+        <div class="mdc-top-app-bar__row">
 
-        <!-- Hamburger button for when the navbar is responsively collapsed -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
-            <span class="navbar-toggler-icon"/>
-        </button>
+            <!-- Left section -->
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <!--button class="mdc-icon-button material-icons mdc-top-app-bar__navigation-icon--unbounded">menu</button-->
+                <div class="brand">
+                    <img class="brand-logo" src="../assets/bit-bot.svg" alt="Bit-Bots Logo">
+                    <span class="brand-text">Imagetagger</span>
+                </div>
+            </section>
 
-        <!-- Navbar buttons on right side -->
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <router-link v-bind:to="{name: 'dashboard', params: {filter: 'all'}}"
-                                 class="nav-link">Dashboard
-                    </router-link>
-                </li>
-                <li>
-                    <router-link to="/" class="nav-link">Explore</router-link>
-                </li>
-                <li>
-                    <router-link to="/" class="nav-link">Messages</router-link>
-                </li>
-                <li>
-                    <router-link to="/" class="nav-link">Tools</router-link>
-                </li>
-                <li>
-                    <router-link
-                            v-if="isLoginVisible"
-                            v-bind:to="{name: 'login'}" class="nav-link">Login
-                    </router-link>
-                </li>
-            </ul>
+            <!-- Right section -->
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+                <router-link :to="{name: 'dashboard', params: {filter: 'all'}}">
+                    <button class="mdc-button mdc-theme--on-primary">
+                        <span class="mdc-button__ripple"/>Home
+                    </button>
+                </router-link>
+
+                <router-link v-if="isLoginVisible"
+                             :to="{name: 'login'}">
+                    <button class="mdc-button mdc-theme--on-primary">
+                        <span class="mdc-button__ripple"/> Login
+                    </button>
+                </router-link>
+
+                <slot/>
+            </section>
         </div>
-    </nav>
+    </header>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
 import Component from "vue-class-component"
+import {MDCTopAppBar} from "@material/top-app-bar/component"
 
-@Component({})
+@Component({
+})
 export default class Navbar extends Vue {
+    private _mdcAppBar: MDCTopAppBar;
+
+    mounted() {
+        this._mdcAppBar = new MDCTopAppBar(this.$refs.elHeader as Element)
+    }
+
     get isLoginVisible() {
         return !this.$store.state.auth.loggedIn
     }
@@ -52,8 +53,31 @@ export default class Navbar extends Vue {
 </script>
 
 <style scoped lang="scss">
-    .navbar-brand img {
-        height: 40px;
-        padding-right: 6px;
+    @import "~@material/top-app-bar/mdc-top-app-bar";
+
+    header.mdc-top-app-bar {
+        top: 0;
+        position: initial;
+        display: block;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+    }
+
+    .brand-logo {
+        height: 45px;
+        padding: 0 5px;
+    }
+
+    .brand-text {
+        @extend .mdc-top-app-bar__title;
+        padding-left: 8px;
+    }
+
+    .mdc-button {
+        text-transform: capitalize;
     }
 </style>
