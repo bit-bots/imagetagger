@@ -2,6 +2,7 @@
     <div>
         <navbar>
             <navbar-search/>
+            <navbar-profile/>
         </navbar>
 
         <div class="mdc-layout-grid">
@@ -19,9 +20,10 @@ import Vue from "vue"
 import Component from "vue-class-component"
 import Navbar from "@/components/Navbar.vue"
 import NavbarSearch from "@/components/NavbarSearch.vue"
+import NavbarProfile from "@/components/NavbarProfile.vue"
 
 @Component({
-    components: {NavbarSearch, Navbar}
+    components: {NavbarProfile, NavbarSearch, Navbar}
 })
 export default class Dashboard extends Vue {
 }

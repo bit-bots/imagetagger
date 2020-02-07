@@ -2,18 +2,26 @@ import {VueInstance} from "@/main"
 import {Module} from "vuex"
 import {RawLocation} from "vue-router"
 
+export class AuthState {
+    loggedIn = false
+    authToken = ""
+    nextRoute: RawLocation = {name: "dashboard", params: {filter: "all"}}
+}
+
 export const authModule = {
-    state: {
-        loggedIn: false,
-        authToken: "",
-        nextRoute: {name: "dashboard", params: {filter: "all"}} as RawLocation
-    },
+    state: new AuthState(),
     mutations: {
         setAuthToken: function (state, payload: string) {
             state.authToken = payload
             state.loggedIn = true
 
             localStorage.setItem("authToken", payload)
+        },
+        logout: function (state) {
+            state.authToken = ""
+            state.loggedIn = false
+
+            localStorage.clear()
         }
     },
     actions: {
@@ -50,6 +58,5 @@ export const authModule = {
                     }
                 })
         },
-        // TODO logout action
     }
-} as Module<any, any>
+} as Module<AuthState, any>

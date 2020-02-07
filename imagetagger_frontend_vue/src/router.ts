@@ -17,6 +17,12 @@ const routes = [
         component: loadView("Login")
     },
 
+    {
+        path: "/profile",
+        name: "profile",
+        component: loadView("Profile")
+    },
+
     {path: "/", name: "dashboard-public", redirect: "/imagesets/list/public"},
 
     {

@@ -4,7 +4,7 @@
 
 <style lang="scss">
     @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500");
-    @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+    @import url("~@mdi/font/css/materialdesignicons.css");
 
     $primary-color-dark: #455A64;
     $primary-color: #607D8B;
@@ -32,5 +32,16 @@
 
     body {
         margin: 0;
+    }
+    button.mdc-icon-button {
+        padding: 8px;
+    }
+    .mdc-list-item__icon {
+        @extend .mdc-list-item__text;
+        margin-right: 10px;
+    }
+    a:link, a:visited, a:hover, a:active {
+        color: inherit;
+        text-decoration: inherit;
     }
 </style>

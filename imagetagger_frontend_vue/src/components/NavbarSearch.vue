@@ -1,12 +1,14 @@
 <template>
-     <div>
-         <button class="material-icons mdc-icon-button"
+     <div class="mdc-top-app-bar__action">
+         <button class="mdc-icon-button"
                  v-if="!isCurrentlySearching"
-                 v-on:click="toggleManualSearch">search</button>
+                 v-on:click="toggleManualSearch">
+             <i class="mdi mdi-magnify"/>
+         </button>
          <div class="mdc-text-field mdc-text-field--with-leading-icon"
               v-show="isCurrentlySearching"
               ref="elTextField">
-             <i class="material-icons mdc-text-field__icon">search</i>
+             <i class="mdi mdi-magnify mdc-text-field__icon"/>
              <input class="mdc-text-field__input" id="navbarSearch" v-model="searchTerm">
              <label for="navbarSearch" class="mdc-floating-label">{{ searchLabel }}</label>
              <div class="mdc-line-ripple"/>

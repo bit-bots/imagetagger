@@ -19,7 +19,7 @@ export const userModule = {
         setMeUser: function (state, payload: MeUser) {
             state.me = payload
         },
-        clearMeUser: function (state) {
+        logout: function (state) {
             state.me = new MeUser()
         }
     },
