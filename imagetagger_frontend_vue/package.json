@@ -1,6 +1,6 @@
 {
   "name": "imagetagger-frontend",
-  "description": "Frontend for the Bit-Bots imagetagger written in Vue",
+  "description": "Frontend for the Bit-Bots ImageTagger written in Vue",
   "version": "0.1.0",
   "private": true,
   "scripts": {

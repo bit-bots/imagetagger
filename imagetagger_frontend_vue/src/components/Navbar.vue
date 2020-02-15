@@ -7,7 +7,7 @@
                 <!--button class="mdc-icon-button material-icons mdc-top-app-bar__navigation-icon--unbounded">menu</button-->
                 <div class="brand">
                     <img class="brand-logo" src="../assets/bit-bot.svg" alt="Bit-Bots Logo">
-                    <span class="brand-text">Imagetagger</span>
+                    <span class="brand-text">ImageTagger</span>
                 </div>
             </section>
 

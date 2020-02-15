@@ -2,57 +2,58 @@
     <div>
         <Navbar/>
 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-4 offset-4">
-                    <div class="card my-4">
+        <div class="mdc-card mdc-elevation--z6">
+            <div class="mdc-card__primary">
+                <h2 class="mdc-typography--headline6">Login</h2>
+                <h3 class="mdc-typography--subtitle2">You need to login to access this part of ImageTagger</h3>
+            </div>
 
-                        <!-- Content of login card -->
-                        <div class="card-body">
-                            <h5 class="card-title">Login</h5>
-                            <h6 class="card-subtitle text-muted mb-4">
-                                You need to login to access this part of Imagetagger
-                            </h6>
+            <div class="mdc-card__primary" v-if="loginError">
+                <p class="login-error mdc-theme--error">{{ loginError }}</p>
+            </div>
 
-                            <!-- Error display -->
-                            <div v-if="loginError" class="alert alert-danger" role="alert">{{ loginError }}</div>
-
-                            <form v-on:submit.prevent="onSubmit">
-                                <!-- Username -->
-                                <div class="form-group">
-                                    <label for="inp-username">Username</label>
-                                    <input id="inp-username" class="form-control"
-                                           type="text" placeholder="Enter your username"
-                                           v-model="username">
+            <!-- Main login mask -->
+            <div class="mdc-card__primary">
+                <form v-on:submit.prevent="onSubmit">
+                    <!-- Username -->
+                    <div class="text-field-wrap">
+                        <div class="mdc-text-field mdc-text-field--outlined" ref="elUsername">
+                            <input type="text" id="username" class="mdc-text-field__input"
+                                    v-model="username">
+                            <div class="mdc-notched-outline">
+                                <div class="mdc-notched-outline__leading"/>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" for="username">Username</label>
                                 </div>
-
-                                <!-- Password -->
-                                <div class="form-group">
-                                    <label for="inp-password">Password</label>
-                                    <input id="inp-password" class="form-control"
-                                           type="password" placeholder="Password"
-                                           v-model="password">
-                                </div>
-
-                                <!-- Remember me -->
-                                <div class="form-group form-check float-right">
-                                    <input class="form-check-input" id="inp-remember" type="checkbox"
-                                           v-model="rememberMe">
-                                    <label class="form-check-label" for="inp-remember">Remember me</label>
-                                </div>
-
-                                <!-- Submit -->
-                                <button class="btn btn-primary" :disabled="!isFormValid">
-                                    Login
-                                </button>
-                            </form>
+                                <div class="mdc-notched-outline__trailing"/>
+                            </div>
                         </div>
-
                     </div>
-                </div>
+
+                    <!-- Password -->
+                    <div class="text-field-wrap">
+                        <div class="mdc-text-field mdc-text-field--outlined" ref="elPassword">
+                            <input type="password" id="password" class="mdc-text-field__input"
+                                    v-model="password">
+                            <div class="mdc-notched-outline">
+                                <div class="mdc-notched-outline__leading"/>
+                                <div class="mdc-notched-outline__notch">
+                                    <label class="mdc-floating-label" for="password">Password</label>
+                                </div>
+                                <div class="mdc-notched-outline__trailing"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="mdc-button mdc-button--outlined mdc-card__action mdc-card__action--button"
+                            :disabled="!isFormValid"
+                            type="submit">
+                        <div class="mdc-button__ripple"/>
+                        <span class="mdc-button__label">Login</span>
+                    </button>
+                </form>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -60,6 +61,7 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import Navbar from "@components/Navbar.vue"
+import {MDCTextField} from "@material/textfield/component"
 
 @Component({
     components: {Navbar}
@@ -69,6 +71,19 @@ export default class Login extends Vue {
     password = ""
     rememberMe = true
     loginError = ""
+
+    private _mdcTextUsername: MDCTextField
+    private _mdcTextPassword: MDCTextField
+
+    mounted() {
+        this._mdcTextUsername = new MDCTextField(this.$refs.elUsername as Element)
+        this._mdcTextPassword = new MDCTextField(this.$refs.elPassword as Element)
+    }
+
+    beforeDestroy() {
+        this._mdcTextUsername.destroy()
+        this._mdcTextPassword.destroy()
+    }
 
     onSubmit(): void {
         this.$store.dispatch("login", {
@@ -93,8 +108,38 @@ export default class Login extends Vue {
 </script>
 
 <style scoped lang="scss">
-    #progress-wrapper {
-        margin-top: 3%;
-        width: 100%;
+    @import "../global_style.sccs";
+
+    .mdc-card {
+        margin: 3% auto auto;
+        width: 30%;
+        padding: 10px 20px;
+    }
+
+    .mdc-card .mdc-typography--subtitle2 {
+        margin-top: 0;
+        opacity: 0.54;
+    }
+
+    .align-horizontal-center > div {
+        margin: 4px 0;
+
+    }
+
+    .text-field-wrap {
+        margin: 4px 0;
+    }
+
+    form {
+        .mdc-text-field {
+        }
+
+        .mdc-text-field__input {
+            padding: 6px 14px 8px;
+        }
+
+        .mdc-card__primary {
+            padding: 1rem;
+        }
     }
 </style>
