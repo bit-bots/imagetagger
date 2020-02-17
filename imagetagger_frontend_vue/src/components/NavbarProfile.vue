@@ -32,7 +32,7 @@ import {MDCMenu} from "@material/menu/component"
 import {Corner} from "@material/menu-surface/constants"
 
 @Component({})
-export default class Navbar extends Vue {
+export default class NavbarProfile extends Vue {
     private _mdcMenu: MDCMenu;
 
     isProfileMenuExtended = false;

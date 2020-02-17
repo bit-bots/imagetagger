@@ -10,6 +10,11 @@ const routes = [
         name: "dashboard",
         component: loadView("Dashboard")
     },
+    {
+        path: "/imagesets/view/:id",
+        name: "imagesetDetails",
+        component: loadView("ImagesetDetails")
+    },
 
     {
         path: "/login",

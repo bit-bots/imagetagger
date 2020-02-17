@@ -28,7 +28,7 @@ import {debounce} from "lodash"
         searchLabel: VueTypes.string.def("Search")
     }
 })
-export default class Navbar extends Vue {
+export default class NavbarSearch extends Vue {
     private _mdcTextField: MDCTextField
 
     searchbarManuallyExtended = false
