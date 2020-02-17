@@ -2,7 +2,7 @@ import Vue from "vue"
 import Vuex, {Store} from "vuex"
 import {authModule} from "@/store/modules/auth"
 import {userModule} from "@/store/modules/user"
-import {contentFilterModule} from "@/store/modules/contentFilters"
+import {contentFilterModule} from "@/store/modules/contentFilter"
 import {imagesetModule} from "@/store/modules/imageset"
 import {teamModule} from "@/store/modules/team"
 

@@ -48,7 +48,12 @@ const resolve = function (toRoute: Route, fromRoute: Route, next: any) {
 })
 export default class Dashboard extends Vue {
     get imagesets(): Imageset[] {
-        return this.$store.state.imagesets.imagesets
+        const filter = this.$store.state.contentFilter.searchTerm as string
+        const imagesets = this.$store.state.imagesets.imagesets as Imageset[]
+
+        return imagesets.filter(iimageset => iimageset.id.toString() == filter ||
+            iimageset.name.toLowerCase().includes(filter.toLowerCase()) ||
+            this.$store.getters.teamById(iimageset.team).name.toLowerCase().includes(filter.toLowerCase()))
     }
 }
 </script>
@@ -63,6 +68,7 @@ export default class Dashboard extends Vue {
     .raise-on-hover {
         transition-duration: 0.25s;
     }
+
     .raise-on-hover:hover {
         @extend .mdc-elevation--z8
     }
