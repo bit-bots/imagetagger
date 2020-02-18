@@ -5,20 +5,15 @@
             <!-- Left section -->
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
                 <!--button class="mdc-icon-button material-icons mdc-top-app-bar__navigation-icon--unbounded">menu</button-->
-                <div class="brand">
+                <router-link class="brand" to="/">
                     <img class="brand-logo" src="../assets/bit-bot.svg" alt="Bit-Bots Logo">
                     <span class="brand-text">ImageTagger</span>
-                </div>
+                </router-link>
             </section>
 
             <!-- Right section -->
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
-                <router-link :to="{name: 'dashboard', params: {filter: 'all'}}">
-                    <button class="mdc-button mdc-theme--on-primary">
-                        <span class="mdc-button__ripple"/>Home
-                    </button>
-                </router-link>
-
+                
                 <router-link v-if="isLoginVisible"
                              :to="{name: 'login'}">
                     <button class="mdc-button mdc-theme--on-primary">
