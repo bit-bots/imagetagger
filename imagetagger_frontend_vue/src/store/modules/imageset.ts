@@ -54,7 +54,7 @@ export const imagesetModule = {
     actions: {
         retrieveAllImagesets: function(context) {
             return VueInstance.$resource("image_sets").get().then(async response => {
-                const imagesets: Imageset[] = await response.json()
+                const imagesets: Imageset[] = (await response.json()).imageSets
                 context.commit("setImagesets", imagesets)
             })
         }

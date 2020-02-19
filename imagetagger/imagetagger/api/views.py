@@ -1,14 +1,13 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
+from dynamic_rest import viewsets as dyn_viewsets
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_200_OK
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
-from imagetagger.api.serializers import ImageSerializer, AnnotationSerializer, AnnotationTypeSerializer, \
-    ExportFormatSerializer, ExportSerializer, ImageSetListSerializer, TeamSerializer, UserSerializer, \
-    VerificationSerializer, ImageSetRetrieveSerializer
+from imagetagger.api import serializers
 from imagetagger.api.permissions import ImageSetPermission, AnnotationPermission, VerificationPermission
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team, User, TeamMembership
@@ -18,39 +17,31 @@ IMAGE_SET_PERMISSIONS = ('verify', 'annotate', 'create_export', 'delete_annotati
                          'delete_set', 'delete_images', 'edit_annotation', 'edit_set', 'read')
 
 
-class AnnotationViewSet(viewsets.ModelViewSet):
+class AnnotationViewSet(dyn_viewsets.DynamicModelViewSet):
     queryset = Annotation.objects.all()
-    serializer_class = AnnotationSerializer
+    serializer_class = serializers.AnnotationSerializer
     permission_classes = (AnnotationPermission,)
 
 
-class AnnotationTypeViewSet(viewsets.ModelViewSet):
+class AnnotationTypeViewSet(dyn_viewsets.DynamicModelViewSet):
     queryset = AnnotationType.objects.all()
-    serializer_class = AnnotationTypeSerializer
+    serializer_class = serializers.AnnotationTypeSerializer
 
 
-class ExportFormatViewSet(viewsets.ModelViewSet):
+class ExportFormatViewSet(dyn_viewsets.DynamicModelViewSet):
     queryset = ExportFormat.objects.all()
-    serializer_class = ExportFormatSerializer
+    serializer_class = serializers.ExportFormatSerializer
 
 
 class ExportViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Export.objects.all()
-    serializer_class = ExportSerializer
+    serializer_class = serializers.ExportSerializer
 
 
-class ImageSetViewSet(viewsets.ModelViewSet):
+class ImageSetViewSet(dyn_viewsets.DynamicModelViewSet):
     queryset = ImageSet.objects.prefetch_related('set_tags').select_related('team').annotate(number_of_images=Count('images'))
     permission_classes = (ImageSetPermission,)
-
-    def get_serializer(self, *args, **kwargs):
-        if kwargs.get('many', False):
-            serializer_class = ImageSetListSerializer
-        else:
-            serializer_class = ImageSetRetrieveSerializer
-
-        kwargs['context'] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
+    serializer_class = serializers.ImageSetSerializer
 
     @staticmethod
     def add_permissions(user, image_set, data):
@@ -62,6 +53,7 @@ class ImageSetViewSet(viewsets.ModelViewSet):
         return data
 
     def retrieve(self, request, *args, **kwargs):
+        # TODO Move data enrichment into serializer or model
         image_set = self.get_object()
         serializer = self.get_serializer(image_set)
         data = self.add_permissions(request.user, image_set, serializer.data)
@@ -89,12 +81,12 @@ class ImageSetViewSet(viewsets.ModelViewSet):
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Image.objects.all()
-    serializer_class = ImageSerializer
+    serializer_class = serializers.ImageSerializer
 
 
-class TeamViewSet(viewsets.ModelViewSet):
+class TeamViewSet(dyn_viewsets.DynamicModelViewSet):
     queryset = Team.objects.all()
-    serializer_class = TeamSerializer
+    serializer_class = serializers.TeamSerializer
 
     @staticmethod
     def add_permissions(user, team, data):
@@ -107,7 +99,7 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         team = self.get_object()
-        serializer = TeamSerializer(team)
+        serializer = serializers.TeamSerializer(team)
         data = self.add_permissions(request.user, team, serializer.data)
         return Response(data)
 
@@ -121,7 +113,7 @@ class TeamViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.prefetch_related('teams', 'pinned_sets')
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
 
     @action(('GET',), detail=False)
     def me(self, request):
@@ -133,7 +125,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class VerificationViewSet(viewsets.ModelViewSet):
+class VerificationViewSet(dyn_viewsets.DynamicModelViewSet):
     queryset = Verification.objects.all()
-    serializer_class = VerificationSerializer
+    serializer_class = serializers.VerificationSerializer
     permission_classes = (VerificationPermission,)

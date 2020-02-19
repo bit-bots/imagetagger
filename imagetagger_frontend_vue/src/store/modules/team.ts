@@ -26,7 +26,7 @@ export const teamModule = {
     actions: {
         retrieveAllTeams: function(context) {
             return VueInstance.$resource("teams").get().then(async response => {
-                const teams: Team[] = await response.json()
+                const teams: Team[] = (await response.json()).teams
                 context.commit("setTeams", teams)
             })
         },

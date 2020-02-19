@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework.routers import DefaultRouter
+from dynamic_rest.routers import DefaultRouter
 
 from imagetagger.api.views import ImageViewSet, AnnotationViewSet, AnnotationTypeViewSet, ExportFormatViewSet, \
     ExportViewSet, ImageSetViewSet, TeamViewSet, UserViewSet, VerificationViewSet
@@ -17,8 +17,8 @@ router.register(r'images', ImageViewSet)
 router.register(r'teams', TeamViewSet, base_name='teams')
 router.register(r'users', UserViewSet, base_name='users')
 router.register(r'verifications', VerificationViewSet, base_name='verifications')
-urlpatterns = router.urls
 
-urlpatterns += [
+urlpatterns = [
+    *router.urls,
     path('auth/', obtain_auth_token),
 ]

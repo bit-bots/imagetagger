@@ -18,10 +18,20 @@ from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import render
 from django_registration.backends.activation.views import RegistrationView
-from django.urls import path
-from rest_framework.documentation import include_docs_urls
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from .users.forms import UserRegistrationForm
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Imagetagger Api",
+        default_version="v1",
+        contact=openapi.Contact("Bit-Bots <info@bit-bots.de>"),
+        license=openapi.License("MIT", "https://github.com/bit-bots/imagetagger/blob/master/LICENSE")
+    ),
+    public=True,
+)
 
 urlpatterns = [
     url(r'^user/', include('django.contrib.auth.urls')),
@@ -36,7 +46,8 @@ urlpatterns = [
     url(r'^tagger_messages/', include('imagetagger.tagger_messages.urls')),
     url(r'^tools/', include('imagetagger.tools.urls')),
     url(r'^api/', include('imagetagger.api.urls')),
-    path('docs/', include_docs_urls(title='Documentation', authentication_classes=[], permission_classes=[])),
+    url(r'^schema.json$', schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    url(r'^docs/$', schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui")
 ]
 
 if settings.DEBUG and 'debug_toolbar' in settings.INSTALLED_APPS:

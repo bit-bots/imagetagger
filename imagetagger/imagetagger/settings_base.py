@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'dynamic_rest',
+    'drf_yasg',
     'widget_tweaks',
     'friendlytagloader',
 ]
@@ -124,6 +126,7 @@ PROBLEMS_URL = 'https://github.com/bit-bots/imagetagger/issues'
 PROBLEMS_TEXT = ''
 
 LOGIN_URL = '/user/login/'
+LOGOUT_URL = '/usr/logout/'
 LOGIN_REDIRECT_URL = '/images/'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
