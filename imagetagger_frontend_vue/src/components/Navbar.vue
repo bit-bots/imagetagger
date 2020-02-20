@@ -26,14 +26,12 @@
         </div>
 
         <!-- Tab bar -->
-        <div v-show="isTabRowVisible" ref="elTabBar"
-             class="mdc-top-app-bar__row tab-row mdc-theme--primary-bg">
-            <div class="mdc-tab-bar" role="tablist">
-                <div class="mdc-tab-scroller" ref="elTabScroller">
-                    <div class="mdc-tab-scroller__scroll-area">
-                        <div class="mdc-tab-scroller__scroll-content">
-                            <slot name="tabs"/>
-                        </div>
+        <div ref="elTabBar" v-show="isTabRowVisible"
+                class="mdc-tab-bar mdc-theme--primary-bg grow-from-top" role="tablist">
+            <div class="mdc-tab-scroller" ref="elTabScroller">
+                <div class="mdc-tab-scroller__scroll-area">
+                    <div class="mdc-tab-scroller__scroll-content">
+                        <slot name="tabs"/>
                     </div>
                 </div>
             </div>
