@@ -1,5 +1,6 @@
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
+import {Vue} from "vue-property-decorator"
 
 
 export interface ImagesetPermissions {
@@ -49,6 +50,13 @@ export const imagesetModule = {
     mutations: {
         setImagesets: (state, payload: Imageset[]) => {
             state.imagesets = payload
+        },
+        setImageset: (state, payload: Imageset) => {
+            const index = state.imagesets.findIndex(i => i.id === payload.id)
+            if (index === -1)
+                state.imagesets.push(payload)
+            else
+                Vue.set(state.imagesets, index, payload)
         }
     },
     actions: {
@@ -57,10 +65,41 @@ export const imagesetModule = {
                 const imagesets: Imageset[] = (await response.json()).imageSets
                 context.commit("setImagesets", imagesets)
             })
+        },
+
+        retrieveImageset: function (context, payload: {
+            id: number,
+            sideloadTeam: boolean
+        }) {
+            let getArgs: any = {}
+            if (payload.sideloadTeam)
+                getArgs["include[]"] = "team.*"
+
+            return VueInstance.$resource(`image_sets/${payload.id}`).get(getArgs)
+                .then(response => response.json())
+                .then(response => {
+                    context.commit("setImageset", response.imageSet)
+
+                    if (payload.sideloadTeam)
+                        if (response.teams[0])
+                            context.commit("setTeam", response.teams[0])
+                        else
+                            console.warn("Requested to sideload the imagesets team but no team was received")
+                })
+        },
+
+        removeImagesetTag: function(context, payload: {imageset: Imageset, tag: string}) {
+            return VueInstance.$http.patch(`image_sets/${payload.imageset.id}/`, {
+                tags: payload.imageset.tags.filter(t => t !== payload.tag)
+            })
+                .then(response => response.json())
+                .then(response => {
+                    console.log("updating imageset")
+                    context.commit("setImageset", response.imageSet)
+                })
         }
     },
     getters: {
-        imagesetById: (state) => (
-            id: number) => state.imagesets.find(iimageset => iimageset.id === id)
+        imagesetById: (state) => (id: number) => state.imagesets.filter(i => i.id === id)[0]
     }
 } as Module<ImagesetState, any>

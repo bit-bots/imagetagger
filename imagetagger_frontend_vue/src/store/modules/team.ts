@@ -5,7 +5,7 @@ import {VueInstance} from "@/main"
 export interface Team {
     id: number
     name: string
-    webstie: string
+    website: string
     members: number[]
     admins: number[]
 }
@@ -22,6 +22,13 @@ export const teamModule = {
         setTeams: (state, payload: Team[]) => {
             state.teams = payload
         },
+        setTeam: (state, payload: Team) => {
+            const index = state.teams.findIndex(i => i.id === payload.id)
+            if (index === -1)
+                state.teams.push(payload)
+            else
+                state.teams[index] = payload
+        }
     },
     actions: {
         retrieveAllTeams: function(context) {
@@ -30,6 +37,12 @@ export const teamModule = {
                 context.commit("setTeams", teams)
             })
         },
+        retrieveTeam: function (context, payload: {id: number}) {
+            return VueInstance.$resource(`team/${payload.id}`).get().then(async response => {
+                const team: Team = (await response.json()).team
+                context.commit("setTeam", team)
+            })
+        }
     },
     getters: {
         teamById: (state) => (id: number) =>

@@ -23,7 +23,7 @@ const routes = [
             {
                 path: "images",
                 name: "imagesetImages",
-                component: loadView("ImagesetDetails")
+                component: loadView("ImagesetImages")
             },
 
             {path: "", redirect: "details"}
