@@ -16,7 +16,7 @@ export const store = new Vuex.Store({
     state: () => new GlobalState(),
     mutations: {
         toggleCurrentlyLoading: function (state, payload?: boolean) {
-            if (payload)
+            if (payload != null)
                 state.currentlyLoading = payload
             else
                 state.currentlyLoading = !state.currentlyLoading
