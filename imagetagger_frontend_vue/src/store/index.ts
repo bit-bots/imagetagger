@@ -1,5 +1,5 @@
 import Vue from "vue"
-import Vuex, {Store} from "vuex"
+import Vuex, {Store, StoreOptions} from "vuex"
 import {authModule} from "@/store/modules/auth"
 import {userModule} from "@/store/modules/user"
 import {contentFilterModule} from "@/store/modules/contentFilter"
@@ -8,9 +8,20 @@ import {teamModule} from "@/store/modules/team"
 
 Vue.use(Vuex)
 
+export class GlobalState {
+    currentlyLoading: boolean = false
+}
+
 export const store = new Vuex.Store({
-    state: {},
-    mutations: {},
+    state: () => new GlobalState(),
+    mutations: {
+        toggleCurrentlyLoading: function (state, payload?: boolean) {
+            if (payload)
+                state.currentlyLoading = payload
+            else
+                state.currentlyLoading = !state.currentlyLoading
+        }
+    },
     actions: {},
     modules: {
         auth: authModule,
@@ -19,4 +30,4 @@ export const store = new Vuex.Store({
         imagesets: imagesetModule,
         teams: teamModule
     }
-})
+} as StoreOptions<GlobalState>)

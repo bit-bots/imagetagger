@@ -38,6 +38,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- Loading bar -->
+        <div ref="elLoadingBar" :class="isLoadingBarVisible ? '' : 'mdc-linear-progress--closed'"
+             role="progressbar" class="mdc-linear-progress mdc-linear-progress--indeterminate">
+            <div class="mdc-linear-progress__buffering-dots"/>
+            <div class="mdc-linear-progress__buffer"/>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                <span class="mdc-linear-progress__bar-inner"/>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"/>
+            </div>
+        </div>
     </header>
 </template>
 
@@ -50,12 +63,14 @@ import {Prop} from "vue-property-decorator"
 import {MDCTopAppBar} from "@material/top-app-bar/component"
 import {MDCTabBar} from "@material/tab-bar/component"
 import {MDCTabScroller} from "@material/tab-scroller/component"
+import {MDCLinearProgress} from "@material/linear-progress/component"
 
 @Component({})
 export default class Navbar extends Vue {
     private _mdcAppBar: MDCTopAppBar
     private _mdcTabBar: MDCTabBar
     private _mdcTabScroller: MDCTabScroller
+    private _mdcLoadingBar: MDCLinearProgress
 
     mounted() {
         this.warnTabAmount()
@@ -63,6 +78,14 @@ export default class Navbar extends Vue {
         this._mdcAppBar = new MDCTopAppBar(this.$refs.elHeader as Element)
         this._mdcTabScroller = new MDCTabScroller(this.$refs.elTabScroller as Element)
         this._mdcTabBar = new MDCTabBar(this.$refs.elTabBar as Element)
+        this._mdcLoadingBar = new MDCLinearProgress(this.$refs.elLoadingBar as Element)
+    }
+
+    destroyed(): void {
+        this._mdcAppBar.destroy()
+        this._mdcTabScroller.destroy()
+        this._mdcTabBar.destroy()
+        this._mdcLoadingBar.destroy()
     }
 
     updated(): void {
@@ -77,6 +100,10 @@ export default class Navbar extends Vue {
         return this.$slots.tabs && this.$slots.tabs[0]
     }
 
+    get isLoadingBarVisible() {
+        return this.$store.state.currentlyLoading
+    }
+
     private warnTabAmount() {
         if (this.$slots.tabs && this.$slots.tabs.length == 1) {
             console.warn("Having only one tab on the Navbar is bad UI design")
@@ -87,6 +114,7 @@ export default class Navbar extends Vue {
 
 <style scoped lang="scss">
     @import "~@material/top-app-bar/mdc-top-app-bar";
+    @import "src/global_style.sccs";
 
     header.mdc-top-app-bar {
         top: 0;
@@ -112,5 +140,9 @@ export default class Navbar extends Vue {
 
     .mdc-button {
         text-transform: capitalize;
+    }
+
+    .mdc-linear-progress__bar-inner {
+        border-color: $accent-color;
     }
 </style>

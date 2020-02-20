@@ -51,7 +51,13 @@ const routes = [
     }
 ]
 
-const router = new VueRouter({
+function loadView(name: string) {
+    // @ts-ignore
+    return resolve => require(["@views/" + name + ".vue"], resolve)
+}
+
+
+export const router = new VueRouter({
     mode: "history",
     routes
 })
@@ -66,9 +72,13 @@ router.beforeResolve((to, from, next) => {
     }
 })
 
-function loadView(name: string) {
-    // @ts-ignore
-    return resolve => require(["@views/" + name + ".vue"], resolve)
-}
+router.beforeEach((toRoute, fromRoute, next) => {
+    if (VueInstance)
+        VueInstance.$store.commit("toggleCurrentlyLoading", true)
+    next()
+})
 
-export {router}
+
+router.afterEach(() => {
+    VueInstance.$store.commit("toggleCurrentlyLoading", false)
+})
