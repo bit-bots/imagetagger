@@ -88,15 +88,11 @@ export const imagesetModule = {
                 })
         },
 
-        removeImagesetTag: function(context, payload: {imageset: Imageset, tag: string}) {
-            return VueInstance.$http.patch(`image_sets/${payload.imageset.id}/`, {
-                tags: payload.imageset.tags.filter(t => t !== payload.tag)
-            })
+        updateImagesetTags: function(context,
+                                     payload: {imageset: Imageset, tags: string[]}) {
+            return VueInstance.$http.patch(`image_sets/${payload.imageset.id}/`, {tags: payload.tags})
                 .then(response => response.json())
-                .then(response => {
-                    console.log("updating imageset")
-                    context.commit("setImageset", response.imageSet)
-                })
+                .then(response => context.commit("setImageset", response.imageSet))
         }
     },
     getters: {

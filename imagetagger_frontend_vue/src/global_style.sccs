@@ -7,3 +7,15 @@ $primary-text-color: #212121;
 $secondary-text-color: #757575;
 $divider-color: #BDBDBD;
 $background-color: #FFFFFF;
+
+/**
+Useful standard Animations
+ */
+@mixin anim-fade($time: 0.5s, $anim-function: ease-in) {
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity $time $anim-function;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
+  }
+}
