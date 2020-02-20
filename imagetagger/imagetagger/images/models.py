@@ -172,8 +172,18 @@ class ImageSet(models.Model):
         return u'Imageset: {0}'.format(self.name)
 
     @property
-    def tag_names(self):
-        return [tag.name for tag in self.set_tags.all()]
+    def tag_names(self) -> list:
+        return list(self.set_tags.order_by("name").values_list("name", flat=True))
+
+    @tag_names.setter
+    def tag_names(self, value: list):
+        self.set_tags.clear()
+        existing_tags = SetTag.objects.filter(name__in=value)
+        self.set_tags.add(*existing_tags)
+
+        for remaining_tag in set(value) - set(existing_tags.values_list("name", flat=True)):
+            self.set_tags.create(name=remaining_tag)
+
 
     @property
     def prio_symbol(self):

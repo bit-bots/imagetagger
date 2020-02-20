@@ -49,7 +49,7 @@ class ImageSetViewSet(dyn_viewsets.DynamicModelViewSet):
         permission_dict = dict()
         for permission in IMAGE_SET_PERMISSIONS:
             permission_dict[permission] = permission in permission_set
-        data['permissions'] = permission_dict
+        data['image_set']['permissions'] = permission_dict
         return data
 
     def retrieve(self, request, *args, **kwargs):
@@ -57,7 +57,7 @@ class ImageSetViewSet(dyn_viewsets.DynamicModelViewSet):
         image_set = self.get_object()
         serializer = self.get_serializer(image_set)
         data = self.add_permissions(request.user, image_set, serializer.data)
-        data['isPinned'] = request.user in image_set.pinned_by.all()
+        data['image_set']['isPinned'] = request.user in image_set.pinned_by.all()
         return Response(data)
 
     @action(methods=('PUT', 'DELETE'), detail=True)
@@ -90,16 +90,17 @@ class TeamViewSet(dyn_viewsets.DynamicModelViewSet):
 
     @staticmethod
     def add_permissions(user, team, data):
+        # TODO Move data enhancement into serializer
         permission_set = team.get_perms(user)
         permission_dict = dict()
         for permission in TEAM_PERMISSIONS:
             permission_dict[permission] = permission in permission_set
-        data['permissions'] = permission_dict
+        data['team']['permissions'] = permission_dict
         return data
 
     def retrieve(self, request, *args, **kwargs):
         team = self.get_object()
-        serializer = serializers.TeamSerializer(team)
+        serializer = self.get_serializer(team)
         data = self.add_permissions(request.user, team, serializer.data)
         return Response(data)
 
