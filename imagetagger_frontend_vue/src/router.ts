@@ -12,8 +12,22 @@ const routes = [
     },
     {
         path: "/imagesets/view/:id",
-        name: "imagesetDetails",
-        component: loadView("ImagesetDetails")
+        component: loadView("Imageset"),
+        children: [
+            {
+                path: "details",
+                name: "imagesetDetails",
+                component: loadView("ImagesetDetails")
+            },
+
+            {
+                path: "images",
+                name: "imagesetImages",
+                component: loadView("ImagesetDetails")
+            },
+
+            {path: "", redirect: "details"}
+        ]
     },
 
     {

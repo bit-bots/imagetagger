@@ -1,23 +1,17 @@
 <template>
     <div class="imageset-details-root">
-        <navbar>
-            <navbar-profile/>
-        </navbar>
-
-        <p>Hello there.</p>
-        <p>This view is not yet implemented</p>
+        <h5>This is the details screen</h5>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
 import Component from "vue-class-component"
-import Navbar from "@/components/Navbar.vue";
-import NavbarProfile from "@/components/NavbarProfile.vue";
+import "vue-class-component/hooks"
+import {Prop} from "vue-property-decorator"
+import VueTypes from "vue-types"
 
-@Component({
-    components: {NavbarProfile, Navbar}
-})
+@Component({})
 export default class ImagesetDetails extends Vue {
 
 }

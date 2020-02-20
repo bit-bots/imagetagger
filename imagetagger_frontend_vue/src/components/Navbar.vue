@@ -24,25 +24,63 @@
                 <slot/>
             </section>
         </div>
+
+        <!-- Tab bar -->
+        <div v-show="isTabRowVisible" ref="elTabBar"
+             class="mdc-top-app-bar__row tab-row mdc-theme--primary-bg">
+            <div class="mdc-tab-bar" role="tablist">
+                <div class="mdc-tab-scroller" ref="elTabScroller">
+                    <div class="mdc-tab-scroller__scroll-area">
+                        <div class="mdc-tab-scroller__scroll-content">
+                            <slot name="tabs"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </header>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
 import Component from "vue-class-component"
+import "vue-class-component/hooks"
+import VueTypes from "vue-types"
+import {Prop} from "vue-property-decorator"
 import {MDCTopAppBar} from "@material/top-app-bar/component"
+import {MDCTabBar} from "@material/tab-bar/component"
+import {MDCTabScroller} from "@material/tab-scroller/component"
 
-@Component({
-})
+@Component({})
 export default class Navbar extends Vue {
-    private _mdcAppBar: MDCTopAppBar;
+    private _mdcAppBar: MDCTopAppBar
+    private _mdcTabBar: MDCTabBar
+    private _mdcTabScroller: MDCTabScroller
 
     mounted() {
+        this.warnTabAmount()
+
         this._mdcAppBar = new MDCTopAppBar(this.$refs.elHeader as Element)
+        this._mdcTabScroller = new MDCTabScroller(this.$refs.elTabScroller as Element)
+        this._mdcTabBar = new MDCTabBar(this.$refs.elTabBar as Element)
+    }
+
+    updated(): void {
+        this.warnTabAmount()
     }
 
     get isLoginVisible() {
         return !this.$store.state.auth.loggedIn
+    }
+
+    get isTabRowVisible() {
+        return this.$slots.tabs && this.$slots.tabs[0]
+    }
+
+    private warnTabAmount() {
+        if (this.$slots.tabs && this.$slots.tabs.length == 1) {
+            console.warn("Having only one tab on the Navbar is bad UI design")
+        }
     }
 }
 </script>
