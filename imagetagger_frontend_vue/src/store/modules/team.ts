@@ -1,3 +1,4 @@
+import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
 
@@ -27,7 +28,7 @@ export const teamModule = {
             if (index === -1)
                 state.teams.push(payload)
             else
-                state.teams[index] = payload
+                Vue.set(state.teams, index, payload)
         }
     },
     actions: {
