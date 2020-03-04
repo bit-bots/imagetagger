@@ -1,6 +1,9 @@
+import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
-import {Vue} from "vue-property-decorator"
+import {User} from "@/store/modules/user"
+import {Team} from "@/store/modules/team"
+import {Url} from "@/httpResourceExtensions"
 
 
 export interface ImagesetPermissions {
@@ -69,22 +72,25 @@ export const imagesetModule = {
 
         retrieveImageset: function (context, payload: {
             id: number,
-            sideloadTeam: boolean
+            sideloadTeam: boolean,
+            sideloadCreator: boolean
         }) {
-            let getArgs: any = {}
+            const url = new Url("image_sets")
+            url.addPart(payload.id)
             if (payload.sideloadTeam)
-                getArgs["include[]"] = "team.*"
+                url.addGetArg("include[]", "team.*")
+            if (payload.sideloadCreator)
+                url.addGetArg("include[]", "creator.*")
 
-            return VueInstance.$resource(`image_sets/${payload.id}`).get(getArgs)
+            return VueInstance.$http.get(url.toString())
                 .then(response => response.json())
                 .then(response => {
                     context.commit("setImageset", response.imageSet)
 
                     if (payload.sideloadTeam)
-                        if (response.teams[0])
-                            context.commit("setTeam", response.teams[0])
-                        else
-                            console.warn("Requested to sideload the imagesets team but no team was received")
+                        context.commit("setTeam", response.teams.find((t: Team) => t.id === response.imageSet.team))
+                    if (payload.sideloadCreator)
+                        context.commit("setUser", response.users.find((u: User) => u.id === response.imageSet.creator))
                 })
         },
 
