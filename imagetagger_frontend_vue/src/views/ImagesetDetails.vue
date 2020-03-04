@@ -1,27 +1,48 @@
 <template>
     <div class="imageset-details-root">
-        <h4>
+        <h4 class="imageset-title">
             <span class="mdc-theme--text-disabled-on-light">Details of </span>
             <span class="mdc-theme--secondary">{{ team.name }}</span>
             <span class="mdc-theme--text-disabled-on-light">'s </span>
             <span class="mdc-theme--primary">{{ imageset.name }}</span>
         </h4>
+        <p v-if="imageset.description" class="mdc-typography--subtitle1">{{ imageset.description }}</p>
+        <horizontal-divider/>
 
         <imageset-tags :imageset-id="imageset.id"/>
 
         <div>
-            <table>
-                <tr>
-                    <td>Tags</td>
+            <table class="mdc-typography--subtitle1">
+                <tr v-if="imageset.location">
                     <td>
-                        <span v-for="tag of imageset.tags" :key="tag">
-                            {{ tag }}
-                        </span>
+                        <i class="mdi mdi-map-marker"/>
+                        <span>Location</span>
                     </td>
+                    <td>{{ imageset.location }}</td>
                 </tr>
 
                 <tr>
-                    <td>Location</td>
+                    <td>
+                        <i class="mdi mdi-professional-hexagon"/>
+                        <span>Creator</span>
+                    </td>
+                    <td>{{ creator.username }}</td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <i class="mdi mdi-nuke"/>
+                        <span>Image count</span>
+                    </td>
+                    <td>{{ imageset.numberOfImages }}</td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <i class="mdi mdi-null"/>
+                        <span>Annotation count</span>
+                    </td>
+                    <td>Not yet in data-type <!-- TODO Retrieve annotation count --></td>
                 </tr>
             </table>
         </div>
@@ -39,14 +60,16 @@ import {VueInstance} from "@/main"
 import {Imageset} from "@/store/modules/imageset"
 import {Team} from "@/store/modules/team"
 import ImagesetTags from "@/components/ImagesetTags.vue"
-import HorizontalDivider from "@/components/HorizontalDivider.vue";
+import HorizontalDivider from "@/components/HorizontalDivider.vue"
+import {User} from "@/store/modules/user"
 
 
 const resolve = function (toRoute: Route, fromRoute: Route, next: () => void) {
     Promise.all([
         VueInstance.$store.dispatch("retrieveImageset", {
             id: toRoute.params.id,
-            sideloadTeam: true
+            sideloadTeam: true,
+            sideloadCreator: true
         })
     ]).finally(next)
 }
@@ -63,20 +86,27 @@ export default class ImagesetDetails extends Vue {
     get team(): Team {
         return this.$store.getters.teamById(this.imageset.team)
     }
+    get creator(): User {
+        return this.$store.getters.userById(this.imageset.creator)
+    }
 }
 </script>
 
 <style scoped lang="scss">
     .imageset-details-root {
         margin: 2% 3%;
-    }
 
-    .imageset-details-root h4 {
-        margin-bottom: 1.8%;
-    }
+        h4 {
+            margin-bottom: 12px;
+        }
 
-    .imageset-tags-root {
-        margin-bottom: 2%;
-        margin-left: -6px;
+        .divider {
+            margin: 8px 0 16px;
+        }
+
+        .imageset-tags-root {
+            margin-bottom: 24px;
+            margin-left: -6px;
+        }
     }
 </style>
