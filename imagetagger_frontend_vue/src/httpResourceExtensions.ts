@@ -1,10 +1,12 @@
 export class Url {
     private parts: string[]
     private getArgs: {key: string, value: string | number}[]
+    private appendSlash: boolean
 
-    constructor(base: string) {
+    constructor(base: string, appendSlash = true) {
         this.parts = base.split("/")
         this.getArgs = []
+        this.appendSlash = appendSlash
     }
 
     public addPart(part: string | number): void {
@@ -18,6 +20,9 @@ export class Url {
     toString(): string {
         let base = this.parts.join("/")
         let args = ""
+
+        if (this.appendSlash)
+            base += "/"
 
         for (const iarg of this.getArgs) {
             if (args === "") {
