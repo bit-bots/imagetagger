@@ -14,44 +14,7 @@
 
             <!-- Main login mask -->
             <div class="mdc-card__primary">
-                <form v-on:submit.prevent="onSubmit">
-                    <!-- Username -->
-                    <div class="text-field-wrap">
-                        <div class="mdc-text-field mdc-text-field--outlined" ref="elUsername">
-                            <input type="text" id="username" class="mdc-text-field__input"
-                                    v-model="username">
-                            <div class="mdc-notched-outline">
-                                <div class="mdc-notched-outline__leading"/>
-                                <div class="mdc-notched-outline__notch">
-                                    <label class="mdc-floating-label" for="username">Username</label>
-                                </div>
-                                <div class="mdc-notched-outline__trailing"/>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div class="text-field-wrap">
-                        <div class="mdc-text-field mdc-text-field--outlined" ref="elPassword">
-                            <input type="password" id="password" class="mdc-text-field__input"
-                                    v-model="password">
-                            <div class="mdc-notched-outline">
-                                <div class="mdc-notched-outline__leading"/>
-                                <div class="mdc-notched-outline__notch">
-                                    <label class="mdc-floating-label" for="password">Password</label>
-                                </div>
-                                <div class="mdc-notched-outline__trailing"/>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="mdc-button mdc-button--outlined mdc-card__action mdc-card__action--button"
-                            :disabled="!isFormValid"
-                            type="submit">
-                        <div class="mdc-button__ripple"/>
-                        <span class="mdc-button__label">Login</span>
-                    </button>
-                </form>
+                <login-component @loggedIn="navigateNext()"/>
             </div>
         </div>
     </div>
@@ -62,47 +25,18 @@ import Vue from "vue"
 import Component from "vue-class-component"
 import Navbar from "@components/Navbar.vue"
 import {MDCTextField} from "@material/textfield/component"
+import LoginComponent from "@/components/Login.vue"
 
 @Component({
-    components: {Navbar}
+    components: {Navbar, LoginComponent}
 })
 export default class Login extends Vue {
     username = ""
     password = ""
     rememberMe = true
-    loginError = ""
-
-    private _mdcTextUsername: MDCTextField
-    private _mdcTextPassword: MDCTextField
-
-    mounted() {
-        this._mdcTextUsername = new MDCTextField(this.$refs.elUsername as Element)
-        this._mdcTextPassword = new MDCTextField(this.$refs.elPassword as Element)
-    }
-
-    beforeDestroy() {
-        this._mdcTextUsername.destroy()
-        this._mdcTextPassword.destroy()
-    }
-
-    onSubmit(): void {
-        this.$store.dispatch("login", {
-            username: this.username,
-            password: this.password
-        }).then(() => {
-            this.loginError = ""
-            this.navigateNext()
-        }).catch(reason => {
-            this.loginError = reason
-        })
-    }
 
     navigateNext(): void {
         this.$router.push(this.$store.state.auth.nextRoute)
-    }
-
-    get isFormValid(): boolean {
-        return this.username != "" && this.password != ""
     }
 }
 </script>
