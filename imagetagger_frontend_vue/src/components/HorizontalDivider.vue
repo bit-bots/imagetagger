@@ -13,7 +13,7 @@ export default class HorizontalDivider extends Vue {
 </script>
 
 <style scoped lang="scss">
-    @import "src/global_style.sccs";
+    @import "../global_style.sccs";
 
     .divider {
         height: 1px;

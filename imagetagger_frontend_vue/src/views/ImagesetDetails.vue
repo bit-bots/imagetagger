@@ -46,6 +46,12 @@
                 </tr>
             </table>
         </div>
+
+        <fab-button class="fixed-bottom-right" icon="download">
+            <fab-button-sub-action icon="download">Download Zip</fab-button-sub-action>
+            <fab-button-sub-action icon="export">Export</fab-button-sub-action>
+            <fab-button-sub-action icon="plus">Create new Format</fab-button-sub-action>
+        </fab-button>
     </div>
 </template>
 
@@ -62,6 +68,8 @@ import {Team} from "@/store/modules/team"
 import ImagesetTags from "@/components/ImagesetTags.vue"
 import HorizontalDivider from "@/components/HorizontalDivider.vue"
 import {User} from "@/store/modules/user"
+import FabButton from "@/components/FabButton.vue"
+import FabButtonSubAction from "@/components/FabButtonSubAction.vue"
 
 
 const resolve = function (toRoute: Route, fromRoute: Route, next: () => void) {
@@ -76,7 +84,7 @@ const resolve = function (toRoute: Route, fromRoute: Route, next: () => void) {
 
 
 @Component({
-    components: {HorizontalDivider, ImagesetTags},
+    components: {FabButtonSubAction, FabButton, HorizontalDivider, ImagesetTags},
     beforeRouteEnter: resolve
 })
 export default class ImagesetDetails extends Vue {
@@ -107,6 +115,12 @@ export default class ImagesetDetails extends Vue {
         .imageset-tags-root {
             margin-bottom: 24px;
             margin-left: -6px;
+        }
+
+        .fixed-bottom-right {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
         }
     }
 </style>

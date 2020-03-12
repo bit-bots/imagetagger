@@ -1,10 +1,19 @@
 <template>
-    <div>
+    <div class="dashboard-root">
         <navbar class="space-after">
             <navbar-search/>
             <navbar-profile/>
         </navbar>
 
+        <div class="centered actions-container">
+            <imagetagger-button>Create Imageset</imagetagger-button>
+        </div>
+
+        <div v-if="imagesets.length === 0" class="centered">
+            <h4 class="no-imagesets-error">No Imagesets created yet</h4>
+        </div>
+
+        <!-- List of imagesets -->
         <div v-for="(iimageset, i) in imagesets" :key="iimageset.id"
              class="centered">
             <router-link :to="{name: 'imagesetDetails', params: {'id': iimageset.id}}">
@@ -27,6 +36,7 @@ import NavbarProfile from "@/components/NavbarProfile.vue"
 import {Imageset} from "@/store/modules/imageset"
 import ImagesetOverview from "@/components/ImagesetOverview.vue"
 import HorizontalDivider from "@/components/HorizontalDivider.vue"
+import ImagetaggerButton from "@/components/ImagetaggerButton.vue"
 
 
 /**
@@ -43,7 +53,7 @@ const resolve = function (toRoute: Route, fromRoute: Route, next: any) {
 
 
 @Component({
-    components: {HorizontalDivider, ImagesetOverview, NavbarProfile, NavbarSearch, Navbar},
+    components: {ImagetaggerButton, HorizontalDivider, ImagesetOverview, NavbarProfile, NavbarSearch, Navbar},
     beforeRouteEnter: resolve
 })
 export default class Dashboard extends Vue {
@@ -60,6 +70,7 @@ export default class Dashboard extends Vue {
 
 <style scoped lang="scss">
     @import "~@material/elevation/mdc-elevation.scss";
+    @import "src/global_style.sccs";
 
     .space-after {
         margin-bottom: 40px;
@@ -82,5 +93,17 @@ export default class Dashboard extends Vue {
         width: 80%;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .actions-container {
+        display: flex;
+        padding: 6px 8px;
+        flex-flow: row nowrap;
+        justify-items: center;
+        justify-content: flex-start;
+
+        & > * {
+            margin-right: 8px;
+        }
     }
 </style>
