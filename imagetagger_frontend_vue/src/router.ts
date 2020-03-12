@@ -8,8 +8,15 @@ const routes = [
     {
         path: "/imagesets/list/:filter",
         name: "dashboard",
-        component: loadView("Dashboard")
+        component: loadView("Dashboard"),
     },
+
+    {
+        path: "/welcome/new_imagetagger/:step",
+        name: "welcomeNewImagetagger",
+        component: loadView("WelcomeNewImagetagger")
+    },
+
     {
         path: "/imagesets/view/:id",
         component: loadView("Imageset"),
@@ -42,7 +49,7 @@ const routes = [
         component: loadView("Profile")
     },
 
-    {path: "/", name: "dashboard-public", redirect: "/imagesets/list/public"},
+    {path: "/", redirect: "/imagesets/list/public"},
 
     {
         path: "*",
@@ -51,6 +58,10 @@ const routes = [
     }
 ]
 
+
+/**
+ * Dynamically import a component from its name
+ */
 function loadView(name: string) {
     // @ts-ignore
     return resolve => require(["@views/" + name + ".vue"], resolve)
@@ -62,6 +73,8 @@ export const router = new VueRouter({
     routes
 })
 
+
+// guard to resolve user when a user is logged in
 router.beforeResolve((to, from, next) => {
     if (VueInstance.$store.state.user.me.id == -1 && VueInstance.$store.state.auth.loggedIn) {
         VueInstance.$store.dispatch("retrieveMeUser")

@@ -13,7 +13,7 @@
 
             <!-- Right section -->
             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
-                
+
                 <router-link v-if="isLoginVisible"
                              :to="{name: 'login'}">
                     <button class="mdc-button mdc-theme--on-primary">

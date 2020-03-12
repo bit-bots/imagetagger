@@ -1,8 +1,8 @@
 <template>
-    <div class="button-root mdc-button" :class="rootClasses">
+    <button class="button-root mdc-button" :class="rootClasses" :disabled="disabled" @click="$emit('click')">
         <span class="mdc-button__ripple"/>
         <slot>Undefined</slot>
-    </div>
+    </button>
 </template>
 
 <script lang="ts">
@@ -17,6 +17,7 @@ export default class ImagetaggerButton extends Vue {
     @Prop(VueTypes.string.def("raised")
         .validate(value => ["raised", "text", "outlined", "unelevated"].includes(value)))
     readonly variant: string
+    @Prop(VueTypes.bool.def(false)) readonly disabled: boolean
 
     get rootClasses(): string {
         switch (this.variant) {
