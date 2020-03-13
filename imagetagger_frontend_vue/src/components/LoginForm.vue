@@ -9,32 +9,12 @@
             <form v-on:submit.prevent="onSubmit">
                 <!-- Username -->
                 <div class="text-field-wrap">
-                    <div class="mdc-text-field mdc-text-field--outlined" ref="elUsername">
-                        <input type="text" id="username" class="mdc-text-field__input"
-                                v-model="username">
-                        <div class="mdc-notched-outline">
-                            <div class="mdc-notched-outline__leading"/>
-                            <div class="mdc-notched-outline__notch">
-                                <label class="mdc-floating-label" for="username">Username</label>
-                            </div>
-                            <div class="mdc-notched-outline__trailing"/>
-                        </div>
-                    </div>
+                    <imagetagger-text-field type="text" label="Username" outlined v-model="username"/>
                 </div>
 
                 <!-- Password -->
                 <div class="text-field-wrap">
-                    <div class="mdc-text-field mdc-text-field--outlined" ref="elPassword">
-                        <input type="password" id="password" class="mdc-text-field__input"
-                                v-model="password">
-                        <div class="mdc-notched-outline">
-                            <div class="mdc-notched-outline__leading"/>
-                            <div class="mdc-notched-outline__notch">
-                                <label class="mdc-floating-label" for="password">Password</label>
-                            </div>
-                            <div class="mdc-notched-outline__trailing"/>
-                        </div>
-                    </div>
+                    <imagetagger-text-field type="password" label="Password" outlined v-model="password"/>
                 </div>
 
                 <button class="mdc-button mdc-button--outlined mdc-card__action mdc-card__action--button"
@@ -51,29 +31,16 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import Navbar from "@components/Navbar.vue"
-import {MDCTextField} from "@material/textfield/component"
+import ImagetaggerTextField from "@/components/base/ImagetaggerTextField.vue"
 
 @Component({
-    components: {Navbar}
+    components: {ImagetaggerTextField, Navbar}
 })
 export default class LoginForm extends Vue {
     username = ""
     password = ""
     rememberMe = true
     loginError = ""
-
-    private _mdcTextUsername: MDCTextField
-    private _mdcTextPassword: MDCTextField
-
-    mounted() {
-        this._mdcTextUsername = new MDCTextField(this.$refs.elUsername as Element)
-        this._mdcTextPassword = new MDCTextField(this.$refs.elPassword as Element)
-    }
-
-    beforeDestroy() {
-        this._mdcTextUsername.destroy()
-        this._mdcTextPassword.destroy()
-    }
 
     onSubmit(): void {
         this.$store.dispatch("login", {

@@ -1,6 +1,6 @@
 <template>
     <div class="create-team--root">
-    Hello World
+        <imagetagger-text-field label="Test Label" :outlined="true"/>
     </div>
 </template>
 
@@ -10,9 +10,12 @@ import Component from "vue-class-component"
 import "vue-class-component/hooks"
 import {Prop} from "vue-property-decorator"
 import VueTypes from "vue-types"
+import ImagetaggerTextField from "@/components/base/ImagetaggerTextField.vue"
 
-@Component({})
-export default class CreateTeam extends Vue {
+@Component({
+    components: {ImagetaggerTextField}
+})
+export default class CreateTeamForm extends Vue {
 }
 </script>
 

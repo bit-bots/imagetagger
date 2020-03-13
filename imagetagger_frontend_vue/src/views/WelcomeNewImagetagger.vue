@@ -14,7 +14,7 @@
         <imagetagger-dialog :open="isCreateTeamDialogOpen" @close="isCreateTeamDialogOpen = false">
             <template v-slot:title>Create a Team</template>
             <template v-slot:default>
-                <create-team/>
+                <create-team-form/>
             </template>
         </imagetagger-dialog>
 
@@ -136,7 +136,7 @@ import ImagetaggerCard from "@/components/base/ImagetaggerCard.vue"
 import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
 import ImagetaggerDialog from "@/components/base/ImagetaggerDialog.vue"
 import LoginForm from "@/components/LoginForm.vue"
-import CreateTeam from "@/components/CreateTeam.vue"
+import CreateTeamForm from "@/components/CreateTeamForm.vue"
 
 
 const STEP_CREATE_USER = 1
@@ -158,7 +158,7 @@ const beforeRouteEnter = function(to: Route, fromRoute: Route, next: Function): 
 
 
 @Component({
-    components: {CreateTeam, Login: LoginForm, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
+    components: {CreateTeamForm, LoginForm, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
     beforeRouteEnter: beforeRouteEnter
 })
 export default class WelcomeNewImagetagger extends Vue {
