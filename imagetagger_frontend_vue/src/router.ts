@@ -40,7 +40,7 @@ const routes = [
     {
         path: "/login",
         name: "login",
-        component: loadView("Login")
+        component: loadView("LoginForm.vue")
     },
 
     {

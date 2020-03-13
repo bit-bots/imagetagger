@@ -55,7 +55,7 @@ export default class ImagetaggerCard extends Vue {
 </script>
 
 <style scoped lang="scss">
-    @import "~@material/card/mdc-card";
+    @import "../../../node_modules/@material/card/mdc-card";
 
     .mdc-card__media {
         text-align: center;

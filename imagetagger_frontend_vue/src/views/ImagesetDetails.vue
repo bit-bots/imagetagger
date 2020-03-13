@@ -68,8 +68,8 @@ import {Team} from "@/store/modules/team"
 import ImagesetTags from "@/components/ImagesetTags.vue"
 import HorizontalDivider from "@/components/HorizontalDivider.vue"
 import {User} from "@/store/modules/user"
-import FabButton from "@/components/FabButton.vue"
-import FabButtonSubAction from "@/components/FabButtonSubAction.vue"
+import FabButton from "@/components/base/FabButton.vue"
+import FabButtonSubAction from "@/components/base/FabButtonSubAction.vue"
 
 
 const resolve = function (toRoute: Route, fromRoute: Route, next: () => void) {

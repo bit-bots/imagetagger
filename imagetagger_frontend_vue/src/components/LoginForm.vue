@@ -56,7 +56,7 @@ import {MDCTextField} from "@material/textfield/component"
 @Component({
     components: {Navbar}
 })
-export default class Login extends Vue {
+export default class LoginForm extends Vue {
     username = ""
     password = ""
     rememberMe = true

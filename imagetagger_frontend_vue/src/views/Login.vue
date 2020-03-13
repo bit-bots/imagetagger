@@ -14,7 +14,7 @@
 
             <!-- Main login mask -->
             <div class="mdc-card__primary">
-                <login-component @loggedIn="navigateNext()"/>
+                <login-form @loggedIn="navigateNext()"/>
             </div>
         </div>
     </div>
@@ -25,10 +25,10 @@ import Vue from "vue"
 import Component from "vue-class-component"
 import Navbar from "@components/Navbar.vue"
 import {MDCTextField} from "@material/textfield/component"
-import LoginComponent from "@/components/Login.vue"
+import LoginForm from "@/components/LoginForm.vue"
 
 @Component({
-    components: {Navbar, LoginComponent}
+    components: {Navbar, LoginForm}
 })
 export default class Login extends Vue {
     username = ""

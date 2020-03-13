@@ -4,10 +4,17 @@
             <navbar-profile/>
         </navbar>
 
-        <imagetagger-dialog :open="isLoginModalOpen" @close="isLoginModalOpen = false">
+        <!-- Modals (multiple because that's simpler) -->
+        <imagetagger-dialog :open="isLoginDialogOpen" @close="isLoginDialogOpen = false">
             <template v-slot:title>Login</template>
             <template v-slot:default>
-                <Login @loggedIn="onLogin()"/>
+                <login-form @loggedIn="onLogin()"/>
+            </template>
+        </imagetagger-dialog>
+        <imagetagger-dialog :open="isCreateTeamDialogOpen" @close="isCreateTeamDialogOpen = false">
+            <template v-slot:title>Create a Team</template>
+            <template v-slot:default>
+                <create-team/>
             </template>
         </imagetagger-dialog>
 
@@ -18,7 +25,7 @@
 
             <div class="steps-container">
                 <!-- Create user -->
-                <imagetagger-card :outlined="false" :title-over-media="true">
+                <imagetagger-card :title-over-media="true">
                     <template v-slot:title>
                         <span class="mdc-theme--text-disabled-on-light">1. </span>
                         <span :class="isCreateUserActive ? 'mdc-theme--primary' : 'mdc-theme--text-disabled-on-light'">
@@ -54,7 +61,7 @@
                 </imagetagger-card>
 
                 <!-- Login -->
-                <imagetagger-card :outlined="false" :title-over-media="true">
+                <imagetagger-card :title-over-media="true">
                     <template v-slot:title>
                         <span class="mdc-theme--text-disabled-on-light">2. </span>
                         <span :class="isLoginActive ? 'mdc-theme--primary' : 'mdc-theme--text-disabled-on-light'">
@@ -71,12 +78,12 @@
                         </p>
                     </template>
                     <template v-slot:action-buttons v-if="isLoginActive">
-                        <imagetagger-button @click="openLoginModal()">Login</imagetagger-button>
+                        <imagetagger-button @click="isLoginDialogOpen = true">Login</imagetagger-button>
                     </template>
                 </imagetagger-card>
 
                 <!-- Create Team -->
-                <imagetagger-card :outlined="false" :title-over-media="true">
+                <imagetagger-card :title-over-media="true">
                     <template v-slot:title>
                         <span class="mdc-theme--text-disabled-on-light">3. </span>
                         <span :class="isCreateTeamActive ? 'mdc-theme--primary' : 'mdc-theme--text-disabled-on-light'">
@@ -87,10 +94,19 @@
                         <i class="mdi mdi-account-group action-icon"
                            :class="isCreateTeamActive ? 'mdc-theme--secondary' : 'mdc-theme--text-disabled-on-light'"/>
                     </template>
+                    <template v-slot:body v-if="isCreateTeamActive">
+                        <p>
+                            In ImageTagger every user is part of a Team which owns a number of Imagesets.
+                            By default no Teams exist so you better create one now.
+                        </p>
+                    </template>
+                    <template v-slot:action-buttons v-if="isCreateTeamActive">
+                        <imagetagger-button @click="isCreateTeamDialogOpen = true">Create Team</imagetagger-button>
+                    </template>
                 </imagetagger-card>
 
                 <!-- Create Imageset -->
-                <imagetagger-card :outlined="false" :title-over-media="true">
+                <imagetagger-card :title-over-media="true">
                     <template v-slot:title>
                         <span class="mdc-theme--text-disabled-on-light">4. </span>
                         <span :class="isCreateImagesetActive ? 'mdc-theme--primary' : 'mdc-theme--text-disabled-on-light'">
@@ -116,10 +132,11 @@ import VueTypes from "vue-types"
 import {Route} from "vue-router"
 import Navbar from "@/components/Navbar.vue"
 import NavbarProfile from "@/components/NavbarProfile.vue"
-import ImagetaggerCard from "@/components/ImagetaggerCard.vue"
-import ImagetaggerButton from "@/components/ImagetaggerButton.vue"
-import ImagetaggerDialog from "@/components/ImagetaggerDialog.vue"
-import Login from "@/components/Login.vue"
+import ImagetaggerCard from "@/components/base/ImagetaggerCard.vue"
+import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
+import ImagetaggerDialog from "@/components/base/ImagetaggerDialog.vue"
+import LoginForm from "@/components/LoginForm.vue"
+import CreateTeam from "@/components/CreateTeam.vue"
 
 
 const STEP_CREATE_USER = 1
@@ -141,11 +158,13 @@ const beforeRouteEnter = function(to: Route, fromRoute: Route, next: Function): 
 
 
 @Component({
-    components: {Login, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
+    components: {CreateTeam, Login: LoginForm, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
     beforeRouteEnter: beforeRouteEnter
 })
 export default class WelcomeNewImagetagger extends Vue {
-    public isLoginModalOpen = false
+    public isLoginDialogOpen = false
+    public isCreateTeamDialogOpen = false
+    public isCreateImagesetDialogOpen = false
 
     get currentStep(): number {
         return +this.$route.params.step
@@ -167,13 +186,19 @@ export default class WelcomeNewImagetagger extends Vue {
         return this.currentStep === STEP_CREATE_IMAGESET
     }
 
-    openLoginModal(): void {
-        this.isLoginModalOpen = true
-    }
-
     onLogin(): void {
         this.$router.push({name: "welcomeNewImagetagger", params: {step: "3"}})
-        this.isLoginModalOpen = false
+        this.isLoginDialogOpen = false
+    }
+
+    onTeamCreated(): void {
+        this.$router.push({name: "welcomeNewImagetagger", params: {step: "4"}})
+        this.isCreateTeamDialogOpen = false
+    }
+
+    onImagesetCreated(e: {id: number}): void {
+        this.$router.push({name: "imagesetDetails", params: {id: e.id.toString()}})
+        this.isCreateImagesetDialogOpen = false
     }
 }
 </script>

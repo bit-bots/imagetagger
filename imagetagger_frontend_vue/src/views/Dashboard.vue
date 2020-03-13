@@ -36,7 +36,7 @@ import NavbarProfile from "@/components/NavbarProfile.vue"
 import {Imageset} from "@/store/modules/imageset"
 import ImagesetOverview from "@/components/ImagesetOverview.vue"
 import HorizontalDivider from "@/components/HorizontalDivider.vue"
-import ImagetaggerButton from "@/components/ImagetaggerButton.vue"
+import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
 
 
 /**
