@@ -1,5 +1,5 @@
 <template>
-    <button class="button-root mdc-button" :class="rootClasses" :disabled="disabled" @click="$emit('click')"
+    <button class="imagetagger-button-root mdc-button" :class="rootClasses" :disabled="disabled" @click="$emit('click')"
             :type="type">
         <span class="mdc-button__ripple"/>
         <slot>Undefined</slot>

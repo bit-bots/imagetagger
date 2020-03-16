@@ -1,19 +1,21 @@
 <template>
-    <div class="imagetagger-text-field-root mdc-text-field" ref="elTextField"
-         :class="outlined ? 'mdc-text-field--outlined': ''">
-        <!--suppress HtmlFormInputWithoutLabel because label is dynamically bound by Vue -->
-        <input :id="inputId"
-               class="mdc-text-field__input"
-               :type="type"
-               :value="value"
-               @input="$emit('input', $event.target.value)">
-        <div class="mdc-line-ripple" v-if="!outlined"/>
-        <div :class="outlined ? 'mdc-notched-outline' : ''">
-            <div class="mdc-notched-outline__leading" v-if="outlined"/>
-            <div :class="outlined ? 'mdc-notched-outline__notch' : ''">
-                <label class="mdc-floating-label" :for="inputId">{{ label }}</label>
+    <div class="imagetagger-text-field-root">
+        <div class="mdc-text-field" ref="elTextField"
+             :class="outlined ? 'mdc-text-field--outlined': ''">
+            <!--suppress HtmlFormInputWithoutLabel because label is dynamically bound by Vue -->
+            <input :id="inputId"
+                   class="mdc-text-field__input"
+                   :type="type"
+                   :value="value"
+                   @input="$emit('input', $event.target.value)">
+            <div class="mdc-line-ripple" v-if="!outlined"/>
+            <div :class="outlined ? 'mdc-notched-outline' : ''">
+                <div class="mdc-notched-outline__leading" v-if="outlined"/>
+                <div :class="outlined ? 'mdc-notched-outline__notch' : ''">
+                    <label class="mdc-floating-label" :for="inputId">{{ label }}</label>
+                </div>
+                <div class="mdc-notched-outline__trailing" v-if="outlined"/>
             </div>
-            <div class="mdc-notched-outline__trailing" v-if="outlined"/>
         </div>
     </div>
 </template>
@@ -51,5 +53,8 @@ export default class ImagetaggerTextField extends Vue {
 </script>
 
 <style scoped lang="scss">
-
+    .imagetagger-text-field-root {
+        padding-top: 8px;
+        display: inline-block;
+    }
 </style>
