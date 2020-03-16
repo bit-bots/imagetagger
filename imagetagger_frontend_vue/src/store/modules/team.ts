@@ -39,10 +39,19 @@ export const teamModule = {
             })
         },
         retrieveTeam: function (context, payload: {id: number}) {
-            return VueInstance.$resource(`team/${payload.id}`).get().then(async response => {
+            return VueInstance.$resource(`teams/${payload.id}`).get().then(async response => {
                 const team: Team = (await response.json()).team
                 context.commit("setTeam", team)
             })
+        },
+        createTeam: function (context, payload: {name: string, website?: string}) {
+            return VueInstance.$http.post("teams/", payload)
+                .then(response => response.json())
+                .then(response => {
+                    const team: Team = response.team
+                    context.commit("setTeam", team)
+                    return team.id
+                })
         }
     },
     getters: {

@@ -14,7 +14,7 @@
         <imagetagger-dialog :open="isCreateTeamDialogOpen" @close="isCreateTeamDialogOpen = false">
             <template v-slot:title>Create a Team</template>
             <template v-slot:default>
-                <create-team-form/>
+                <create-team-form @teamCreated="onTeamCreated()"/>
             </template>
         </imagetagger-dialog>
 
@@ -149,9 +149,7 @@ const STEP_CREATE_IMAGESET = 4
  */
 const beforeRouteEnter = function(to: Route, fromRoute: Route, next: Function): void {
     next((vm: WelcomeNewImagetagger) => {
-        if (vm.currentStep > STEP_LOGIN && !vm.$store.state.auth.loggedIn)
-            vm.$router.push({name: "welcomeNewImagetagger", params: {step: STEP_LOGIN.toString()}})
-        else if (vm.currentStep <= STEP_LOGIN && vm.$store.state.auth.loggedIn)
+        if (vm.currentStep <= STEP_LOGIN && vm.$store.state.auth.loggedIn)
             vm.$router.push({name: "welcomeNewImagetagger", params: {step: STEP_CREATE_TEAM.toString()}})
     })
 }
