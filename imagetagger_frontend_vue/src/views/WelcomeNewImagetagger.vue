@@ -17,6 +17,12 @@
                 <create-team-form @teamCreated="onTeamCreated()"/>
             </template>
         </imagetagger-dialog>
+        <imagetagger-dialog :open="isCreateImagesetDialogOpen" @close="isCreateImagesetDialogOpen = false">
+            <template v-slot:title>Create an Imageset</template>
+            <template v-slot:default>
+                <create-imageset-form @imagesetCreated="onImagesetCreated"/>
+            </template>
+        </imagetagger-dialog>
 
         <div class="centered">
             <h2>Welcome to your new ImageTagger</h2>
@@ -76,9 +82,17 @@
                         <p>
                             Now that a you have created a user, it is time to log in.
                         </p>
+                        <p v-if="isLoggedIn">
+                            Although you are already logged in, you can log in with a different user or simply
+                            continue.
+                        </p>
                     </template>
                     <template v-slot:action-buttons v-if="isLoginActive">
-                        <imagetagger-button @click="isLoginDialogOpen = true">Login</imagetagger-button>
+                        <imagetagger-button v-if="!isLoggedIn" @click="isLoginDialogOpen = true">Login</imagetagger-button>
+                        <imagetagger-button v-if="isLoggedIn" @click="isLoginDialogOpen = true">
+                            Login with other User
+                        </imagetagger-button>
+                        <imagetagger-button v-if="isLoggedIn" @click="onLogin()">Continue</imagetagger-button>
                     </template>
                 </imagetagger-card>
 
@@ -99,9 +113,20 @@
                             In ImageTagger every user is part of a Team which owns a number of Imagesets.
                             By default no Teams exist so you better create one now.
                         </p>
+                        <p v-if="myTeams.length > 0">
+                            You are already in a Team. You can create another one or simply continue.
+                        </p>
                     </template>
                     <template v-slot:action-buttons v-if="isCreateTeamActive">
-                        <imagetagger-button @click="isCreateTeamDialogOpen = true">Create Team</imagetagger-button>
+                        <imagetagger-button v-if="myTeams.length === 0" @click="isCreateTeamDialogOpen = true">
+                            Create Team
+                        </imagetagger-button>
+                        <imagetagger-button v-if="myTeams.length > 0" @click="isCreateTeamDialogOpen = true">
+                            Create another Team
+                        </imagetagger-button>
+                        <imagetagger-button v-if="myTeams.length > 0" @click="onTeamCreated()">
+                            Continue
+                        </imagetagger-button>
                     </template>
                 </imagetagger-card>
 
@@ -116,6 +141,18 @@
                     <template v-slot:media>
                         <i class="mdi mdi-folder-multiple-image action-icon"
                            :class="isCreateImagesetActive ? 'mdc-theme--secondary' : 'mdc-theme--text-disabled-on-light'"/>
+                    </template>
+                    <template v-if="isCreateImagesetActive" v-slot:body>
+                        <p>
+                            Imagesets help you organize your tagging tasks by grouping multiple Images.
+                        </p>
+                        <p>
+                            You are able to mark Imagesets as important and assign labels to them so that you can
+                            easily communicate with your teams which tagging tasks are to be prioritized.
+                        </p>
+                    </template>
+                    <template v-if="isCreateImagesetActive" v-slot:action-buttons>
+                        <imagetagger-button @click="isCreateImagesetDialogOpen = true">Create Imageset</imagetagger-button>
                     </template>
                 </imagetagger-card>
             </div>
@@ -137,6 +174,8 @@ import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
 import ImagetaggerDialog from "@/components/base/ImagetaggerDialog.vue"
 import LoginForm from "@/components/LoginForm.vue"
 import CreateTeamForm from "@/components/CreateTeamForm.vue"
+import CreateImagesetForm from "@/components/CreateImagesetForm.vue"
+import {Team} from "@/store/modules/team"
 
 
 const STEP_CREATE_USER = 1
@@ -145,18 +184,24 @@ const STEP_CREATE_TEAM = 3
 const STEP_CREATE_IMAGESET = 4
 
 /**
- * Prevents the user from navigating to a step that is not yet available
+ * Prevents the user from navigating to a step that is not yet available.
+ * Also retrieves data from network when it is not yet available and needed
  */
 const beforeRouteEnter = function(to: Route, fromRoute: Route, next: Function): void {
     next((vm: WelcomeNewImagetagger) => {
-        if (vm.currentStep <= STEP_LOGIN && vm.$store.state.auth.loggedIn)
-            vm.$router.push({name: "welcomeNewImagetagger", params: {step: STEP_CREATE_TEAM.toString()}})
+        if (vm.currentStep > STEP_LOGIN && !vm.$store.state.auth.loggedIn)
+            vm.$router.push({name: "welcomeNewImagetagger", params: {step: STEP_CREATE_USER.toString()}})
+
+        else if (vm.currentStep >= STEP_CREATE_TEAM && vm.myTeams.length === 0)
+            vm.$store.dispatch("retrieveAllTeams")
     })
 }
 
 
 @Component({
-    components: {CreateTeamForm, LoginForm, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
+    components: {
+        CreateImagesetForm,
+        CreateTeamForm, LoginForm, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
     beforeRouteEnter: beforeRouteEnter
 })
 export default class WelcomeNewImagetagger extends Vue {
@@ -184,6 +229,14 @@ export default class WelcomeNewImagetagger extends Vue {
         return this.currentStep === STEP_CREATE_IMAGESET
     }
 
+    get isLoggedIn(): boolean {
+        return this.$store.state.auth.loggedIn
+    }
+
+    get myTeams(): Team[] {
+        return this.$store.getters.myTeams
+    }
+
     onLogin(): void {
         this.$router.push({name: "welcomeNewImagetagger", params: {step: "3"}})
         this.isLoginDialogOpen = false
@@ -194,8 +247,8 @@ export default class WelcomeNewImagetagger extends Vue {
         this.isCreateTeamDialogOpen = false
     }
 
-    onImagesetCreated(e: {id: number}): void {
-        this.$router.push({name: "imagesetDetails", params: {id: e.id.toString()}})
+    onImagesetCreated(id: number): void {
+        this.$router.push({name: "imagesetDetails", params: {id: id.toString()}})
         this.isCreateImagesetDialogOpen = false
     }
 }

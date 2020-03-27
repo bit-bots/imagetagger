@@ -57,5 +57,7 @@ export const teamModule = {
     getters: {
         teamById: (state) => (id: number) =>
             state.teams.find(iteam => iteam.id === id),
+        myTeams: (state, getters, rootState) =>
+            state.teams.filter(t => rootState.user.me.teams.includes(t.id))
     }
 } as Module<TeamState, any>

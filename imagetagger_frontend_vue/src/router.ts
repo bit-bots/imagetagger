@@ -11,6 +11,7 @@ const routes = [
         component: loadView("Dashboard"),
     },
 
+    {path: "/welcome/new_imagetagger",redirect: "/welcome/new_imagetagger/1"},
     {
         path: "/welcome/new_imagetagger/:step",
         name: "welcomeNewImagetagger",

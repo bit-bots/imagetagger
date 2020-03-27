@@ -177,12 +177,14 @@ class ImageSet(models.Model):
 
     @tag_names.setter
     def tag_names(self, value: list):
-        self.set_tags.clear()
-        existing_tags = SetTag.objects.filter(name__in=value)
-        self.set_tags.add(*existing_tags)
+        # if the imageset gets created, id is not yet set
+        if self.id:
+            self.set_tags.clear()
+            existing_tags = SetTag.objects.filter(name__in=value)
+            self.set_tags.add(*existing_tags)
 
-        for remaining_tag in set(value) - set(existing_tags.values_list("name", flat=True)):
-            self.set_tags.create(name=remaining_tag)
+            for remaining_tag in set(value) - set(existing_tags.values_list("name", flat=True)):
+                self.set_tags.create(name=remaining_tag)
 
 
     @property

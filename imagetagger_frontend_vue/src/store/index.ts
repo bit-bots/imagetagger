@@ -29,5 +29,6 @@ export const store = new Vuex.Store({
         contentFilter: contentFilterModule,
         imagesets: imagesetModule,
         teams: teamModule
-    }
+    },
+    strict: true
 } as StoreOptions<GlobalState>)

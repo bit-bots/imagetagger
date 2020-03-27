@@ -63,7 +63,7 @@ export const imagesetModule = {
         }
     },
     actions: {
-        retrieveAllImagesets: function(context) {
+        retrieveAllImagesets: function (context) {
             return VueInstance.$resource("image_sets").get().then(async response => {
                 const imagesets: Imageset[] = (await response.json()).imageSets
                 context.commit("setImagesets", imagesets)
@@ -94,11 +94,29 @@ export const imagesetModule = {
                 })
         },
 
-        updateImagesetTags: function(context,
-                                     payload: {imageset: Imageset, tags: string[]}) {
+        updateImagesetTags: function (context,
+                                      payload: { imageset: Imageset, tags: string[] }) {
             return VueInstance.$http.patch(`image_sets/${payload.imageset.id}/`, {tags: payload.tags})
                 .then(response => response.json())
                 .then(response => context.commit("setImageset", response.imageSet))
+        },
+
+        createImageset: (context,
+                         payload: {
+                             name: string,
+                             description: string,
+                             location: string,
+                             public: boolean,
+                             publicCollaboration: boolean,
+                             team: number
+                         }) => {
+            return VueInstance.$http.post("image_sets/", payload)
+                .then(response => response.json())
+                .then(response => {
+                    const imageset: Imageset = response.imageSet
+                    context.commit("setImageset", imageset)
+                    return imageset.id
+                })
         }
     },
     getters: {

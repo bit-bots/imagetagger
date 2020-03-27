@@ -83,11 +83,11 @@ class ImageSetSerializer(serializers.DynamicModelSerializer):
                   'images', 'main_annotation_type', 'tags', 'team', 'creator',
                   'zip_url', 'number_of_images')
 
-    tags = fields.DynamicField(source="tag_names", field_type=list)
+    tags = fields.DynamicField(source="tag_names", field_type=list, default=[])
     creator = serializers.DynamicRelationField("UserSerializer", read_only=True)
     team = serializers.DynamicRelationField("TeamSerializer", read_only=True)
-    zip_url = ReverseRouteField("images:download_imageset", "id")
-    number_of_images = fields.DynamicField(source="image_count")
+    zip_url = ReverseRouteField("images:download_imageset", "id", read_only=True)
+    number_of_images = fields.DynamicField(source="image_count", read_only=True)
     images = fields.DynamicRelationField("ImageSerializer", many=True)
 
 
