@@ -33,30 +33,31 @@ export const teamModule = {
     },
     actions: {
         retrieveAllTeams: function(context) {
-            return VueInstance.$resource("teams").get().then(async response => {
-                const teams: Team[] = (await response.json()).teams
-                context.commit("setTeams", teams)
-            })
+            return VueInstance.$resource("teams").get()
+                .then(response => response.json())
+                .then((response: Team[]) => {
+                    context.commit("setTeams", response)
+                })
         },
         retrieveTeam: function (context, payload: {id: number}) {
-            return VueInstance.$resource(`teams/${payload.id}`).get().then(async response => {
-                const team: Team = (await response.json()).team
-                context.commit("setTeam", team)
-            })
+            return VueInstance.$resource(`teams/${payload.id}`).get()
+                .then(response => response.json())
+                .then((response: Team) => {
+                    context.commit("setTeam", response)
+                })
         },
         createTeam: function (context, payload: {name: string, website?: string}) {
             return VueInstance.$http.post("teams/", payload)
                 .then(response => response.json())
-                .then(response => {
-                    const team: Team = response.team
-                    context.commit("setTeam", team)
-                    return team.id
+                .then((response: Team) => {
+                    context.commit("setTeam", response)
+                    return response.id
                 })
         }
     },
     getters: {
         teamById: (state) => (id: number) =>
-            state.teams.find(iteam => iteam.id === id),
+            state.teams.find(t => t.id === id),
         myTeams: (state, getters, rootState) =>
             state.teams.filter(t => rootState.user.me.teams.includes(t.id))
     }

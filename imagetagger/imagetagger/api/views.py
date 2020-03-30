@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
-from dynamic_rest import viewsets as dyn_viewsets
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,18 +16,18 @@ IMAGE_SET_PERMISSIONS = ('verify', 'annotate', 'create_export', 'delete_annotati
                          'delete_set', 'delete_images', 'edit_annotation', 'edit_set', 'read')
 
 
-class AnnotationViewSet(dyn_viewsets.DynamicModelViewSet):
+class AnnotationViewSet(viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = serializers.AnnotationSerializer
     permission_classes = (AnnotationPermission,)
 
 
-class AnnotationTypeViewSet(dyn_viewsets.DynamicModelViewSet):
+class AnnotationTypeViewSet(viewsets.ModelViewSet):
     queryset = AnnotationType.objects.all()
     serializer_class = serializers.AnnotationTypeSerializer
 
 
-class ExportFormatViewSet(dyn_viewsets.DynamicModelViewSet):
+class ExportFormatViewSet(viewsets.ModelViewSet):
     queryset = ExportFormat.objects.all()
     serializer_class = serializers.ExportFormatSerializer
 
@@ -38,7 +37,7 @@ class ExportViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.ExportSerializer
 
 
-class ImageSetViewSet(dyn_viewsets.DynamicModelViewSet):
+class ImageSetViewSet(viewsets.ModelViewSet):
     queryset = ImageSet.objects.prefetch_related('set_tags').select_related('team').annotate(number_of_images=Count('images'))
     permission_classes = (ImageSetPermission,)
     serializer_class = serializers.ImageSetSerializer
@@ -49,7 +48,7 @@ class ImageSetViewSet(dyn_viewsets.DynamicModelViewSet):
         permission_dict = dict()
         for permission in IMAGE_SET_PERMISSIONS:
             permission_dict[permission] = permission in permission_set
-        data['image_set']['permissions'] = permission_dict
+        data['permissions'] = permission_dict
         return data
 
     def retrieve(self, request, *args, **kwargs):
@@ -57,7 +56,7 @@ class ImageSetViewSet(dyn_viewsets.DynamicModelViewSet):
         image_set = self.get_object()
         serializer = self.get_serializer(image_set)
         data = self.add_permissions(request.user, image_set, serializer.data)
-        data['image_set']['isPinned'] = request.user in image_set.pinned_by.all()
+        data['isPinned'] = request.user in image_set.pinned_by.all()
         return Response(data)
 
     @action(methods=('PUT', 'DELETE'), detail=True)
@@ -84,7 +83,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.ImageSerializer
 
 
-class TeamViewSet(dyn_viewsets.DynamicModelViewSet):
+class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = serializers.TeamSerializer
 
@@ -95,7 +94,7 @@ class TeamViewSet(dyn_viewsets.DynamicModelViewSet):
         permission_dict = dict()
         for permission in TEAM_PERMISSIONS:
             permission_dict[permission] = permission in permission_set
-        data['team']['permissions'] = permission_dict
+        data['permissions'] = permission_dict
         return data
 
     def retrieve(self, request, *args, **kwargs):
@@ -126,7 +125,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class VerificationViewSet(dyn_viewsets.DynamicModelViewSet):
+class VerificationViewSet(viewsets.ModelViewSet):
     queryset = Verification.objects.all()
     serializer_class = serializers.VerificationSerializer
     permission_classes = (VerificationPermission,)

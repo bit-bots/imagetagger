@@ -43,15 +43,16 @@ export const userModule = {
 
     actions: {
         retrieveMeUser: function (context) {
-            return VueInstance.$resource("users/me").get().then(async response => {
-                const user: MeUser = await response.json()
-                context.commit("setMeUser", user)
-            })
+            return VueInstance.$resource("users/me").get()
+                .then(response => response.json())
+                .then((response: MeUser) => {
+                    context.commit("setMeUser", response)
+                })
         },
         retrieveUser: function (context, payload: {id: number}) {
             return VueInstance.$resource(`users/${payload.id}`).get()
                 .then(response => response.json())
-                .then(response => {
+                .then((response: User) => {
                     context.commit("setUser", response)
                 })
         }

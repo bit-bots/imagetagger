@@ -74,8 +74,9 @@ class ImageSet(models.Model):
     )
     creator = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 default=None,
-                                on_delete=models.SET_NULL,
-                                null=True,
+                                #on_delete=models.SET_NULL,
+                                on_delete=models.CASCADE,
+                                null=False,
                                 blank=True)
     public = models.BooleanField(default=False)
     public_collaboration = models.BooleanField(default=False)

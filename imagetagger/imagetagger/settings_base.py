@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'dynamic_rest',
     'drf_yasg',
     'widget_tweaks',
     'friendlytagloader',

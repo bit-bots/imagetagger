@@ -1,55 +1,41 @@
 from django.urls import reverse
-from dynamic_rest import serializers as serializers
-from dynamic_rest import fields
+from rest_framework import serializers
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team, User
 
 
-class NotInImageField(fields.DynamicComputedField):
-    def get_attribute(self, instance):
+class CurrentUserAsListDefault(serializers.CurrentUserDefault):
+    def __call__(self):
+        current_user = super().__call__()
+        return [current_user]
+
+
+class AnnotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Annotation
+        fields = ('id', 'concealed', 'blurred', 'last_edit_time', 'not_in_image',
+                  'vector', 'image', 'annotation_type', 'creator', 'last_editor')
+
+    creator = serializers.HiddenField(source='user', default=serializers.CurrentUserDefault())
+    concealed = serializers.BooleanField(source='_concealed')
+    blurred = serializers.BooleanField(source='_blurred')
+    not_in_image = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_not_in_image(instance):
         return instance.vector is None
 
 
-class ReverseRouteField(fields.DynamicComputedField):
-    def __init__(self, route_name, instance_field_name, requires=None, deferred=None, field_type=None, immutable=False, **kwargs):
-        super().__init__(requires, deferred, field_type, immutable, **kwargs)
-        self.route_name = route_name
-        self.instance_field_name = instance_field_name
-
-    def get_attribute(self, instance):
-        instance_field = getattr(instance, self.instance_field_name)
-        return reverse(self.route_name, args=(instance_field,))
-
-
-class AnnotationSerializer(serializers.DynamicModelSerializer):
-    class Meta:
-        model = Annotation
-        fields = ('id', 'concealed', 'blurred', 'last_edit_time', 'user', 'not_in_image',
-                  'vector', 'image', 'annotation_type', 'creator', 'last_editor')
-
-    creator = serializers.DynamicRelationField("UserSerializer", source="user", read_only=True)
-    concealed = fields.DynamicField(source="_concealed")
-    blurred = fields.DynamicField(source="_blurred")
-    not_in_image = NotInImageField()
-
-    user = fields.fields.HiddenField(default=serializers.serializers.CurrentUserDefault())
-
-    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    # concealed = serializers.BooleanField(source='_concealed')
-    # blurred = serializers.BooleanField(source='_blurred')
-    # not_in_image = serializers.SerializerMethodField(read_only=True)
-
-
-class AnnotationTypeSerializer(serializers.DynamicModelSerializer):
+class AnnotationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnnotationType
         fields = ('id', 'name', 'active', 'vector_type', 'node_count',
                   'enable_concealed', 'enable_blurred')
 
 
-class ExportFormatSerializer(serializers.DynamicModelSerializer):
+class ExportFormatSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExportFormat
         fields = ('id', 'name', 'last_change_time', 'public', 'base_format', 'image_format',
@@ -57,25 +43,30 @@ class ExportFormatSerializer(serializers.DynamicModelSerializer):
                   'min_verifications', 'image_aggregation', 'include_blurred', 'include_concealed')
 
 
-class ExportSerializer(serializers.DynamicModelSerializer):
+class ExportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Export
         fields = ('id', 'time', 'annotation_count', 'url', 'deprecated',
                   'format', 'image_set', 'creator')
 
-    creator = serializers.DynamicRelationField("UserSerializer", source="user", read_only=True)
+    creator = serializers.PrimaryKeyRelatedField(source="user", read_only=True)
 
 
-class ImageSerializer(serializers.DynamicModelSerializer):
+class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ('id', 'name', 'width', 'height', 'url', 'annotations')
 
-    url = ReverseRouteField("images:view_image", "id")
-    annotations = fields.DynamicRelationField("AnnotationSerializer", many=True)
+    url = serializers.SerializerMethodField()
+    annotations = serializers.PrimaryKeyRelatedField(many=True, queryset=Annotation.objects.all())
+
+    @staticmethod
+    def get_url(instance: Image):
+        route_name = "images:view_image"
+        return reverse(route_name, args=(instance.id,))
 
 
-class ImageSetSerializer(serializers.DynamicModelSerializer):
+class ImageSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSet
         fields = ('id', 'name', 'location', 'description', 'time', 'public',
@@ -83,35 +74,40 @@ class ImageSetSerializer(serializers.DynamicModelSerializer):
                   'images', 'main_annotation_type', 'tags', 'team', 'creator',
                   'zip_url', 'number_of_images')
 
-    tags = fields.DynamicField(source="tag_names", field_type=list, default=[])
-    creator = serializers.DynamicRelationField("UserSerializer", read_only=True)
-    team = serializers.DynamicRelationField("TeamSerializer", read_only=True)
-    zip_url = ReverseRouteField("images:download_imageset", "id", read_only=True)
-    number_of_images = fields.DynamicField(source="image_count", read_only=True)
-    images = fields.DynamicRelationField("ImageSerializer", many=True)
+    tags = serializers.ListField(source="tag_names", child=serializers.CharField(), allow_empty=True, default=[])
+    creator = serializers.PrimaryKeyRelatedField(
+        default=serializers.CreateOnlyDefault(serializers.CurrentUserDefault()),
+        queryset=User.objects.all())    # TODO Make read_only which breaks setting a default
+    team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all())
+    zip_url = serializers.SerializerMethodField()
+    number_of_images = serializers.IntegerField(source="image_count", read_only=True)
+    images = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    @staticmethod
+    def get_zip_url(instance: ImageSet):
+        route_name = "images:download_imageset"
+        return reverse(route_name, args=(instance.id,))
 
 
-class UserSerializer(serializers.DynamicModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'points', 'pinned_sets', 'teams')
 
 
-class TeamSerializer(serializers.DynamicModelSerializer):
+class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
         fields = ('id', 'name', 'members', 'website')
 
-    members = fields.DynamicRelationField("UserSerializer", many=True, sideloading=False)
+    members = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(),
+                                                 default=serializers.CreateOnlyDefault(CurrentUserAsListDefault()))
 
 
-class VerificationSerializer(serializers.DynamicModelSerializer):
+class VerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Verification
         fields = ('id', 'time', 'verification_value', 'creator', 'annotation')
 
-    creator = fields.DynamicRelationField("UserSerializer", source="user", read_only=True)
-    verification_value = fields.DynamicField(source="verified")
-
-    # verification_value = serializers.BooleanField(source='verified')
-    # creator = serializers.PrimaryKeyRelatedField(source='user', read_only=True)
+    creator = serializers.PrimaryKeyRelatedField(source="user", read_only=True)
+    verification_value = serializers.BooleanField(source="verified")

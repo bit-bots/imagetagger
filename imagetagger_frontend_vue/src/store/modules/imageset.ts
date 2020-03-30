@@ -64,10 +64,11 @@ export const imagesetModule = {
     },
     actions: {
         retrieveAllImagesets: function (context) {
-            return VueInstance.$resource("image_sets").get().then(async response => {
-                const imagesets: Imageset[] = (await response.json()).imageSets
-                context.commit("setImagesets", imagesets)
-            })
+            return VueInstance.$resource("image_sets").get()
+                .then(response => response.json())
+                .then((response: Imageset[]) => {
+                    context.commit("setImagesets", response)
+                })
         },
 
         retrieveImageset: function (context, payload: {
@@ -75,22 +76,18 @@ export const imagesetModule = {
             sideloadTeam: boolean,
             sideloadCreator: boolean
         }) {
-            const url = new Url("image_sets")
-            url.addPart(payload.id)
-            if (payload.sideloadTeam)
-                url.addGetArg("include[]", "team.*")
-            if (payload.sideloadCreator)
-                url.addGetArg("include[]", "creator.*")
-
-            return VueInstance.$http.get(url.toString())
+            return VueInstance.$http.get(`image_sets/${payload.id}/`)
                 .then(response => response.json())
-                .then(response => {
-                    context.commit("setImageset", response.imageSet)
+                .then((response: Imageset) => {
+                    context.commit("setImageset", response)
 
+                    const children: Promise<any>[] = []
                     if (payload.sideloadTeam)
-                        context.commit("setTeam", response.teams.find((t: Team) => t.id === response.imageSet.team))
+                        children.push(context.dispatch("retrieveTeam", {id: response.team}))
                     if (payload.sideloadCreator)
-                        context.commit("setUser", response.users.find((u: User) => u.id === response.imageSet.creator))
+                        children.push(context.dispatch("retrieveUser", {id: response.creator}))
+
+                    return Promise.all(children)
                 })
         },
 
@@ -112,10 +109,9 @@ export const imagesetModule = {
                          }) => {
             return VueInstance.$http.post("image_sets/", payload)
                 .then(response => response.json())
-                .then(response => {
-                    const imageset: Imageset = response.imageSet
-                    context.commit("setImageset", imageset)
-                    return imageset.id
+                .then((response: Imageset) => {
+                    context.commit("setImageset", response)
+                    return response.id
                 })
         }
     },

@@ -4,7 +4,6 @@ Django<3.0
 djangorestframework
 djangorestframework-camel-case
 django-widget-tweaks
-dynamic-rest
 fasteners
 Pillow
 psycopg2-binary

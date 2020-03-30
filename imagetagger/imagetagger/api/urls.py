@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
-from dynamic_rest.routers import DefaultRouter
+from rest_framework.routers import DefaultRouter
 
 from imagetagger.api.views import ImageViewSet, AnnotationViewSet, AnnotationTypeViewSet, ExportFormatViewSet, \
     ExportViewSet, ImageSetViewSet, TeamViewSet, UserViewSet, VerificationViewSet
