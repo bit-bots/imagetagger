@@ -187,22 +187,25 @@ const STEP_CREATE_IMAGESET = 4
  * Prevents the user from navigating to a step that is not yet available.
  * Also retrieves data from network when it is not yet available and needed
  */
-const beforeRouteEnter = function(to: Route, fromRoute: Route, next: Function): void {
-    next((vm: WelcomeNewImagetagger) => {
-        if (vm.currentStep > STEP_LOGIN && !vm.$store.state.auth.loggedIn)
-            vm.$router.push({name: "welcomeNewImagetagger", params: {step: STEP_CREATE_USER.toString()}})
+const guardRoute = function(vm: WelcomeNewImagetagger, currentStep: number): void {
+    if (currentStep > STEP_LOGIN && !vm.$store.state.auth.loggedIn)
+        vm.$router.push({name: "welcomeNewImagetagger", params: {step: STEP_CREATE_USER.toString()}})
 
-        else if (vm.currentStep >= STEP_CREATE_TEAM && vm.myTeams.length === 0)
-            vm.$store.dispatch("retrieveAllTeams")
-    })
+    else if (currentStep >= STEP_CREATE_TEAM && vm.myTeams.length === 0)
+        vm.$store.dispatch("retrieveAllTeams")
 }
-
 
 @Component({
     components: {
         CreateImagesetForm,
         CreateTeamForm, LoginForm, ImagetaggerDialog, ImagetaggerButton, NavbarProfile, Navbar, ImagetaggerCard},
-    beforeRouteEnter: beforeRouteEnter
+    beforeRouteEnter: (to, fromRoute, next) => {
+        next(vm => guardRoute(vm as WelcomeNewImagetagger, +to.params.step))
+    },
+    beforeRouteUpdate: function (to, fromRoute, next) {
+        guardRoute(this as WelcomeNewImagetagger, +to.params.step)
+        next()
+    }
 })
 export default class WelcomeNewImagetagger extends Vue {
     public isLoginDialogOpen = false
