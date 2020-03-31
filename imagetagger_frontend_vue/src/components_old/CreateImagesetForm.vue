@@ -34,10 +34,10 @@ import "vue-class-component/hooks"
 import {Prop, Watch} from "vue-property-decorator"
 import VueTypes from "vue-types"
 import {Team} from "@/plugins/store/modules/team"
-import ImagetaggerTextField from "@/components/base/ImagetaggerTextField.vue"
-import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
-import ImagetaggerSwitch from "@/components/base/ImagetaggerSwitch.vue"
-import ImagetaggerDropdown from "@/components/base/ImagetaggerDropdown.vue"
+import ImagetaggerTextField from "@/components_old/base/ImagetaggerTextField.vue"
+import ImagetaggerButton from "@/components_old/base/ImagetaggerButton.vue"
+import ImagetaggerSwitch from "@/components_old/base/ImagetaggerSwitch.vue"
+import ImagetaggerDropdown from "@/components_old/base/ImagetaggerDropdown.vue"
 
 @Component({
     components: {ImagetaggerSwitch, ImagetaggerButton, ImagetaggerTextField, ImagetaggerDropdown}

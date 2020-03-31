@@ -15,9 +15,9 @@
 <script lang="ts">
 import Vue from "vue"
 import Component from "vue-class-component"
-import Navbar from "@/components/Navbar.vue"
-import NavbarProfile from "@/components/NavbarProfile.vue"
-import NavbarTab from "@/components/NavbarTab.vue"
+import Navbar from "@/components_old/Navbar.vue"
+import NavbarProfile from "@/components_old/NavbarProfile.vue"
+import NavbarTab from "@/components_old/NavbarTab.vue"
 
 @Component({
     components: {NavbarTab, NavbarProfile, Navbar}

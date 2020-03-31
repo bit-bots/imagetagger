@@ -1,3 +1,15 @@
+/**
+ * Un-styles anchor tags when the a-unstyle class is applied
+ */
+a.a-unstyle:link, a.a-unstyle:visited, a.a-unstyle:hover, a.a-unstyle:active {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+
+
+// TODO Remove below
+
 // Given colors
 $primary-color: #083358;
 $accent-color: #F67280;

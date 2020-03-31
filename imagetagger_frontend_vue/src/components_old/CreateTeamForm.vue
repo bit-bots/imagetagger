@@ -23,8 +23,8 @@ import Component from "vue-class-component"
 import "vue-class-component/hooks"
 import {Prop} from "vue-property-decorator"
 import VueTypes from "vue-types"
-import ImagetaggerTextField from "@/components/base/ImagetaggerTextField.vue"
-import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
+import ImagetaggerTextField from "@/components_old/base/ImagetaggerTextField.vue"
+import ImagetaggerButton from "@/components_old/base/ImagetaggerButton.vue"
 
 @Component({
     components: {ImagetaggerButton, ImagetaggerTextField}

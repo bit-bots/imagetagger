@@ -1,0 +1,10 @@
+@use "colors";
+
+@each $name, $value in colors.$all-colors {
+  .theme-#{$name}-fg {
+    color: $value !important;
+  }
+  .theme-#{$name}-bg {
+    background-color: $value !important;
+  }
+}

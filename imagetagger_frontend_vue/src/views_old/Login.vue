@@ -23,9 +23,9 @@
 <script lang="ts">
 import Vue from "vue"
 import Component from "vue-class-component"
-import Navbar from "@/components/Navbar.vue"
+import Navbar from "@/components_old/Navbar.vue"
 import {MDCTextField} from "@material/textfield/component"
-import LoginForm from "@/components/LoginForm.vue"
+import LoginForm from "@/components_old/LoginForm.vue"
 
 @Component({
     components: {Navbar, LoginForm}

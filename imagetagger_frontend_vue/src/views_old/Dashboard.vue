@@ -30,19 +30,19 @@ import Vue from "vue"
 import Component from "vue-class-component"
 import {Route} from "vue-router"
 import {VueInstance} from "@/main"
-import Navbar from "@/components/Navbar.vue"
-import NavbarSearch from "@/components/NavbarSearch.vue"
-import NavbarProfile from "@/components/NavbarProfile.vue"
+import Navbar from "@/components_old/Navbar.vue"
+import NavbarSearch from "@/components_old/NavbarSearch.vue"
+import NavbarProfile from "@/components_old/NavbarProfile.vue"
 import {Imageset} from "@/plugins/store/modules/imageset"
-import ImagesetOverview from "@/components/ImagesetOverview.vue"
-import HorizontalDivider from "@/components/HorizontalDivider.vue"
-import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
+import ImagesetOverview from "@/components_old/ImagesetOverview.vue"
+import HorizontalDivider from "@/components_old/HorizontalDivider.vue"
+import ImagetaggerButton from "@/components_old/base/ImagetaggerButton.vue"
 
 
 /**
- * Resolve API dependencies of all included components.
+ * Resolve API dependencies of all included components_old.
  *
- * Done here because components don't get the beforeRouteEnter event call.
+ * Done here because components_old don't get the beforeRouteEnter event call.
  */
 const resolve = function (toRoute: Route, fromRoute: Route, next: any) {
     Promise.all([

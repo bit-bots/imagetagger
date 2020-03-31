@@ -1,15 +1,35 @@
 <template>
-    <router-view/>
+    <v-app>
+        <it-navbar/>
+        <v-content>
+            <router-view/>
+        </v-content>
+    </v-app>
 </template>
 
+
+<script>
+import Vue from "vue"
+import Component from "vue-class-component"
+import ItNavbar from "@/components/ItNavbar"
+
+@Component({
+    components: {ItNavbar}
+})
+export default class App extends Vue {}
+</script>
+
+
 <style lang="scss">
+    @use "src/styles/colors";
+    @use "src/styles/color_classes";
     @import "styles/global_style";
     //@import "~src/styles/global_style";
-    @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500");
-    @import url("~@mdi/font/css/materialdesignicons.css");
+    //@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500");
+    //@import url("~@mdi/font/css/materialdesignicons.css");
 
-    // Set custom theme to be used by material design components framework
-    $mdc-theme-primary: $primary-color;
+    // Set custom theme to be used by material design components_old framework
+ /*   $mdc-theme-primary: $primary-color;
     $mdc-theme-secondary: $accent-color;
     $mdc-theme-background: $background-color;
     $mdc-theme-surface: $background-color;
@@ -18,11 +38,15 @@
     $mdc-theme-text-secondary-on-background: $secondary-text-color;
     $mdc-theme-text-icon-on-background: $primary-color-text;
     $mdc-theme-text-primary-on-light: $primary-text-color;
-    $mdc-theme-text-secondary-on-light: $secondary-text-color;
+    $mdc-theme-text-secondary-on-light: $secondary-text-color;*/
 
-    @import "~material-components-web/material-components-web";
+    //@import "~material-components_old-web/material-components_old-web";
 
     // Global style fixes
+    body {
+        margin: 0;
+    }
+/*
     body {
         margin: 0;
     }
@@ -92,5 +116,5 @@
     .cursor-w-resize {cursor: w-resize;}
     .cursor-wait {cursor: wait;}
     .cursor-zoom-in {cursor: zoom-in;}
-    .cursor-zoom-out {cursor: zoom-out;}
+    .cursor-zoom-out {cursor: zoom-out;}*/
 </style>

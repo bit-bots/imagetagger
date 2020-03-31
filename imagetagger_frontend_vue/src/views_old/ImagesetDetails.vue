@@ -65,11 +65,11 @@ import {Route} from "vue-router"
 import {VueInstance} from "@/main"
 import {Imageset} from "@/plugins/store/modules/imageset"
 import {Team} from "@/plugins/store/modules/team"
-import ImagesetTags from "@/components/ImagesetTags.vue"
-import HorizontalDivider from "@/components/HorizontalDivider.vue"
+import ImagesetTags from "@/components_old/ImagesetTags.vue"
+import HorizontalDivider from "@/components_old/HorizontalDivider.vue"
 import {User} from "@/plugins/store/modules/user"
-import FabButton from "@/components/base/FabButton.vue"
-import FabButtonSubAction from "@/components/base/FabButtonSubAction.vue"
+import FabButton from "@/components_old/base/FabButton.vue"
+import FabButtonSubAction from "@/components_old/base/FabButtonSubAction.vue"
 
 
 const resolve = function (toRoute: Route, fromRoute: Route, next: () => void) {
