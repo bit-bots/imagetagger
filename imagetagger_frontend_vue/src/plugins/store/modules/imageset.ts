@@ -1,9 +1,8 @@
 import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
-import {User} from "@/store/modules/user"
-import {Team} from "@/store/modules/team"
-import {Url} from "@/httpResourceExtensions"
+import {User} from "@/plugins/store/modules/user"
+import {Team} from "@/plugins/store/modules/team"
 
 
 export interface ImagesetPermissions {

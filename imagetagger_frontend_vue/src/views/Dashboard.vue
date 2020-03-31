@@ -33,7 +33,7 @@ import {VueInstance} from "@/main"
 import Navbar from "@/components/Navbar.vue"
 import NavbarSearch from "@/components/NavbarSearch.vue"
 import NavbarProfile from "@/components/NavbarProfile.vue"
-import {Imageset} from "@/store/modules/imageset"
+import {Imageset} from "@/plugins/store/modules/imageset"
 import ImagesetOverview from "@/components/ImagesetOverview.vue"
 import HorizontalDivider from "@/components/HorizontalDivider.vue"
 import ImagetaggerButton from "@/components/base/ImagetaggerButton.vue"
@@ -70,7 +70,7 @@ export default class Dashboard extends Vue {
 
 <style scoped lang="scss">
     @import "~@material/elevation/mdc-elevation.scss";
-    @import "src/global_style.sccs";
+    @import "../styles/global_style";
 
     .space-after {
         margin-bottom: 40px;

@@ -42,7 +42,7 @@ export default class Login extends Vue {
 </script>
 
 <style scoped lang="scss">
-    @import "src/global_style.sccs";
+    @import "../styles/global_style";
 
     .mdc-card {
         margin: 3% auto auto;

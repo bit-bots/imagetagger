@@ -112,7 +112,7 @@ export default class Navbar extends Vue {
 
 <style scoped lang="scss">
     @import "~@material/top-app-bar/mdc-top-app-bar";
-    @import "src/global_style.sccs";
+    @import "../styles/global_style";
 
     header.mdc-top-app-bar {
         top: 0;

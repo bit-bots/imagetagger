@@ -43,7 +43,7 @@ export default class ImagetaggerDropdown extends Vue {
 </script>
 
 <style scoped lang="scss">
-    @import "src/global_style.sccs";
+    @import "../../styles/global_style";
 
     .imagetagger-dropdown-root {
         margin-top: 8px;

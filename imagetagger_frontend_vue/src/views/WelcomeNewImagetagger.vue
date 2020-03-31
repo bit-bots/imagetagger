@@ -175,7 +175,7 @@ import ImagetaggerDialog from "@/components/base/ImagetaggerDialog.vue"
 import LoginForm from "@/components/LoginForm.vue"
 import CreateTeamForm from "@/components/CreateTeamForm.vue"
 import CreateImagesetForm from "@/components/CreateImagesetForm.vue"
-import {Team} from "@/store/modules/team"
+import {Team} from "@/plugins/store/modules/team"
 
 
 const STEP_CREATE_USER = 1

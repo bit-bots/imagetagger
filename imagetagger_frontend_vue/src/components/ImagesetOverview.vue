@@ -21,8 +21,8 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import VueTypes from "vue-types"
-import {Imageset} from "@/store/modules/imageset"
-import {Team} from "@/store/modules/team"
+import {Imageset} from "@/plugins/store/modules/imageset"
+import {Team} from "@/plugins/store/modules/team"
 
 
 @Component({

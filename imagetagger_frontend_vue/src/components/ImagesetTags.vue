@@ -35,7 +35,7 @@ import Component from "vue-class-component"
 import "vue-class-component/hooks"
 import {Prop} from "vue-property-decorator"
 import VueTypes from "vue-types"
-import {Imageset} from "@/store/modules/imageset"
+import {Imageset} from "@/plugins/store/modules/imageset"
 
 @Component({})
 export default class ImagesetTags extends Vue {
@@ -65,7 +65,7 @@ export default class ImagesetTags extends Vue {
 </script>
 
 <style scoped lang="scss">
-    @import "src/global_style.sccs";
+    @import "../styles/global_style";
 
     .mdc-text-field.chip-text-field {
         // values taken from mdc-chip classes

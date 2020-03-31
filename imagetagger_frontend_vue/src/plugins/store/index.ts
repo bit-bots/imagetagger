@@ -1,10 +1,10 @@
 import Vue from "vue"
 import Vuex, {Store, StoreOptions} from "vuex"
-import {authModule} from "@/store/modules/auth"
-import {userModule} from "@/store/modules/user"
-import {contentFilterModule} from "@/store/modules/contentFilter"
-import {imagesetModule} from "@/store/modules/imageset"
-import {teamModule} from "@/store/modules/team"
+import {authModule} from "@/plugins/store/modules/auth"
+import {userModule} from "@/plugins/store/modules/user"
+import {contentFilterModule} from "@/plugins/store/modules/contentFilter"
+import {imagesetModule} from "@/plugins/store/modules/imageset"
+import {teamModule} from "@/plugins/store/modules/team"
 
 Vue.use(Vuex)
 

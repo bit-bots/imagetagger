@@ -3,7 +3,8 @@
 </template>
 
 <style lang="scss">
-    @import "global_style.sccs";
+    @import "styles/global_style";
+    //@import "~src/styles/global_style";
     @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500");
     @import url("~@mdi/font/css/materialdesignicons.css");
 
