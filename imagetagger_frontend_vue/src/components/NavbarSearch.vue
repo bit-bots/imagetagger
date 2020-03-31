@@ -42,7 +42,7 @@ export default class NavbarSearch extends Vue {
     }
 
     toggleManualSearch() {
-        this.searchbarManuallyExtended = !this.searchbarManuallyExtended;
+        this.searchbarManuallyExtended = !this.searchbarManuallyExtended
     }
 
     get searchTerm(): string {

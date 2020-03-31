@@ -65,7 +65,7 @@ const routes = [
  */
 function loadView(name: string) {
     // @ts-ignore
-    return resolve => require(["@views/" + name + ".vue"], resolve)
+    return resolve => require(["@/views/" + name + ".vue"], resolve)
 }
 
 
