@@ -1,0 +1,66 @@
+<template>
+    <v-form @submit.prevent="onSubmit" ref="form">
+        <v-banner v-if="login_error !== ''" color="error" class="mb-4 login-error">
+            {{ login_error }}
+        </v-banner>
+
+        <v-text-field label="Username" name="username" prepend-icon="mdi-account" type="text"
+                      :rules="[validateUsername]" v-model="username"/>
+        <v-text-field label="Password" name="password" prepend-icon="mdi-lock" type="password"
+                      :rules="[validatePassword]" v-model="password"/>
+        <div class="d-flex d-flex-row align-baseline justify-space-between">
+            <v-switch label="Remember me" name="remember" v-model="remember_me"/>
+            <v-btn color="primary" type="submit">Login</v-btn>
+        </div>
+    </v-form>
+</template>
+
+<script lang="ts">
+import Vue from "vue"
+import Component from "vue-class-component"
+import "vue-class-component/hooks"
+import {Prop} from "vue-property-decorator"
+import VueTypes from "vue-types"
+
+@Component({})
+export default class ItLoginForm extends Vue {
+    username: string = ""
+    password: string = ""
+    remember_me: boolean = true     // TODO implement remember_me for login
+    login_error: string = ""
+
+    onSubmit(e: any): void {
+        if ((this.$refs.form as any).validate()) {
+            this.$store.dispatch("login", {
+                username: this.username,
+                password: this.password
+            }).then(() => {
+                this.login_error = ""
+                this.$emit("loggedIn")
+            }).catch(reason => {
+                this.login_error = reason
+            })
+        }
+    }
+
+    validateUsername(value: string): boolean | string {
+        if (value !== "")
+            return true
+        else
+            return "Username cannot be empty"
+    }
+
+    validatePassword(value: string): boolean | string {
+        if (value !== "")
+            return true
+        else
+            return "Password cannot be empty"
+    }
+}
+</script>
+
+<style scoped lang="scss">
+    .login-error {
+        border-radius: 4px;
+    }
+</style>
