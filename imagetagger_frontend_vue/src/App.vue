@@ -23,7 +23,9 @@ export default class App extends Vue {}
 <style lang="scss">
     @use "src/styles/colors";
     @use "src/styles/color_classes";
+    @import "node_modules/vuetify/src/styles/main";
     @import "styles/global_style";
+
     //@import "~src/styles/global_style";
     //@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500");
     //@import url("~@mdi/font/css/materialdesignicons.css");

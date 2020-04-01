@@ -14,7 +14,7 @@
                     </v-list-item>
 
                     <v-list-item>
-                        <router-link :to="{name: 'logout'}">
+                        <router-link :to="{name: 'logout', query: {next: currentUrl}}">
                             <v-list-item-action>Logout</v-list-item-action>
                         </router-link>
                     </v-list-item>
@@ -33,6 +33,9 @@ import VueTypes from "vue-types"
 
 @Component({})
 export default class ItNavbarProfile extends Vue {
+    get currentUrl(): string {
+        return this.$route.fullPath
+    }
 }
 </script>
 

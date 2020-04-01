@@ -41,7 +41,13 @@ const routes = [
     {
         path: "/login",
         name: "login",
-        component: loadView("LoginForm.vue")
+        component: loadView("Login")
+    },
+
+    {
+        path: "/logout",
+        name: "logout",
+        component: loadView("Logout")
     },
 
     {
