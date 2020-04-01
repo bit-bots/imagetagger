@@ -3,6 +3,12 @@ $_theme-colors: (
         "primary": var(--v-primary-base),
         "secondary": var(--v-secondary-base),
         "accent": var(--v-accent-base),
+        "info": var(--v-info-base),
+        "warning": var(--v-warning-base),
+        "error": var(--v-error-base),
+        "success": var(--v-success-base),
+        "anchor": var(--v-anchor-base),
+
         "white": var(--v-white-base),
 );
 
