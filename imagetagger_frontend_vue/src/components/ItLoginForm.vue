@@ -1,16 +1,20 @@
 <template>
     <v-form @submit.prevent="onSubmit" ref="form">
-        <v-banner v-if="login_error !== ''" color="error" class="mb-4 login-error">
+        <v-alert v-if="login_error !== ''" color="error">
             {{ login_error }}
-        </v-banner>
+        </v-alert>
 
         <v-text-field label="Username" name="username" prepend-icon="mdi-account" type="text"
                       :rules="[validateUsername]" v-model="username"/>
         <v-text-field label="Password" name="password" prepend-icon="mdi-lock" type="password"
                       :rules="[validatePassword]" v-model="password"/>
-        <div class="d-flex d-flex-row align-baseline justify-space-between">
+        <div class="d-flex flex-row align-baseline justify-space-between">
             <v-switch label="Remember me" name="remember" v-model="remember_me"/>
-            <v-btn color="primary" type="submit">Login</v-btn>
+            <div>
+                <slot>
+                    <v-btn color="primary" type="submit">Login</v-btn>
+                </slot>
+            </div>
         </div>
     </v-form>
 </template>
@@ -60,7 +64,4 @@ export default class ItLoginForm extends Vue {
 </script>
 
 <style scoped lang="scss">
-    .login-error {
-        border-radius: 4px;
-    }
 </style>

@@ -6,6 +6,7 @@
                 <v-banner class="elevation-4">No imagesets created yet</v-banner>
             </v-col>
 
+            <!-- TODO maybe use v-list-item-group -->
             <v-col v-for="iimageset in imagesets" :key="iimageset.id"
                    cols="8" offset="2">
                 <v-hover v-slot:default="{ hover }">
