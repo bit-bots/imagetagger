@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
-from imagetagger.images.models import Image, ImageSet
+from imagetagger.images.models import Image, ImageSet, SetTag
 from imagetagger.users.models import Team, User
 
 
@@ -111,3 +111,8 @@ class VerificationSerializer(serializers.ModelSerializer):
 
     creator = serializers.PrimaryKeyRelatedField(source="user", read_only=True)
     verification_value = serializers.BooleanField(source="verified")
+
+
+class ImagesetTagSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance: SetTag):
+        return instance.name

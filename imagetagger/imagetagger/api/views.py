@@ -8,7 +8,7 @@ from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_
 from imagetagger.annotations.models import Annotation, AnnotationType, ExportFormat, Export, Verification
 from imagetagger.api import serializers
 from imagetagger.api.permissions import ImageSetPermission, AnnotationPermission, VerificationPermission
-from imagetagger.images.models import Image, ImageSet
+from imagetagger.images.models import Image, ImageSet, SetTag
 from imagetagger.users.models import Team, User, TeamMembership
 
 TEAM_PERMISSIONS = ('create_set', 'user_management', 'manage_export_formats')
@@ -129,3 +129,8 @@ class VerificationViewSet(viewsets.ModelViewSet):
     queryset = Verification.objects.all()
     serializer_class = serializers.VerificationSerializer
     permission_classes = (VerificationPermission,)
+
+
+class ImagesetTagViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin):
+    queryset = SetTag.objects.all()
+    serializer_class = serializers.ImagesetTagSerializer

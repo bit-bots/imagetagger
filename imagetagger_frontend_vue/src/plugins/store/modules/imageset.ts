@@ -44,6 +44,7 @@ export interface Imageset {
 
 export class ImagesetState {
     imagesets: Imageset[] = []
+    availableTags: string[] = []
 }
 
 
@@ -59,8 +60,12 @@ export const imagesetModule = {
                 state.imagesets.push(payload)
             else
                 Vue.set(state.imagesets, index, payload)
-        }
+        },
+        setAvailableTags:(state, payload: string[]) => {
+            state.availableTags = payload
+        },
     },
+
     actions: {
         retrieveAllImagesets: function (context) {
             return VueInstance.$resource("image_sets").get()
@@ -91,10 +96,16 @@ export const imagesetModule = {
         },
 
         updateImagesetTags: function (context,
-                                      payload: { imageset: Imageset, tags: string[] }) {
-            return VueInstance.$http.patch(`image_sets/${payload.imageset.id}/`, {tags: payload.tags})
+                                      payload: { id: number, tags: string[] }) {
+            return VueInstance.$http.patch(`image_sets/${payload.id}/`, {tags: payload.tags})
                 .then(response => response.json())
-                .then(response => context.commit("setImageset", response.imageSet))
+                .then(response => context.commit("setImageset", response))
+        },
+
+        retrieveAvailableTags: function(context) {
+            return VueInstance.$resource("image_set_tags").get()
+                .then(response => response.json())
+                .then(response => context.commit("setAvailableTags", response))
         },
 
         createImageset: (context,

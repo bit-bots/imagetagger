@@ -92,6 +92,11 @@ router.beforeResolve((to, from, next) => {
     }
 })
 
+router.onError(err => {
+    alert(`That navigation did not work because ${err}`)
+    throw err
+})
+
 router.beforeEach((toRoute, fromRoute, next) => {
     if (VueInstance)
         VueInstance.$store.commit("toggleCurrentlyLoading", true)

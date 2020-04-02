@@ -18,7 +18,6 @@ export default new Vuetify({
                 secondary: "#F67280",
                 accent: "#F67280",
                 white: "#FFFFFF",
-
             }
         }
     }
