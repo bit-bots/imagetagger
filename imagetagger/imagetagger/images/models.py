@@ -61,7 +61,6 @@ class ImageSet(models.Model):
         (ZipState.PROCESSING, 'processing'),
     )
 
-    path = models.CharField(max_length=100, unique=True, null=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
@@ -74,9 +73,8 @@ class ImageSet(models.Model):
     )
     creator = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 default=None,
-                                #on_delete=models.SET_NULL,
-                                on_delete=models.CASCADE,
-                                null=False,
+                                on_delete=models.SET_NULL,
+                                null=True,
                                 blank=True)
     public = models.BooleanField(default=False)
     public_collaboration = models.BooleanField(default=False)
@@ -103,6 +101,10 @@ class ImageSet(models.Model):
 
     def tmp_zip_path(self):
         return os.path.join(self.path, ".tmp." + self.zip_name())
+
+    @property
+    def path(self):
+        return '{}_{}'.format(self.team.id, self.id)
 
     @property
     def image_count(self):

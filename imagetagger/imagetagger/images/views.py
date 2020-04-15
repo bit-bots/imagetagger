@@ -303,9 +303,6 @@ def create_imageset(request):
                     form.instance.team = team
                     form.instance.creator = request.user
                     form.instance.save()
-                    form.instance.path = '{}_{}'.format(team.id,
-                                                        form.instance.id)
-                    form.instance.save()
 
                     # create a folder to store the images of the set
                     folder_path = form.instance.root_path()
