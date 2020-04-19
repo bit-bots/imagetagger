@@ -6,3 +6,4 @@ Pillow
 psycopg2-binary
 django-registration
 django-friendly-tag-loader
+fs
