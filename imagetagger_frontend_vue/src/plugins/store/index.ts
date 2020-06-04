@@ -4,6 +4,7 @@ import {authModule} from "@/plugins/store/modules/auth"
 import {userModule} from "@/plugins/store/modules/user"
 import {imagesetModule} from "@/plugins/store/modules/imageset"
 import {teamModule} from "@/plugins/store/modules/team"
+import {imageModule} from "@/plugins/store/modules/image"
 
 Vue.use(Vuex)
 
@@ -26,7 +27,8 @@ export const store = new Vuex.Store({
         auth: authModule,
         user: userModule,
         imagesets: imagesetModule,
-        teams: teamModule
+        teams: teamModule,
+        images: imageModule
     },
     strict: true
 } as StoreOptions<GlobalState>)
