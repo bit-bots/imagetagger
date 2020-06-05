@@ -126,7 +126,7 @@ def handle_upload(imageset_id, files, user):
                         image_set=imageset,
                         filename=fname,
                         checksum=fchecksum)
-                    os.makedirs(os.path.dirname(image.path()))
+                    os.makedirs(os.path.dirname(image.path()), exist_ok=True)
                     with open(image.path(), 'wb') as out:
                         for chunk in f.chunks():
                             out.write(chunk)
