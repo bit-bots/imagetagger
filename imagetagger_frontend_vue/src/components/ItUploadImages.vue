@@ -9,7 +9,7 @@
         </p>
         <v-file-input label="Images or zip" multiple counter show-size accept=".zip,image/*" v-model="files"/>
         <div class="d-flex flex-row justify-end mt-4">
-            <v-btn color="primary" type="submit">Upload</v-btn>
+            <v-btn color="primary" type="submit" disabled>Upload</v-btn>
         </div>
     </v-form>
 </template>

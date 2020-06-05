@@ -28,7 +28,7 @@ import "vue-class-component/hooks"
 import {Route} from "vue-router/types/router"
 import {Imageset} from "@/plugins/store/modules/imageset"
 import {VueInstance} from "@/main"
-import ItImagesetOverview from "@/components/ItImagesetOverview.vue";
+import ItImagesetOverview from "@/components/ItImagesetOverview.vue"
 
 
 /**

@@ -42,7 +42,8 @@ const resolve = function (to: Route, fromRoute: Route, next: () => void) {
     if (VueInstance.$store.getters.imagesetById(+to.params.id) === undefined) {
         VueInstance.$store.dispatch("retrieveImageset", {
             id: to.params.id,
-            sideloadTeam: true
+            sideloadTeam: true,
+            sideloadImages: true
         }).finally(next)
     } else
         next()

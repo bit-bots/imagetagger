@@ -103,8 +103,8 @@ import ItLoginForm from "@/components/ItLoginForm.vue"
 import {Team} from "@/plugins/store/modules/team"
 import {RawLocation, Route} from "vue-router"
 import {VueInstance} from "@/main"
-import ItCreateTeamForm from "@/components/ItCreateTeamForm.vue";
-import ItCreateImagesetForm from "@/components/ItCreateImagesetForm.vue";
+import ItCreateTeamForm from "@/components/ItCreateTeamForm.vue"
+import ItCreateImagesetForm from "@/components/ItCreateImagesetForm.vue"
 
 const STEP_CREATE_USER = 1
 const STEP_LOGIN = 2

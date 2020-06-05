@@ -39,6 +39,12 @@ const routes = [
     },
 
     {
+        path: "/imagesets/view/:imagesetId/image/:imageId",
+        name: "imageView",
+        component: loadView("Image")
+    },
+
+    {
         path: "/login",
         name: "login",
         component: loadView("Login")

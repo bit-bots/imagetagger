@@ -78,7 +78,8 @@ export const imagesetModule = {
         retrieveImageset: function (context, payload: {
             id: number,
             sideloadTeam: boolean,
-            sideloadCreator: boolean
+            sideloadCreator: boolean,
+            sideloadImages: boolean,
         }) {
             return VueInstance.$http.get(`image_sets/${payload.id}/`)
                 .then(response => response.json())
@@ -90,6 +91,9 @@ export const imagesetModule = {
                         children.push(context.dispatch("retrieveTeam", {id: response.team}))
                     if (payload.sideloadCreator)
                         children.push(context.dispatch("retrieveUser", {id: response.creator}))
+                    if (payload.sideloadImages)
+                        children.push(...response.images.map(i => context.dispatch("retrieveImage", {id: i})))
+                        // TODO Add better API which does not require dozens of HTTP requests
 
                     return Promise.all(children)
                 })

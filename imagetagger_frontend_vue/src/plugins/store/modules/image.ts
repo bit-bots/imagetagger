@@ -1,10 +1,16 @@
 import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
+import {Imageset} from "@/plugins/store/modules/imageset"
 
 
 export interface Image {
     id: number
+    name: string
+    width: number
+    height: number
+    url: string
+    annotations: number[]
 }
 
 
@@ -37,21 +43,15 @@ export const imageModule = {
         },
 
         uploadImages: function (context, payload: {imageset: number, files: File[]}) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader()
-                reader.onload = (event) => {
-                    VueInstance.$http.post("images/", {
-                        name: payload.files[0].name,
-                        imagesetId: payload.imageset,
-                        data: reader.result
-                    }).then(resolve)
-                }
-                reader.readAsBinaryString(payload.files[0])
-            })
+            throw new Error("Image uploading is not yet implemented")
         }
     },
     getters: {
-        imageById: (state) => (id: number) =>
-            state.images.find(t => t.id === id),
+        imageById: (state) => (id: number) => state.images.find(t => t.id === id),
+
+        imagesFromImageset: (state, getters, rootState, rootGetters) => (imagesetId: number) => {
+            return (rootGetters.imagesetById(imagesetId) as Imageset)
+                .images.map(i => getters.imageById(i))
+        },
     }
 } as Module<ImageState, any>
