@@ -112,13 +112,14 @@ TOOL_UPLOAD_NOTICE = ''
 # }
 
 
-# Usage of sentry for errorreporting (remember to activate raven in installed apps)
-# import raven
-
-# RAVEN_CONFIG = {
-#     'dsn': 'threaded+requests+https://Sentry-DSN',
-#     # If you are using git, you can also automatically configure the
-#     # release based on the git info.
-#     #'release': raven.fetch_git_sha(os.path.dirname(__file__)),
-#     'release': open('/opt/imagetagger/.releaseversion').read(),
-# }
+# Usage of sentry for error reporting
+# import sentry_sdk
+# from sentry_sdk.integrations.django import DjangoIntegration
+#
+# sentry_sdk.init(
+#     dsn="https://...",
+#     integrations=[DjangoIntegration()],
+#
+#     # If you wish to associate users to errors you may enable sending PII data.
+#     send_default_pii=True
+# )
