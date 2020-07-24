@@ -23,8 +23,14 @@
         <p>{% blocktrans %}We have recorded the error under the Identifier {{ event_id }}.{% endblocktrans %}</p>
         <script>
             Sentry.showReportDialog({
-                eventId: '{{ event_id }}'
-            });{# TODO: User ausfüllen wenn angemeldet? #}
+                eventId: '{{ event_id }}',
+            {% if request.user %}
+                user: {
+                    name: '{{ request.user.username }}',
+                    email: '{{ request.user.email }}',
+                }
+            {% endif %}
+            });
         </script>
     {% endif %}
     </div><div class="col-md-offset-1 col-md-5"><img src="{% static 'symbols/server-Bit.png' %}" style="width: 100%;"></div>
