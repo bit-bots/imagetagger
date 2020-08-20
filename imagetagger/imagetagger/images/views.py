@@ -359,7 +359,9 @@ def view_image(request, image_id):
     file_path = os.path.join(settings.IMAGE_PATH, image.path())
 
     if settings.USE_NGINX_IMAGE_PROVISION:
-        response = HttpResponse(content_type='image')
+        response = HttpResponse()
+        # Let nginx determine the Content-Type
+        del response['Content-Type']
         response['X-Accel-Redirect'] = "/ngx_static_dn/{}".format(image.relative_path())
     else:
         response =  FileResponse(open(file_path, 'rb'), content_type="image")
