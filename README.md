@@ -58,7 +58,7 @@ Checkout the latest release:
 git checkout v0.x
 ```
 
-In our production Senty is used for error reporting (pip install raven).
+In our production Senty is used for error reporting (pip install sentry-sdk).
 django-auth-ldap is used for login via ldap
 uwsgi is used to serve the app to nginx
 
