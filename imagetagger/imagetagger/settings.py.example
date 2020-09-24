@@ -11,7 +11,7 @@ SECRET_KEY = 'DEV KEY PLEASE CHANGE IN PRODUCTION INTO SOMETHING RANDOM'
 DEBUG = True
 
 # Allowed Host headers this site can server
-ALLOWED_HOSTS = ['imagetagger.example.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Additional installed apps
 INSTALLED_APPS += [
@@ -25,7 +25,7 @@ DATABASES = {
     'default': {
         # Imagetagger relies on some Postgres features so other Databses will _not_ work
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': '127.0.0.1',
+        'HOST': 'imagetagger-postgres',
         'NAME': 'imagetagger',
         'PASSWORD': 'imagetagger',
         'USER': 'imagetagger',
@@ -39,7 +39,7 @@ LANGUAGE_CODE = 'en-us'
 
 # TIME_ZONE = 'Europe/Berlin' #Timezone of your server
 
-# STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/imagetagger'
 
 # EXPORT_SEPARATOR = '|'
 # DATA_PATH = os.path.join(BASE_DIR, 'data')
@@ -52,7 +52,7 @@ LANGUAGE_CODE = 'en-us'
 #     'jpg',
 # }
 
-USE_NGINX_IMAGE_PROVISION = False  # defines if images get provided directly via nginx what generally improves imageset download performance
+USE_NGINX_IMAGE_PROVISION = True  # defines if images get provided directly via nginx what generally improves imageset download performance
 
 # The 'report a problem' page on an internal server error can either be a custom url or a text that can be defined here.
 # PROBLEMS_URL = 'https://problems.example.com'
@@ -69,13 +69,16 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 UPLOAD_FS_GROUP = 33  # www-data on debian
 
-ENABLE_ZIP_DOWNLOAD = False  # If enabled, run manage.py runzipdaemon to create the zip files and keep them up to date
+ENABLE_ZIP_DOWNLOAD = True  # If enabled, run manage.py runzipdaemon to create the zip files and keep them up to date
 
 # Test mail functionality by printing mails to console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TOOLS_ENABLED = True
-TOOLS_PATH = os.path.join(BASE_DIR, 'tools')
 TOOL_UPLOAD_NOTICE = ''
+
+DATA_PATH = '/app/data'
+IMAGE_PATH = DATA_PATH + '/images'
+TOOLS_PATH = DATA_PATH + '/tools'
 
 # Use ldap login
 #

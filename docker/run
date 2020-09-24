@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+/app/src/imagetagger/manage.py migrate
+
+nginx
+exec uwsgi /etc/uwsgi/imagetagger.ini
+
