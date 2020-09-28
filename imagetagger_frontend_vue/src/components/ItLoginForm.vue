@@ -23,18 +23,17 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 
 @Component({})
 export default class ItLoginForm extends Vue {
-    username: string = ""
-    password: string = ""
-    remember_me: boolean = true     // TODO implement remember_me for login
-    login_error: string = ""
+    username = ""
+    password = ""
+    remember_me = true     // TODO implement remember_me for login
+    login_error = ""
 
-    onSubmit(e: any): void {
-        if ((this.$refs.form as any).validate()) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onSubmit(e: never): void {
+        if ((this.$refs.form as unknown).validate()) {
             this.$store.dispatch("login", {
                 username: this.username,
                 password: this.password

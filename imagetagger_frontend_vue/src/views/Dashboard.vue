@@ -34,7 +34,7 @@ import ItImagesetOverview from "@/components/ItImagesetOverview.vue"
 /**
  * Resolve network dependencies of all included components
  */
-const resolve = function(to: Route, fromRoute: Route, next: Function): void {
+const resolve = function(to: Route, fromRoute: Route, next: () => void): void {
     Promise.all([
         VueInstance.$store.dispatch("retrieveAllImagesets"),
         VueInstance.$store.dispatch("retrieveAllTeams")

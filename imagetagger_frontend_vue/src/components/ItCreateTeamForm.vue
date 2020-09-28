@@ -19,16 +19,14 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 import {required} from "@/plugins/vuetify/formValidators"
 
 @Component({})
 export default class ItCreateTeamForm extends Vue {
-    name: string = ""
+    name = ""
 
     onSubmit(): void {
-        if ((this.$refs.form as any).validate()) {
+        if ((this.$refs.form as unknown).validate()) {
             this.$store.dispatch("createTeam", {name: this.name})
                 .then(id => this.$emit("teamCreated", id))
         }

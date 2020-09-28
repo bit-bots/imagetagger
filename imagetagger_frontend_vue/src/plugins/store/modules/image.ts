@@ -2,6 +2,7 @@ import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
 import {Imageset} from "@/plugins/store/modules/imageset"
+import {RootState} from "@/plugins/store/root";
 
 
 export interface Image {
@@ -42,6 +43,8 @@ export const imageModule = {
                 })
         },
 
+        // TODO implement image uploading
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         uploadImages: function (context, payload: {imageset: number, files: File[]}) {
             throw new Error("Image uploading is not yet implemented")
         }
@@ -54,4 +57,4 @@ export const imageModule = {
                 .images.map(i => getters.imageById(i))
         },
     }
-} as Module<ImageState, any>
+} as Module<ImageState, RootState>

@@ -1,6 +1,7 @@
 import {VueInstance} from "@/main"
 import {Module} from "vuex"
 import {RawLocation} from "vue-router"
+import {RootState} from "@/plugins/store/root";
 
 export class AuthState {
     loggedIn = false
@@ -59,4 +60,4 @@ export const authModule = {
                 })
         },
     }
-} as Module<AuthState, any>
+} as Module<AuthState, RootState>

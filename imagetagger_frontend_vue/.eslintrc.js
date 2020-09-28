@@ -3,17 +3,13 @@ module.exports = {
     env: {
         node: true
     },
-    extends: ["plugin:vue/essential"],
-    rules: {
-        "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-        "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-        semi: ["error", "never"],
-        indent: ["warn", 4, {
-            FunctionExpression: {parameters: "first"}
-        }],
-        quotes: ["warn", "double"]
-    },
+    plugins: ["@typescript-eslint"],
+    extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:vue/essential",],
     parserOptions: {
         parser: "@typescript-eslint/parser"
-    }
+    },
+    rules: {
+        "no-console": process.env.NODE_ENV === "production" ? "error" : "warn",
+        "no-debugger": process.env.NODE_ENV === "production" ? "error" : "warn",
+    },
 }

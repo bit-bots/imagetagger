@@ -1,6 +1,7 @@
 import Vue from "vue"
 import {VueInstance} from "@/main"
 import {Module} from "vuex"
+import {RootState} from "@/plugins/store/root";
 
 export class MeUser {
     id = -1
@@ -62,4 +63,4 @@ export const userModule = {
         userById: (state) => (id: number) =>
             state.users.find(iuser => iuser.id === id)
     }
-} as Module<UserState, any>
+} as Module<UserState, RootState>

@@ -28,8 +28,6 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 import {Imageset} from "@/plugins/store/modules/imageset"
 import ItImagesetDetailsData from "@/components/ItImagesetDetailsData.vue"
 import {VueInstance} from "@/main"

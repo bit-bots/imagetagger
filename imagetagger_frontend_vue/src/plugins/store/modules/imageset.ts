@@ -1,8 +1,7 @@
 import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
-import {User} from "@/plugins/store/modules/user"
-import {Team} from "@/plugins/store/modules/team"
+import {RootState} from "@/plugins/store/root";
 
 
 export interface ImagesetPermissions {
@@ -86,7 +85,7 @@ export const imagesetModule = {
                 .then((response: Imageset) => {
                     context.commit("setImageset", response)
 
-                    const children: Promise<any>[] = []
+                    const children: Promise<unknown>[] = []
                     if (payload.sideloadTeam)
                         children.push(context.dispatch("retrieveTeam", {id: response.team}))
                     if (payload.sideloadCreator)
@@ -132,4 +131,4 @@ export const imagesetModule = {
     getters: {
         imagesetById: (state) => (id: number) => state.imagesets.filter(i => i.id === id)[0]
     }
-} as Module<ImagesetState, any>
+} as Module<ImagesetState, RootState>

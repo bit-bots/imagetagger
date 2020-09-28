@@ -1,4 +1,4 @@
-type Rule = (value: any) => boolean | string
+type Rule = (value: unknown) => boolean | string
 
 export const required: Rule = function (value) {
     if (value != null && value != "" && value != [])

@@ -31,8 +31,6 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 import {Imageset as ImagesetData} from "@/plugins/store/modules/imageset"
 import {Route} from "vue-router"
 import {VueInstance} from "@/main"

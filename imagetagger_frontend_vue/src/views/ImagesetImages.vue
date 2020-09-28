@@ -25,8 +25,6 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 import ItUploadImages from "@/components/ItUploadImages.vue"
 import ItImagesetImageList from "@/components/ItImagesetImageList.vue"
 

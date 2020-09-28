@@ -24,7 +24,6 @@ import Component from "vue-class-component"
 import "vue-class-component/hooks"
 import {Prop} from "vue-property-decorator"
 import VueTypes from "vue-types"
-import Imageset from "@/views/Imageset.vue"
 import {Image} from "@/plugins/store/modules/image"
 
 // :to="{ name: 'imageView', params: {imagesetId, imageId: image.id} }"

@@ -1,6 +1,7 @@
 import Vue from "vue"
 import {Module} from "vuex"
 import {VueInstance} from "@/main"
+import {RootState} from "@/plugins/store/root";
 
 
 export interface Team {
@@ -61,4 +62,4 @@ export const teamModule = {
         myTeams: (state, getters, rootState) =>
             state.teams.filter(t => rootState.user.me.teams.includes(t.id))
     }
-} as Module<TeamState, any>
+} as Module<TeamState, RootState>

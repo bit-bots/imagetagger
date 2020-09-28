@@ -19,8 +19,6 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 import ItLoginForm from "@/components/ItLoginForm.vue"
 
 @Component({

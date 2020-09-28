@@ -23,19 +23,17 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Prop} from "vue-property-decorator"
-import VueTypes from "vue-types"
 import {required} from "@/plugins/vuetify/formValidators"
 import {Team} from "@/plugins/store/modules/team"
 
 @Component({})
 export default class ItCreateImagesetForm extends Vue {
-    name: string = ""
-    teamId: number = -1
-    description: string = ""
-    location: string = ""
-    isPublic: boolean = false
-    isPublicCollaboration: boolean = false
+    name = ""
+    teamId = -1
+    description = ""
+    location = ""
+    isPublic = false
+    isPublicCollaboration = false
 
     get teamNames(): string[] {
         return this.$store.getters.myTeams.map((t: Team) => t.name)
@@ -53,7 +51,7 @@ export default class ItCreateImagesetForm extends Vue {
     }
 
     onSubmit(): void {
-        if ((this.$refs.form as any).validate()) {
+        if ((this.$refs.form as unknown).validate()) {
             this.$store.dispatch("createImageset", {
                 name: this.name,
                 description: this.description,
