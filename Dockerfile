@@ -39,6 +39,7 @@ COPY docker/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/update_points docker/zip_daemon docker/run /app/bin/
 RUN ln -sf /app/bin/* /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/run"]
+ENV IN_DOCKER=true
 
 # add image metadata
 EXPOSE 3008

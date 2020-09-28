@@ -52,7 +52,8 @@ STATIC_ROOT = '/var/www/imagetagger'
 #     'jpg',
 # }
 
-USE_NGINX_IMAGE_PROVISION = True  # defines if images get provided directly via nginx what generally improves imageset download performance
+# defines if images get provided directly via nginx which generally improves imageset download performance
+USE_NGINX_IMAGE_PROVISION = True if os.getenv("IN_DOCKER", "") != "" else False
 
 # The 'report a problem' page on an internal server error can either be a custom url or a text that can be defined here.
 # PROBLEMS_URL = 'https://problems.example.com'
@@ -69,7 +70,8 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 UPLOAD_FS_GROUP = 33  # www-data on debian
 
-ENABLE_ZIP_DOWNLOAD = True  # If enabled, run manage.py runzipdaemon to create the zip files and keep them up to date
+# If enabled, run manage.py runzipdaemon to create the zip files and keep them up to date
+ENABLE_ZIP_DOWNLOAD = True  if os.getenv("IN_DOCKER", "") != "" else False
 
 # Test mail functionality by printing mails to console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
