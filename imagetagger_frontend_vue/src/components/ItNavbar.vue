@@ -1,24 +1,24 @@
 <template>
-    <v-app-bar color="primary" :app="true">
-        <!-- Main row -->
-        <template v-slot:default>
-            <router-link class="brand a-unstyle theme-white-fg" to="/">
-                <img class="brand__logo" src="../assets/bit-bot.svg" alt="Bit-Bots Logo">
-                <span class="brand__text">ImageTagger</span>
-            </router-link>
-            <v-spacer/>
+<v-app-bar color="primary" :app="true">
+    <!-- Main row -->
+    <template v-slot:default>
+        <router-link class="brand a-unstyle theme-white-fg" to="/">
+            <img class="brand__logo" src="../assets/bit-bot.svg" alt="Bit-Bots Logo">
+            <span class="brand__text">ImageTagger</span>
+        </router-link>
+        <v-spacer/>
 
-            <!-- Right side controls -->
-            <it-navbar-profile v-if="isLoggedIn"/>
-            <router-link v-else :to="{name: 'login'}">
-                <v-btn text color="white">Login</v-btn>
-            </router-link>
-        </template>
+        <!-- Right side controls -->
+        <it-navbar-profile v-if="isLoggedIn"/>
+        <router-link v-else :to="{name: 'login'}">
+            <v-btn text color="white">Login</v-btn>
+        </router-link>
+    </template>
 
-        <template v-slot:extension v-if="isLoadingBarVisible">
-            <!-- TODO Implement loading bar -->
-        </template>
-    </v-app-bar>
+    <template v-slot:extension v-if="isLoadingBarVisible">
+        <!-- TODO Implement loading bar -->
+    </template>
+</v-app-bar>
 </template>
 
 <script lang="ts">
@@ -42,17 +42,17 @@ export default class ItNavbar extends Vue {
 </script>
 
 <style scoped lang="scss">
-    .brand {
-        display: flex;
-        align-items: center;
+.brand {
+  display: flex;
+  align-items: center;
 
-        & .brand__logo {
-            height: 45px;
-            padding: 0 5px;
-        }
+  & .brand__logo {
+    height: 45px;
+    padding: 0 5px;
+  }
 
-        & .brand__text {
-            padding-left: 8px;
-        }
-    }
+  & .brand__text {
+    padding-left: 8px;
+  }
+}
 </style>

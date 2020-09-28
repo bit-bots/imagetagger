@@ -1,13 +1,13 @@
 <template>
-    <v-combobox type="solo"
-                hide-selected
-                multiple
-                small-chips
-                deletable-chips
-                flat
-                placeholder="Enter a new Tag name or select one"
-                v-model="selectedTags"
-                :items="availableTags"></v-combobox>
+<v-combobox type="solo"
+            hide-selected
+            multiple
+            small-chips
+            deletable-chips
+            flat
+            placeholder="Enter a new Tag name or select one"
+            v-model="selectedTags"
+            :items="availableTags"></v-combobox>
 </template>
 
 <script lang="ts">
@@ -31,6 +31,7 @@ export default class ItImagesetTags extends Vue {
             this.$store.dispatch("retrieveAvailableTags")
         })
     }
+
     get selectedTags(): string[] {
         return this.imageset.tags
     }

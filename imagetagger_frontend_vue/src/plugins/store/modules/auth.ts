@@ -45,19 +45,19 @@ export const authModule = {
             return VueInstance.$http.post("auth/", payload)
                 // success
                 .then(async response => {
-                    const token = (await response.json()).token
-                    context.commit("setAuthToken", token)
-                    return Promise.resolve()
-                },
+                        const token = (await response.json()).token
+                        context.commit("setAuthToken", token)
+                        return Promise.resolve()
+                    },
 
-                // error
-                response => {
-                    if (response.status == 400) {
-                        return Promise.reject("Invalid login credentials")
-                    } else {
-                        return Promise.reject("Unknown error during login")
-                    }
-                })
+                    // error
+                    response => {
+                        if (response.status == 400) {
+                            return Promise.reject("Invalid login credentials")
+                        } else {
+                            return Promise.reject("Unknown error during login")
+                        }
+                    })
         },
     }
 } as Module<AuthState, RootState>

@@ -35,7 +35,7 @@ export const imageModule = {
         }
     },
     actions: {
-        retrieveImage: function (context, payload: {id: number}) {
+        retrieveImage: function (context, payload: { id: number }) {
             return VueInstance.$resource(`images/${payload.id}`).get()
                 .then(response => response.json())
                 .then((response: Image) => {
@@ -45,7 +45,7 @@ export const imageModule = {
 
         // TODO implement image uploading
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        uploadImages: function (context, payload: {imageset: number, files: File[]}) {
+        uploadImages: function (context, payload: { imageset: number, files: File[] }) {
             throw new Error("Image uploading is not yet implemented")
         }
     },

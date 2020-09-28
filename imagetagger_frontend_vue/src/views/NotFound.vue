@@ -1,7 +1,7 @@
 <template>
-    <div class="not-found__root">
-        <h1>Page not found.</h1>
-    </div>
+<div class="not-found__root">
+    <h1>Page not found.</h1>
+</div>
 </template>
 
 <script lang="ts">

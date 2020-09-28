@@ -8,7 +8,6 @@ $_theme-colors: (
         "error": var(--v-error-base),
         "success": var(--v-success-base),
         "anchor": var(--v-anchor-base),
-
         "white": var(--v-white-base),
 );
 
@@ -19,10 +18,9 @@ $_theme-colors: (
 $all-colors: $_theme-colors;
 
 @function get-color($name) {
-  @if(map-has_key($all-colors, $name)) {
+  @if (map-has_key($all-colors, $name)) {
     @return map-get($all-colors, $name);
-  }
-  @else {
+  } @else {
     @warn "Unknown color #{$name}";
     @return red;
   }

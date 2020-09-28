@@ -30,7 +30,7 @@ export const userModule = {
         setMeUser: function (state, payload: MeUser) {
             state.me = payload
         },
-        setUser: function(state, payload: User) {
+        setUser: function (state, payload: User) {
             const index = state.users.findIndex(i => i.id === payload.id)
             if (index === -1)
                 state.users.push(payload)
@@ -50,7 +50,7 @@ export const userModule = {
                     context.commit("setMeUser", response)
                 })
         },
-        retrieveUser: function (context, payload: {id: number}) {
+        retrieveUser: function (context, payload: { id: number }) {
             return VueInstance.$resource(`users/${payload.id}`).get()
                 .then(response => response.json())
                 .then((response: User) => {

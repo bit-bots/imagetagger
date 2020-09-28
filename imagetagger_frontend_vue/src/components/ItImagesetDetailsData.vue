@@ -1,26 +1,28 @@
 <template> <!-- TODO Make editable by double clicking in table field -->
-    <v-simple-table class="small-first-td">
-        <tbody>
-        <tr>
-            <td>Name</td>
-            <td>{{ imageset.name }}</td>
-        </tr>
-        <tr>
-            <td>Description</td>
-            <td v-if="imageset.description">{{ imageset.description }}</td>
-            <td v-else class="font-italic font-weight-light">not set</td>
-        </tr>
-        <tr>
-            <td>Tags</td>
-            <td><it-imageset-tags :id="id"/></td>
-        </tr>
-        <tr>
-            <td>Location</td>
-            <td v-if="imageset.location">{{ imageset.location }}</td>
-            <td v-else class="font-italic font-weight-light">not set</td>
-        </tr>
-        </tbody>
-    </v-simple-table>
+<v-simple-table class="small-first-td">
+    <tbody>
+    <tr>
+        <td>Name</td>
+        <td>{{ imageset.name }}</td>
+    </tr>
+    <tr>
+        <td>Description</td>
+        <td v-if="imageset.description">{{ imageset.description }}</td>
+        <td v-else class="font-italic font-weight-light">not set</td>
+    </tr>
+    <tr>
+        <td>Tags</td>
+        <td>
+            <it-imageset-tags :id="id"/>
+        </td>
+    </tr>
+    <tr>
+        <td>Location</td>
+        <td v-if="imageset.location">{{ imageset.location }}</td>
+        <td v-else class="font-italic font-weight-light">not set</td>
+    </tr>
+    </tbody>
+</v-simple-table>
 </template>
 
 <script lang="ts">
@@ -45,7 +47,7 @@ export default class ItImagesetDetailsData extends Vue {
 </script>
 
 <style scoped lang="scss">
-    .small-first-td td:nth-of-type(1) {
-        width: 48px;
-    }
+.small-first-td td:nth-of-type(1) {
+  width: 48px;
+}
 </style>

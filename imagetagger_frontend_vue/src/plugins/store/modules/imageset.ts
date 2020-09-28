@@ -60,7 +60,7 @@ export const imagesetModule = {
             else
                 Vue.set(state.imagesets, index, payload)
         },
-        setAvailableTags:(state, payload: string[]) => {
+        setAvailableTags: (state, payload: string[]) => {
             state.availableTags = payload
         },
     },
@@ -92,7 +92,7 @@ export const imagesetModule = {
                         children.push(context.dispatch("retrieveUser", {id: response.creator}))
                     if (payload.sideloadImages)
                         children.push(...response.images.map(i => context.dispatch("retrieveImage", {id: i})))
-                        // TODO Add better API which does not require dozens of HTTP requests
+                    // TODO Add better API which does not require dozens of HTTP requests
 
                     return Promise.all(children)
                 })
@@ -105,7 +105,7 @@ export const imagesetModule = {
                 .then(response => context.commit("setImageset", response))
         },
 
-        retrieveAvailableTags: function(context) {
+        retrieveAvailableTags: function (context) {
             return VueInstance.$resource("image_set_tags").get()
                 .then(response => response.json())
                 .then(response => context.commit("setAvailableTags", response))

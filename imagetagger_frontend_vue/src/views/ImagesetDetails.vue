@@ -1,27 +1,29 @@
 <template>
-    <v-row>
-        <!-- Information -->
-        <v-col>
-            <v-card>
-                <v-card-title>Imageset Details</v-card-title>
-                <v-card-text><it-imageset-details-data :id="this.imageset.id"/></v-card-text>
-                <v-card-actions>
-                    <v-btn outlined disabled>Export</v-btn> <!-- TODO Implement tag exporting -->
-                    <v-btn outlined disabled>Import</v-btn> <!-- TODO Implement tag importing -->
-                </v-card-actions>
-            </v-card>
-        </v-col>
+<v-row>
+    <!-- Information -->
+    <v-col>
+        <v-card>
+            <v-card-title>Imageset Details</v-card-title>
+            <v-card-text>
+                <it-imageset-details-data :id="this.imageset.id"/>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn outlined disabled>Export</v-btn> <!-- TODO Implement tag exporting -->
+                <v-btn outlined disabled>Import</v-btn> <!-- TODO Implement tag importing -->
+            </v-card-actions>
+        </v-card>
+    </v-col>
 
-        <!-- Statistics -->
-        <v-col cols="3">
-            <v-card>
-                <v-card-title>Statistics</v-card-title>
-                <v-card-text>
-                    <v-alert color="warning">Not yet implemented</v-alert> <!-- TODO Implement Imageset statistics -->
-                </v-card-text>
-            </v-card>
-        </v-col>
-    </v-row>
+    <!-- Statistics -->
+    <v-col cols="3">
+        <v-card>
+            <v-card-title>Statistics</v-card-title>
+            <v-card-text>
+                <v-alert color="warning">Not yet implemented</v-alert> <!-- TODO Implement Imageset statistics -->
+            </v-card-text>
+        </v-card>
+    </v-col>
+</v-row>
 </template>
 
 <script lang="ts">

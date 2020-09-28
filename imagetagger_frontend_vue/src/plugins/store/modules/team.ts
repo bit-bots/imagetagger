@@ -33,21 +33,21 @@ export const teamModule = {
         }
     },
     actions: {
-        retrieveAllTeams: function(context) {
+        retrieveAllTeams: function (context) {
             return VueInstance.$resource("teams").get()
                 .then(response => response.json())
                 .then((response: Team[]) => {
                     context.commit("setTeams", response)
                 })
         },
-        retrieveTeam: function (context, payload: {id: number}) {
+        retrieveTeam: function (context, payload: { id: number }) {
             return VueInstance.$resource(`teams/${payload.id}`).get()
                 .then(response => response.json())
                 .then((response: Team) => {
                     context.commit("setTeam", response)
                 })
         },
-        createTeam: function (context, payload: {name: string, website?: string}) {
+        createTeam: function (context, payload: { name: string, website?: string }) {
             return VueInstance.$http.post("teams/", payload)
                 .then(response => response.json())
                 .then((response: Team) => {

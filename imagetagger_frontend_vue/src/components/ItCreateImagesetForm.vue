@@ -1,22 +1,22 @@
 <template>
-    <v-form @submit.prevent="onSubmit" ref="form">
-        <v-text-field label="Name" :rules="[required]" v-model="name"/>
-        <v-select label="Team" :items="teamNames" :rules="[required]" v-model="teamName"/>
-        <v-text-field label="Description (optional)" v-model="description"/>
-        <v-text-field label="Location (optional)" v-model="location"/>
+<v-form @submit.prevent="onSubmit" ref="form">
+    <v-text-field label="Name" :rules="[required]" v-model="name"/>
+    <v-select label="Team" :items="teamNames" :rules="[required]" v-model="teamName"/>
+    <v-text-field label="Description (optional)" v-model="description"/>
+    <v-text-field label="Location (optional)" v-model="location"/>
 
-        <div class="d-flex flex-row justify-space-between align-baseline">
-            <div class="d-flex flex-row">
-                <v-switch label="Public" class="mr-8" v-model="isPublic"/>
-                <v-switch label="Public Collaboration" v-model="isPublicCollaboration"/>
-            </div>
-            <div>
-                <slot>
-                    <v-btn color="primary" type="submit">Create Imageset</v-btn>
-                </slot>
-            </div>
+    <div class="d-flex flex-row justify-space-between align-baseline">
+        <div class="d-flex flex-row">
+            <v-switch label="Public" class="mr-8" v-model="isPublic"/>
+            <v-switch label="Public Collaboration" v-model="isPublicCollaboration"/>
         </div>
-    </v-form>
+        <div>
+            <slot>
+                <v-btn color="primary" type="submit">Create Imageset</v-btn>
+            </slot>
+        </div>
+    </div>
+</v-form>
 </template>
 
 <script lang="ts">
@@ -43,6 +43,7 @@ export default class ItCreateImagesetForm extends Vue {
     set teamName(value: string) {
         this.teamId = (this.$store.getters.myTeams as Team[]).find(t => t.name === value).id
     }
+
     get teamName(): string | null {
         if (this.teamId === -1)
             return null

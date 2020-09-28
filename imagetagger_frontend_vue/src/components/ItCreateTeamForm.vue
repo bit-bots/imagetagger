@@ -1,18 +1,18 @@
 <template>
-    <v-form @submit.prevent="onSubmit" ref="form">
-        <p>
-            When creating a new Team you wil automatically be added to that team and given all permissions.<br>
-            You can add members to your new Team later.
-        </p>
-        <v-text-field label="Team Name" :rules="[required]" v-model="name"/>
-        <div class="d-flex flex-row justify-end">
-            <div>
-                <slot>
-                    <v-btn color="primary" type="submit">Create Team</v-btn>
-                </slot>
-            </div>
+<v-form @submit.prevent="onSubmit" ref="form">
+    <p>
+        When creating a new Team you wil automatically be added to that team and given all permissions.<br>
+        You can add members to your new Team later.
+    </p>
+    <v-text-field label="Team Name" :rules="[required]" v-model="name"/>
+    <div class="d-flex flex-row justify-end">
+        <div>
+            <slot>
+                <v-btn color="primary" type="submit">Create Team</v-btn>
+            </slot>
         </div>
-    </v-form>
+    </div>
+</v-form>
 </template>
 
 <script lang="ts">

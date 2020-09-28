@@ -1,9 +1,9 @@
 <template>
-    <v-container>
-        <v-row align="center" justify="center">
-            <v-progress-circular indeterminate color="primary"/>
-        </v-row>
-    </v-container>
+<v-container>
+    <v-row align="center" justify="center">
+        <v-progress-circular indeterminate color="primary"/>
+    </v-row>
+</v-container>
 </template>
 
 <script lang="ts">

@@ -1,24 +1,24 @@
 <template>
-    <v-row>
-        <!-- Upload new Images -->
-        <v-col cols="5">
-            <v-card>
-                <v-card-title>Upload Images</v-card-title>
-                <v-card-text>
-                    <it-upload-images :imageset-id="+$route.params.id"/>
-                </v-card-text>
-            </v-card>
-        </v-col>
+<v-row>
+    <!-- Upload new Images -->
+    <v-col cols="5">
+        <v-card>
+            <v-card-title>Upload Images</v-card-title>
+            <v-card-text>
+                <it-upload-images :imageset-id="+$route.params.id"/>
+            </v-card-text>
+        </v-card>
+    </v-col>
 
-        <v-col cols="7">
-            <v-card>
-                <v-card-title>List of Images</v-card-title>
-                <v-card-text>
-                    <it-imageset-image-list :imageset-id="+$route.params.id"/>
-                </v-card-text>
-            </v-card>
-        </v-col>
-    </v-row>
+    <v-col cols="7">
+        <v-card>
+            <v-card-title>List of Images</v-card-title>
+            <v-card-text>
+                <it-imageset-image-list :imageset-id="+$route.params.id"/>
+            </v-card-text>
+        </v-card>
+    </v-col>
+</v-row>
 </template>
 
 <script lang="ts">

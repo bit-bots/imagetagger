@@ -1,27 +1,27 @@
 <template>
-    <div>
-        <v-menu>
-            <template v-slot:activator="{ on }">
-                <v-btn icon color="white" v-on="on"><i class="mdi mdi-account"/></v-btn>
-            </template>
+<div>
+    <v-menu>
+        <template v-slot:activator="{ on }">
+            <v-btn icon color="white" v-on="on"><i class="mdi mdi-account"/></v-btn>
+        </template>
 
-            <template v-slot:default>
-                <v-list>
-                    <v-list-item>
-                        <router-link :to="{name: 'profile'}">
-                            <v-list-item-action>Profile</v-list-item-action>
-                        </router-link>
-                    </v-list-item>
+        <template v-slot:default>
+            <v-list>
+                <v-list-item>
+                    <router-link :to="{name: 'profile'}">
+                        <v-list-item-action>Profile</v-list-item-action>
+                    </router-link>
+                </v-list-item>
 
-                    <v-list-item>
-                        <router-link :to="{name: 'logout', query: {next: currentUrl}}">
-                            <v-list-item-action>Logout</v-list-item-action>
-                        </router-link>
-                    </v-list-item>
-                </v-list>
-            </template>
-        </v-menu>
-    </div>
+                <v-list-item>
+                    <router-link :to="{name: 'logout', query: {next: currentUrl}}">
+                        <v-list-item-action>Logout</v-list-item-action>
+                    </router-link>
+                </v-list-item>
+            </v-list>
+        </template>
+    </v-menu>
+</div>
 </template>
 
 <script lang="ts">

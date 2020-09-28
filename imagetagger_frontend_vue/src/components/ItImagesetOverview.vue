@@ -1,17 +1,17 @@
 <template>
-    <div class="d-flex flex-row flex-nowrap align-center">
-        <div class="marker-container">
-            <v-icon class="theme-error-fg">mdi-alert-circle-outline</v-icon>
-        </div>
-
-        <div>
-            <h6 class="title">
-                <span class="theme-secondary-fg">{{ team.name }}</span>
-                <span class="theme-secondary-fg"> / </span>
-                <span class="theme-primary-fg">{{ imageset.name }}</span>
-            </h6>
-        </div>
+<div class="d-flex flex-row flex-nowrap align-center">
+    <div class="marker-container">
+        <v-icon class="theme-error-fg">mdi-alert-circle-outline</v-icon>
     </div>
+
+    <div>
+        <h6 class="title">
+            <span class="theme-secondary-fg">{{ team.name }}</span>
+            <span class="theme-secondary-fg"> / </span>
+            <span class="theme-primary-fg">{{ imageset.name }}</span>
+        </h6>
+    </div>
+</div>
 </template>
 
 <script lang="ts">
@@ -38,14 +38,14 @@ export default class ItImagesetOverview extends Vue {
 </script>
 
 <style scoped lang="scss">
-    .marker-container {
-        margin-right: 16px;
-        width: 24px;
-        text-align: center;
-    }
+.marker-container {
+  margin-right: 16px;
+  width: 24px;
+  text-align: center;
+}
 
-    h6 {
-        margin-top: 1em;
-        margin-bottom: 1em;
-    }
+h6 {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
 </style>

@@ -1,22 +1,22 @@
 <template>
-    <v-form @submit.prevent="onSubmit" ref="form">
-        <v-alert v-if="login_error !== ''" color="error">
-            {{ login_error }}
-        </v-alert>
+<v-form @submit.prevent="onSubmit" ref="form">
+    <v-alert v-if="login_error !== ''" color="error">
+        {{ login_error }}
+    </v-alert>
 
-        <v-text-field label="Username" name="username" prepend-icon="mdi-account" type="text"
-                      :rules="[validateUsername]" v-model="username"/>
-        <v-text-field label="Password" name="password" prepend-icon="mdi-lock" type="password"
-                      :rules="[validatePassword]" v-model="password"/>
-        <div class="d-flex flex-row align-baseline justify-space-between">
-            <v-switch label="Remember me" name="remember" v-model="remember_me"/>
-            <div>
-                <slot>
-                    <v-btn color="primary" type="submit">Login</v-btn>
-                </slot>
-            </div>
+    <v-text-field label="Username" name="username" prepend-icon="mdi-account" type="text"
+                  :rules="[validateUsername]" v-model="username"/>
+    <v-text-field label="Password" name="password" prepend-icon="mdi-lock" type="password"
+                  :rules="[validatePassword]" v-model="password"/>
+    <div class="d-flex flex-row align-baseline justify-space-between">
+        <v-switch label="Remember me" name="remember" v-model="remember_me"/>
+        <div>
+            <slot>
+                <v-btn color="primary" type="submit">Login</v-btn>
+            </slot>
         </div>
-    </v-form>
+    </div>
+</v-form>
 </template>
 
 <script lang="ts">
@@ -31,7 +31,7 @@ export default class ItLoginForm extends Vue {
     remember_me = true     // TODO implement remember_me for login
     login_error = ""
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSubmit(e: never): void {
         if ((this.$refs.form as unknown).validate()) {
             this.$store.dispatch("login", {

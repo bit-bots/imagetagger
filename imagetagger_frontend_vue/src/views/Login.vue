@@ -1,18 +1,18 @@
 <template>
-    <v-container>
-        <v-row align="center" justify="center">
-            <v-col cols="12" md="4" sm="8">
-                <v-card elevation="12">
-                    <v-toolbar color="primary" flat>
-                        <v-toolbar-title class="theme-white-fg">Login</v-toolbar-title>
-                    </v-toolbar>
-                    <v-card-text>
-                        <it-login-form @loggedIn="onLoggedIn"/>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-        </v-row>
-    </v-container>
+<v-container>
+    <v-row align="center" justify="center">
+        <v-col cols="12" md="4" sm="8">
+            <v-card elevation="12">
+                <v-toolbar color="primary" flat>
+                    <v-toolbar-title class="theme-white-fg">Login</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                    <it-login-form @loggedIn="onLoggedIn"/>
+                </v-card-text>
+            </v-card>
+        </v-col>
+    </v-row>
+</v-container>
 </template>
 
 <script lang="ts">
