@@ -23,6 +23,7 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
+import {VFormType} from "@/plugins/vuetify/extraTypes";
 
 @Component({})
 export default class ItLoginForm extends Vue {
@@ -33,7 +34,7 @@ export default class ItLoginForm extends Vue {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSubmit(e: never): void {
-        if ((this.$refs.form as unknown).validate()) {
+        if ((this.$refs.form as VFormType).validate()) {
             this.$store.dispatch("login", {
                 username: this.username,
                 password: this.password

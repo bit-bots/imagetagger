@@ -100,7 +100,7 @@ import Component from "vue-class-component"
 import "vue-class-component/hooks"
 import ItLoginForm from "@/components/ItLoginForm.vue"
 import {Team} from "@/plugins/store/modules/team"
-import {RawLocation, Route} from "vue-router"
+import {NavigationGuard, RawLocation} from "vue-router"
 import {VueInstance} from "@/main"
 import ItCreateTeamForm from "@/components/ItCreateTeamForm.vue"
 import ItCreateImagesetForm from "@/components/ItCreateImagesetForm.vue"
@@ -110,7 +110,7 @@ const STEP_LOGIN = 2
 const STEP_CREATE_TEAM = 3
 const STEP_CREATE_IMAGESET = 4
 
-const guardRoute = function (to: Route, fromRoute: Route, next: () => void) {
+const guardRoute: NavigationGuard = function (to, fromRoute, next) {
     const nextStep: number = +to.params.step
     if (nextStep > STEP_LOGIN && !VueInstance.$store.state.auth.loggedIn)
         next({name: "welcomeNewImagetagger", params: {step: STEP_LOGIN.toString()}} as RawLocation)

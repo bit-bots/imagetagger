@@ -25,6 +25,7 @@ import Component from "vue-class-component"
 import "vue-class-component/hooks"
 import {required} from "@/plugins/vuetify/formValidators"
 import {Team} from "@/plugins/store/modules/team"
+import {VFormType} from "@/plugins/vuetify/extraTypes";
 
 @Component({})
 export default class ItCreateImagesetForm extends Vue {
@@ -52,7 +53,7 @@ export default class ItCreateImagesetForm extends Vue {
     }
 
     onSubmit(): void {
-        if ((this.$refs.form as unknown).validate()) {
+        if ((this.$refs.form as VFormType).validate()) {
             this.$store.dispatch("createImageset", {
                 name: this.name,
                 description: this.description,

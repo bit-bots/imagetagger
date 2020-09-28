@@ -25,7 +25,7 @@
 import Vue from "vue"
 import Component from "vue-class-component"
 import "vue-class-component/hooks"
-import {Route} from "vue-router/types/router"
+import {NavigationGuard, Route} from "vue-router/types/router"
 import {Imageset} from "@/plugins/store/modules/imageset"
 import {VueInstance} from "@/main"
 import ItImagesetOverview from "@/components/ItImagesetOverview.vue"
@@ -34,11 +34,11 @@ import ItImagesetOverview from "@/components/ItImagesetOverview.vue"
 /**
  * Resolve network dependencies of all included components
  */
-const resolve = function (to: Route, fromRoute: Route, next: () => void): void {
+const resolve: NavigationGuard = function (to: Route, fromRoute: Route, next) {
     Promise.all([
         VueInstance.$store.dispatch("retrieveAllImagesets"),
         VueInstance.$store.dispatch("retrieveAllTeams")
-    ]).catch(console.error).finally(next())
+    ]).catch(console.error).finally(next)
 }
 
 @Component({
