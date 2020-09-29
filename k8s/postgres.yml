@@ -1,0 +1,71 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: imagetagger-postgres
+  labels:
+    tier: database
+spec:
+  selector:
+    tier: database
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: imagetagger-postgres
+  labels:
+    tier: database
+spec:
+  selector:
+    matchLabels:
+      tier: database
+  template:
+    metadata:
+      labels:
+        tier: database
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: imagetagger-database
+      containers:
+        - name: main
+          image: docker.io/postgres:12
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: imagetagger-postgres
+          env:
+            # postgres recommends putting the actual data in a sub-folder if it is mounted from external sources
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          ports:
+            - name: postgres
+              containerPort: 5432
+          livenessProbe:
+            tcpSocket:
+              port: postgres
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: imagetagger-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi       # should be enough even for large instances
+  selector:
+    matchLabels:
+      tier: database
