@@ -3,7 +3,8 @@ FROM docker.io/debian:buster-slim
 # install imagetagger system dependencies
 RUN apt-get update && \
 	apt-get install --no-install-recommends -y g++ wget uwsgi-plugin-python3 python3 python3-pip node-uglify make git \
-	    python3-psycopg2 python3-ldap3 gettext gcc python3-dev python3-setuptools libldap2-dev libsasl2-dev nginx
+	    python3-psycopg2 python3-ldap3 python3-pkg-resources gettext gcc python3-dev python3-setuptools libldap2-dev \
+	    libsasl2-dev nginx
 
 # add requirements file
 WORKDIR /app/src
