@@ -39,10 +39,12 @@ class Command(BaseCommand):
             return
 
         tmp_zip_path = imageset.tmp_zip_path()
+        if not tmp().exists(path.dirname(tmp_zip_path)):
+            tmp().makedirs(path.dirname(tmp_zip_path))
         with tmp().open(tmp_zip_path, 'wb') as zip_file:
             with WriteZipFS(zip_file) as zip_fs:
                 for image in imageset.images.all():
-                    root().download(image.path(), zip_fs.open(image.name, 'wb'))
+                    root().download(image.path(), zip_fs.openbin(image.name, 'w'))
         with tmp().open(tmp_zip_path, 'rb') as zip_file:
             root().upload(imageset.zip_path(), zip_file)
         tmp().remove(tmp_zip_path)
