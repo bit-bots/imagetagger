@@ -13,15 +13,13 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 from django.contrib.messages import constants as messages
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+FS_URL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+TMP_FS_URL = 'temp://imagetagger'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -133,11 +131,15 @@ MESSAGE_TAGS = {
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'static/'
 
 EXPORT_SEPARATOR = '|'
-DATA_PATH = os.path.join(BASE_DIR, 'data')
 
-IMAGE_PATH = os.path.join(BASE_DIR, 'images')  # the absolute path to the folder with the imagesets
+IMAGE_PATH = 'images'  # the path to the folder with the imagesets relative to the filesystem root (see FS_URL)
+TMP_IMAGE_PATH = 'images'  # the path to use for temporary image files relative to the temp filesystem (see TMP_FS_URL)
+TOOLS_PATH = 'tools'  # the path to the folder with the tools relative to the filesystem root (see FS_URL)
+TOOLS_ENABLED = True
+TOOL_UPLOAD_NOTICE = ''
 
 # filename extension of accepted imagefiles
 IMAGE_EXTENSION = {

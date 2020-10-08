@@ -1,5 +1,5 @@
 from .settings_base import *
-import os
+from fs import path
 
 # Settings for Imagetagger
 # Copy this file as settings.py and customise as necessary
@@ -42,9 +42,9 @@ LANGUAGE_CODE = 'en-us'
 STATIC_ROOT = '/var/www/imagetagger'
 
 # EXPORT_SEPARATOR = '|'
-# DATA_PATH = os.path.join(BASE_DIR, 'data')
 
-# IMAGE_PATH = os.path.join(BASE_DIR, 'images')  # the absolute path to the folder with the imagesets
+# IMAGE_PATH = 'images'  # the path to the folder with the imagesets relative to the filesystem root (see FS_URL)
+# TMP_IMAGE_PATH = 'images'  # the path to use for temporary image files relative to the temp filesystem (see TMP_FS_URL)
 
 # filename extension of accepted imagefiles
 # IMAGE_EXTENSION = {
@@ -78,9 +78,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TOOLS_ENABLED = True
 TOOL_UPLOAD_NOTICE = ''
 
-DATA_PATH = '/app/data'
-IMAGE_PATH = DATA_PATH + '/images'
-TOOLS_PATH = DATA_PATH + '/tools'
+IMAGE_PATH = 'images'
+TOOLS_PATH = 'tools'
 
 # Use ldap login
 #

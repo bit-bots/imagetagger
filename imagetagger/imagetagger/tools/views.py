@@ -7,10 +7,11 @@ from django.db import transaction
 from django.db.models import Q
 from django.template.response import TemplateResponse
 from django.contrib import messages
+from fs.errors import ResourceNotFound
 from .models import Tool
 from .forms import ToolUploadForm, FileUploadForm
 from imagetagger.users.models import Team
-import os
+from imagetagger.base.filesystem import root
 
 
 def tools_enabled(in_function):
@@ -58,9 +59,8 @@ def create_tool(request):
                 tool.save()
             tool.filename = '{}_{}'.format(tool.id,
                                            request.FILES['file'].name)
-            if not os.path.isdir(settings.TOOLS_PATH):
-                os.makedirs(settings.TOOLS_PATH)
-            with open(os.path.join(settings.TOOLS_PATH, tool.filename), 'wb+') as f:
+            tools_dir = root().makedirs(settings.TOOLS_PATH)
+            with tools_dir.open(tool.filename, 'wb+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
             messages.success(request, 'The tool was successfully uploaded')
@@ -93,11 +93,11 @@ def edit_tool(request, tool_id):
         file_form = FileUploadForm(request.POST, request.FILES)
         if file_form.is_valid() and 'file' in request.FILES.keys():
             changed_file = True
-            old_file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
+            tools_dir = root().opendir(settings.TOOLS_PATH)
+            old_name = tool.filename
             tool.filename = request.FILES['file'].name
-            file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
-            os.remove(old_file_path)
-            with open(file_path, 'wb+') as f:
+            tools_dir.remove(old_name)
+            with tools_dir.open(tool.filename, 'wb+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
         tool.save()
@@ -123,9 +123,11 @@ def delete_tool(request, tool_id):
     if request.method == 'POST':
         tool = get_object_or_404(Tool, id=tool_id)
         if tool.has_perm('delete_tool', request.user):
-            file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            tools_dir = root().opendir(settings.TOOLS_PATH)
+            try:
+                tools_dir.remove(tool.filename)
+            except ResourceNotFound:
+                pass
             tool.delete()
         else:
             messages.error(request, 'You do not have the permission to delete the tool!')
@@ -137,9 +139,9 @@ def delete_tool(request, tool_id):
 def download_tool(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
     if tool.has_perm('download_tool', request.user):
-        file_path = os.path.join(settings.TOOLS_PATH, tool.filename)
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as fh:
+        tools_dir = root().opendir(settings.TOOLS_PATH)
+        if tools_dir.isfile(tool.filename):
+            with tools_dir.open(tool.filename, 'rb') as fh:
                 response = HttpResponse(fh.read(), content_type="application")
                 response['Content-Disposition'] = 'attachment; filename=' + tool.filename
                 return response
