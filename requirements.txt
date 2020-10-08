@@ -9,7 +9,7 @@ confusable-homoglyphs==3.2.0  # via django-registration
 django-friendly-tag-loader==1.3.1  # via -r requirements.in
 django-registration==3.1  # via -r requirements.in
 django-widget-tweaks==1.4.8  # via -r requirements.in
-django==2.2.12            # via -r requirements.in, django-registration, djangorestframework
+django==2.2.13            # via -r requirements.in, django-registration, djangorestframework
 djangorestframework==3.11.0  # via -r requirements.in
 fasteners==0.15           # via -r requirements.in
 fs==2.4.11                # via -r requirements.in
