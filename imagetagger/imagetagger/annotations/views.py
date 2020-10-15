@@ -234,11 +234,11 @@ def export_format(export_format_name, imageset):
 
     placeholders_filename = {
         '%%imageset': imageset.name,
-        '%%team': imageset.team.name,
+        '%%team': imageset.team.name if imageset.team else 'DeletedTeam',
         '%%setlocation': imageset.location,
     }
     for key, value in placeholders_filename.items():
-                        file_name = file_name.replace(key, str(value))
+        file_name = file_name.replace(key, str(value))
 
     min_verifications = export_format.min_verifications
     annotation_counter = 0
@@ -422,7 +422,7 @@ def export_format(export_format_name, imageset):
         '%%content': formatted_content,
         '%%imageset': imageset.name,
         '%%setdescription': imageset.description,
-        '%%team': imageset.team.name,
+        '%%team': imageset.team.name if imageset.team else 'DeletedTeam',
         '%%setlocation': imageset.location,
     }
     for key, value in placeholders_base.items():
