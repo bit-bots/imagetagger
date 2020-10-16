@@ -476,7 +476,7 @@ def create_imageset(request):
 
                     # create a folder to store the images of the set
                     folder_path = form.instance.root_path()
-                    root().makedirs(folder_path)
+                    root().makedirs(folder_path, recreate=True)
                     # TODO rfrigg: Check if necessary
                     # shutil.chown(folder_path, group=settings.UPLOAD_FS_GROUP)
 
