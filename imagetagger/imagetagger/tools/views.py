@@ -59,7 +59,7 @@ def create_tool(request):
                 tool.save()
             tool.filename = '{}_{}'.format(tool.id,
                                            request.FILES['file'].name)
-            tools_dir = root().makedirs(settings.TOOLS_PATH)
+            tools_dir = root().makedirs(settings.TOOLS_PATH, recreate=True)
             with tools_dir.open(tool.filename, 'wb+') as f:
                 for chunk in request.FILES['file']:
                     f.write(chunk)
