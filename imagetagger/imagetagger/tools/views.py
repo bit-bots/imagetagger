@@ -140,7 +140,7 @@ def download_tool(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
     if tool.has_perm('download_tool', request.user):
         tools_dir = root().opendir(settings.TOOLS_PATH)
-        if tools_dir.isfile(tool.filename):
+        if tool.filename and tools_dir.isfile(tool.filename):
             with tools_dir.open(tool.filename, 'rb') as fh:
                 response = HttpResponse(fh.read(), content_type="application")
                 response['Content-Disposition'] = 'attachment; filename=' + tool.filename
