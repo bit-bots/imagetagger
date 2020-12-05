@@ -17,6 +17,19 @@ class AnnotationTypeSerializer(ModelSerializer):
         )
 
 
+class AnnotationListSerializer(ModelSerializer):
+    class Meta:
+        model = Annotation
+        fields = (
+            'id',
+            'annotation_type',
+            'vector',
+            'image',
+        )
+
+    image = ImageSerializer(read_only=True)
+
+
 class AnnotationSerializer(ModelSerializer):
     verified_by_user = SerializerMethodField('is_verified_by_user')
 

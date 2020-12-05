@@ -89,6 +89,23 @@ function calculateImageScale() {
     })
   }
 
+  function loadSingleAnnotation(id, fromHistory) {
+    let params = {
+      annotation_id: id,
+    };
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadone/?' + $.param(params), {
+      type: 'GET',
+      headers: gHeaders,
+      dataType: 'json',
+      success: function (data) {
+        continueLoadAnnotationView(data.annotation, fromHistory);
+      },
+      error: function () {
+        displayFeedback($('#feedback_connection_error'))
+      }
+    })
+  }
+
   /**
    * Scroll image list to make current image visible.
    */
@@ -320,15 +337,19 @@ function calculateImageScale() {
    */
   function loadAnnotationView(annotationId, fromHistory) {
     gAnnotationId = annotationId;
-    let annotation = gAnnotationList.filter(function(e) {
+    let annotationNotInList = gAnnotationList.filter(function (e) {
       return e.id === annotationId;
-    })[0];
-    if (!annotation) {
+    }).length === 0;
+    if (annotationNotInList) {
       console.log(
         'skipping request to load annotation ' + annotationId +
         ' as it is not in current annotation list.');
       return;
     }
+    loadSingleAnnotation(annotationId, fromHistory);
+  }
+
+  function continueLoadAnnotationView(annotation, fromHistory) {
     if (annotation.verified_by_user) {
       displayFeedback($('#feedback_already_verified'));
     }
@@ -344,17 +365,17 @@ function calculateImageScale() {
     loading.removeClass('hidden');
 
     displayImage(imageId);
-    scrollImageList(annotationId);
+    scrollImageList(annotation.id);
 
     $('.annotation_link').removeClass('active');
-    var link = $('#annotation_link_' + annotationId);
+    var link = $('#annotation_link_' + annotation.id);
     link.addClass('active');
     $('#active_image_name').text(link.text());
 
     if (fromHistory !== true) {
       history.pushState({
         imageId: imageId
-      }, document.title, '/annotations/' + annotationId + '/verify/');
+      }, document.title, '/annotations/' + annotation.id + '/verify/');
     }
     $('#annotation-type-title').html('<b>Annotation type: ' + annotation.annotation_type.name + '</b>');
     if (annotation.concealed) {
