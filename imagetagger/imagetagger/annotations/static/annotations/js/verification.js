@@ -24,6 +24,7 @@ function calculateImageScale() {
   let gHeaders;
   let gHideFeedbackTimeout;
   let gAnnotationList;
+  let gAnnotationTypes;
   let gImageId;
   let gImageSet;
   let gImageSetId;
@@ -81,7 +82,9 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function (data) {
-        displayAnnotationTypeOptions(data.annotation_types);
+        gAnnotationTypes = data.annotation_types;
+        displayAnnotationTypeOptions();
+        loadFilteredAnnotationList(gImageSetId);
       },
       error: function () {
         displayFeedback($('#feedback_connection_error'))
@@ -241,7 +244,10 @@ function calculateImageScale() {
           annotation_text_array.push("'x" + i + "': " + annotation.vector["x" + i] +
               ", 'y" + i + "': " + annotation.vector["y" + i]);
         }
-        link.text(shorten("{" + annotation_text_array.join(', ') + "}"));
+        let annotation_type = gAnnotationTypes.filter(function (e) {
+          return e.id === annotation.annotation_type;
+        })[0].name;
+        link.text(shorten(annotation_type + " {" + annotation_text_array.join(', ') + "}"));
       }
 
       link.data('annotationid', annotation.id);
@@ -273,10 +279,10 @@ function calculateImageScale() {
     }
   }
 
-  function displayAnnotationTypeOptions(annotationTypeList) {
+  function displayAnnotationTypeOptions() {
     // TODO: empty the options?
     let annotationTypeSelect = $('#annotation_type_select');
-    $.each(annotationTypeList, function (key, annotationType) {
+    $.each(gAnnotationTypes, function (key, annotationType) {
       annotationTypeSelect.append($('<option/>', {
         name: annotationType.name,
         value: annotationType.id,
@@ -573,7 +579,6 @@ function calculateImageScale() {
     $('#blurred_label').hide();
     $('#concealed_label').hide();
     loadAnnotationTypeList(gImageSetId);
-    loadFilteredAnnotationList(gImageSetId);
 
     $('#filter_update_btn').on('click', handleFilterSwitchChange);
 
