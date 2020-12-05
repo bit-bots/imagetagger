@@ -18,7 +18,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_2
 from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
-from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer, ExportFormatInfoSerializer
+from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer, AnnotationListSerializer, ExportFormatInfoSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
@@ -722,24 +722,22 @@ def load_filtered_set_annotations(request) -> Response:
         raise ParseError
 
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
-    images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.filter(image__in=images,
-                                            annotation_type__active=True).select_related()
-    user_verifications = Verification.objects.filter(user=request.user, annotation__in=annotations)
-    if annotation_type_id > -1:
-        annotations = annotations.filter(annotation_type__id=annotation_type_id)
-    if verified:
-        annotations = [annotation for annotation in annotations if not user_verifications.filter(annotation=annotation).exists()]
-
     if not imageset.has_perm('read', request.user):
         return Response({
             'detail': 'permission for reading this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
 
-    serializer = AnnotationSerializer(
-        sorted(list(annotations), key=lambda annotation: annotation.image.id),
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.filter(image__in=images,
+                                            annotation_type__active=True).order_by('image_id').select_related()
+    if annotation_type_id > -1:
+        annotations = annotations.filter(annotation_type__id=annotation_type_id)
+    if verified:
+        annotations = annotations.filter(~Q(verified_by=request.user))
+
+    serializer = AnnotationListSerializer(
+        list(annotations),
         many=True,
-        context={'request': request},
     )
     return Response({
         'annotations': serializer.data,
