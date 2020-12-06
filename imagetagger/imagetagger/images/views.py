@@ -415,7 +415,7 @@ def view_imageset(request, image_set_id):
     all_annotation_types = AnnotationType.objects.filter(active=True)
     annotations = Annotation.objects.filter(
         image__in=images,
-        annotation_type__active=True).order_by("id")
+        annotation_type__active=True).order_by('image__name', 'id')
     annotation_types = AnnotationType.objects.filter(annotation__image__image_set=imageset, active=True).distinct()\
         .annotate(count=Count('annotation'),
                   in_image_count=Count('annotation', filter=Q(annotation__vector__isnull=False)),
