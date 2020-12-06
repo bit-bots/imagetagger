@@ -1,6 +1,6 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, CharField
 
-from .models import Annotation, AnnotationType, Verification
+from .models import Annotation, AnnotationType, Verification, ExportFormat
 from imagetagger.images.serializers import ImageSerializer
 
 
@@ -39,3 +39,15 @@ class AnnotationSerializer(ModelSerializer):
 
     annotation_type = AnnotationTypeSerializer(read_only=True)
     image = ImageSerializer(read_only=True)
+
+
+class ExportFormatInfoSerializer(ModelSerializer):
+    team_name = CharField(source='team.name')
+
+    class Meta:
+        model = ExportFormat
+        fields = (
+            'name',
+            'id',
+            'team_name',
+        )

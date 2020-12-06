@@ -18,7 +18,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_2
 from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
-from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer
+from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer, ExportFormatInfoSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
@@ -921,3 +921,54 @@ def api_blurred_concealed_annotation(request) -> Response:
     return Response({
         'detail': 'you updated the last annotation',
     }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['POST'])
+def api_create_export(request) -> Response:
+    try:
+        image_set_id = int(request.data['imageset_id'])
+        export_format_id = int(request.data['export_format_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    imageset = get_object_or_404(ImageSet, id=image_set_id)
+    if imageset.has_perm('create_export', request.user):
+        format = get_object_or_404(ExportFormat, id=export_format_id)
+        export_text, annotation_count, export_filename = export_format(format, imageset)
+
+        export = Export(image_set=imageset,
+                        user=request.user,
+                        annotation_count=annotation_count,
+                        export_text=export_text,
+                        format=format)
+        export.save()
+        export.filename = export_filename.replace('%%exportid', str(export.id))
+        export.save()
+
+        return Response({
+                    'detail': 'export created successfully.',
+                    'export_id': export.id,
+                }, status=HTTP_201_CREATED)
+    return Response({
+                'detail': 'permission for exporting annotations in this image set missing.',
+            }, status=HTTP_403_FORBIDDEN)
+
+
+@login_required
+@api_view(['GET'])
+def api_get_export_formats(request) -> Response:
+    user_teams = Team.objects.filter(members=request.user)
+    export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
+    serializer = ExportFormatInfoSerializer(
+        export_formats,
+        many=True,
+        context={
+            'request': request,
+        }
+    )
+    return Response({
+                'detail': 'your user has access to the following export formats',
+                'export_formats': serializer.data,
+            }, status=HTTP_200_OK)
+
