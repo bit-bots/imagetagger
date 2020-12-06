@@ -413,6 +413,13 @@ function calculateImageScale() {
     if (tool) {
       tool.clear();
     }
+    // wait for image
+    let image = $('#image')[0];
+    if (!(image.complete && image.naturalHeight !== 0)) {
+      window.setTimeout(() => drawAnnotations(annotations, current), 50);
+      return;
+    }
+    // image is loaded
     let annotation = annotations[0];
     if (!tool || tool.annotationTypeId !== annotation.annotation_type.id ||
       (tool.vector_type === 5 && tool.node_count !== annotation.annotation_type.node_count)) {
