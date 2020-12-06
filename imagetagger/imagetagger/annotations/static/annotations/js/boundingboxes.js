@@ -18,6 +18,18 @@ class BoundingBoxes {
     this.clear();
     calculateImageScale();
     color = color || globals.stdColor;
+    let colors = [];
+    if (color.constructor === Array) {
+      colors = color;
+      if (color.length != annotations.length) {
+        console.log('wrong number of colors');
+        return;
+      }
+    } else {
+      for (let i = 0; i < annotations.length; i++) {
+        colors.push(color);
+      }
+    }
 
     if (annotations.length === 0 || !globals.drawAnnotations) {
       return;
@@ -29,6 +41,7 @@ class BoundingBoxes {
     for (var a in annotations) {
 
       var annotation = annotations[a];
+      let color = colors[a];
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }

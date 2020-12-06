@@ -28,6 +28,7 @@ function calculateImageScale() {
   let gImageId;
   let gImageSet;
   let gImageSetId;
+  let gCurrentAnnotations;
   let gImageCache = {};
   let gAnnotationId;  // the selected annotation
   let tool;
@@ -92,16 +93,18 @@ function calculateImageScale() {
     })
   }
 
-  function loadSingleAnnotation(id, fromHistory) {
+  function loadImageAnnotations(annotation, fromHistory) {
     let params = {
-      annotation_id: id,
+      image_id: annotation.image.id,
+      annotation_type_id: annotation.annotation_type,
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadone/?' + $.param(params), {
+    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadmultiple/?' + $.param(params), {
       type: 'GET',
       headers: gHeaders,
       dataType: 'json',
       success: function (data) {
-        continueLoadAnnotationView(data.annotation, fromHistory);
+        gCurrentAnnotations = data.annotation;
+        continueLoadAnnotationView(annotation.id, fromHistory);
       },
       error: function () {
         displayFeedback($('#feedback_connection_error'))
@@ -130,7 +133,7 @@ function calculateImageScale() {
     if (state) {
       strState = 'accept';
     }
-    let annotation = gAnnotationList.filter(function(e) {
+    let annotation = gCurrentAnnotations.filter(function(e) {
       return e.id === id;
     })[0];
     annotation.verified_by_user = true;
@@ -324,11 +327,9 @@ function calculateImageScale() {
     annotationIndex += offset;
     if (annotationIndex < 0) {
       displayFeedback($('#feedback_last_annotation'));
-      drawAnnotation(gAnnotationList[0]);
       return;
     } else if (annotationIndex >= annotationIndexList.length) {
       displayFeedback($('#feedback_last_annotation'));
-      drawAnnotation(gAnnotationList[gAnnotationList.length - 1]);
       return;
     }
 
@@ -343,19 +344,22 @@ function calculateImageScale() {
    */
   function loadAnnotationView(annotationId, fromHistory) {
     gAnnotationId = annotationId;
-    let annotationNotInList = gAnnotationList.filter(function (e) {
+    let annotation = gAnnotationList.filter(function (e) {
       return e.id === annotationId;
-    }).length === 0;
-    if (annotationNotInList) {
+    })[0];
+    if (!annotation) {
       console.log(
         'skipping request to load annotation ' + annotationId +
         ' as it is not in current annotation list.');
       return;
     }
-    loadSingleAnnotation(annotationId, fromHistory);
+    loadImageAnnotations(annotation, fromHistory);
   }
 
-  function continueLoadAnnotationView(annotation, fromHistory) {
+  function continueLoadAnnotationView(annotation_id, fromHistory) {
+    let annotation = gCurrentAnnotations.filter(function (e) {
+      return e.id === annotation_id;
+    })[0];
     if (annotation.verified_by_user) {
       displayFeedback($('#feedback_already_verified'));
     }
@@ -396,18 +400,20 @@ function calculateImageScale() {
       $('#blurred_label').hide()
     }
     $('#blurred').prop('checked', annotation.blurred);
-    drawAnnotation(annotation);
+    drawAnnotations(gCurrentAnnotations, annotation.id);
   }
 
   /**
-   * Draw the annotation that should be verified
+   * Draw the annotations that should be verified
    *
-   * @param annotation
+   * @param annotations list of all annotation to draw
+   * @param current id of the current annotation
    */
-  function drawAnnotation(annotation) {
+  function drawAnnotations(annotations, current) {
     if (tool) {
       tool.clear();
     }
+    let annotation = annotations[0];
     if (!tool || tool.annotationTypeId !== annotation.annotation_type.id ||
       (tool.vector_type === 5 && tool.node_count !== annotation.annotation_type.node_count)) {
       switch (annotation.annotation_type.vector_type) {
@@ -425,18 +431,25 @@ function calculateImageScale() {
           break;
       }
     }
-    let color = '#FF0000';
-    if (annotation.concealed) {
-      if (annotation.blurred) {
-        color = '#5CB85C';
-      } else {
-        color = '#F0AD4E';
+    colors = [];
+    for (let annotation of annotations) {
+      let color = '#FF0000';
+      if (annotation.concealed) {
+        if (annotation.blurred) {
+          color = '#5CB85C';
+        } else {
+          color = '#F0AD4E';
+        }
       }
+      else if (annotation.blurred) {
+        color = '#5BC0DE'
+      }
+      if (annotation.id !== current) {
+        color += '60'; // some transparency
+      }
+      colors.push(color);
     }
-    else if (annotation.blurred) {
-      color = '#5BC0DE'
-    }
-    tool.drawExistingAnnotations([annotation], color);
+    tool.drawExistingAnnotations(annotations, colors);
   }
 
   /**
@@ -515,7 +528,7 @@ function calculateImageScale() {
   }
 
   function handleConcealedChange() {
-    let annotation = gAnnotationList.filter(function(e) {
+    let annotation = gCurrentAnnotations.filter(function(e) {
       return e.id === gAnnotationId;
     })[0];
     annotation.concealed = $('#concealed').is(':checked');
@@ -524,12 +537,12 @@ function calculateImageScale() {
     } else {
       $('#concealed_label').hide()
     }
-    drawAnnotation(annotation);
+    drawAnnotations(gCurrentAnnotations, annotation.id);
     apiBlurredConcealed();
   }
 
   function handleBlurredChange() {
-    let annotation = gAnnotationList.filter(function(e) {
+    let annotation = gCurrentAnnotations.filter(function(e) {
       return e.id === gAnnotationId;
     })[0];
     annotation.blurred = $('#blurred').is(':checked');
@@ -538,12 +551,12 @@ function calculateImageScale() {
     } else {
       $('#blurred_label').hide()
     }
-    drawAnnotation(annotation);
+    drawAnnotations(gCurrentAnnotations, annotation.id);
     apiBlurredConcealed();
   }
 
   function apiBlurredConcealed() {
-    let annotation = gAnnotationList.filter(function(e) {
+    let annotation = gCurrentAnnotations.filter(function(e) {
       return e.id === gAnnotationId;
     })[0];
     let data = {
