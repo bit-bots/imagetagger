@@ -198,7 +198,7 @@ function calculateImageScale() {
       'src', '/images/image/' + imageId + '/');
   }
 
-    /**
+  /**
    * Preload next and previous images to cache.
    */
   function preloadImages() {
@@ -239,9 +239,7 @@ function calculateImageScale() {
       }
       if (annotation.vector === null) {
         link.text("not in image")
-      }
-      else
-      {
+      } else {
         let annotation_text_array = [];
         for (let i = 1; i <= Object.keys(annotation.vector).length / 2; i++) {
           annotation_text_array.push("'x" + i + "': " + annotation.vector["x" + i] +
@@ -256,8 +254,7 @@ function calculateImageScale() {
       link.data('annotationid', annotation.id);
       link.click(function(event) {
         event.preventDefault();
-        gAnnotationId = $(this).data('annotationid');
-        loadAnnotationView(gAnnotationId);
+        loadAnnotationView($(this).data('annotationid'));
       });
 
       result.append(link);
@@ -339,7 +336,7 @@ function calculateImageScale() {
   /**
    * Load the annotation view for another image.
    *
-   * @param imageId
+   * @param annotationId
    * @param fromHistory
    */
   function loadAnnotationView(annotationId, fromHistory) {
@@ -422,7 +419,7 @@ function calculateImageScale() {
     // image is loaded
     let annotation = annotations[0];
     if (!tool || tool.annotationTypeId !== annotation.annotation_type.id ||
-      (tool.vector_type === 5 && tool.node_count !== annotation.annotation_type.node_count)) {
+        (tool.vector_type === 5 && tool.node_count !== annotation.annotation_type.node_count)) {
       switch (annotation.annotation_type.vector_type) {
         case 1: // Boundingbox
           tool = new BoundingBoxes(annotation.annotation_type.id, true);
@@ -434,7 +431,7 @@ function calculateImageScale() {
         case 5: // Polygon
           $('#image_canvas').removeClass('hidden').attr('width', $('#image').width()).attr('height', $('#image').height());
           tool = new Canvas($('#image_canvas'), annotation.annotation_type.vector_type,
-            annotation.annotation_type.node_count, annotation.annotation_type.id);
+              annotation.annotation_type.node_count, annotation.annotation_type.id);
           break;
       }
     }
@@ -447,8 +444,7 @@ function calculateImageScale() {
         } else {
           color = '#F0AD4E';
         }
-      }
-      else if (annotation.blurred) {
+      } else if (annotation.blurred) {
         color = '#5BC0DE'
       }
       if (annotation.id !== current) {
