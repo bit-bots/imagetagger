@@ -427,10 +427,26 @@ class Canvas {
   drawExistingAnnotations(annotations, color) {
     this.clear();
     color = color || globals.stdColor;
+    let colors = [];
+    if (color.constructor === Array) {
+      colors = color;
+      if (color.length != annotations.length) {
+        console.log('wrong number of colors');
+        return;
+      }
+    } else {
+      for (let i = 0; i < annotations.length; i++) {
+        colors.push(color);
+      }
+    }
     if (!globals.drawAnnotations) {
       return;
     }
-    for (let annotation of annotations) {
+    for (let i in annotations) {
+      let annotation = annotations[i];
+      let color = colors[i];
+      console.log(annotation);
+      console.log(color);
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }

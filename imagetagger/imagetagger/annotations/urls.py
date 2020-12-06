@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^api/annotation/loadsetannotationtypes/$', views.load_set_annotation_types, name='load_set_annotation_types'),  # loads annotations of an image
     url(r'^api/annotation/loadfilteredset/$', views.load_filtered_set_annotations, name='load_filtered_set_annotations'),  # loads filtered annotations of an image
     url(r'^api/annotation/loadone/$', views.load_annotation, name='load_annotation'),
+    url(r'^api/annotation/loadmultiple/$', views.load_multiple_annotations, name='load_multiple_annotations'),
     url(r'^api/annotation/verify/$', views.api_verify_annotation, name='verify_annotation'),
     url(r'^api/annotation/update/$', views.update_annotation, name='update_annotations'),
     url(r'^api/annotation/blurred_concealed/$', views.api_blurred_concealed_annotation, name='blurred_concealed_annotation'),
