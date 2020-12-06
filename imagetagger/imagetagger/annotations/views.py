@@ -18,7 +18,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_2
 from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
-from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer
+from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer, ExportFormatInfoSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
@@ -960,13 +960,15 @@ def api_create_export(request) -> Response:
 def api_get_export_formats(request) -> Response:
     user_teams = Team.objects.filter(members=request.user)
     export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
-    export_format_ids = [export_format.id for export_format in export_formats]
-    export_format_names = [export_format.name for export_format in export_formats]
-    export_format_teams = [export_format.team.name for export_format in export_formats]
+    serializer = ExportFormatInfoSerializer(
+        export_formats,
+        many=True,
+        context={
+            'request': request,
+        }
+    )
     return Response({
                 'detail': 'your user has access to the following export formats',
-                'export_format_ids': export_format_ids,
-                'export_format_names': export_format_names,
-                'export_format_teams': export_format_teams,
+                'export_formats': serializer.data,
             }, status=HTTP_200_OK)
 
