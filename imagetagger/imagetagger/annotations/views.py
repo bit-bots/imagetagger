@@ -929,9 +929,9 @@ def api_create_export(request) -> Response:
     try:
         image_set_id = int(request.data['imageset_id'])
         export_format_id = int(request.data['export_format_id'])
-
     except (KeyError, TypeError, ValueError):
         raise ParseError
+
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if imageset.has_perm('create_export', request.user):
         format = get_object_or_404(ExportFormat, id=export_format_id)
