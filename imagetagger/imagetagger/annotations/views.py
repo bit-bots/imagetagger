@@ -956,7 +956,7 @@ def api_create_export(request) -> Response:
 
 
 @login_required
-@api_view(['POST'])
+@api_view(['GET'])
 def api_get_export_formats(request) -> Response:
     user_teams = Team.objects.filter(members=request.user)
     export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
