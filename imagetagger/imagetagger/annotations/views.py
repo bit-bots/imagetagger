@@ -729,7 +729,7 @@ def load_filtered_set_annotations(request) -> Response:
 
     images = Image.objects.filter(image_set=imageset)
     annotations = Annotation.objects.filter(image__in=images,
-                                            annotation_type__active=True).order_by('image_id').select_related()
+                                            annotation_type__active=True).order_by('image__name', 'id').select_related()
     if annotation_type_id > -1:
         annotations = annotations.filter(annotation_type__id=annotation_type_id)
     if verified:
