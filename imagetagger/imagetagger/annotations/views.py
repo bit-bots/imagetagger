@@ -961,8 +961,12 @@ def api_get_export_formats(request) -> Response:
     user_teams = Team.objects.filter(members=request.user)
     export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
     export_format_ids = [export_format.id for export_format in export_formats]
+    export_format_names = [export_format.name for export_format in export_formats]
+    export_format_teams = [export_format.team.name for export_format in export_formats]
     return Response({
                 'detail': 'your user has access to the following export formats',
-                'export_formats': export_format_ids,
+                'export_format_ids': export_format_ids,
+                'export_format_names': export_format_names,
+                'export_format_teams': export_format_teams,
             }, status=HTTP_200_OK)
 
