@@ -62,7 +62,11 @@ const routes = [
         component: loadView("Profile")
     },
 
-    {path: "/", redirect: "/imagesets/list/public"},
+    {
+        path: "/",
+        name: "landingPage",
+        component: loadView("LandingPage")
+    },
 
     {
         path: "*",
