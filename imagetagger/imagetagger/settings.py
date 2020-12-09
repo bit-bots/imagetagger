@@ -1,5 +1,4 @@
 import os
-import typing
 from os.path import join as path_join
 from configurations import Configuration, values
 from django.contrib import messages
@@ -216,7 +215,7 @@ class Base(Configuration):
     TOOL_UPLOAD_NOTICE = values.Value(environ_prefix='IT', default='')
     ENABLE_ZIP_DOWNLOAD = values.BooleanValue(environ_prefix='IT', default=is_in_docker())
     USE_NGINX_IMAGE_PROVISION = values.BooleanValue(environ_prefix='IT', default=is_in_docker())
-    FS_URL = values.Value(environ_prefix='IT', default=path_join(os.path.dirname(BASE_DIR), 'data'))
+    FS_URL = values.Value(environ_prefix='IT', default=path_join(BASE_DIR, 'data'))
     TMP_FS_URL = values.Value(environ_prefix='IT', default='temp://imagetagger')
 
     SENTRY_REPORTING_ENABLED = values.BooleanValue(environ_prefix='IT', default=False)
