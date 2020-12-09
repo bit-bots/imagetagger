@@ -137,9 +137,6 @@ class Base(Configuration):
 
     EXPORT_SEPARATOR = '|'
 
-    FS_URL = os.path.dirname(BASE_DIR)
-    TMP_FS_URL = 'temp://imagetagger'
-
     IMAGE_PATH = 'images'  # the path to the folder with the imagesets relative to the filesystem root (see FS_URL)
     TMP_IMAGE_PATH = 'images'  # the path to use for temporary image files relative to the temp filesystem (see TMP_FS_URL)
     TOOLS_PATH = 'tools'  # the path to the folder with the tools relative to the filesystem root (see FS_URL)
@@ -219,6 +216,8 @@ class Base(Configuration):
     TOOL_UPLOAD_NOTICE = values.Value(environ_prefix='IT', default='')
     ENABLE_ZIP_DOWNLOAD = values.BooleanValue(environ_prefix='IT', default=is_in_docker())
     USE_NGINX_IMAGE_PROVISION = values.BooleanValue(environ_prefix='IT', default=is_in_docker())
+    FS_URL = values.Value(environ_prefix='IT', default=path_join(os.path.dirname(BASE_DIR), 'data'))
+    TMP_FS_URL = values.Value(environ_prefix='IT', default='temp://imagetagger')
 
     SENTRY_REPORTING_ENABLED = values.BooleanValue(environ_prefix='IT', default=False)
     SENTRY_DSN = values.Value(environ_prefix='IT', environ_required=SENTRY_REPORTING_ENABLED)
