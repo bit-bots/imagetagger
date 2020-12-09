@@ -8,7 +8,7 @@ RUN apt-get update && \
 
 # add requirements file
 WORKDIR /app/src
-COPY requirements.txt /app/src/requirements.txt
+COPY imagetagger/requirements.txt /app/src/requirements.txt
 
 # install python dependencies
 RUN pip3 install -r /app/src/requirements.txt
@@ -22,10 +22,12 @@ RUN apt-get clean
 # add remaining sources
 COPY imagetagger /app/src/imagetagger
 
-# confiure runtime environment
-RUN mkdir /app/data /app/static /app/config
-RUN cp /app/src/imagetagger/imagetagger/settings.py.example /app/config/settings.py
-RUN ln -sf /app/config/settings.py /app/src/imagetagger/imagetagger/settings.py
+# configure /app/config/imagetagger_settings to be python importable so that one can use their own settings file
+RUN mkdir -p /app/data /app/static /app/config/imagetagger_settings
+RUN touch /app/config/imagetagger_settings/__init__.py
+ENV PYTHONPATH=$PYTHONPATH:/app/config:/app/src/imagetagger
+
+# configure runtime environment
 RUN sed -i 's/env python/env python3/g' /app/src/imagetagger/manage.py
 
 ARG UID_WWW_DATA=5008
@@ -41,6 +43,7 @@ COPY docker/update_points docker/zip_daemon docker/run /app/bin/
 RUN ln -sf /app/bin/* /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/run"]
 ENV IN_DOCKER=true
+ENV DJANGO_CONFIGURATION=Prod
 
 # add image metadata
 EXPOSE 3008
