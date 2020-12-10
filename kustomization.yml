@@ -12,8 +12,13 @@ resources:
 
 configMapGenerator:
   - name: imagetagger-web
-    files:
-      - "settings.py=./imagetagger/imagetagger/settings.py.example"
+    literals:
+      # service hostname
+      - "IT_DB_HOST=imagetagger-postgres"
+      # references to below postgres configMap which is also mounted in the pod
+      - "IT_DB_USER=$(POSTGRES_USER)"
+      - "IT_DB_PASSWORD=$(POSTGRES_PASSWORD)"
+      - "IT_DB_NAME=$(POSTGRES_DB)"
   - name: imagetagger-postgres
     literals:
       - "POSTGRES_PASSWORD=imagetagger"
