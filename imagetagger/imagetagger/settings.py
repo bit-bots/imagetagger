@@ -232,4 +232,8 @@ class Dev(Base):
 
 
 class Prod(Base):
-    pass
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = values.Value(environ_prefix='IT', environ_required=True)
+    EMAIL_PORT = values.Value(environ_prefix='IT')
+    EMAIL_HOST_USER = values.Value(environ_prefix='IT')
+    EMAIL_HOST_PASSWORD = values.Value(environ_prefix='IT')
