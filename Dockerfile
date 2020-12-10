@@ -23,7 +23,7 @@ RUN apt-get clean
 COPY imagetagger /app/src/imagetagger
 
 # configure imagetagger.settings_local to be importable but 3rd party providable
-RUN mkdir -p /app/data /app/static /app/config/
+RUN mkdir -p /app/data /app/config/
 RUN touch /app/config/settings.py
 RUN ln -sf /app/config/settings.py /app/src/imagetagger/imagetagger/settings_local.py
 
@@ -35,8 +35,6 @@ ARG GID_WWW_DATA=33
 RUN usermod -u $UID_WWW_DATA -g $GID_WWW_DATA -d /app/data/ www-data
 RUN chown -R www-data /app
 
-RUN /app/src/imagetagger/manage.py collectstatic --no-input
-
 COPY docker/uwsgi_imagetagger.ini /etc/uwsgi/imagetagger.ini
 COPY docker/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/update_points docker/zip_daemon docker/run /app/bin/
@@ -45,6 +43,7 @@ ENTRYPOINT ["/usr/local/bin/run"]
 ENV IN_DOCKER=true
 ENV DJANGO_CONFIGURATION=Prod
 ENV IT_FS_URL=/app/data
+ENV IT_STATIC_ROOT=/var/www/imagetagger
 
 # add image metadata
 EXPOSE 3008
