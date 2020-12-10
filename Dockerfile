@@ -22,10 +22,10 @@ RUN apt-get clean
 # add remaining sources
 COPY imagetagger /app/src/imagetagger
 
-# configure /app/config/imagetagger_settings to be python importable so that one can use their own settings file
-RUN mkdir -p /app/data /app/static /app/config/imagetagger_settings
-RUN touch /app/config/imagetagger_settings/__init__.py
-ENV PYTHONPATH=$PYTHONPATH:/app/config:/app/src/imagetagger
+# configure imagetagger.settings_local to be importable but 3rd party providable
+RUN mkdir -p /app/data /app/static /app/config/
+RUN touch /app/config/settings.py
+RUN ln -sf /app/config/settings.py /app/src/imagetagger/imagetagger/settings_local.py
 
 # configure runtime environment
 RUN sed -i 's/env python/env python3/g' /app/src/imagetagger/manage.py
@@ -44,6 +44,7 @@ RUN ln -sf /app/bin/* /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/run"]
 ENV IN_DOCKER=true
 ENV DJANGO_CONFIGURATION=Prod
+ENV IT_FS_URL=/app/data
 
 # add image metadata
 EXPOSE 3008
