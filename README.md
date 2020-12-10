@@ -40,131 +40,152 @@ FIEDLER, Niklas, et al. [ImageTagger: An Open Source Online Platform for Collabo
    organization={Springer}
 }
 ```
-## Upgrade
 
-```
-pip install -U -r requirements.txt
-./manage.py migrate
-```
+## Installing and running Imagetagger
+Imagetagger can be installed and run locally (best for development), in a docker container or in Kubernetes 
+(used in our deployment).
 
-for additional steps on some releases see instructions
-in [UPGRADE.md](https://github.com/bit-bots/imagetagger/blob/master/UPGRADE.md)
+### Locally
 
-## Install
+1.  #### Install the latest release
+    
+    You should probably do this in a [virtual environment](https://virtualenv.pypa.io/en/stable/) 
+    ```shell
+    git checkout v…
+    pip3 install -r imagetagger/requirements.txt
+    ```
+   
+2.  #### Setup a database server
+    
+    As a database server [postgresql](https://www.postgresql.org/) is required.
+    Please seek a guide specific to your operating system on how to install a server and get it running.
+   
+    Once postgresql is installed, a user and database need to be set up for imagetagger.
+    Of course, the user and password can be changed to something else.
+    ```postgresql
+    CREATE USER imagetagger PASSWORD 'imagetagger';
+    CREATE DATABASE imagetagger WITH OWNER imagetagger;
+    ```
 
-Checkout the latest release:
+3.  #### Configuring ImageTagger to connect to the database
+    
+    Please see the lower section about application configuration on how to configure ImageTagger for your specific
+    database credentials.
+   
+4.  #### Initialize the database
+    
+    Run the following to create and setup all necessary database tables:
+    ```shell
+    ./manage.py migrate
+    ```
 
-```
-git checkout v0.x
-```
+5.  #### Create a user
+    
+    ```shell
+    export DJANGO_CONFIGURATION=Prod
+    ./manage.py createsuperuser
+    ```
 
-In our production Senty is used for error reporting (pip install sentry-sdk).
-django-auth-ldap is used for login via ldap
-uwsgi is used to serve the app to nginx
-
-Install Python Dependencies:
-
-```
-pip3 install -r requirements.txt
-```
-
-Copy settings.py.example to settings.py in the imagetagger folder:
-
-```
-cp imagetagger/settings.py.example imagetagger/settings.py
-```
-
-and customize the settings.py.
-
-The following settings should probably be changed:
-
-+ The secret key
-+ The DEBUG setting
-+ The ALLOWED\_HOSTS
-+ The database settings
-+ The UPLOAD\_FS\_GROUP to the id of the group that should access and create the uploaded images
-
-For the database, postgresql is used. Install it by running `sudo apt install postgresql` on Debian based operating systems. A default database cluster is automatically initialized.
-
-Other systems may require different commands to install the package and the database cluster may
-have to be initialized manually (e.g. using `sudo -iu postgres initdb --locale en_US.UTF-8 -D '/var/lib/postgres/data'`).
-
-To start the postgresql server, run `sudo systemctl start postgresql.service`. If the server should always be started on boot, run `sudo systemctl enable postgresql.service`.
-
-Then, create the user and the database by running
-
-`sudo -iu postgres psql`
-
-and then, in the postgres environment
-
-```
-CREATE USER imagetagger PASSWORD 'imagetagger';
-CREATE DATABASE imagetagger WITH OWNER imagetagger ENCODING UTF8;
-```
-
-where of course the password and the user should be adapted to the ones specified in the database settings in the settings.py.
-
-To initialize the database, run `./manage.py migrate`
-
-To create an administrator user, run `./manage.py createsuperuser`.
-
-`./manage.py runserver` starts the server with the configuration given in the settings.py file.
-
-To create annotation types, log into the application and click on Administration at the very bottom of the home page.
-
-For **production** systems it is necessary to run the following commands after each upgrade
-
-```bash
+6.  #### Run the server
+    
+    ```shell
+    export DJANGO_CONFIGURATION=Prod
+    ./manage.py runserver
+    ```
+   
+**In a production deployment** it is necessary to run the following commands after each upgrade:
+```shell
+export DJANGO_CONFIGURATION=Prod
 ./manage.py migrate
 ./manage.py compilemessages
 ./manage.py collectstatic
 ```
 
-Our production uwisgi config can be found at https://github.com/fsinfuhh/mafiasi-rkt/blob/master/imagetagger/uwsgi-imagetagger.ini
+for additional steps on some releases see instructions in [UPGRADE.md](https://github.com/bit-bots/imagetagger/blob/master/UPGRADE.md)
 
-Example Nginx Config:
+### In-Docker
 
-```
-server {
-        listen 443;
-        server_name imagetagger.bit-bots.de;
+1.  #### Checkout the latest release
+    
+    ```shell
+    git checkout v…
+    ```
 
-        ssl_certificate /etc/letsencrypt/certs/imagetagger.bit-bots.de/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/certs/imagetagger.bit-bots.de/privkey.pem;
-        include /etc/nginx/ssl.conf;
-        include /etc/nginx/acme.conf;
-        ssl on;
+2.  #### Build the container image
+    
+    *Note:* the Dockerfile has been tested with [podman](https://podman.io/) as well.
+    ```shell
+    docker build -t imagetagger .
+    ```
+   
+3.  #### Run the container
+    
+    ```shell
+    docker run -it -p 8000:80 --name imagetagger imagetagger
+    ```
+   
+    This step will not work out of the box because configuration still needs to be done.
+    See the lower section about configuring ImageTagger on how to fix this.
 
-        client_max_body_size 4G;
+4.  #### Create a user
+    
+    *Note: This step requires a container running in the background.*
+    ```shell
+    docker exec imagetagger /app/src/imagetagger/manage.py createsuperuser
+    ```
+   
+#### About the Container 
 
-        access_log /var/log/nginx/imagetagger.bit-bots.de.access.log;
-        error_log /var/log/nginx/imagetagger.bit-bots.de.error.log;
+| Kind | Description |
+|---|---|
+| Volume | `/app/data` is where persistent data (like images) are stored
+| Environment | ImageTagger can mostly be configured via environment variables
+| Ports | The container internal webserver listens on port 80 for incoming connections.
 
-        location /static {
-                expires 1h;
-                alias /var/www/imagetagger;
-        }
+### On Kubernetes
 
-        location /ngx_static_dn/ {
-                internal;
-                alias /srv/data/imagetagger/storage/pictures/;
-        }
+1.  Follow the steps for *In-Docker* on how to build a container image
 
-        location / {
-                include uwsgi_params;
-                uwsgi_pass 127.0.0.1:4819;
-                uwsgi_read_timeout 120;
-        }
-}
-```
+2.  **Apply kubernetes configuration**
 
-If you want to provide zip files of image sets, set `ENABLE_ZIP_DOWNLOAD = True` in your `settings.py`.
-A daemon that creates and updates the zip files is necessary, you can start it with `./manage.py runzipdaemon`.
-Please take into account that the presence of zip files will double your storage requirement.
+    *Note: This assumes you have access to a kubernetes cluster configured and can use kubectl*
+    
+    We use [kustomize](https://kustomize.io/) for management of our kubernetes configuration.
+    It can be applied by running the following commands:
+    ```shell
+    kustomize build . > k8s.yml
+    kubectl apply -f k8s.yml
+    ```
+   
+#### Generated Kubernetes resources
 
-Zip archive download via a script is also possible. The URL is `/images/imageset/<id>/download/`. A successful request
-returns HTTP 200 OK and the zip file. When the file generation is still in progress, HTTP 202 ACCEPTED is returned.
-For an empty image set, HTTP 204 NO CONTENT is returned instead of an empty zip archive.
+| Kind | Name | Description
+|---|---|---
+| [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) | imagetagger | The namespace in which each resource resides
+| [Deployment](https://kubernetes.io/es/docs/concepts/workloads/controllers/deployment/) + [Service](https://kubernetes.io/docs/concepts/services-networking/service/) | imagetagger-postgres | postgresql server which is required by ImageTagger. The replica count can be dialed down to 0 if an the usage of an external server is desired.
+| [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) | imagetagger-database | Where the postgresql server stores its data
+| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) | imagetagger-postgres | Configuration of the postgresql server. Also available inside the application server deployment so that settings can be [referenced](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/).
+| [Deployment](https://kubernetes.io/es/docs/concepts/workloads/controllers/deployment/) + [Service](https://kubernetes.io/docs/concepts/services-networking/service/) | imagetagger-web | application server. Per default this deployment references the image `imagetagger:local` which is probably not resolvable and should be replaced by a reference to where your previously built container image is available.
+| [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) | imagetagger-image-data | Where the application server stores its images (and tools).
+| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) | imagetagger-web | Configuration of the application server. Mounted as environment variables.
+
+## Configuration
+
+ImageTagger is a Django application and uses [django-configurations](https://django-configurations.readthedocs.io/en/stable/)
+for better configuration management.
+
+It is configured to use a *Dev* configuration when running locally and *Prod* when running in a container.
+This can be overridden via the environment variable `DJANGO_CONFIGURATION`.
+
+For a list of available configuration values see [settings.py](https://github.com/bit-bots/imagetagger/blob/master/imagetagger/imagetagger/settings.py). 
+Towards the bottom is a list of *values*. These are taken from environment variables where the key is the variable name
+but with an `IT_` prefix.
+
+If completely custom configuration is desired, `imagetagger/imagetagger/settings_local.py` can be created in which
+a custom configuration class may be created. In docker this file may be located at `/app/config/settings.py` so that
+mounting it should be simple.
+To use this custom configuration class, the environment variables `DJANGO_SETTINGS_MODULE=imagetagger.settings_local`
+and `DJANGO_CONFIGURATION=MyCustomClass` must be set.
 
 ## Used dependencies
 
