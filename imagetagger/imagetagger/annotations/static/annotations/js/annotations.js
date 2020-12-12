@@ -35,6 +35,7 @@ function calculateImageScale() {
   const FEEDBACK_DISPLAY_TIME = 3000;
   const ANNOTATE_URL = '/annotations/%s/';
   const IMAGE_SET_URL = '/images/imageset/%s/';
+  const DELETE_IMAGE_URL = '/images/image/delete/%s/';
   const PRELOAD_BACKWARD = 2;
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
@@ -896,6 +897,7 @@ function calculateImageScale() {
       next_image_id = gImageList[0];
     }
     $('#next-image-id').attr('value', next_image_id || '');
+    $('#delete-image-form').attr('action', DELETE_IMAGE_URL.replace('%s', imageId));
     tool.restoreSelection(false);
 
     if (fromHistory !== true) {
