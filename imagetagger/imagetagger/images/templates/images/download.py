@@ -4,6 +4,7 @@ import sys
 import getpass
 import shutil
 import os
+import zipfile
 try:
     import requests
 except ImportError:
@@ -42,32 +43,53 @@ for userint in imagesets:
 if error:
     sys.exit()
 
+error = False
 
-def download_imageset(current_imageset):
-    error = False
+loginpage = requests.get(BaseUrl)
+csrftoken = loginpage.cookies['csrftoken']
+
+cookies = {'csrftoken': csrftoken}
+csrfmiddlewaretoken = csrftoken
+data = {'username': user,
+        'password': password,
+        'csrfmiddlewaretoken': csrfmiddlewaretoken}
+loggedinpage = requests.post(
+    '{}user/login/'.format(BaseUrl),
+    data=data,
+    cookies=cookies,
+    allow_redirects=False,
+    headers={'referer': BaseUrl})
+
+try:
+    sessionid = loggedinpage.cookies['sessionid']
+except KeyError:
+    print('Login failed')
+    sys.exit(1)
+cookies = {'sessionid': sessionid}
+
+
+def download_zip(current_imageset):
     if not os.path.exists(os.path.join(os.getcwd(), filename, current_imageset)):
         os.makedirs(os.path.join(os.getcwd(), filename, current_imageset))
-    loginpage = requests.get(BaseUrl)
-    csrftoken = loginpage.cookies['csrftoken']
+    ziplink = f"{BaseUrl}images/imageset/{current_imageset}/download/"
+    with requests.get(ziplink,
+                     data=data,
+                     cookies=cookies,
+                     allow_redirects=False,
+                     headers={'referer': BaseUrl},
+                     stream=True) as r:
+        filepath = os.path.join(filename, current_imageset)
+        full_zipname = os.path.join(filepath, current_imageset+".zip")
+        with open(full_zipname, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+        with zipfile.ZipFile(full_zipname, 'r') as unzip:
+            unzip.extractall(filepath)
+        os.remove(full_zipname)
+    print(f"Downloaded imageset {current_imageset}")
 
-    cookies = {'csrftoken': csrftoken}
-    csrfmiddlewaretoken = csrftoken
-    data = {'username': user,
-            'password': password,
-            'csrfmiddlewaretoken': csrfmiddlewaretoken}
-    loggedinpage = requests.post(
-        '{}user/login/'.format(BaseUrl),
-        data=data,
-        cookies=cookies,
-        allow_redirects=False,
-        headers={'referer': BaseUrl})
-
-    try:
-        sessionid = loggedinpage.cookies['sessionid']
-    except KeyError:
-        print('Login failed')
-        sys.exit(1)
-    cookies = {'sessionid': sessionid}
+# Download images individually. This is slower than downloading the zip, so the zip is used by default.
+def download_imageset(current_imageset):
     page = requests.get("{}images/imagelist/{}/".format(BaseUrl,
                         current_imageset),
                         cookies=cookies)
@@ -104,7 +126,7 @@ def download_imageset(current_imageset):
 
 for imgset in imagesets:
     if imgset is not " ":
-        download_imageset(imgset)
+        download_zip(imgset)
 if errorlist:
     print("There have been errors while downloading the following imagesets: ")
     for item in errorlist:
