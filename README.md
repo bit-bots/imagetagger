@@ -6,6 +6,19 @@ If you are participating in RoboCup, you should not install your own instance bu
 
 For a short overview of the functions please have a look at the following poster: https://robocup.informatik.uni-hamburg.de/wp-content/uploads/2017/11/imagetagger-poster.pdf
 
+Table of Contents:
+- [ImageTagger](#imagetagger)
+    * [Features](#features)
+    * [Planned Features](#planned-features)
+    * [Reference](#reference)
+    * [Installing and running ImageTagger](#installing-and-running-imagetagger)
+        + [Locally](#locally)
+        + [In-Docker](#in-docker)
+        + [On Kubernetes](#on-kubernetes)
+    * [Configuration](#configuration)
+    * [Used dependencies](#used-dependencies)
+
+
 ## Features
 
 * team creation
@@ -27,7 +40,7 @@ For a short overview of the functions please have a look at the following poster
 
 ## Reference
 
-This paper describes the Bit-Bots Imagetagger more in depth. Please cite if you use this tool in your research:
+This paper describes the Bit-Bots ImageTagger more in depth. Please cite if you use this tool in your research:
 
 FIEDLER, Niklas, et al. [ImageTagger: An Open Source Online Platform for Collaborative Image Labeling.](https://robocup.informatik.uni-hamburg.de/wp-content/uploads/2018/11/imagetagger_paper.pdf) In: RoboCup 2018: Robot World Cup XXII. Springer, 2018.
 
@@ -41,11 +54,15 @@ FIEDLER, Niklas, et al. [ImageTagger: An Open Source Online Platform for Collabo
 }
 ```
 
-## Installing and running Imagetagger
-Imagetagger can be installed and run locally (best for development), in a docker container or in Kubernetes 
+## Installing and running ImageTagger
+ImageTagger can be installed and run locally (best for development), in a docker container or in Kubernetes 
 (used in our deployment).
 
 ### Locally
+
+In some of the following code snippets, the `DJANGO_CONFIGURATION` environment variable is exported.
+This defines the type of deployment by selecting one of our predefined configuration presets.
+If ImageTagger is running in a development environment, no export is necessary.
 
 1.  #### Install the latest release
     
@@ -60,7 +77,7 @@ Imagetagger can be installed and run locally (best for development), in a docker
     As a database server [postgresql](https://www.postgresql.org/) is required.
     Please seek a guide specific to your operating system on how to install a server and get it running.
    
-    Once postgresql is installed, a user and database need to be set up for imagetagger.
+    Once postgresql is installed, a user and database need to be set up for ImageTagger.
     Of course, the user and password can be changed to something else.
     ```postgresql
     CREATE USER imagetagger PASSWORD 'imagetagger';
@@ -69,7 +86,7 @@ Imagetagger can be installed and run locally (best for development), in a docker
 
 3.  #### Configuring ImageTagger to connect to the database
     
-    Please see the lower section about application configuration on how to configure ImageTagger for your specific
+    Please see the lower [Configuration](#configuration) section on how to configure ImageTagger for your specific
     database credentials.
    
 4.  #### Initialize the database
@@ -125,13 +142,13 @@ for additional steps on some releases see instructions in [UPGRADE.md](https://g
     ```
    
     This step will not work out of the box because configuration still needs to be done.
-    See the lower section about configuring ImageTagger on how to fix this.
+    See the lower [section about configuring](#configuration) ImageTagger on how to fix this.
 
 4.  #### Create a user
     
     *Note: This step requires a container running in the background.*
     ```shell
-    docker exec imagetagger /app/src/imagetagger/manage.py createsuperuser
+    docker exec -it imagetagger /app/src/imagetagger/manage.py createsuperuser
     ```
    
 #### About the Container 
@@ -139,12 +156,13 @@ for additional steps on some releases see instructions in [UPGRADE.md](https://g
 | Kind | Description |
 |---|---|
 | Volume | `/app/data` is where persistent data (like images) are stored
+| Volume | `/app/config` is where additional custom configuration files can be placed. See the [Configuration section](#configuration) below
 | Environment | ImageTagger can mostly be configured via environment variables
 | Ports | The container internal webserver listens on port 80 for incoming connections.
 
 ### On Kubernetes
 
-1.  Follow the steps for *In-Docker* on how to build a container image
+1.  Follow the steps for [In-Docker](#in-docker) on how to build a container image
 
 2.  **Apply kubernetes configuration**
 
@@ -167,14 +185,14 @@ for additional steps on some releases see instructions in [UPGRADE.md](https://g
 | [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) | imagetagger-postgres | Configuration of the postgresql server. Also available inside the application server deployment so that settings can be [referenced](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/).
 | [Deployment](https://kubernetes.io/es/docs/concepts/workloads/controllers/deployment/) + [Service](https://kubernetes.io/docs/concepts/services-networking/service/) | imagetagger-web | application server. Per default this deployment references the image `imagetagger:local` which is probably not resolvable and should be replaced by a reference to where your previously built container image is available.
 | [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) | imagetagger-image-data | Where the application server stores its images (and tools).
-| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) | imagetagger-web | Configuration of the application server. Mounted as environment variables.
+| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) | imagetagger-web | Configuration of the application server. Mounted as environment variables. See [Configuration](#configuration) for details.
 
 ## Configuration
 
 ImageTagger is a Django application and uses [django-configurations](https://django-configurations.readthedocs.io/en/stable/)
 for better configuration management.
 
-It is configured to use a *Dev* configuration when running locally and *Prod* when running in a container.
+ImageTagger is configured to use a *Dev* configuration when running locally and *Prod* when running in a container.
 This can be overridden via the environment variable `DJANGO_CONFIGURATION`.
 
 For a list of available configuration values see [settings.py](https://github.com/bit-bots/imagetagger/blob/master/imagetagger/imagetagger/settings.py). 
@@ -182,10 +200,30 @@ Towards the bottom is a list of *values*. These are taken from environment varia
 but with an `IT_` prefix.
 
 If completely custom configuration is desired, `imagetagger/imagetagger/settings_local.py` can be created in which
-a custom configuration class may be created. In docker this file may be located at `/app/config/settings.py` so that
+a custom configuration class may be created. In Docker this file may be located at `/app/config/settings.py` so that
 mounting it should be simple.
 To use this custom configuration class, the environment variables `DJANGO_SETTINGS_MODULE=imagetagger.settings_local`
 and `DJANGO_CONFIGURATION=MyCustomClass` must be set.
+
+If downloading zip files of Imagesets is desired, the feature can be enabled by settings `IT_ENABLE_ZIP_DOWNLOAD` to `true`. 
+A separate zip generation daemon must then be started via the following command.
+This feature is enabled and running automatically in Docker based deployments.
+```shell
+export DJANGO_CONFIGURATION=Prod
+./manage.py runzipdaemon
+```
+
+
+### Minimal production Configuration
+
+In production, the following configuration values **must** be defined (as environment variables)
+
+| Key | Description
+|---|---
+| `IT_SECRET_KEY` | The [django secret key](https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-SECRET_KEY) used by ImageTagger. It is used for password hashing and other cryptographic operations.
+| `IT_ALLOWED_HOSTS` | [django ALLOWED_HOSTS](https://docs.djangoproject.com/en/3.0/ref/settings/#allowed-hosts) as comma separated list of values. It defines the hostnames which this application will allow to be used under.
+| `IT_DB_HOST` | Hostname (or IP-address) of the postgresql server. When deploying on kubernetes, the provided Kustomization sets this to reference the database deployment.
+| `IT_DOWNLOAD_BASE_URL` | Base-URL under which this application is reachable. It defines the prefix for generated download links.
 
 ## Used dependencies
 

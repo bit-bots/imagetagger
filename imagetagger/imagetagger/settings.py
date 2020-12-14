@@ -119,40 +119,18 @@ class Base(Configuration):
         messages.SUCCESS: 'success',
     }
 
-    # Static files (CSS, JavaScript, Images)
-    # https://docs.djangoproject.com/en/1.10/howto/static-files/
-
-    STATIC_URL = '/static/'
-
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-    ########################################################################
-    #
-    # Custom Imagetagger defined settings
-    #
-    ########################################################################
-    UPLOAD_NOTICE = 'By uploading images to this tool you accept that the images get published under creative ' \
-                    'commons license and confirm that you have the permission to do so.'
-
-    EXPORT_SEPARATOR = '|'
-
-    IMAGE_PATH = 'images'  # the path to the folder with the imagesets relative to the filesystem root (see FS_URL)
-    TMP_IMAGE_PATH = 'images'  # the path to use for temporary image files relative to the temp filesystem (see TMP_FS_URL)
-    TOOLS_PATH = 'tools'  # the path to the folder with the tools relative to the filesystem root (see FS_URL)
-
-    # filename extension of accepted imagefiles
-    IMAGE_EXTENSION = {
-        'png',
-        'jpeg',
-    }
-
     # Sets the default expire time for new messages in days
     DEFAULT_EXPIRE_TIME = 7
 
     # Sets the default number of messages per page
     MESSAGES_PER_PAGE = 10
 
-    ACCOUNT_ACTIVATION_DAYS = 7
+    # Static files (CSS, JavaScript, Images)
+    # https://docs.djangoproject.com/en/1.10/howto/static-files/
+
+    STATIC_URL = '/static/'
+
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
     ########################################################################
     #
@@ -217,6 +195,19 @@ class Base(Configuration):
     USE_NGINX_IMAGE_PROVISION = values.BooleanValue(environ_prefix='IT', default=is_in_docker())
     FS_URL = values.Value(environ_prefix='IT', default=path_join(BASE_DIR, 'data'))
     TMP_FS_URL = values.Value(environ_prefix='IT', default='temp://imagetagger')
+    UPLOAD_NOTICE = values.Value(environ_prefix='IT', default='By uploading images to this tool you accept that '
+                                                              'the images get published under creative commons license '
+                                                              'and confirm that you have the permission to do so.')
+    EXPORT_SEPARATOR = values.Value(environ_prefix='IT', default='|')
+    # the path to the folder with the imagesets relative to the filesystem root (see FS_URL)
+    IMAGE_PATH = values.Value(environ_prefix='IT', default='images')
+    # the path to use for temporary image files relative to the temp filesystem (see TMP_FS_URL)
+    TMP_IMAGE_PATH = values.Value(environ_prefix='IT', default='images')
+    # the path to the folder with the tools relative to the filesystem root (see FS_URL)
+    TOOLS_PATH = values.Value(environ_prefix='IT', default='tools')
+    # filename extension of accepted imagefiles
+    IMAGE_EXTENSION = values.ListValue(environ_prefix='IT', default=['png', 'jpeg'])
+    ACCOUNT_ACTIVATION_DAYS = values.PositiveIntegerValue(environ_prefix='IT', default=7)
 
     SENTRY_REPORTING_ENABLED = values.BooleanValue(environ_prefix='IT', default=False)
     SENTRY_DSN = values.Value(environ_prefix='IT', environ_required=SENTRY_REPORTING_ENABLED)
