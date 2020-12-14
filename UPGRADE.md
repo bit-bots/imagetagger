@@ -1,6 +1,17 @@
 Upgrade instructions
 ====================
 
+Upgrading 0.5 to 0.6
+--------------------
+
+Release 0.6 changed the application configuration to be largely based on environment variables instead of the operator
+providing a custom `settings.py` file.
+
+Most settings which previously had to be defined can now be given as environment variables but with an `IT_` prefix.
+See [the README](https://github.com/bit-bots/imagetagger#configuration) on more details.
+
+If desired, a custom configuration file can still be supplied. This is explained in the README as well.
+
 Upgrading 0.4 to 0.5
 --------------------
 
