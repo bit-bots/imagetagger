@@ -46,13 +46,11 @@ if error:
 error = False
 
 loginpage = requests.get(BaseUrl)
-csrftoken = loginpage.cookies['csrftoken']
 
-cookies = {'csrftoken': csrftoken}
-csrfmiddlewaretoken = csrftoken
+cookies = {'csrftoken': loginpage.cookies['csrftoken']}
 data = {'username': user,
         'password': password,
-        'csrfmiddlewaretoken': csrfmiddlewaretoken}
+        'csrfmiddlewaretoken': loginpage.cookies['csrftoken']}
 loggedinpage = requests.post(
     '{}user/login/'.format(BaseUrl),
     data=data,
