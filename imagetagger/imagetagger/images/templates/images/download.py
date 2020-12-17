@@ -88,6 +88,9 @@ def download_zip(current_imageset):
 
 # Download images individually. This is slower than downloading the zip, so the zip is used by default.
 def download_imageset(current_imageset):
+    error = False
+    if not os.path.exists(os.path.join(os.getcwd(), filename, current_imageset)):
+        os.makedirs(os.path.join(os.getcwd(), filename, current_imageset))
     page = requests.get("{}images/imagelist/{}/".format(BaseUrl,
                         current_imageset),
                         cookies=cookies)
