@@ -8,15 +8,22 @@ For a short overview of the functions please have a look at the following poster
 
 Table of Contents:
 - [ImageTagger](#imagetagger)
-    * [Features](#features)
-    * [Planned Features](#planned-features)
-    * [Reference](#reference)
-    * [Installing and running ImageTagger](#installing-and-running-imagetagger)
-        + [Locally](#locally)
-        + [In-Docker](#in-docker)
-        + [On Kubernetes](#on-kubernetes)
-    * [Configuration](#configuration)
-    * [Used dependencies](#used-dependencies)
+    
+    - [Features](#features)
+    
+    - [Planned Features](#planned-features)
+      
+    - [Reference](#reference)
+      
+    - [Installing and running ImageTagger](#installing-and-running-imagetagger)
+      
+        - [Locally](#locally)
+        - [In-Docker](#in-docker)
+        - [On Kubernetes](#on-kubernetes)
+        
+    - [Configuration](#configuration)
+      
+    - [Used dependencies](#used-dependencies)
 
 
 ## Features
@@ -66,9 +73,12 @@ If ImageTagger is running in a development environment, no export is necessary.
 
 1.  #### Install the latest release
     
-    You should probably do this in a [virtual environment](https://virtualenv.pypa.io/en/stable/) 
+    You should probably do this in a [virtual environment](https://virtualenv.pypa.io/en/stable/)
+    
+    Replace `v…` with the latest release tag.
     ```shell
     git checkout v…
+    cd imagetagger
     pip3 install -r imagetagger/requirements.txt
     ```
    
@@ -82,6 +92,18 @@ If ImageTagger is running in a development environment, no export is necessary.
     ```postgresql
     CREATE USER imagetagger PASSWORD 'imagetagger';
     CREATE DATABASE imagetagger WITH OWNER imagetagger;
+    ```
+    
+3.  ### Select a Configuration preset
+
+    When running ImageTagger as a developer, no step is necessary because a development configuration is used per
+    default when not running as a docker based deployment.
+    However if this is supposed to be a production deployment, export the following environment variable.
+    
+    Currently available presets are `Dev` and `Prod`
+
+    ```shell
+    export DJANGO_CONFIGURATION=…
     ```
 
 3.  #### Configuring ImageTagger to connect to the database
@@ -99,7 +121,6 @@ If ImageTagger is running in a development environment, no export is necessary.
 5.  #### Create a user
     
     ```shell
-    export DJANGO_CONFIGURATION=Prod
     ./manage.py createsuperuser
     ```
 
@@ -112,7 +133,6 @@ If ImageTagger is running in a development environment, no export is necessary.
    
 **In a production deployment** it is necessary to run the following commands after each upgrade:
 ```shell
-export DJANGO_CONFIGURATION=Prod
 ./manage.py migrate
 ./manage.py compilemessages
 ./manage.py collectstatic
@@ -213,6 +233,8 @@ export DJANGO_CONFIGURATION=Prod
 ./manage.py runzipdaemon
 ```
 
+To create annotation types, log into the application and click on Administration at the very bottom of the home page.
+
 
 ### Minimal production Configuration
 
@@ -223,7 +245,20 @@ In production, the following configuration values **must** be defined (as enviro
 | `IT_SECRET_KEY` | The [django secret key](https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-SECRET_KEY) used by ImageTagger. It is used for password hashing and other cryptographic operations.
 | `IT_ALLOWED_HOSTS` | [django ALLOWED_HOSTS](https://docs.djangoproject.com/en/3.0/ref/settings/#allowed-hosts) as comma separated list of values. It defines the hostnames which this application will allow to be used under.
 | `IT_DB_HOST` | Hostname (or IP-address) of the postgresql server. When deploying on kubernetes, the provided Kustomization sets this to reference the database deployment.
+| `IT_DB_PASSWORD ` | Password used for authenticating against the postgresql server.
 | `IT_DOWNLOAD_BASE_URL` | Base-URL under which this application is reachable. It defines the prefix for generated download links.
+
+### Database Configuration
+
+The following environment variables configure how the postgresql server is accessed
+
+| Key | Required | Default | Description
+|---|---|---|---
+| `IT_DB_HOST` | yes | | Hostname (or IP-address) of the postgresql server. When deploying on kubernetes, the provided Kustomization sets this to reference the database deployment.
+| `IT_DB_PORT` | no | 5432 | Port on which the postgresql server listens. 
+| `IT_DB_NAME` | no | imagetagger | Database name on the postgresql server. ImageTagger requires full access to it.
+| `IT_DB_USER` | no | imagetagger | User as which to authenticate on the postgresql server.
+| `IT_DB_PASSWORD` | yes | | Password used for authentication.
 
 ## Used dependencies
 
