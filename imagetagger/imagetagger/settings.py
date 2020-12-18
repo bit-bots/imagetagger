@@ -179,7 +179,7 @@ class Base(Configuration):
     DB_PORT = values.PositiveIntegerValue(environ_prefix='IT', default=5432)
     DB_NAME = values.Value(environ_prefix='IT', default='imagetagger')
     DB_USER = values.Value(environ_prefix='IT', default=DB_NAME)
-    DB_PASSWORD = values.Value(environ_prefix='IT', default=DB_USER)
+    DB_PASSWORD = values.Value(environ_prefix='IT', environ_required=True)
     ALLOWED_HOSTS = values.ListValue(environ_prefix='IT', environ_required=True)
     LANGUAGE_CODE = values.Value(environ_prefix='IT', default='en-us')
     TIME_ZONE = values.Value(environ_prefix='IT', default='Europe/Berlin')
@@ -218,6 +218,7 @@ class Dev(Base):
     DEBUG = values.BooleanValue(environ_prefix='IT', default=True)
     SECRET_KEY = values.Value(environ_prefix='IT', default='DEV-KEY ONLY! DONT USE IN PRODUCTION!')
     DB_HOST = values.Value(environ_prefix='IT', default='localhost')
+    DB_PASSWORD = values.Value(environ_prefix='IT', default='imagetagger')
     ALLOWED_HOSTS = values.ListValue(environ_prefix='IT', default=['localhost', '127.0.0.1'])
     DOWNLOAD_BASE_URL = values.Value(environ_prefix='IT', default='localhost')
 
