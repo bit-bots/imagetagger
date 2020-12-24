@@ -12,6 +12,15 @@ except ImportError:
     sys.exit()
 
 BaseUrl = "{{ base_url }}" + "/"
+separate_download = False
+if "--separate" in sys.argv or "-s" in sys.argv:
+    separate_download = True
+    # remove parameters from list
+    if "--separate" in sys.argv:
+        sys.argv.remove("--separate")
+    if "-s" in sys.argv:
+        sys.argv.remove("-s")
+    print("The images will be downloaded separately instead of as zip.")
 if len(sys.argv) < 2:
     imageset = input("Imagesets you want to download, separated by a ',' or ' ':")
 else:
@@ -19,7 +28,9 @@ else:
         print("This script will download images from the specified imageset for you.")
         print("The images will be downloaded from: {}".format(BaseUrl))
         print("If errors occur during the download you will be notified at the end of the script execution")
-        print("Just execute it with ./imagetagger_dl_script.py")
+        print("If you want to download the images separately instead of as a zip (this was done in the past),")
+        print("call the script with ./imagetagger_dl_script.py --separate imgsetID1, imgsetID2")
+        print("Otherwise just execute it with ./imagetagger_dl_script.py")
         sys.exit()
     else:
         imageset = " ".join(sys.argv[1:])
@@ -67,6 +78,7 @@ cookies = {'sessionid': sessionid}
 
 
 def download_zip(current_imageset):
+    print(f"Now downloading {current_imageset}")
     if not os.path.exists(os.path.join(os.getcwd(), filename, current_imageset)):
         os.makedirs(os.path.join(os.getcwd(), filename, current_imageset))
     ziplink = f"{BaseUrl}images/imageset/{current_imageset}/download/"
@@ -132,7 +144,10 @@ def download_imageset(current_imageset):
 
 for imgset in imagesets:
     if imgset is not " ":
-        download_zip(imgset)
+        if not separate_download:
+            download_zip(imgset)
+        else:
+            download_imageset(imgset)
 if errorlist:
     print("There have been errors while downloading the following imagesets: ")
     for item in errorlist:
