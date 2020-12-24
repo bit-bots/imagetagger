@@ -76,6 +76,11 @@ def download_zip(current_imageset):
                      allow_redirects=False,
                      headers={'referer': BaseUrl},
                      stream=True) as r:
+        # this is intended for the case when an imageset does not exist or the zip does not yet exist
+        if r.status_code == 404:
+            print("In Imageset {} was an error. The server returned page not found.".format(current_imageset))
+            errorlist.append(current_imageset)
+            return
         filepath = os.path.join(filename, current_imageset)
         full_zipname = os.path.join(filepath, current_imageset+".zip")
         with open(full_zipname, "wb") as f:
