@@ -103,7 +103,7 @@ If ImageTagger is running in a development environment, no export is necessary.
     Currently available presets are `Dev` and `Prod`
 
     ```shell
-    export DJANGO_CONFIGURATION=…
+    export DJANGO_CONFIGURATION=Prod
     ```
 
 3.  #### Configuring ImageTagger to connect to the database
