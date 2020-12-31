@@ -79,7 +79,7 @@ If ImageTagger is running in a development environment, no export is necessary.
     ```shell
     git checkout v…
     cd imagetagger
-    pip3 install -r imagetagger/requirements.txt
+    pip3 install -r requirements.txt
     ```
    
 2.  #### Setup a database server
@@ -127,7 +127,6 @@ If ImageTagger is running in a development environment, no export is necessary.
 6.  #### Run the server
     
     ```shell
-    export DJANGO_CONFIGURATION=Prod
     ./manage.py runserver
     ```
    
