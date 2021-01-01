@@ -22,7 +22,7 @@ if "--separate" in sys.argv or "-s" in sys.argv:
         sys.argv.remove("-s")
     print("The images will be downloaded separately instead of as zip.")
 if len(sys.argv) < 2:
-    imageset = input("Imagesets you want to download, separated by a ',' or ' ':")
+    imageset = input("Imagesets you want to download, separated by a ',' or ' ': ")
 else:
     if sys.argv[1] == '-h':
         print("This script will download images from the specified imageset for you.")
@@ -90,7 +90,7 @@ def download_zip(current_imageset):
                      stream=True) as r:
         # this is intended for the case when an imageset does not exist or the zip does not yet exist
         if r.status_code == 404:
-            print("In Imageset {} was an error. The server returned page not found.".format(current_imageset))
+            print("In Imageset {} was an error. The server returned page not found. Try --separate if zip download is disabled.".format(current_imageset))
             errorlist.append(current_imageset)
             return
         filepath = os.path.join(filename, current_imageset)
@@ -143,7 +143,7 @@ def download_imageset(current_imageset):
 
 
 for imgset in imagesets:
-    if imgset is not " ":
+    if imgset != " ":
         if not separate_download:
             download_zip(imgset)
         else:
