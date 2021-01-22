@@ -958,7 +958,13 @@ def api_create_export(request) -> Response:
 
     imageset = get_object_or_404(ImageSet, id=image_set_id)
     if imageset.has_perm('create_export', request.user):
+        user_teams = Team.objects.filter(members=request.user)
+        export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
         format = get_object_or_404(ExportFormat, id=export_format_id)
+        if format not in export_formats:  # The user wants to use an export format they have no access to
+            return Response({
+                        'detail': 'permission for exporting annotations in this format missing.',
+                    }, status=HTTP_403_FORBIDDEN)
         export_text, annotation_count, export_filename = export_format(format, imageset)
 
         export = Export(image_set=imageset,
