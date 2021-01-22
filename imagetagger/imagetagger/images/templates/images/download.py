@@ -5,6 +5,7 @@ import getpass
 import shutil
 import os
 import zipfile
+import json
 try:
     import requests
 except ImportError:
@@ -21,6 +22,12 @@ if "--separate" in sys.argv or "-s" in sys.argv:
     if "-s" in sys.argv:
         sys.argv.remove("-s")
     print("The images will be downloaded separately instead of as zip.")
+
+anno_download = False
+if "--anno" in sys.argv:
+    anno_download = True
+    export_id = None
+    sys.argv.remove("--anno")
 if len(sys.argv) < 2:
     imageset = input("Imagesets you want to download, separated by a ',' or ' ': ")
 else:
@@ -30,6 +37,7 @@ else:
         print("If errors occur during the download you will be notified at the end of the script execution")
         print("If you want to download the images separately instead of as a zip (this was done in the past),")
         print("call the script with ./imagetagger_dl_script.py --separate imgsetID1, imgsetID2")
+        print("If you want to download annotations additionally to your images, use the parameter --anno")
         print("Otherwise just execute it with ./imagetagger_dl_script.py")
         sys.exit()
     else:
@@ -141,13 +149,59 @@ def download_imageset(current_imageset):
     if not error:
         print('\nImageset {} has been downloaded.'.format(current_imageset))
 
+def create_export_format(imageset_id):
+    export_format_data = data
+    export_format_data['imageset_id'] = imageset_id
+    export_format_data['export_format_id'] = export_id
+    cookies['csrftoken'] = loginpage.cookies['csrftoken']
+
+    response = requests.post(BaseUrl + "annotations/api/export/create/", data=export_format_data,
+                        cookies=cookies, headers={'referer': BaseUrl})
+    print(response.content)
+    response = json.loads(response.text)
+    export_url = BaseUrl + f"/annotations/export/{response['export_id']}/download/"
+    r = requests.get(export_url,
+                     data=data,
+                     cookies=cookies,
+                     allow_redirects=False,
+                     headers={'referer': BaseUrl},
+                     stream=True)
+    # directory path
+    filepath = os.path.join(filename, str(imageset_id))
+    # filename
+    export_name = os.path.join(filepath, str(imageset_id) + ".txt")
+    print(r.content)
+    with open(export_name, "wb") as f:
+        f.write(r.content)
+
+
+def select_annotation_format_id():
+    while True:
+        print()
+        print("Please visit https://imagetagger.bit-bots.de/annotations/api/export_format/list/ while logged in to find the id of your export format")
+        format_id = input("Enter your export format id:")
+        if not format_id.isdigit():
+            print("{} is not a valid integer, please use integer for the export format id".format(format_id))
+        else:
+            global export_id
+            export_id = format_id
+            break
+        print()
+
+if anno_download:
+    select_annotation_format_id()
 
 for imgset in imagesets:
     if imgset != " ":
         if not separate_download:
             download_zip(imgset)
+            if anno_download:
+                create_export_format(imgset)
         else:
             download_imageset(imgset)
+            if anno_download:
+                create_export_format(imgset)
+
 if errorlist:
     print("There have been errors while downloading the following imagesets: ")
     for item in errorlist:
