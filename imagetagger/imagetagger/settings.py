@@ -229,3 +229,4 @@ class Prod(Base):
     EMAIL_PORT = values.Value(environ_prefix='IT')
     EMAIL_HOST_USER = values.Value(environ_prefix='IT')
     EMAIL_HOST_PASSWORD = values.Value(environ_prefix='IT')
+    DEFAULT_FROM_EMAIL = values.Value(environ_prefix='IT')
