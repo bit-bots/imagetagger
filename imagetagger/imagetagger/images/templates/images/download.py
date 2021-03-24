@@ -17,6 +17,7 @@ BASE_URL = "{{ base_url }}/"
 
 
 def login(user, password):
+    """Log into the imagetagger. Returns POST data and cookies"""
     login_page = requests.get(BASE_URL)
 
     cookies = {'csrftoken': login_page.cookies['csrftoken']}
@@ -35,10 +36,17 @@ def login(user, password):
         cookies['sessionid'] = logged_in_page.cookies['sessionid']
     except KeyError:
         return False
-    return [data, cookies]
+    return data, cookies
 
 
 def download_zip(set_id, target_folder, login_data):
+    """
+    Downloads an imageset as zip file
+
+    :param set_id: The id of the image set to download
+    :param target_folder: The folder in which the images should be saved
+    :param login_data: Data as returned by login()
+    """
     print(f"Now downloading {set_id}")
 
     os.makedirs(target_folder, exist_ok=True)
@@ -70,6 +78,13 @@ def download_zip(set_id, target_folder, login_data):
 
 
 def download_imageset(set_id, target_folder, login_data):
+    """
+    Downloads an imageset as separate files
+
+    :param set_id: The id of the image set to download
+    :param target_folder: The folder in which the images should be saved
+    :param login_data: Data as returned by login()
+    """
     print(f'Now downloading {set_id}')
 
     os.makedirs(target_folder, exist_ok=True)
@@ -112,6 +127,14 @@ def download_imageset(set_id, target_folder, login_data):
 
 
 def download_annotations(set_id, export_id, target_folder, login_data):
+    """
+    Downloads annotations for an imageset
+
+    :param set_id: The id of the image set for which the annotations will be saved
+    :param export_id: The id of the export format
+    :param target_folder: The folder in which the images should be saved
+    :param login_data: Data as returned by login()
+    """
     export_format_data = login_data[0]
     export_format_data['imageset_id'] = set_id
     export_format_data['export_format_id'] = export_id
@@ -177,20 +200,20 @@ if __name__ == '__main__':
     if not login_data:
         sys.exit('Login failed')
 
-    errorlist = []
+    error_list = []
     for imgset in args.imagesets:
         set_folder = os.path.join(folder, str(imgset))
         if not args.separate:
             if not download_zip(imgset, set_folder, login_data):
-                errorlist.append(imgset)
+                error_list.append(imgset)
         else:
             if not download_imageset(imgset, set_folder, login_data):
-                errorlist.append(imgset)
+                error_list.append(imgset)
 
         if args.annotations:
             if not download_annotations(imgset, args.export_format, set_folder, login_data):
-                errorlist.append(imgset)
+                error_list.append(imgset)
 
-    if errorlist:
+    if error_list:
         print("There have been errors while downloading the following imagesets: ")
-        print(', '.join(str(error) for error in errorlist))
+        print(', '.join(str(error) for error in error_list))
