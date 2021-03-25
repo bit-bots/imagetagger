@@ -96,7 +96,7 @@ def download_imageset(set_id, target_folder, login_data):
 
     images = page.text.replace('\n', '')
     images = images.split(',')
-    error = True
+    success = True
 
     for index, image in enumerate(images):
         if image == '':
@@ -109,7 +109,7 @@ def download_imageset(set_id, target_folder, login_data):
                          stream=True)
         if r.status_code == 404:
             print("In Imageset {} was an error. The server returned page not found.".format(set_id))
-            error = True
+            success = False
             continue
 
         image = image.split('?')[1]
@@ -121,14 +121,14 @@ def download_imageset(set_id, target_folder, login_data):
 
     print()
 
-    if not error:
+    if success:
         print('\nImageset {} has been downloaded.'.format(set_id))
-    return error
+    return success
 
 
 def download_annotations(set_id, export_id, target_folder, login_data):
     """
-    Downloads annotations for an imageset
+    Downloads annotations for an imageset, which is usually slower than the zip download.
 
     :param set_id: The id of the image set for which the annotations will be saved
     :param export_id: The id of the export format
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This script will download images from the specified imageset for you.'
                                                  f' The images will be downloaded from: {BASE_URL}')
     parser.add_argument('-s', '--separate', action='store_true', default=False,
-                        help='Download the images separately instead of bundled in a ZIP file')
+                        help='Download the images separately instead of bundled in a ZIP file, this is usually slower.')
     parser.add_argument('-a', '--annotations', action='store_true', default=False,
                         help='Also download annotations')
     parser.add_argument('-e', '--export-format', type=int,
@@ -180,11 +180,6 @@ if __name__ == '__main__':
                         help='A list of imagesets to download')
     args = parser.parse_args()
 
-    if not args.username:
-        args.username = input("Username: ")
-
-    password = getpass.getpass()
-
     if args.annotations and not args.export_format:
         print(f'Please visit {BASE_URL}/annotations/api/export_format/list/ '
               'while logged in to find the id of your export format')
@@ -193,12 +188,17 @@ if __name__ == '__main__':
             sys.exit(f'{format_id} is not a valid integer.')
         args.export_format = format_id
 
-    folder = os.path.join(os.path.realpath(args.directory))
-    os.makedirs(folder, exist_ok=True)
+    if not args.username:
+        args.username = input("Username: ")
+    password = getpass.getpass()
 
     login_data = login(args.username, password)
     if not login_data:
         sys.exit('Login failed')
+
+    folder = os.path.join(os.path.realpath(args.directory))
+    os.makedirs(folder, exist_ok=True)
+
 
     error_list = []
     for imgset in args.imagesets:
