@@ -380,8 +380,8 @@ class BoundingBoxes {
     // array with all matching annotations
     var matchingAnnotations = [];
 
-    for (var a in globals.currentAnnotations) {
-      var annotation = globals.currentAnnotations[a];
+    for (var a in globals.currentAnnotationsOfSelectedType) {
+      var annotation = globals.currentAnnotationsOfSelectedType[a];
       if (annotation.annotation_type.id !== annotationType) {
         continue;
       }
