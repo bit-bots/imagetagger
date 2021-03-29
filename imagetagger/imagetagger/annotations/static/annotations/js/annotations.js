@@ -738,34 +738,30 @@ function calculateImageScale() {
     let concealedP = $('#concealed_p');
     let blurred = $('#blurred');
     let blurredP = $('#blurred_p');
-    let selectedAnnotation = $('#annotation_type_id').find(':selected');
-    if (selectedAnnotation.data('concealed')) {
-      concealedP.show();
-      concealed.prop('disabled', false);
-    } else {
+    if ($('#not_in_image').is(':checked')) {
       concealedP.hide();
+      concealed.prop('checked', false);
       concealed.prop('disabled', true);
-    }
-    if (selectedAnnotation.data('blurred')) {
-      blurredP.show();
-      blurred.prop('disabled', false);
-    } else {
       blurredP.hide();
+      blurred.prop('checked', false);
       blurred.prop('disabled', true);
+    } else {
+      let selectedAnnotation = $('#annotation_type_id').find(':selected');
+      if (selectedAnnotation.data('concealed')) {
+        concealedP.show();
+        concealed.prop('disabled', false);
+      } else {
+        concealedP.hide();
+        concealed.prop('disabled', true);
+      }
+      if (selectedAnnotation.data('blurred')) {
+        blurredP.show();
+        blurred.prop('disabled', false);
+      } else {
+        blurredP.hide();
+        blurred.prop('disabled', true);
+      }
     }
-  }
-
-  function hideCBCheckboxes() {
-    let concealed = $('#concealed');
-    let concealedP = $('#concealed_p');
-    let blurred = $('#blurred');
-    let blurredP = $('#blurred_p');
-    concealedP.hide();
-    concealed.prop('checked', false);
-    concealed.prop('disabled', true);
-    blurredP.hide();
-    blurred.prop('checked', false);
-    blurred.prop('disabled', true);
   }
 
   /**
@@ -778,13 +774,12 @@ function calculateImageScale() {
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
-      tool.resetSelection();
+      tool.resetSelection(true);
       coordinate_table.hide();
-      hideCBCheckboxes();
     } else {
       coordinate_table.show();
-      setupCBCheckboxes();
     }
+    setupCBCheckboxes();
   }
 
   /**
@@ -877,7 +872,6 @@ function calculateImageScale() {
     var loading = $('#annotations_loading');
     existingAnnotations.addClass('hidden');
     noAnnotations.addClass('hidden');
-    notInImage.prop('checked', false).change();
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
@@ -1143,8 +1137,8 @@ function calculateImageScale() {
     globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
       return e.annotation_type.id === gAnnotationType;
     });
-    setupCBCheckboxes();
     setTool();
+    setupCBCheckboxes();
   }
 
   function handleMouseDown(event) {
