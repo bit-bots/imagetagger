@@ -589,6 +589,9 @@ class Canvas {
         blurredP.hide();
         blurred.prop('checked', false);
         blurred.prop('disabled', true);
+      } else if (globals.restoreSelectionVectorType === 4) {
+        // this is not implemented for multilines, so just do nothing
+        this.old = undefined;
       } else {
         let vector = {};
         for (let key in globals.restoreSelection) {
