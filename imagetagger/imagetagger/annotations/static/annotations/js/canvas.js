@@ -579,6 +579,16 @@ class Canvas {
       if (globals.restoreSelection === null) {
         $('#not_in_image').prop('checked', true);
         $('#coordinate_table').hide();
+        let concealed = $('#concealed');
+        let concealedP = $('#concealed_p');
+        let blurred = $('#blurred');
+        let blurredP = $('#blurred_p');
+        concealedP.hide();
+        concealed.prop('checked', false);
+        concealed.prop('disabled', true);
+        blurredP.hide();
+        blurred.prop('checked', false);
+        blurred.prop('disabled', true);
       } else {
         let vector = {};
         for (let key in globals.restoreSelection) {
