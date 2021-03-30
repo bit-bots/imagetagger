@@ -887,7 +887,7 @@ function calculateImageScale() {
   /**
    * Load the image list from tye server applying a new filter.
    */
-  function loadImageList() {
+  async function loadImageList() {
     let filterElem = $('#filter_annotation_type');
     let filter = filterElem.val();
     let params = {
@@ -901,24 +901,25 @@ function calculateImageScale() {
       handleAnnotationTypeChange();
     }
 
-    $.ajax(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
-      type: 'GET',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function(data, textStatus, jqXHR) {
-        if (data.image_set.images.length === 0) {
-          // redirect to image set view.
-          displayFeedback($('#feedback_image_set_empty'));
-          filterElem.val('').change();
-          return;
-        }
+    $('.annotate_button').prop('disabled', true);
+    try {
+      let response = await fetch(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
+        method: 'GET',
+        headers: gHeaders,
+      });
+      let data = await response.json();
+      if (data.image_set.images.length === 0) {
+        // set is empty, reset filter
+        displayFeedback($('#feedback_image_set_empty'));
+        filterElem.val('').change();
+      } else {
         displayImageList(data.image_set.images);
-      },
-      error: function() {
-        $('.annotate_button').prop('disabled', false);
-        displayFeedback($('#feedback_connection_error'));
       }
-    });
+    } catch {
+      displayFeedback($('#feedback_connection_error'));
+    } finally {
+      $('.annotate_button').prop('disabled', false);
+    }
   }
 
   /**
@@ -1171,7 +1172,7 @@ function calculateImageScale() {
       if (tool instanceof BoundingBoxes) {
         tool.cancelSelection();
       }
-      loadImageList();
+      await loadImageList();
       await loadAdjacentImage(-1);
     });
     $('#back_button').click(async function(event) {
