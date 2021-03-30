@@ -560,14 +560,7 @@ function calculateImageScale() {
     result.attr('id', 'image_list');
     oldImageList.replaceWith(result);
 
-    gImageList = getImageList();
-
-    // load first image if current image is not within image set
-    if (!imageContained) {
-      await loadAnnotateView(imageList[0].id);
-    }
-
-    scrollImageList();
+    gImageList = imageList.map(image => { return image.id });
   }
 
   /**
@@ -626,21 +619,6 @@ function calculateImageScale() {
     tool.reloadSelection(annotationId, annotationData);
     $('#concealed').prop('checked', annotationElem.data('concealed')).change();
     $('#blurred').prop('checked', annotationElem.data('blurred')).change();
-  }
-
-  /**
-   * Get the image list from all .annotate_image_link within #image_list.
-   */
-  function getImageList() {
-    let imageList = [];
-    $('#image_list').find('.annotate_image_link').each(function(key, elem) {
-      let imageId = parseInt($(elem).data('imageid'));
-      if (imageList.indexOf(imageId) === -1) {
-        imageList.push(imageId);
-      }
-    });
-
-    return imageList;
   }
 
   /**
@@ -816,6 +794,11 @@ function calculateImageScale() {
    * @param fromHistory
    */
   async function loadAnnotateView(imageId, fromHistory) {
+    // load first image if current image is not within image set
+    if (!gImageList.includes(imageId)) {
+      console.log('Loading first image because ' + imageId + ' is not contained in the selection');
+      imageId = gImageList[0];
+    }
     gEditAnnotationId = undefined;
 
     imageId = parseInt(imageId);
@@ -835,7 +818,7 @@ function calculateImageScale() {
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
-    let loadImage = displayImage(imageId).then(scrollImageList);
+    let loadImage = displayImage(imageId);
 
     if (!$('#keep_selection').prop('checked')) {
       $('#concealed').prop('checked', false);
@@ -880,9 +863,9 @@ function calculateImageScale() {
   }
 
   /**
-   * Load the image list from tye server applying a new filter.
+   * Get the image list from the server applying a new filter.
    */
-  async function loadImageList() {
+  async function getImageList() {
     let filterElem = $('#filter_annotation_type');
     let filter = filterElem.val();
     let params = {
@@ -908,7 +891,7 @@ function calculateImageScale() {
         displayFeedback($('#feedback_image_set_empty'));
         filterElem.val('').change();
       } else {
-        await displayImageList(data.image_set.images);
+        return data.image_set.images;
       }
     } catch {
       displayFeedback($('#feedback_connection_error'));
@@ -976,7 +959,7 @@ function calculateImageScale() {
    * Load the previous or the next image
    *
    * @param offset integer to add to the current image index
-   * @return index of the requested image in gImageList
+   * @return id of the requested image
    */
   async function loadAdjacentImage(offset) {
     let imageIndex = gImageList.indexOf(gImageId);
@@ -991,7 +974,8 @@ function calculateImageScale() {
     while (imageIndex > imageIndex.length) {
       imageIndex -= imageIndex.length;
     }
-    await loadAnnotateView(gImageList[imageIndex]);
+    gImageId = gImageList[imageIndex];
+    return gImageList[imageIndex];
   }
 
   /**
@@ -1026,9 +1010,10 @@ function calculateImageScale() {
 
   /**
    * Scroll image list to make current image visible.
+   * @param imageId id of the image to scroll to
    */
-  function scrollImageList() {
-    let imageLink = $('#annotate_image_link_' + gImageId);
+  function scrollImageList(imageId) {
+    let imageLink = $('#annotate_image_link_' + imageId);
     let list = $('#image_list');
 
     let offset = list.offset().top;
@@ -1102,6 +1087,17 @@ function calculateImageScale() {
     handleAnnotationTypeChange();
   }
 
+  async function updateFilter() {
+      handleAnnotationTypeChange();
+      let imageList = await getImageList();
+      await displayImageList(imageList);
+      if (!gImageList.includes(gImageId)) {
+        gImageId = gImageList[0];
+      }
+      scrollImageList(gImageId);
+      await loadAnnotateView(gImageId);
+  }
+
 
   $(document).ready(function() {
     let get_params = decodeURIComponent(window.location.search.substring(1)).split('&');
@@ -1126,16 +1122,17 @@ function calculateImageScale() {
       "Content-Type": 'application/json',
       "X-CSRFTOKEN": gCsrfToken
     };
-    gImageList = getImageList();
-    scrollImageList();
-    loadAnnotationTypeList();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
     $(window).on('load', function() {
       setTool();
-      loadAnnotateView(gImageId);
-      preloadImages();
+      getImageList()
+          .then(displayImageList)
+          .then(r => { scrollImageList(gImageId) })
+          .then(r => { loadAnnotateView(gImageId) })
+          .then(r => { preloadImages() });
+      loadAnnotationTypeList();
     }());
 
     $('.annotation_value').on('input', function() {
@@ -1143,8 +1140,8 @@ function calculateImageScale() {
     });
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
-    $('select#filter_annotation_type').on('change', loadImageList);
-    $('#filter_update_btn').on('click', loadImageList);
+    $('select#filter_annotation_type').on('change', updateFilter);
+    $('#filter_update_btn').on('click', updateFilter);
     $('select').on('change', function() {
       document.activeElement.blur();
     });
@@ -1178,29 +1175,33 @@ function calculateImageScale() {
     $('#last_button').click(async function (event) {
       try {
         let annotation = getValidAnnotation(true);
-        let annotationPromise = createAnnotation(annotation);
-        let imagePromise = loadImageList().then(r => {
-          return loadAdjacentImage(-1);
-        })
-        await Promise.all([annotationPromise, imagePromise]);
+        await createAnnotation(annotation);
+        let imageId = await loadAdjacentImage(-1);
+        let imageList = await getImageList();
+        await displayImageList(imageList);
+        scrollImageList(imageId);
+        await loadAnnotateView(imageId);
       } catch (e) {
         console.log(e);
       }
     });
     $('#back_button').click(async function (event) {
-      await loadAdjacentImage(-1);
+      let imageId = await loadAdjacentImage(-1);
+      await loadAnnotateView(imageId);
     });
     $('#skip_button').click(async function (event) {
-      await loadAdjacentImage(1)
+      let imageId = await loadAdjacentImage(1);
+      await loadAnnotateView(imageId);
     });
     $('#next_button').click(async function (event) {
       try {
         let annotation = getValidAnnotation(true);
-        let annotationPromise = createAnnotation(annotation);
-        let imagePromise = loadImageList().then(r => {
-          return loadAdjacentImage(1);
-        })
-        await Promise.all([annotationPromise, imagePromise]);
+        await createAnnotation(annotation);
+        let imageId = await loadAdjacentImage(1);
+        let imageList = await getImageList();
+        await displayImageList(imageList);
+        scrollImageList(imageId);
+        await loadAnnotateView(imageId);
       } catch (e) {
         console.log(e);
       }
