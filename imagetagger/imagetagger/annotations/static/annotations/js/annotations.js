@@ -151,7 +151,7 @@ function calculateImageScale() {
 
     if (annotationTypeId === -1) {
       displayFeedback($('#feedback_annotation_type_missing'));
-      return;
+      throw new Error('annotation type missing');
     }
     let blurred = $('#blurred').is(':checked');
     let concealed = $('#concealed').is(':checked');
@@ -179,7 +179,7 @@ function calculateImageScale() {
     let node_count = selected_annotation.nodeCount;
     if (!validate_vector(vector, vector_type, node_count)) {
       displayFeedback($('#feedback_annotation_invalid'));
-      return;
+      throw new Error('annotation is invalid');
     }
 
     if (markForRestore === true) {
@@ -985,12 +985,12 @@ function calculateImageScale() {
    * Load the previous or the next image
    *
    * @param offset integer to add to the current image index
+   * @return index of the requested image in gImageList
    */
-  function loadAdjacentImage(offset) {
+  async function loadAdjacentImage(offset) {
     let imageIndex = gImageList.indexOf(gImageId);
     if (imageIndex < 0) {
-      console.log('current image is not referenced from page!');
-      return;
+      throw new Error('current image is not referenced from page!')
     }
 
     imageIndex += offset;
@@ -1000,8 +1000,7 @@ function calculateImageScale() {
     while (imageIndex > imageIndex.length) {
       imageIndex -= imageIndex.length;
     }
-
-    loadAnnotateView(gImageList[imageIndex]);
+    return imageIndex;
   }
 
   /**
@@ -1180,20 +1179,26 @@ function calculateImageScale() {
       }).then(r => {
         loadImageList();
       }).then(r => {
-        loadAdjacentImage(-1);
+        return loadAdjacentImage(-1);
+      }).then(imageIndex => {
+        loadAnnotateView(gImageList[imageIndex]);
       });
     });
     $('#back_button').click(function(event) {
       if (tool instanceof BoundingBoxes) {
           tool.cancelSelection();
       }
-      loadAdjacentImage(-1);
+      loadAdjacentImage(-1).then(imageIndex => {
+        loadAnnotateView(gImageList[imageIndex]);
+      });
     });
     $('#skip_button').click(function(event) {
       if (tool instanceof BoundingBoxes) {
           tool.cancelSelection();
       }
-      loadAdjacentImage(1);
+      loadAdjacentImage(1).then(imageIndex => {
+        loadAnnotateView(gImageList[imageIndex]);
+      });
     });
     $('#next_button').click(function(event) {
       createAnnotation(true).then(r => {
@@ -1203,7 +1208,9 @@ function calculateImageScale() {
       }).then(r => {
         loadImageList();
       }).then(r => {
-        loadAdjacentImage(1);
+        return loadAdjacentImage(1);
+      }).then(imageIndex => {
+        loadAnnotateView(gImageList[imageIndex]);
       });
     });
     $('.js_feedback').mouseover(function() {
