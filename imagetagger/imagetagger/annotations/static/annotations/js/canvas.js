@@ -371,6 +371,11 @@ class Canvas {
     for (let d of this.drawings) {
       d.remove();
     }
+    this.unsetAnnotationFields();
+    this.currentDrawing = undefined;
+  }
+
+  unsetAnnotationFields() {
     switch (this.vector_type) {
       case 2: // Point
         this.updateAnnotationFields({x1: 0, y1: 0});
@@ -425,7 +430,8 @@ class Canvas {
   }
 
   drawExistingAnnotations(annotations, color) {
-    this.clear();
+    let currentDrawing = this.currentDrawing;
+    this.currentDrawing = undefined;
     color = color || globals.stdColor;
     let colors = [];
     if (color.constructor === Array) {
@@ -445,8 +451,6 @@ class Canvas {
     for (let i in annotations) {
       let annotation = annotations[i];
       let color = colors[i];
-      console.log(annotation);
-      console.log(color);
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }
@@ -485,7 +489,14 @@ class Canvas {
           console.log("Unknown vector type: " + annotation.annotation_type.vector_type);
       }
     }
-    this.currentDrawing = undefined;
+    // completely restore the drawing from before drawing the existing annotations,
+    // especially the annotation fields are overwritten during the drawing
+    this.currentDrawing = currentDrawing;
+    if (currentDrawing) {
+      this.reloadSelection(currentDrawing.id);
+    } else {
+      this.unsetAnnotationFields();
+    }
   }
 
   updateAnnotationFields(drawing) {
@@ -545,24 +556,22 @@ class Canvas {
       drawing.setMutable(false);
     }
     if (this.old && this.currentDrawing) {
-        this.currentDrawing.setPoints(this.old);
-        this.old = undefined;
-      } else if (this.currentDrawing) {
-        this.currentDrawing.remove();
-      }
-      this.currentDrawing = undefined;
+      this.currentDrawing.setPoints(this.old);
+      this.old = undefined;
+    } else if (this.currentDrawing) {
+      this.currentDrawing.remove();
+    }
+    this.currentDrawing = undefined;
   }
 
   cancelSelection() {
     this.resetSelection(true)
   }
 
-  initSelection() { }
-
   /**
    * Restore the selection.
    */
-  restoreSelection(reset) {
+  restoreSelection() {
     if (!$('#keep_selection').prop('checked')) {
       return;
     }
@@ -605,11 +614,6 @@ class Canvas {
         this.reloadSelection(0);
         this.old = undefined;
       }
-    }
-    if (reset !== false) {
-      globals.restoreSelection = undefined;
-      globals.restoreSelectionNodeCount = 0;
-      globals.restoreSelectionVectorType = 1;
     }
   }
 

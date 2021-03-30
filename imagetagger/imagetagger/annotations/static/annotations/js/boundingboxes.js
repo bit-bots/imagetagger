@@ -1,20 +1,17 @@
 // JS file for bounding box internals
 
 class BoundingBoxes {
-  constructor(annotationTypeId, noSelection) {
+  constructor(annotationTypeId) {
     this.selection = undefined;
     this.vector_type = 1;
     if (globals.image === '') {
       globals.image = $('#image');
     }
     this.annotationTypeId = annotationTypeId;
-    if (!noSelection) {
-      this.initSelection();
-    }
+    this.resetSelection();
   }
 
   drawExistingAnnotations(annotations, color) {
-    this.clear();
     calculateImageScale();
     color = color || globals.stdColor;
     let colors = [];
@@ -93,21 +90,8 @@ class BoundingBoxes {
     while (boundingBoxes.firstChild) {
       boundingBoxes.removeChild(boundingBoxes.firstChild);
     }
-  }
 
-  /**
-   * Initialize the selection.
-   */
-  initSelection() {
-    this.selection = globals.image.imgAreaSelect({
-      instance: true,
-      show: true,
-      minHeight: 2,
-      minWidth: 2,
-      onSelectChange: this.updateAnnotationFields,
-      resizeMargin: 3
-    });
-    this.selection.cancelSelection();
+    this.cancelSelection();
   }
 
   /**
@@ -117,7 +101,8 @@ class BoundingBoxes {
     this.setHighlightColor(annotationId);
     this.selection = globals.image.imgAreaSelect({
       instance: true,
-      show: true
+      show: true,
+      onSelectChange: this.updateAnnotationFields,
     });
     if (!annotationData) {
       annotationData = {
@@ -150,15 +135,21 @@ class BoundingBoxes {
     this.unsetHighlightColor();
     $('.annotation_value').val(0);
 
-    if (this.selection !== undefined) {
-      this.selection.cancelSelection();
-    }
+    this.selection = globals.image.imgAreaSelect({
+      instance: true,
+      show: true,
+      minHeight: 2,
+      minWidth: 2,
+      onSelectChange: this.updateAnnotationFields,
+      resizeMargin: 3
+    });
+    this.selection.cancelSelection();
   }
 
   /**
    * Restore the selection.
    */
-  restoreSelection(reset) {
+  restoreSelection() {
     if (!$('#keep_selection').prop('checked')) {
       return;
     }
@@ -173,9 +164,6 @@ class BoundingBoxes {
         $('#y2Field').val(globals.restoreSelection.y2);
         this.reloadSelection(0, globals.restoreSelection);
       }
-    }
-    if (reset !== false) {
-      globals.restoreSelection = undefined;
     }
   }
 
