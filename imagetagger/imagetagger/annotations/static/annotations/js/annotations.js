@@ -2,8 +2,6 @@ globals = {
   image: {},
   imageScaleWidth: 1,
   imageScaleHeight: 1,
-  editedAnnotationsId: undefined,
-  editActiveContainer: {},
   restoreSelection: undefined,
   restoreSelectionVectorType: 1,
   restoreSelectionNodeCount: 0,
@@ -52,6 +50,7 @@ function calculateImageScale() {
   let gHighlightedAnnotation;
   let gShiftDown;
   let tool;
+  let gEditAnnotationId;  // id of the currently edited annotation, or undefined
 
   function shorten(string, length) {
     let threshold = length || 30;
@@ -117,7 +116,7 @@ function calculateImageScale() {
           cancelSelection: function() {},
           reset: function() {},
           drawExistingAnnotations: function() {},
-          handleEscape: function() {},
+          closeDrawing: function() {},
           handleMousemove: function() {},
           handleMouseDown: function() {},
           handleMouseUp: function() {},
@@ -198,10 +197,10 @@ function calculateImageScale() {
       blurred: blurred
     };
     let editing = false;
-    if (globals.editedAnnotationsId !== undefined) {
+    if (gEditAnnotationId !== undefined) {
       // edit instead of create
       action = 'update';
-      body.annotation_id = globals.editedAnnotationsId;
+      body.annotation_id = gEditAnnotationId;
       editing = true;
     }
 
@@ -219,7 +218,7 @@ function calculateImageScale() {
         if (editing) {
           if (data.detail === 'similar annotation exists.') {
             displayFeedback($('#feedback_annotation_exists_deleted'));
-            $('#annotation_edit_button_' + globals.editedAnnotationsId).parent().parent().fadeOut().remove();
+            $('#annotation_edit_button_' + gEditAnnotationId).parent().parent().fadeOut().remove();
           } else {
             displayFeedback($('#feedback_annotation_updated'));
             displayExistingAnnotations(data.annotations);
@@ -240,10 +239,7 @@ function calculateImageScale() {
 
       tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
 
-      globals.editedAnnotationsId = undefined;
-      $('.annotation').removeClass('alert-info');
-      globals.editActiveContainer.addClass('hidden');
-      tool.resetSelection(true);
+      resetSelection();
     } catch (e) {
       console.log(e);
       displayFeedback($('#feedback_connection_error'));
@@ -295,9 +291,9 @@ function calculateImageScale() {
    * @param annotationId
    */
   function deleteAnnotation(annotationId) {
-    if (globals.editedAnnotationsId === annotationId) {
+    if (gEditAnnotationId === annotationId) {
       // stop editing
-      tool.resetSelection(true);
+      resetSelection();
       $('#not_in_image').prop('checked', false).change();
     }
 
@@ -323,7 +319,7 @@ function calculateImageScale() {
         tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
         displayExistingAnnotations(gCurrentAnnotations);
         displayFeedback($('#feedback_annotation_deleted'));
-        globals.editedAnnotationsId = undefined;
+        gEditAnnotationId = undefined;
       },
       error: function() {
         $('.annotate_button').prop('disabled', false);
@@ -356,7 +352,7 @@ function calculateImageScale() {
       let annotation = annotations[i];
 
       let alertClass = '';
-      if (globals.editedAnnotationsId === annotation.id) {
+      if (gEditAnnotationId === annotation.id) {
         alertClass = ' alert-info';
       }
       let newAnnotation = $(
@@ -509,12 +505,22 @@ function calculateImageScale() {
     globals.image = newImage;
     calculateImageScale();
     tool.initSelection();
-    tool.resetSelection();
+    resetSelection();
 
     if (currentImage.data('imageid') !== undefined) {
       // add previous image to cache
       gImageCache[currentImage.data('imageid')] = currentImage;
     }
+  }
+
+  /**
+   * Delete the current selection
+   */
+  function resetSelection() {
+    tool.resetSelection();
+    gEditAnnotationId = undefined;
+    $('.annotation').removeClass('alert-info');
+    $('#edit_active').addClass('hidden');
   }
 
   /**
@@ -592,8 +598,8 @@ function calculateImageScale() {
     let annotationTypeId = annotationElem.data('annotationtypeid');
     $('#annotation_type_id').val(annotationTypeId);
     handleAnnotationTypeChange();
-    globals.editedAnnotationsId = annotationId;
-    globals.editActiveContainer.removeClass('hidden');
+    gEditAnnotationId = annotationId;
+    $('#edit_active').removeClass('hidden');
 
     $('.js_feedback').stop().addClass('hidden');
     let params = {
@@ -735,7 +741,7 @@ function calculateImageScale() {
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
-      tool.resetSelection(true);
+      resetSelection();
       coordinate_table.hide();
     } else {
       coordinate_table.show();
@@ -814,7 +820,7 @@ function calculateImageScale() {
    * @param fromHistory
    */
   function loadAnnotateView(imageId, fromHistory) {
-    globals.editedAnnotationsId = undefined;
+    gEditAnnotationId = undefined;
 
     imageId = parseInt(imageId);
 
@@ -870,7 +876,7 @@ function calculateImageScale() {
       if (globals.restoreSelection !== undefined) {
         tool.restoreSelection();
       } else {
-        tool.resetSelection();
+        resetSelection();
       }
     };
 
@@ -1089,10 +1095,10 @@ function calculateImageScale() {
 
   // handle DEL key press
   function handleDelete(event) {
-    if (globals.editedAnnotationsId === undefined)
+    if (gEditAnnotationId === undefined)
       return;
 
-    deleteAnnotation(globals.editedAnnotationsId);
+    deleteAnnotation(gEditAnnotationId);
   }
 
   function selectAnnotationType(annotationTypeNumber) {
@@ -1115,7 +1121,6 @@ function calculateImageScale() {
         break;
       }
     }
-    globals.editActiveContainer = $('#edit_active');
     globals.image = $('#image');
     globals.drawAnnotations = $('#draw_annotations').is(':checked');
     gMousepos = $('#mousepos');
@@ -1158,14 +1163,14 @@ function calculateImageScale() {
       handleMouseClick(e);
     });
     $('#cancel_edit_button').click(function() {
-      tool.resetSelection(true);
+      resetSelection();
     });
     $('#save_button').click(function (event) {
       event.preventDefault();
       createAnnotation();
     });
     $('#reset_button').click(function() {
-      tool.resetSelection(true);
+      resetSelection();
     });
     $('#last_button').click(function(event) {
       createAnnotation(true).then(r => {
@@ -1243,7 +1248,13 @@ function calculateImageScale() {
           gShiftDown = true;
           break;
         case 27: // Escape
-          tool.handleEscape();
+          if (globals.annotation_type_id === 4) {
+            // special case multiline: close drawing
+            tool.closeDrawing();
+          } else {
+            // normally, just delete the selection
+            resetSelection();
+          }
           break;
         case 73: //i
           if(gShiftDown) {

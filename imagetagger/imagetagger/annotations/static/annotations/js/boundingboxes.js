@@ -80,16 +80,9 @@ class BoundingBoxes {
     }
   }
 
-  unsetHighlightColor(id) {
-    let highlightBox;
+  unsetHighlightColor() {
     for (let box of $('.boundingBox')) {
-      if ($(box).data('annotationid') === id) {
-        highlightBox = box;
-        break;
-      }
-    }
-    if (highlightBox) {
-      $(highlightBox).css({
+      $(box).css({
         'border': '2px solid ' + globals.stdColor
       });
     }
@@ -156,17 +149,13 @@ class BoundingBoxes {
   /**
    * Delete current selection.
    */
-  resetSelection(abortEdit) {
-    this.unsetHighlightColor(globals.editedAnnotationsId);
+  resetSelection() {
+    this.unsetHighlightColor();
     $('.annotation_value').val(0);
 
     if (this.selection !== undefined) {
       this.selection.cancelSelection();
     }
-
-    globals.editedAnnotationsId = undefined;
-    $('.annotation').removeClass('alert-info');
-    globals.editActiveContainer.addClass('hidden');
   }
 
   /**
@@ -371,7 +360,7 @@ class BoundingBoxes {
 
   handleMouseDown(event) { }
   handleMouseUp(event) { }
-  handleEscape() { this.resetSelection(true); }
+  closeDrawing() { }
 
   handleMouseClick(event) {
     // get current annotation type id

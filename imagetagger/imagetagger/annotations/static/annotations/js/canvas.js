@@ -532,32 +532,25 @@ class Canvas {
     }
   }
 
-  handleEscape() {
+  closeDrawing() {
     if (this.currentDrawing && this.annotationTypeId === 4 && !this.currentDrawing.closed) {
       this.currentDrawing.close();
-    } else {
-      this.resetSelection(true);
     }
   }
 
-  resetSelection(abortEdit) {
+  resetSelection() {
     $('.annotation_value').val(0);
     // Make every drawing immutable
     for (let drawing of this.drawings) {
       drawing.setMutable(false);
     }
-    globals.editedAnnotationsId = undefined;
-    $('.annotation').removeClass('alert-info');
-    globals.editActiveContainer.addClass('hidden');
-    if (abortEdit === true) {
-      if (this.old && this.currentDrawing) {
+    if (this.old && this.currentDrawing) {
         this.currentDrawing.setPoints(this.old);
         this.old = undefined;
       } else if (this.currentDrawing) {
         this.currentDrawing.remove();
       }
       this.currentDrawing = undefined;
-    }
   }
 
   cancelSelection() {
