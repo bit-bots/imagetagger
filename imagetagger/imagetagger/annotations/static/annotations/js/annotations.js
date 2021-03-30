@@ -61,12 +61,6 @@ function calculateImageScale() {
     }
   }
 
-  function initTool() {
-    setTool();
-    tool.initSelection();
-    loadAnnotateView(gImageId);
-  }
-
   function setTool() {
     let selected_annotation = $('#annotation_type_id').children(':selected').data();
     let vector_type = selected_annotation.vectorType;
@@ -1151,12 +1145,14 @@ function calculateImageScale() {
     gImageList = getImageList();
     scrollImageList();
     loadAnnotationTypeList();
-    preloadImages();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
     $(window).on('load', function() {
-      initTool();
+      setTool();
+      tool.initSelection();
+      loadAnnotateView(gImageId);
+      preloadImages();
     }());
 
     $('.annotation_value').on('input', function() {
