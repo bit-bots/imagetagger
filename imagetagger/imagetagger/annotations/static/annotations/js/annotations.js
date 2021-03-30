@@ -550,7 +550,7 @@ function calculateImageScale() {
       link.click(async function(event) {
         event.preventDefault(); // do not let the browser follow the link
         globals.restoreSelection = undefined;
-        await loadAnnotateView($(this).data('imageid'));
+        await changeImage($(this).data('imageid'), false);
       });
 
       result.append(link);
@@ -1101,6 +1101,22 @@ function calculateImageScale() {
       await loadAnnotateView(gImageId);
   }
 
+  /**
+   * Change the image that is currently shown, i.e. update the image list, the displayed image and the annotation view
+   * @param imageId the id of the image to change to
+   * @param keepSelection whether the current selection should be kept on the next image
+   */
+  async function changeImage(imageId, keepSelection) {
+    if (!keepSelection) {
+      // unset restoreSelection to avoid restoring a selection that we do not want to keep
+      globals.restoreSelection = undefined;
+    }
+    let imageList = await getImageList();
+    await displayImageList(imageList);
+    scrollImageList(imageId);
+    await loadAnnotateView(imageId);
+  }
+
 
   $(document).ready(function() {
     let get_params = decodeURIComponent(window.location.search.substring(1)).split('&');
@@ -1180,31 +1196,27 @@ function calculateImageScale() {
         let annotation = getValidAnnotation(true);
         await createAnnotation(annotation);
         let imageId = await loadAdjacentImage(-1);
-        let imageList = await getImageList();
-        await displayImageList(imageList);
-        scrollImageList(imageId);
-        await loadAnnotateView(imageId);
+        let keepSelection = $('#keep_selection').prop('checked');
+        await changeImage(imageId, keepSelection);
       } catch (e) {
         console.log(e);
       }
     });
     $('#back_button').click(async function (event) {
       let imageId = await loadAdjacentImage(-1);
-      await loadAnnotateView(imageId);
+      await changeImage(imageId, false);
     });
     $('#skip_button').click(async function (event) {
       let imageId = await loadAdjacentImage(1);
-      await loadAnnotateView(imageId);
+      await changeImage(imageId, false)
     });
     $('#next_button').click(async function (event) {
       try {
         let annotation = getValidAnnotation(true);
         await createAnnotation(annotation);
         let imageId = await loadAdjacentImage(1);
-        let imageList = await getImageList();
-        await displayImageList(imageList);
-        scrollImageList(imageId);
-        await loadAnnotateView(imageId);
+        let keepSelection = $('#keep_selection').prop('checked')
+        await changeImage(imageId, keepSelection);
       } catch (e) {
         console.log(e);
       }
@@ -1215,7 +1227,7 @@ function calculateImageScale() {
     $('.annotate_image_link').click(async function(event) {
       event.preventDefault(); // do not let the browser load the link
       globals.restoreSelection = undefined;
-      await loadAnnotateView($(this).data('imageid'));
+      await changeImage($(this).data('imageid'), false);
     });
 
     // annotation buttons
