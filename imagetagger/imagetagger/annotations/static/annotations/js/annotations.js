@@ -520,6 +520,8 @@ function calculateImageScale() {
     gEditAnnotationId = undefined;
     $('.annotation').removeClass('alert-info');
     $('#edit_active').addClass('hidden');
+    $('#concealed').prop('checked', false);
+    $('#blurred').prop('checked', false);
   }
 
   /**
@@ -820,11 +822,6 @@ function calculateImageScale() {
 
     let loadImage = displayImage(imageId);
 
-    if (!$('#keep_selection').prop('checked')) {
-      $('#concealed').prop('checked', false);
-      $('#blurred').prop('checked', false);
-    }
-
     $('.annotate_image_link').removeClass('active');
     let link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
@@ -837,8 +834,14 @@ function calculateImageScale() {
     $('#delete-image-form').attr('action', DELETE_IMAGE_URL.replace('%s', imageId));
 
     tool.clear();
-    if (globals.restoreSelection !== undefined) {
+    if (globals.restoreSelection !== undefined && $('#keep_selection').prop('checked')) {
       tool.restoreSelection();
+      if (globals.restoreSelection === null) {
+        // not in image
+        $('#not_in_image').prop('checked', true);
+        $('#coordinate_table').hide();
+        setupCBCheckboxes();
+      }
     } else {
       resetSelection();
     }

@@ -150,13 +150,8 @@ class BoundingBoxes {
    * Restore the selection.
    */
   restoreSelection() {
-    if (!$('#keep_selection').prop('checked')) {
-      return;
-    }
     if (globals.restoreSelection !== undefined) {
       if (globals.restoreSelection === null) {
-        $('#not_in_image').prop('checked', true);
-        $('#coordinate_table').hide();
       } else {
         $('#x1Field').val(globals.restoreSelection.x1);
         $('#x2Field').val(globals.restoreSelection.x2);
