@@ -248,18 +248,17 @@ function calculateImageScale() {
     }
   }
 
-  function loadAnnotationTypeList() {
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadannotationtypes/', {
-      type: 'GET',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function (data) {
-        displayAnnotationTypeOptions(data.annotation_types);
-      },
-      error: function () {
-        displayFeedback($('#feedback_connection_error'))
-      }
-    })
+  async function loadAnnotationTypeList() {
+    try {
+      let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/loadannotationtypes/', {
+        method: 'GET',
+        headers: gHeaders,
+      });
+      let data = await response.json();
+      displayAnnotationTypeOptions(data.annotation_types);
+    } catch {
+      displayFeedback($('#feedback_connection_error'))
+    }
   }
 
   function displayAnnotationTypeOptions(annotationTypeList) {
