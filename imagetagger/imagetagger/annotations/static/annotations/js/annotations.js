@@ -39,28 +39,19 @@ function calculateImageScale() {
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
 
-  // TODO: Find a solution for url resolvings
-
-  var gCsrfToken;
-  var gHeaders;
-  var gHideFeedbackTimeout;
-  var gImageCache = {};
-  var gImageId;
-  var gImageSetId;
-  var gImageList;
-  var gMousepos;
+  let gCsrfToken;
+  let gHeaders;
+  let gHideFeedbackTimeout;
+  let gImageCache = {};
+  let gImageId;
+  let gImageSetId;
+  let gImageList;
+  let gMousepos;
   let gAnnotationType = -1;
   let gCurrentAnnotations = [];
   let gHighlightedAnnotation;
-
-  var gShiftDown;
-
-  // a threshold for editing an annotation if you select a small rectangle
-  var gSelectionThreshold = 5;
-
-  // save the current annotations of the image, so we can draw and hide the
-
-  var tool;
+  let gShiftDown;
+  let tool;
 
   function shorten(string, length) {
     let threshold = length || 30;
@@ -163,8 +154,8 @@ function calculateImageScale() {
       event.preventDefault();
     }
 
-    var annotationTypeId = parseInt($('#annotation_type_id').val());
-    var vector = null;
+    let annotationTypeId = parseInt($('#annotation_type_id').val());
+    let vector = null;
 
     if (isNaN(annotationTypeId)) {
       displayFeedback($('#feedback_annotation_type_missing'));
@@ -205,15 +196,15 @@ function calculateImageScale() {
       globals.restoreSelectionNodeCount = node_count;
     }
 
-    var action = 'create';
-    var data = {
+    let action = 'create';
+    let data = {
       annotation_type_id: annotationTypeId,
       image_id: gImageId,
       vector: vector,
       concealed: concealed,
       blurred: blurred
     };
-    var editing = false;
+    let editing = false;
     if (globals.editedAnnotationsId !== undefined) {
       // edit instead of create
       action = 'update';
@@ -338,7 +329,7 @@ function calculateImageScale() {
       }
     }
     $('.js_feedback').stop().addClass('hidden');
-    var params = {
+    let params = {
       annotation_id: annotationId
     };
     $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/delete/?' + $.param(params), {
@@ -369,8 +360,8 @@ function calculateImageScale() {
    * @param annotations
    */
   function displayExistingAnnotations(annotations) {
-    var existingAnnotations = $('#existing_annotations');
-    var noAnnotations = $('#no_annotations');
+    let existingAnnotations = $('#existing_annotations');
+    let noAnnotations = $('#no_annotations');
 
     existingAnnotations.addClass('hidden');
 
@@ -383,14 +374,14 @@ function calculateImageScale() {
     existingAnnotations.html('');
 
     // display new annotations
-    for (var i = 0; i < annotations.length; i++) {
-      var annotation = annotations[i];
+    for (let i = 0; i < annotations.length; i++) {
+      let annotation = annotations[i];
 
-      var alertClass = '';
+      let alertClass = '';
       if (globals.editedAnnotationsId === annotation.id) {
         alertClass = ' alert-info';
       }
-      var newAnnotation = $(
+      let newAnnotation = $(
         '<div id="annotation_' + annotation.id +
         '" class="annotation' + alertClass + '">');
 
@@ -422,14 +413,14 @@ function calculateImageScale() {
 
       newAnnotation.append(annotation.annotation_type.name + ':');
 
-      var annotationLinks = $('<div style="float: right;">');
-      var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
+      let annotationLinks = $('<div style="float: right;">');
+      let verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
       '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="verify" class="annotation_verify_button">' +
       '</a>');
-      var editButton = $('<a href="#">' +
+      let editButton = $('<a href="#">' +
       '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit" class="annotation_edit_button">' +
       '</a>');
-      var deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
+      let deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
       '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete" class="annotation_delete_button">' +
       '</a>');
       const annotationId = annotation.id;
@@ -469,7 +460,7 @@ function calculateImageScale() {
 
   function handleMouseClick(e) {
     if (e && (e.target.id === 'image' || e.target.id === 'image_canvas')) {
-      var position = globals.image.offset();
+      let position = globals.image.offset();
       globals.mouseClickX = Math.round((e.pageX - position.left));
       globals.mouseClickY = Math.round((e.pageY - position.top));
       tool.handleMouseClick(e);
@@ -527,8 +518,8 @@ function calculateImageScale() {
     }
 
     // image is in cache.
-    var currentImage = globals.image;
-    var newImage = gImageCache[imageId];
+    let currentImage = globals.image;
+    let newImage = gImageCache[imageId];
 
     currentImage.attr('id', '');
     newImage.attr('id', 'image');
@@ -553,16 +544,16 @@ function calculateImageScale() {
    * @param imageList
    */
   function displayImageList(imageList) {
-    var oldImageList = $('#image_list');
-    var result = $('<div>');
-    var imageContained = false;
+    let oldImageList = $('#image_list');
+    let result = $('<div>');
+    let imageContained = false;
 
     oldImageList.html('');
 
-    for (var i = 0; i < imageList.length; i++) {
-      var image = imageList[i];
+    for (let i = 0; i < imageList.length; i++) {
+      let image = imageList[i];
 
-      var link = $('<a>');
+      let link = $('<a>');
       link.attr('id', 'annotate_image_link_' + image.id);
       link.attr('href', ANNOTATE_URL.replace('%s', image.id));
       link.addClass('annotate_image_link');
@@ -631,11 +622,11 @@ function calculateImageScale() {
       event.preventDefault();
     }
     $('.js_feedback').stop().addClass('hidden');
-    var params = {
+    let params = {
       annotation_id: annotationId
     };
 
-    var annotationData = annotationElem.data('vector');
+    let annotationData = annotationElem.data('vector');
     if (annotationData === undefined) {
       annotationData = annotationElem.data('escapedvector');
     }
@@ -644,7 +635,7 @@ function calculateImageScale() {
     $('.annotation').removeClass('alert-info');
     annotationElem.parent().parent().addClass('alert-info');
 
-    var notInImage = $('#not_in_image');
+    let notInImage = $('#not_in_image');
     if (annotationData === null) {
       // not in image
       notInImage.prop('checked', true).change();
@@ -665,9 +656,9 @@ function calculateImageScale() {
    * Get the image list from all .annotate_image_link within #image_list.
    */
   function getImageList() {
-    var imageList = [];
+    let imageList = [];
     $('#image_list').find('.annotate_image_link').each(function(key, elem) {
-      var imageId = parseInt($(elem).data('imageid'));
+      let imageId = parseInt($(elem).data('imageid'));
       if (imageList.indexOf(imageId) === -1) {
         imageList.push(imageId);
       }
@@ -799,8 +790,8 @@ function calculateImageScale() {
    */
   function handleSelection(event) {
     calculateImageScale();
-    var cH = $('#crosshair-h'), cV = $('#crosshair-v');
-    var position = globals.image.offset();
+    let cH = $('#crosshair-h'), cV = $('#crosshair-v');
+    let position = globals.image.offset();
     if (event.pageX > position.left &&
           event.pageX < position.left + globals.image.width() &&
           event.pageY > position.top &&
@@ -862,10 +853,9 @@ function calculateImageScale() {
       return;
     }
 
-    var noAnnotations = $('#no_annotations');
-    var notInImage = $('#not_in_image');
-    var existingAnnotations = $('#existing_annotations');
-    var loading = $('#annotations_loading');
+    let noAnnotations = $('#no_annotations');
+    let existingAnnotations = $('#existing_annotations');
+    let loading = $('#annotations_loading');
     existingAnnotations.addClass('hidden');
     noAnnotations.addClass('hidden');
     loading.removeClass('hidden');
@@ -879,7 +869,7 @@ function calculateImageScale() {
     scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
-    var link = $('#annotate_image_link_' + imageId);
+    let link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
     $('#active_image_name').text(link.text().trim());
     let next_image_id = gImageList[gImageList.indexOf(imageId) + 1];
@@ -994,7 +984,7 @@ function calculateImageScale() {
       return;
     }
 
-    var params = {
+    let params = {
       image_id: imageId
     };
     $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
@@ -1019,7 +1009,7 @@ function calculateImageScale() {
    * @param offset integer to add to the current image index
    */
   function loadAdjacentImage(offset) {
-    var imageIndex = gImageList.indexOf(gImageId);
+    let imageIndex = gImageList.indexOf(gImageId);
     if (imageIndex < 0) {
       console.log('current image is not referenced from page!');
       return;
@@ -1040,8 +1030,8 @@ function calculateImageScale() {
    * Preload next and previous images to cache.
    */
   function preloadImages() {
-    var keepImages = [];
-    for (var imageId = gImageId - PRELOAD_BACKWARD;
+    let keepImages = [];
+    for (let imageId = gImageId - PRELOAD_BACKWARD;
          imageId <= gImageId + PRELOAD_FORWARD;
          imageId++) {
       keepImages.push(imageId);
@@ -1056,7 +1046,7 @@ function calculateImageScale() {
    * @param keep Array of the image ids which should be kept in the cache.
    */
   function pruneImageCache(keep) {
-    for (var imageId in gImageCache) {
+    for (let imageId in gImageCache) {
       imageId = parseInt(imageId);
       if (gImageCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
         delete gImageCache[imageId];
@@ -1068,11 +1058,11 @@ function calculateImageScale() {
    * Scroll image list to make current image visible.
    */
   function scrollImageList() {
-    var imageLink = $('#annotate_image_link_' + gImageId);
-    var list = $('#image_list');
+    let imageLink = $('#annotate_image_link_' + gImageId);
+    let list = $('#image_list');
 
-    var offset = list.offset().top;
-    var linkTop = imageLink.offset().top;
+    let offset = list.offset().top;
+    let linkTop = imageLink.offset().top;
 
     // link should be (roughly) in the middle of the element
     offset += parseInt(list.height() / 2);
@@ -1097,7 +1087,7 @@ function calculateImageScale() {
     if (!$('#draw_annotations').is(':checked'))
       return;
 
-    var position = globals.image.offset();
+    let position = globals.image.offset();
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
             event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
@@ -1115,7 +1105,7 @@ function calculateImageScale() {
     if (!$('#draw_annotations').is(':checked'))
       return;
 
-    var position = globals.image.offset();
+    let position = globals.image.offset();
     globals.mouseUpX = Math.round((event.pageX - position.left)/* * globals.imageScaleWidth*/);
     globals.mouseUpY = Math.round((event.pageY - position.top)/* * globals.imageScaleHeight*/);
 
@@ -1134,8 +1124,8 @@ function calculateImageScale() {
   }
 
   function selectAnnotationType(annotationTypeNumber) {
-    var annotationTypeId = '#annotation_type_' + annotationTypeNumber;
-    var option = $(annotationTypeId);
+    let annotationTypeId = '#annotation_type_' + annotationTypeNumber;
+    let option = $(annotationTypeId);
     if(option.length) {
       $('#annotation_type_id').val(option.val());
     }
