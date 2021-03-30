@@ -854,6 +854,9 @@ function calculateImageScale() {
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
+    if (tool instanceof BoundingBoxes) {
+      tool.cancelSelection();
+    }
     let loadImage = displayImage(imageId).then(scrollImageList);
 
     if (!$('#keep_selection').prop('checked')) {
@@ -1193,9 +1196,6 @@ function calculateImageScale() {
         let annotation = getValidAnnotation(true);
         let annotationPromise = createAnnotation(annotation);
         let imagePromise = loadImageList().then(r => {
-          if (tool instanceof BoundingBoxes) {
-            tool.cancelSelection();
-          }
           return loadAdjacentImage(-1);
         })
         await Promise.all([annotationPromise, imagePromise]);
@@ -1204,15 +1204,9 @@ function calculateImageScale() {
       }
     });
     $('#back_button').click(async function (event) {
-      if (tool instanceof BoundingBoxes) {
-        tool.cancelSelection();
-      }
       await loadAdjacentImage(-1);
     });
     $('#skip_button').click(async function (event) {
-      if (tool instanceof BoundingBoxes) {
-        tool.cancelSelection();
-      }
       await loadAdjacentImage(1)
     });
     $('#next_button').click(async function (event) {
@@ -1220,9 +1214,6 @@ function calculateImageScale() {
         let annotation = getValidAnnotation(true);
         let annotationPromise = createAnnotation(annotation);
         let imagePromise = loadImageList().then(r => {
-          if (tool instanceof BoundingBoxes) {
-            tool.cancelSelection();
-          }
           return loadAdjacentImage(1);
         })
         await Promise.all([annotationPromise, imagePromise]);
