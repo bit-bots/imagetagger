@@ -984,11 +984,14 @@ function calculateImageScale() {
   async function preloadImages() {
     let keepImages = [];
     let cacheLoadings = [];
-    for (let imageId = gImageId - PRELOAD_BACKWARD;
-         imageId <= gImageId + PRELOAD_FORWARD;
-         imageId++) {
-      keepImages.push(imageId);
-      cacheLoadings.push(loadImageToCache(imageId));
+    let currentImageIndex = gImageList.indexOf(gImageId);
+    for (let index = currentImageIndex - PRELOAD_BACKWARD;
+         index <= currentImageIndex + PRELOAD_FORWARD;
+         index++) {
+      if (gImageList[index] !== undefined) {
+        keepImages.push(gImageList[index]);
+        cacheLoadings.push(loadImageToCache(gImageList[index]));
+      }
     }
     await Promise.all(cacheLoadings);
     pruneImageCache(keepImages);
