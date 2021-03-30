@@ -482,7 +482,7 @@ function calculateImageScale() {
 
     if (gImageList.indexOf(imageId) === -1) {
       console.log(
-        'skiping request to load image ' + imageId +
+        'skipping request to display image ' + imageId +
         ' as it is not in current image list.');
       return;
     }
@@ -805,7 +805,7 @@ function calculateImageScale() {
 
     if (gImageList.indexOf(imageId) === -1) {
       console.log(
-        'skiping request to load image ' + imageId +
+        'skipping request to load annotation view for image ' + imageId +
         ' as it is not in current image list.');
       return;
     }
@@ -910,8 +910,8 @@ function calculateImageScale() {
 
     if (gImageList.indexOf(imageId) === -1) {
       console.log(
-        'skiping request to load image ' + imageId +
-        ' as it is not in current image list.');
+        'skipping request to load image ' + imageId +
+        ' to cache as it is not in current image list.');
       return;
     }
 
