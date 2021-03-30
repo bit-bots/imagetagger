@@ -1171,54 +1171,40 @@ function calculateImageScale() {
     $('#reset_button').click(function() {
       resetSelection();
     });
-    $('#last_button').click(function(event) {
-      createAnnotation(true).then(r => {
-        if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
-        }
-      }).then(r => {
-        loadImageList();
-      }).then(r => {
-        return loadAdjacentImage(-1);
-      }).then(imageIndex => {
-        loadAnnotateView(gImageList[imageIndex]);
-      });
+    $('#last_button').click(async function(event) {
+      await createAnnotation(true);
+      if (tool instanceof BoundingBoxes) {
+        tool.cancelSelection();
+      }
+      loadImageList();
+      await loadAdjacentImage(-1);
     });
-    $('#back_button').click(function(event) {
+    $('#back_button').click(async function(event) {
       if (tool instanceof BoundingBoxes) {
           tool.cancelSelection();
       }
-      loadAdjacentImage(-1).then(imageIndex => {
-        loadAnnotateView(gImageList[imageIndex]);
-      });
+      await loadAdjacentImage(-1);
     });
-    $('#skip_button').click(function(event) {
+    $('#skip_button').click(async function(event) {
       if (tool instanceof BoundingBoxes) {
           tool.cancelSelection();
       }
-      loadAdjacentImage(1).then(imageIndex => {
-        loadAnnotateView(gImageList[imageIndex]);
-      });
+      await loadAdjacentImage(1)
     });
-    $('#next_button').click(function(event) {
-      createAnnotation(true).then(r => {
-        if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
-        }
-      }).then(r => {
-        loadImageList();
-      }).then(r => {
-        return loadAdjacentImage(1);
-      }).then(imageIndex => {
-        loadAnnotateView(gImageList[imageIndex]);
-      });
+    $('#next_button').click(async function(event) {
+      await createAnnotation(true);
+      if (tool instanceof BoundingBoxes) {
+        tool.cancelSelection();
+      }
+      await loadImageList();
+      await loadAdjacentImage(1);
     });
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
     });
-    $('.annotate_image_link').click(function(event) {
+    $('.annotate_image_link').click(async function(event) {
       event.preventDefault(); // do not let the browser load the link
-      loadAnnotateView($(this).data('imageid'));
+      await loadAnnotateView($(this).data('imageid'));
     });
 
     // annotation buttons
