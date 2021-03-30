@@ -1234,7 +1234,7 @@ function calculateImageScale() {
           gShiftDown = true;
           break;
         case 27: // Escape
-          if (globals.annotation_type_id === 4) {
+          if (gAnnotationType === 4) {
             // special case multiline: close drawing
             tool.closeDrawing();
           } else {
