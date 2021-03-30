@@ -144,16 +144,10 @@ function calculateImageScale() {
    * Create an annotation using the form data from the current page.
    * If an annotation is currently edited, an update is triggered instead.
    *
-   * @param event
    * @param successCallback a function to be executed on success
    * @param markForRestore
    */
-  function createAnnotation(event, successCallback, markForRestore, reload_list) {
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-    }
-
+  function createAnnotation(successCallback, markForRestore, reload_list) {
     let annotationTypeId = parseInt($('#annotation_type_id').val());
     let vector = null;
 
@@ -309,25 +303,20 @@ function calculateImageScale() {
   /**
    * Delete an annotation.
    *
-   * @param event
    * @param annotationId
    */
-  function deleteAnnotation(event, annotationId) {
+  function deleteAnnotation(annotationId) {
     if (globals.editedAnnotationsId === annotationId) {
       // stop editing
       tool.resetSelection(true);
       $('#not_in_image').prop('checked', false).change();
     }
 
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-
-      // TODO: Do not use a primitive js confirm
-      if (!confirm('Do you really want to delete the annotation?')) {
-        return;
-      }
+    // TODO: Do not use a primitive js confirm
+    if (!confirm('Do you really want to delete the annotation?')) {
+      return;
     }
+
     $('.js_feedback').stop().addClass('hidden');
     let params = {
       annotation_id: annotationId
@@ -426,7 +415,7 @@ function calculateImageScale() {
       const annotationId = annotation.id;
       editButton.attr('id', 'annotation_edit_button_' + annotationId);
       editButton.click(function(event) {
-        editAnnotation(event, this, annotationId);
+        editAnnotation(this, annotationId);
       });
       editButton.data('annotationtypeid', annotation.annotation_type.id);
       editButton.data('annotationid', annotation.id);
@@ -434,7 +423,8 @@ function calculateImageScale() {
       editButton.data('blurred', annotation.blurred);
       editButton.data('concealed', annotation.concealed);
       deleteButton.click(function(event) {
-        deleteAnnotation(event, annotationId);
+        event.preventDefault(); // the button is a link, don't follow it
+        deleteAnnotation(annotationId);
       });
       annotationLinks.append(verifyButton);
       annotationLinks.append(' ');
@@ -564,7 +554,7 @@ function calculateImageScale() {
       link.text(image.name);
       link.data('imageid', image.id);
       link.click(function(event) {
-        event.preventDefault();
+        event.preventDefault(); // do not let the browser follow the link
         loadAnnotateView($(this).data('imageid'));
       });
 
@@ -605,11 +595,10 @@ function calculateImageScale() {
   /**
    * Edit an annotation.
    *
-   * @param event
    * @param annotationElem the element which stores the edit button of the annotation
    * @param annotationId
    */
-  function editAnnotation(event, annotationElem, annotationId) {
+  function editAnnotation(annotationElem, annotationId) {
     annotationElem = $(annotationElem);
     let annotationTypeId = annotationElem.data('annotationtypeid');
     $('#annotation_type_id').val(annotationTypeId);
@@ -617,10 +606,6 @@ function calculateImageScale() {
     globals.editedAnnotationsId = annotationId;
     globals.editActiveContainer.removeClass('hidden');
 
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-    }
     $('.js_feedback').stop().addClass('hidden');
     let params = {
       annotation_id: annotationId
@@ -826,8 +811,6 @@ function calculateImageScale() {
 
   /**
    * Handle a resize event of the window.
-   *
-   * @param event
    */
   function handleResize() {
     tool.cancelSelection();
@@ -1120,7 +1103,7 @@ function calculateImageScale() {
     if (globals.editedAnnotationsId === undefined)
       return;
 
-    deleteAnnotation(event, globals.editedAnnotationsId);
+    deleteAnnotation(globals.editedAnnotationsId);
   }
 
   function selectAnnotationType(annotationTypeNumber) {
@@ -1188,13 +1171,14 @@ function calculateImageScale() {
     $('#cancel_edit_button').click(function() {
       tool.resetSelection(true);
     });
-    $('#save_button').click(createAnnotation);
+    $('#save_button').click(function (event) {
+      createAnnotation();
+    });
     $('#reset_button').click(function() {
       tool.resetSelection(true);
     });
     $('#last_button').click(function(event) {
-      event.preventDefault();
-      createAnnotation(undefined, function() {
+      createAnnotation(function() {
         loadAdjacentImage(-1);
       }, true, true);
       if (tool instanceof BoundingBoxes) {
@@ -1202,22 +1186,19 @@ function calculateImageScale() {
       }
     });
     $('#back_button').click(function(event) {
-      event.preventDefault();
       if (tool instanceof BoundingBoxes) {
           tool.cancelSelection();
       }
       loadAdjacentImage(-1);
     });
     $('#skip_button').click(function(event) {
-      event.preventDefault();
       if (tool instanceof BoundingBoxes) {
           tool.cancelSelection();
       }
       loadAdjacentImage(1);
     });
     $('#next_button').click(function(event) {
-      event.preventDefault();
-      createAnnotation(undefined, function() {
+      createAnnotation(function() {
         loadAdjacentImage(1);
       }, true, true);
       if (tool instanceof BoundingBoxes) {
@@ -1228,7 +1209,7 @@ function calculateImageScale() {
       $(this).addClass('hidden');
     });
     $('.annotate_image_link').click(function(event) {
-      event.preventDefault();
+      event.preventDefault(); // do not let the browser load the link
       loadAnnotateView($(this).data('imageid'));
     });
 
@@ -1236,13 +1217,14 @@ function calculateImageScale() {
     $('.annotation_edit_button').each(function(key, elem) {
       elem = $(elem);
       elem.click(function(event) {
-        editAnnotation(event, this, parseInt(elem.data('annotationid')));
+        editAnnotation(this, parseInt(elem.data('annotationid')));
       });
     });
     $('.annotation_delete_button').each(function(key, elem) {
       elem = $(elem);
       elem.click(function(event) {
-        deleteAnnotation(event, parseInt(elem.data('annotationid')));
+        event.preventDefault();  // the button is a link, don't follow it
+        deleteAnnotation(parseInt(elem.data('annotationid')));
       });
     });
 
