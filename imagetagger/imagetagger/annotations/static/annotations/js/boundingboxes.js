@@ -338,11 +338,11 @@ class BoundingBoxes {
     this.clear();
   }
 
-  handleMouseDown(event) { }
-  handleMouseUp(event) { }
+  handleMouseDown() { }
+  handleMouseUp() { }
   closeDrawing() { }
 
-  handleMouseClick(event) {
+  handleMouseClick(event, x, y) {
     // get current annotation type id
     let annotationType = parseInt($('#annotation_type_id').val());
 
@@ -363,7 +363,7 @@ class BoundingBoxes {
       let bottom = annotation.vector.y2 / globals.imageScaleHeight;
 
       // check if we clicked inside that annotation
-      if (globals.mouseClickX >= left && globals.mouseClickX <= right && globals.mouseClickY >= top && globals.mouseClickY <= bottom) {
+      if (x >= left && x <= right && y >= top && y <= bottom) {
         matchingAnnotations.push(annotation);
       }
     }

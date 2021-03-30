@@ -332,11 +332,11 @@ class Canvas {
     }
   }
 
-  mouseTooClose() {
+  mouseTooClose(x, y) {
     for (let drawing of this.drawings) {
       let points = drawing.getPointTuples();
       for (let point of points) {
-        if (Math.abs(point[0] * globals.imageScaleWidth - globals.mouseDownX) < threshold && Math.abs(point[1] * globals.imageScaleHeight - globals.mouseDownY) < threshold) {
+        if (Math.abs(point[0] * globals.imageScaleWidth - x) < threshold && Math.abs(point[1] * globals.imageScaleHeight - y) < threshold) {
           return true;
         }
       }
@@ -647,7 +647,7 @@ class Canvas {
   increaseSelectionSizeRight() {}
   increaseSelectionSizeUp() {}
 
-  handleMouseClick(event) {
+  handleMouseClick(event, x, y) {
     let position = globals.image.offset();
     if (!(event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
       event.pageY > position.top && event.pageY < position.top + globals.image.height()) &&
@@ -656,20 +656,20 @@ class Canvas {
     }
   }
 
-  handleMouseDown() {
+  handleMouseDown(event, x, y) {
     // Check if we are close enough to move the point, not draw a new drawing
     // we use the variable locked which is checked when we can create a new line
-    if (this.mouseTooClose()) {
+    if (this.mouseTooClose(x, y)) {
       this.locked = true;
     }
   }
 
-  handleMouseUp() {
+  handleMouseUp(event, x, y) {
     if (this.inline && this.currentDrawing) {
       // We are currently drawing a drawing
       // and we clicked inside of the canvas:
       // add a point
-      this.currentDrawing.addPoint(globals.mouseUpX, globals.mouseUpY);
+      this.currentDrawing.addPoint(x, y);
     } else if (this.locked) {
       // we do not create a drawing because we are
       // only moving an existing one
@@ -683,19 +683,19 @@ class Canvas {
       this.inline = true;
       switch (this.vector_type) {
         case 2: // Point
-          this.drawPoint({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          this.drawPoint({x1: x, y1: y}, 0, true);
           break;
         case 3: // Line
-          this.drawLine({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          this.drawLine({x1: x, y1: y}, 0, true);
           break;
         case 4: // Multiline
-          this.drawMultiline({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          this.drawMultiline({x1: x, y1: y}, 0, true);
           break;
         case 5: // Polygon
           if (this.node_count === 0) {
-            this.drawArbitraryPolygon({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true, false);
+            this.drawArbitraryPolygon({x1: x, y1: y}, 0, true, false);
           } else {
-            this.drawPolygon({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true, this.node_count, false);
+            this.drawPolygon({x1: x, y1: y}, 0, true, this.node_count, false);
           }
           break;
         default:

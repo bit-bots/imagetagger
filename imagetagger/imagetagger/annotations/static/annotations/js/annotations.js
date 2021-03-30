@@ -4,12 +4,6 @@ globals = {
   imageScaleHeight: 1,
   moveSelectionStepSize: 2,
   drawAnnotations: true,
-  mouseUpX: undefined,
-  mouseUpY: undefined,
-  mouseClickX: undefined,
-  mouseClickY: undefined,
-  mouseDownX: undefined,
-  mouseDownY: undefined,
   currentAnnotationsOfSelectedType: undefined,
   stdColor: '#CC4444',
   mutColor: '#CC0000'
@@ -418,18 +412,12 @@ function calculateImageScale() {
     existingAnnotations.removeClass('hidden');
   }
 
-  /**
-   * Highlight one annotation in a different color
-   * @param annotationTypeId
-   * @param annotationId
-   */
-
   function handleMouseClick(e) {
     if (e && (e.target.id === 'image' || e.target.id === 'image_canvas')) {
       let position = globals.image.offset();
-      globals.mouseClickX = Math.round((e.pageX - position.left));
-      globals.mouseClickY = Math.round((e.pageY - position.top));
-      tool.handleMouseClick(e);
+      let x = Math.round((e.pageX - position.left));
+      let y = Math.round((e.pageY - position.top));
+      tool.handleMouseClick(e, x, y);
     }
 
     // remove any existing highlight
@@ -1047,9 +1035,9 @@ function calculateImageScale() {
         displayFeedback($('#feedback_annotation_type_missing'));
         return;
       }
-      globals.mouseDownX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
-      globals.mouseDownY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
-      tool.handleMouseDown(event);
+      let x = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
+      let y = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
+      tool.handleMouseDown(event, x, y);
     }
   }
 
@@ -1058,12 +1046,12 @@ function calculateImageScale() {
       return;
 
     let position = globals.image.offset();
-    globals.mouseUpX = Math.round((event.pageX - position.left)/* * globals.imageScaleWidth*/);
-    globals.mouseUpY = Math.round((event.pageY - position.top)/* * globals.imageScaleHeight*/);
+    let x = Math.round((event.pageX - position.left)/* * globals.imageScaleWidth*/);
+    let y = Math.round((event.pageY - position.top)/* * globals.imageScaleHeight*/);
 
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
       event.pageY > position.top && event.pageY < position.top + globals.image.height()) {
-      tool.handleMouseUp(event);
+      tool.handleMouseUp(event, x, y);
     }
   }
 
