@@ -478,7 +478,7 @@ function calculateImageScale() {
    *
    * @param imageId
    */
-  function displayImage(imageId) {
+  async function displayImage(imageId) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
@@ -490,7 +490,7 @@ function calculateImageScale() {
 
     if (gImageCache[imageId] === undefined) {
       // image is not available in cache. Load it.
-      loadImageToCache(imageId);
+      await loadImageToCache(imageId);
     }
 
     // image is in cache.
@@ -500,7 +500,7 @@ function calculateImageScale() {
     currentImage.attr('id', '');
     newImage.attr('id', 'image');
     gImageId = imageId;
-    preloadImages();
+    let loadImages = preloadImages();
 
     currentImage.replaceWith(newImage);
     globals.image = newImage;
@@ -512,6 +512,7 @@ function calculateImageScale() {
       // add previous image to cache
       gImageCache[currentImage.data('imageid')] = currentImage;
     }
+    await loadImages;
   }
 
   /**
@@ -529,7 +530,7 @@ function calculateImageScale() {
    *
    * @param imageList
    */
-  function displayImageList(imageList) {
+  async function displayImageList(imageList) {
     let oldImageList = $('#image_list');
     let result = $('<div>');
     let imageContained = false;
@@ -565,7 +566,7 @@ function calculateImageScale() {
 
     // load first image if current image is not within image set
     if (!imageContained) {
-      loadAnnotateView(imageList[0].id);
+      await loadAnnotateView(imageList[0].id);
     }
 
     scrollImageList();
@@ -840,12 +841,12 @@ function calculateImageScale() {
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
-    displayImage(imageId);
+    let loadImage = displayImage(imageId).then(scrollImageList);
+
     if (!$('#keep_selection').prop('checked')) {
       $('#concealed').prop('checked', false);
       $('#blurred').prop('checked', false);
     }
-    scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
     let link = $('#annotate_image_link_' + imageId);
@@ -881,6 +882,7 @@ function calculateImageScale() {
     } catch {
       console.log("Unable to load annotations for image" + imageId);
     }
+    await loadImage;
   }
 
   /**
@@ -912,7 +914,7 @@ function calculateImageScale() {
         displayFeedback($('#feedback_image_set_empty'));
         filterElem.val('').change();
       } else {
-        displayImageList(data.image_set.images);
+        await displayImageList(data.image_set.images);
       }
     } catch {
       displayFeedback($('#feedback_connection_error'));
@@ -926,7 +928,7 @@ function calculateImageScale() {
    *
    * @param imageId
    */
-  function loadImageToCache(imageId) {
+  async function loadImageToCache(imageId) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
@@ -1001,14 +1003,16 @@ function calculateImageScale() {
   /**
    * Preload next and previous images to cache.
    */
-  function preloadImages() {
+  async function preloadImages() {
     let keepImages = [];
+    let cacheLoadings = [];
     for (let imageId = gImageId - PRELOAD_BACKWARD;
          imageId <= gImageId + PRELOAD_FORWARD;
          imageId++) {
       keepImages.push(imageId);
-      loadImageToCache(imageId);
+      cacheLoadings.push(loadImageToCache(imageId));
     }
+    await Promise.all(cacheLoadings);
     pruneImageCache(keepImages);
   }
 
@@ -1105,7 +1109,7 @@ function calculateImageScale() {
   }
 
 
-  $(function() {
+  $(document).ready(function() {
     let get_params = decodeURIComponent(window.location.search.substring(1)).split('&');
     let editAnnotationId = undefined;
     for (let i = 0; i < get_params.length; i++) {
@@ -1129,9 +1133,9 @@ function calculateImageScale() {
       "X-CSRFTOKEN": gCsrfToken
     };
     gImageList = getImageList();
+    scrollImageList();
     loadAnnotationTypeList();
     preloadImages();
-    scrollImageList();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
