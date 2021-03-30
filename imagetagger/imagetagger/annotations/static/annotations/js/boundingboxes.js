@@ -2,7 +2,6 @@
 
 class BoundingBoxes {
   constructor(annotationTypeId, noSelection) {
-    this.initialized = false;
     this.selection = undefined;
     this.vector_type = 1;
     if (globals.image === '') {
@@ -100,8 +99,6 @@ class BoundingBoxes {
    * Initialize the selection.
    */
   initSelection() {
-    this.initialized = true;
-
     this.selection = globals.image.imgAreaSelect({
       instance: true,
       show: true,

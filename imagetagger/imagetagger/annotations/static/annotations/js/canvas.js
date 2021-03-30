@@ -557,9 +557,7 @@ class Canvas {
     this.resetSelection(true)
   }
 
-  initSelection() {
-    this.initialized = true;
-  }
+  initSelection() { }
 
   /**
    * Restore the selection.
