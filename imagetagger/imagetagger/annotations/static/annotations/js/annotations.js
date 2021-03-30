@@ -290,42 +290,44 @@ function calculateImageScale() {
    *
    * @param annotationId
    */
-  function deleteAnnotation(annotationId) {
+  async function deleteAnnotation(annotationId) {
+    // TODO: Do not use a primitive js confirm
+    if (!confirm('Do you really want to delete the annotation?')) {
+      return;
+    }
+
     if (gEditAnnotationId === annotationId) {
       // stop editing
       resetSelection();
       $('#not_in_image').prop('checked', false).change();
     }
 
-    // TODO: Do not use a primitive js confirm
-    if (!confirm('Do you really want to delete the annotation?')) {
-      return;
-    }
-
     $('.js_feedback').stop().addClass('hidden');
     let params = {
       annotation_id: annotationId
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/delete/?' + $.param(params), {
-      type: 'DELETE',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function(data) {
-        gCurrentAnnotations = data.annotations;
-        globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
-        });
-        // redraw the annotations
-        tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
-        displayExistingAnnotations(gCurrentAnnotations);
-        displayFeedback($('#feedback_annotation_deleted'));
-        gEditAnnotationId = undefined;
-      },
-      error: function() {
-        $('.annotate_button').prop('disabled', false);
-        displayFeedback($('#feedback_connection_error'));
-      }
-    });
+
+    $('.annotate_button').prop('disabled', true);
+    try {
+      let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/delete/?' + $.param(params), {
+        method: 'DELETE',
+        headers: gHeaders,
+      });
+      let data = await response.json();
+      gCurrentAnnotations = data.annotations;
+      globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function (e) {
+        return e.annotation_type.id === gAnnotationType;
+      });
+      // redraw the annotations
+      tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+      displayExistingAnnotations(gCurrentAnnotations);
+      displayFeedback($('#feedback_annotation_deleted'));
+      gEditAnnotationId = undefined;
+    } catch {
+      displayFeedback($('#feedback_connection_error'));
+    } finally {
+      $('.annotate_button').prop('disabled', false);
+    }
   }
 
   /**
@@ -407,9 +409,9 @@ function calculateImageScale() {
       editButton.data('vector', annotation.vector);
       editButton.data('blurred', annotation.blurred);
       editButton.data('concealed', annotation.concealed);
-      deleteButton.click(function(event) {
+      deleteButton.click(async function(event) {
         event.preventDefault(); // the button is a link, don't follow it
-        deleteAnnotation(annotationId);
+        await deleteAnnotation(annotationId);
       });
       annotationLinks.append(verifyButton);
       annotationLinks.append(' ');
@@ -1086,11 +1088,11 @@ function calculateImageScale() {
   }
 
   // handle DEL key press
-  function handleDelete(event) {
+  async function handleDelete() {
     if (gEditAnnotationId === undefined)
       return;
 
-    deleteAnnotation(gEditAnnotationId);
+    await deleteAnnotation(gEditAnnotationId);
   }
 
   function selectAnnotationType(annotationTypeNumber) {
@@ -1209,9 +1211,9 @@ function calculateImageScale() {
     });
     $('.annotation_delete_button').each(function(key, elem) {
       elem = $(elem);
-      elem.click(function(event) {
+      elem.click(async function(event) {
         event.preventDefault();  // the button is a link, don't follow it
-        deleteAnnotation(parseInt(elem.data('annotationid')));
+        await deleteAnnotation(parseInt(elem.data('annotationid')));
       });
     });
 
@@ -1302,7 +1304,7 @@ function calculateImageScale() {
           break;
       }
     });
-    $(document).keyup(function(event) {
+    $(document).keyup(async function(event) {
       switch (event.keyCode){
         case 16: // Shift
               gShiftDown = false;
@@ -1329,7 +1331,7 @@ function calculateImageScale() {
           $('#save_button').click();
           break;
         case 46: //'DEL'
-          handleDelete(event);
+          await handleDelete();
           break;
         case 66: //b
           $('#blurred').click();
