@@ -548,9 +548,9 @@ function calculateImageScale() {
       }
       link.text(image.name);
       link.data('imageid', image.id);
-      link.click(function(event) {
+      link.click(async function(event) {
         event.preventDefault(); // do not let the browser follow the link
-        loadAnnotateView($(this).data('imageid'));
+        await loadAnnotateView($(this).data('imageid'));
       });
 
       result.append(link);
@@ -819,7 +819,7 @@ function calculateImageScale() {
    * @param imageId
    * @param fromHistory
    */
-  function loadAnnotateView(imageId, fromHistory) {
+  async function loadAnnotateView(imageId, fromHistory) {
     gEditAnnotationId = undefined;
 
     imageId = parseInt(imageId);
@@ -864,11 +864,10 @@ function calculateImageScale() {
       }, document.title, '/annotations/' + imageId + '/');
     }
 
-    let handleNewAnnotations = function() {
-      // image is in cache.
-      globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
-        return e.annotation_type.id === gAnnotationType;
-      });
+    try {
+      // load existing annotations for this image
+      await loadAnnotations(imageId);
+
       loading.addClass('hidden');
       displayExistingAnnotations(gCurrentAnnotations);
       tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
@@ -878,10 +877,9 @@ function calculateImageScale() {
       } else {
         resetSelection();
       }
-    };
-
-    // load existing annotations for this image
-    loadAnnotations(imageId, handleNewAnnotations);
+    } catch {
+      console.log("Unable to load annotations for image" + imageId);
+    }
   }
 
   /**
@@ -950,35 +948,30 @@ function calculateImageScale() {
    * Load the annotations of an image to the cache if they are not in it already.
    *
    * @param imageId
-   * @param cb callback for success
    */
-  function loadAnnotations(imageId, cb) {
+  async function loadAnnotations(imageId) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
-      console.log(
-        'skiping request to load annotations of image ' + imageId +
-        ' as it is not in current image list.');
-      return;
+      throw new Error(
+          'skipping request to load annotations of image ' + imageId +
+          ' as it is not in current image list.');
     }
 
     let params = {
       image_id: imageId
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
-      type: 'GET',
+    let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
+      method: 'GET',
       headers: gHeaders,
-      dataType: 'json',
-      success: function(data) {
-        // save the current annotations
-        gCurrentAnnotations = data.annotations;
-        console.log("Saving annotations for", imageId);
-        cb();
-      },
-      error: function() {
-        console.log("Unable to load annotations for image" + imageId);
-      }
     });
+    let data = await response.json();
+    // save the current annotations
+    gCurrentAnnotations = data.annotations;
+    globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function (e) {
+      return e.annotation_type.id === gAnnotationType;
+    });
+    console.log("Fetched annotations for", imageId);
   }
 
   /**
@@ -1000,7 +993,7 @@ function calculateImageScale() {
     while (imageIndex > imageIndex.length) {
       imageIndex -= imageIndex.length;
     }
-    return imageIndex;
+    await loadAnnotateView(gImageList[imageIndex]);
   }
 
   /**
@@ -1224,9 +1217,9 @@ function calculateImageScale() {
 
     $(document).on('mousemove touchmove', handleSelection);
     $(window).on('resize', handleResize);
-    window.onpopstate = function(event) {
+    window.onpopstate = async function(event) {
       if (event.state !== undefined && event.state !== null && event.state.imageId !== undefined) {
-        loadAnnotateView(event.state.imageId, true);
+        await loadAnnotateView(event.state.imageId, true);
       }
     };
 
