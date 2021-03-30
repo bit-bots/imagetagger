@@ -140,12 +140,11 @@ function calculateImageScale() {
   }
 
   /**
-   * Create an annotation using the form data from the current page.
-   * If an annotation is currently edited, an update is triggered instead.
-   *
+   * Check whether the current state allows to create an annotation (i.e. a valid selection was made)
    * @param markForRestore if the annotation should be saved to be reused for the next image
+   * @return the valid vector or null
    */
-  async function createAnnotation(markForRestore) {
+  function getValidAnnotation(markForRestore) {
     let annotationTypeId = parseInt($('#annotation_type_id').val());
     let vector = null;
 
@@ -188,19 +187,33 @@ function calculateImageScale() {
       globals.restoreSelectionNodeCount = node_count;
     }
 
-    let action = 'create';
-    let body = {
+    let annotation = {
       annotation_type_id: annotationTypeId,
       image_id: gImageId,
       vector: vector,
       concealed: concealed,
       blurred: blurred
     };
-    let editing = false;
     if (gEditAnnotationId !== undefined) {
+      annotation.annotation_id = gEditAnnotationId;
+    }
+    return annotation;
+  }
+
+  /**
+   * Create an annotation using the form data from the current page.
+   * If an annotation is currently edited, an update is triggered instead.
+   *
+   * @param annotation the annotation to be created, as returned by getValidAnnotation
+   */
+  async function createAnnotation(annotation) {
+
+    let action = 'create';
+    let body = annotation;
+    let editing = false;
+    if (body.annotation_id !== undefined) {
       // edit instead of create
       action = 'update';
-      body.annotation_id = gEditAnnotationId;
       editing = true;
     }
 
@@ -1163,40 +1176,59 @@ function calculateImageScale() {
     $('#cancel_edit_button').click(function() {
       resetSelection();
     });
-    $('#save_button').click(function (event) {
+    $('#save_button').click(async function (event) {
       event.preventDefault();
-      createAnnotation();
+      try {
+        let annotation = getValidAnnotation()
+        await createAnnotation(annotation);
+      } catch (e) {
+        console.log(e);
+      }
     });
     $('#reset_button').click(function() {
       resetSelection();
     });
-    $('#last_button').click(async function(event) {
-      await createAnnotation(true);
+    $('#last_button').click(async function (event) {
+      try {
+        let annotation = getValidAnnotation(true);
+        let annotationPromise = createAnnotation(annotation);
+        let imagePromise = loadImageList().then(r => {
+          if (tool instanceof BoundingBoxes) {
+            tool.cancelSelection();
+          }
+          return loadAdjacentImage(-1);
+        })
+        await Promise.all([annotationPromise, imagePromise]);
+      } catch (e) {
+        console.log(e);
+      }
+    });
+    $('#back_button').click(async function (event) {
       if (tool instanceof BoundingBoxes) {
         tool.cancelSelection();
       }
-      await loadImageList();
       await loadAdjacentImage(-1);
     });
-    $('#back_button').click(async function(event) {
+    $('#skip_button').click(async function (event) {
       if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
-      }
-      await loadAdjacentImage(-1);
-    });
-    $('#skip_button').click(async function(event) {
-      if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
+        tool.cancelSelection();
       }
       await loadAdjacentImage(1)
     });
-    $('#next_button').click(async function(event) {
-      await createAnnotation(true);
-      if (tool instanceof BoundingBoxes) {
-        tool.cancelSelection();
+    $('#next_button').click(async function (event) {
+      try {
+        let annotation = getValidAnnotation(true);
+        let annotationPromise = createAnnotation(annotation);
+        let imagePromise = loadImageList().then(r => {
+          if (tool instanceof BoundingBoxes) {
+            tool.cancelSelection();
+          }
+          return loadAdjacentImage(1);
+        })
+        await Promise.all([annotationPromise, imagePromise]);
+      } catch (e) {
+        console.log(e);
       }
-      await loadImageList();
-      await loadAdjacentImage(1);
     });
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
