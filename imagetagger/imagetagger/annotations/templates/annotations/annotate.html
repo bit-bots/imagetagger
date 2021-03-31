@@ -23,6 +23,10 @@
             display: none;
     }
     {%  endif %}
+    body {
+        /* this is necessary to avoid a jumping image when the scrollbar appears */
+        overflow-y: scroll;
+    }
     </style>
 {% endblock additional_annotation_css %}
 
