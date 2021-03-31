@@ -1090,8 +1090,6 @@ function calculateImageScale() {
    */
   async function changeImage(imageId, annotation) {
     window.history.replaceState(null, document.title, ANNOTATE_URL.replace('%s', imageId));
-    let imageList = await getImageList();
-    await displayImageList(imageList);
     scrollImageList(imageId);
     await loadAnnotateView(imageId, annotation);
   }
