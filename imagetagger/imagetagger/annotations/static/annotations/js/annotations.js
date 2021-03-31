@@ -793,9 +793,8 @@ function calculateImageScale() {
    * Load the annotation view for another image.
    *
    * @param imageId
-   * @param fromHistory
    */
-  async function loadAnnotateView(imageId, fromHistory) {
+  async function loadAnnotateView(imageId) {
     // load first image if current image is not within image set
     if (!gImageList.includes(imageId)) {
       console.log('Loading first image because ' + imageId + ' is not contained in the selection');
@@ -844,12 +843,6 @@ function calculateImageScale() {
       }
     } else {
       resetSelection();
-    }
-
-    if (fromHistory !== true) {
-      history.pushState({
-        imageId: imageId
-      }, document.title, '/annotations/' + imageId + '/');
     }
 
     try {
@@ -1110,6 +1103,7 @@ function calculateImageScale() {
    * @param keepSelection whether the current selection should be kept on the next image
    */
   async function changeImage(imageId, keepSelection) {
+    window.history.replaceState(null, document.title, ANNOTATE_URL.replace('%s', imageId));
     if (!keepSelection) {
       // unset restoreSelection to avoid restoring a selection that we do not want to keep
       globals.restoreSelection = undefined;
@@ -1250,11 +1244,6 @@ function calculateImageScale() {
 
     $(document).on('mousemove touchmove', handleSelection);
     $(window).on('resize', handleResize);
-    window.onpopstate = async function(event) {
-      if (event.state !== undefined && event.state !== null && event.state.imageId !== undefined) {
-        await loadAnnotateView(event.state.imageId, true);
-      }
-    };
 
     // attach listeners for mouse events
     $(document).on('mousedown.annotation_edit', handleMouseDown);
