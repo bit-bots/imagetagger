@@ -148,17 +148,17 @@ class BoundingBoxes {
 
   /**
    * Restore the selection.
+   * @param selection the selection to restore, object containing the vector
    */
-  restoreSelection() {
-    if (globals.restoreSelection !== undefined) {
-      if (globals.restoreSelection === null) {
-      } else {
-        $('#x1Field').val(globals.restoreSelection.x1);
-        $('#x2Field').val(globals.restoreSelection.x2);
-        $('#y1Field').val(globals.restoreSelection.y1);
-        $('#y2Field').val(globals.restoreSelection.y2);
-        this.reloadSelection(0, globals.restoreSelection);
-      }
+  restoreSelection(selection) {
+    let vector = selection.vector;
+    if (vector === null) {
+    } else {
+      $('#x1Field').val(vector.x1);
+      $('#x2Field').val(vector.x2);
+      $('#y1Field').val(vector.y1);
+      $('#y2Field').val(vector.y2);
+      this.reloadSelection(0, vector);
     }
   }
 

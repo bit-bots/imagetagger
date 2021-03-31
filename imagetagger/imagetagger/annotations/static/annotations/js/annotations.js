@@ -2,9 +2,6 @@ globals = {
   image: {},
   imageScaleWidth: 1,
   imageScaleHeight: 1,
-  restoreSelection: undefined,
-  restoreSelectionVectorType: 1,
-  restoreSelectionNodeCount: 0,
   moveSelectionStepSize: 2,
   drawAnnotations: true,
   mouseUpX: undefined,
@@ -171,12 +168,6 @@ function calculateImageScale() {
     if (!validate_vector(vector, vector_type, node_count)) {
       displayFeedback($('#feedback_annotation_invalid'));
       throw new Error('annotation is invalid');
-    }
-
-    if (markForRestore === true) {
-      globals.restoreSelection = vector;
-      globals.restoreSelectionVectorType = vector_type;
-      globals.restoreSelectionNodeCount = node_count;
     }
 
     let annotation = {
@@ -551,8 +542,7 @@ function calculateImageScale() {
       link.data('imageid', image.id);
       link.click(async function(event) {
         event.preventDefault(); // do not let the browser follow the link
-        globals.restoreSelection = undefined;
-        await changeImage($(this).data('imageid'), false);
+        await changeImage($(this).data('imageid'));
       });
 
       result.append(link);
@@ -793,8 +783,9 @@ function calculateImageScale() {
    * Load the annotation view for another image.
    *
    * @param imageId
+   * @param restoreAnnotation an annotation to restore
    */
-  async function loadAnnotateView(imageId) {
+  async function loadAnnotateView(imageId, restoreAnnotation) {
     // load first image if current image is not within image set
     if (!gImageList.includes(imageId)) {
       console.log('Loading first image because ' + imageId + ' is not contained in the selection');
@@ -833,9 +824,16 @@ function calculateImageScale() {
     $('#delete-image-form').attr('action', DELETE_IMAGE_URL.replace('%s', imageId));
 
     tool.clear();
-    if (globals.restoreSelection !== undefined && $('#keep_selection').prop('checked')) {
-      tool.restoreSelection();
-      if (globals.restoreSelection === null) {
+    if ($('#keep_selection').prop('checked') && restoreAnnotation) {
+      let annotation_type = $('#annotation_type_id').children('[value=' + restoreAnnotation.annotation_type_id + ']').data();
+      let vector_type = annotation_type.vectorType;
+      let node_count = annotation_type.nodeCount;
+      tool.restoreSelection({
+        vector_type: vector_type,
+        node_count: node_count,
+        vector: restoreAnnotation.vector,
+      });
+      if (restoreAnnotation.vector === null) {
         // not in image
         $('#not_in_image').prop('checked', true);
         $('#coordinate_table').hide();
@@ -1100,18 +1098,14 @@ function calculateImageScale() {
   /**
    * Change the image that is currently shown, i.e. update the image list, the displayed image and the annotation view
    * @param imageId the id of the image to change to
-   * @param keepSelection whether the current selection should be kept on the next image
+   * @param annotation the annotation to restore at the next image if the option is selected. undefined for no restoring
    */
-  async function changeImage(imageId, keepSelection) {
+  async function changeImage(imageId, annotation) {
     window.history.replaceState(null, document.title, ANNOTATE_URL.replace('%s', imageId));
-    if (!keepSelection) {
-      // unset restoreSelection to avoid restoring a selection that we do not want to keep
-      globals.restoreSelection = undefined;
-    }
     let imageList = await getImageList();
     await displayImageList(imageList);
     scrollImageList(imageId);
-    await loadAnnotateView(imageId);
+    await loadAnnotateView(imageId, annotation);
   }
 
 
@@ -1175,7 +1169,6 @@ function calculateImageScale() {
       event.preventDefault();
       try {
         let annotation = getValidAnnotation();
-        globals.restoreSelection = undefined;
         tool.clear();
         resetSelection();
         await createAnnotation(annotation);
@@ -1193,27 +1186,25 @@ function calculateImageScale() {
         let annotation = getValidAnnotation(true);
         await createAnnotation(annotation);
         let imageId = await loadAdjacentImage(-1);
-        let keepSelection = $('#keep_selection').prop('checked');
-        await changeImage(imageId, keepSelection);
+        await changeImage(imageId, annotation);
       } catch (e) {
         console.log(e);
       }
     });
     $('#back_button').click(async function (event) {
       let imageId = await loadAdjacentImage(-1);
-      await changeImage(imageId, false);
+      await changeImage(imageId);
     });
     $('#skip_button').click(async function (event) {
       let imageId = await loadAdjacentImage(1);
-      await changeImage(imageId, false)
+      await changeImage(imageId);
     });
     $('#next_button').click(async function (event) {
       try {
         let annotation = getValidAnnotation(true);
         await createAnnotation(annotation);
         let imageId = await loadAdjacentImage(1);
-        let keepSelection = $('#keep_selection').prop('checked')
-        await changeImage(imageId, keepSelection);
+        await changeImage(imageId, annotation);
       } catch (e) {
         console.log(e);
       }
@@ -1223,8 +1214,7 @@ function calculateImageScale() {
     });
     $('.annotate_image_link').click(async function(event) {
       event.preventDefault(); // do not let the browser load the link
-      globals.restoreSelection = undefined;
-      await changeImage($(this).data('imageid'), false);
+      await changeImage($(this).data('imageid'));
     });
 
     // annotation buttons

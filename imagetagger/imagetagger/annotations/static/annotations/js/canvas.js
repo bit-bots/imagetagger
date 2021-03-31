@@ -570,35 +570,42 @@ class Canvas {
 
   /**
    * Restore the selection.
+   * @param selection the selection to restore, object containing vector, vector_type and node_count
    */
-  restoreSelection() {
-    if (globals.restoreSelection !== undefined) {
-      if (globals.restoreSelection === null) {
-      } else if (globals.restoreSelectionVectorType === 4) {
-        // this is not implemented for multilines, so just do nothing
-        this.old = undefined;
-      } else {
-        let vector = {};
-        for (let key in globals.restoreSelection) {
-          if (key[0] === "y") {
-            vector[key] = globals.restoreSelection[key] / globals.imageScaleHeight;
-          } else {
-            vector[key] = globals.restoreSelection[key] / globals.imageScaleWidth;
-          }
+  restoreSelection(selection) {
+    let vector = selection.vector;
+    let vectorType = selection.vector_type;
+    let nodeCount = selection.node_count;
+    if (vector === null) {
+    } else if (vectorType === 4) {
+      // this is not implemented for multilines, so just do nothing
+      this.old = undefined;
+    } else {
+      let scaledVector = {};
+      for (let key in vector) {
+        if (key[0] === "y") {
+          scaledVector[key] = vector[key] / globals.imageScaleHeight;
+        } else {
+          scaledVector[key] = vector[key] / globals.imageScaleWidth;
         }
-        this.updateAnnotationFields(globals.restoreSelection);
-        switch(globals.restoreSelectionVectorType) {
-          case 2: this.drawPoint(vector, 0, true); break;
-          case 3: this.drawLine(vector, 0, true); break;
-          case 5: if (globals.restoreSelectionNodeCount === 0) {
-            this.drawArbitraryPolygon(vector, 0, true, true);
-          } else {
-            this.drawPolygon(vector, 0, true, globals.restoreSelectionNodeCount, true);
-          }
-        }
-        this.reloadSelection(0);
-        this.old = undefined;
       }
+      this.updateAnnotationFields(vector);
+      switch (vectorType) {
+        case 2:
+          this.drawPoint(scaledVector, 0, true);
+          break;
+        case 3:
+          this.drawLine(scaledVector, 0, true);
+          break;
+        case 5:
+          if (nodeCount === 0) {
+            this.drawArbitraryPolygon(scaledVector, 0, true, true);
+          } else {
+            this.drawPolygon(scaledVector, 0, true, nodeCount, true);
+          }
+      }
+      this.reloadSelection(0);
+      this.old = undefined;
     }
   }
 
