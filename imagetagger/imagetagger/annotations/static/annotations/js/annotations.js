@@ -478,7 +478,6 @@ function calculateImageScale() {
     currentImage.attr('id', '');
     newImage.attr('id', 'image');
     gImageId = imageId;
-    let loadImages = preloadImages();
 
     currentImage.replaceWith(newImage);
     globals.image = newImage;
@@ -488,7 +487,6 @@ function calculateImageScale() {
       // add previous image to cache
       gImageCache[currentImage.data('imageid')] = currentImage;
     }
-    await loadImages;
   }
 
   /**
@@ -798,7 +796,6 @@ function calculateImageScale() {
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
-    let loadImage = displayImage(imageId);
 
     $('.annotate_image_link').removeClass('active');
     let link = $('#annotate_image_link_' + imageId);
@@ -812,6 +809,10 @@ function calculateImageScale() {
     $('#delete-image-form').attr('action', DELETE_IMAGE_URL.replace('%s', imageId));
 
     tool.clear();
+
+    await displayImage(imageId);
+    let loadImages = preloadImages();
+
     if ($('#keep_selection').prop('checked') && restoreAnnotation) {
       if (restoreAnnotation.vector === null) {
         // not in image
@@ -843,7 +844,7 @@ function calculateImageScale() {
     } catch {
       console.log("Unable to load annotations for image" + imageId);
     }
-    await loadImage;
+    await loadImages;
   }
 
   /**
