@@ -813,19 +813,21 @@ function calculateImageScale() {
 
     tool.clear();
     if ($('#keep_selection').prop('checked') && restoreAnnotation) {
-      let annotation_type = $('#annotation_type_id').children('[value=' + restoreAnnotation.annotation_type_id + ']').data();
-      let vector_type = annotation_type.vectorType;
-      let node_count = annotation_type.nodeCount;
-      tool.restoreSelection({
-        vector_type: vector_type,
-        node_count: node_count,
-        vector: restoreAnnotation.vector,
-      });
       if (restoreAnnotation.vector === null) {
         // not in image
+        tool.resetSelection();
         $('#not_in_image').prop('checked', true);
         $('#coordinate_table').hide();
         setupCBCheckboxes();
+      } else {
+        let annotation_type = $('#annotation_type_id').children('[value=' + restoreAnnotation.annotation_type_id + ']').data();
+        let vector_type = annotation_type.vectorType;
+        let node_count = annotation_type.nodeCount;
+        tool.restoreSelection({
+          vector_type: vector_type,
+          node_count: node_count,
+          vector: restoreAnnotation.vector,
+        });
       }
     } else {
       resetSelection();
