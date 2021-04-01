@@ -182,6 +182,7 @@ function calculateImageScale() {
    * If an annotation is currently edited, an update is triggered instead.
    *
    * @param annotation the annotation to be created, as returned by getValidAnnotation
+   * @return whether the annotation was successfully created
    */
   async function createAnnotation(annotation) {
 
@@ -193,6 +194,8 @@ function calculateImageScale() {
       action = 'update';
       editing = true;
     }
+
+    let success = true;
 
     $('.js_feedback').stop().addClass('hidden');
     $('.annotate_button').prop('disabled', true);
@@ -209,11 +212,13 @@ function calculateImageScale() {
           if (data.detail === 'similar annotation exists.') {
             displayFeedback($('#feedback_annotation_exists_deleted'));
             $('#annotation_edit_button_' + gEditAnnotationId).parent().parent().fadeOut().remove();
+            success = false;
           } else {
             displayFeedback($('#feedback_annotation_updated'));
           }
         } else {
           displayFeedback($('#feedback_annotation_exists'));
+          success = false;
         }
       } else if (response.status === 201) {
         displayFeedback($('#feedback_annotation_created'));
@@ -227,9 +232,11 @@ function calculateImageScale() {
     } catch (e) {
       console.log(e);
       displayFeedback($('#feedback_connection_error'));
+      success = false;
     } finally {
       $('.annotate_button').prop('disabled', false);
     }
+    return success;
   }
 
   async function loadAnnotationTypeList() {
@@ -1173,9 +1180,15 @@ function calculateImageScale() {
     $('#last_button').click(async function (event) {
       try {
         let annotation = getValidAnnotation(true);
-        await createAnnotation(annotation);
-        let imageId = await loadAdjacentImage(-1);
-        await changeImage(imageId, annotation);
+        if (await createAnnotation(annotation)) {
+          let imageId = await loadAdjacentImage(-1);
+          await changeImage(imageId, annotation);
+        } else {
+          tool.clear();
+          resetSelection();
+          tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+          displayExistingAnnotations(gCurrentAnnotations);
+        }
       } catch (e) {
         console.log(e);
       }
@@ -1191,9 +1204,15 @@ function calculateImageScale() {
     $('#next_button').click(async function (event) {
       try {
         let annotation = getValidAnnotation(true);
-        await createAnnotation(annotation);
-        let imageId = await loadAdjacentImage(1);
-        await changeImage(imageId, annotation);
+        if (await createAnnotation(annotation)) {
+          let imageId = await loadAdjacentImage(1);
+          await changeImage(imageId, annotation);
+        } else {
+          tool.clear();
+          resetSelection();
+          tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+          displayExistingAnnotations(gCurrentAnnotations);
+        }
       } catch (e) {
         console.log(e);
       }
