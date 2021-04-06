@@ -180,16 +180,10 @@ class Drawing {
   }
 }
 
-class Point {
+class Point extends Drawing {
   constructor(parent, point, id, mutable, color) {
-    /* Set fields */
-    this.pointCounter = 1;      // The number of points that are currently set
-    this.id = id;
-    this.name = "drawing" + id;
-    this.parent = parent;
-    this.mutable = mutable;
-    this.color = color || globals.stdColor;
-
+    super(parent, point, id, mutable, color);
+    this.parent.removeLayer(this.name);
     /* Define layer */
     let l = {
       name: this.name,
@@ -202,23 +196,6 @@ class Point {
     this.parent.inline = false;
     this.parent.locked = false;
     this.parent.updateAnnotationFields(point);
-  }
-  /** Set the cursor to 'drag' or 'crosshair' in mouseover
-   *
-   * @param bool whether the dursor is in 'drag' style
-   */
-  setDragCursor(bool) {}
-  setMutable(mutable) {}
-  getPointTuples() {
-    let l = this.parent.getLayer(this.name);
-    return [[l.x, l.y]];
-  }
-  getPoints() {
-    let l = this.parent.getLayer(this.name);
-    return {x1: l.x, y1: l.y};
-  }
-  remove() {
-    this.parent.removeLayer(this.name);
   }
 }
 
