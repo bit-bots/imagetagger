@@ -4,21 +4,44 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-appdirs==1.4.4            # via fs
-confusable-homoglyphs==3.2.0  # via django-registration
-django-configurations==2.2  # via -r requirements.in
-django-friendly-tag-loader==1.3.1  # via -r requirements.in
-django-registration==3.1.1  # via -r requirements.in
-django-widget-tweaks==1.4.8  # via -r requirements.in
-django==2.2.19            # via -r requirements.in, django-registration, djangorestframework
-djangorestframework==3.12.2  # via -r requirements.in
-fasteners==0.16           # via -r requirements.in
-fs==2.4.12                # via -r requirements.in
-pillow==8.1.2             # via -r requirements.in
-psycopg2-binary==2.8.6    # via -r requirements.in
-pytz==2021.1              # via django, fs
-six==1.15.0               # via django-configurations, fasteners, fs
-sqlparse==0.4.1           # via django
+appdirs==1.4.4
+    # via fs
+confusable-homoglyphs==3.2.0
+    # via django-registration
+django-configurations==2.2
+    # via -r requirements.in
+django-friendly-tag-loader==1.3.1
+    # via -r requirements.in
+django-registration==3.1.1
+    # via -r requirements.in
+django-widget-tweaks==1.4.8
+    # via -r requirements.in
+django==2.2.20
+    # via
+    #   -r requirements.in
+    #   django-registration
+    #   djangorestframework
+djangorestframework==3.12.2
+    # via -r requirements.in
+fasteners==0.16
+    # via -r requirements.in
+fs==2.4.12
+    # via -r requirements.in
+pillow==8.1.2
+    # via -r requirements.in
+psycopg2-binary==2.8.6
+    # via -r requirements.in
+pytz==2021.1
+    # via
+    #   django
+    #   fs
+six==1.15.0
+    # via
+    #   django-configurations
+    #   fasteners
+    #   fs
+sqlparse==0.4.1
+    # via django
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
