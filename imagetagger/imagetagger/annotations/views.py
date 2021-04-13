@@ -266,6 +266,7 @@ def export_format(export_format_name, imageset):
                             '%%imagewidth': annotation.image.width,
                             '%%imageheight': annotation.image.height,
                             '%%imagename': image.name,
+                            '%%imageid': image.id,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                         }
@@ -295,6 +296,7 @@ def export_format(export_format_name, imageset):
                             '%%imagewidth': image.width,
                             '%%imageheight': image.height,
                             '%%imagename': image.name,
+                            '%%imageid': image.id,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                             '%%vector': formatted_vector,
@@ -332,6 +334,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': image.width,
                     '%%imageheight': image.height,
                     '%%imagename': image.name,
+                    '%%imageid': image.id,
                     '%%annotations': annotation_content,
                     '%%annoamount': annotations.count(),
                 }
@@ -358,6 +361,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
                     '%%imagename': annotation.image.name,
+                    '%%imageid': annotation.image.id,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                 }
@@ -387,6 +391,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
                     '%%imagename': annotation.image.name,
+                    '%%imageid': annotation.image.id,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                     '%%vector': formatted_vector,
