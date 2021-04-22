@@ -15,5 +15,6 @@ urlpatterns = [
     url(r'^team/(\d+)/grant_admin/(\d+)/$', views.grant_team_admin, name='grant_team_admin'),
     url(r'^team/(\d+)/revoke_admin/(\d+)/$', views.revoke_team_admin, name='revoke_team_admin'),
     url(r'^user/(\d+)/$', views.user, name='user'),
+    url(r'^user/(\d+)/delete/$', views.delete_account, name='delete_account'),
     url(r'^user/explore/$', views.explore_user, name='explore_user'),
 ]

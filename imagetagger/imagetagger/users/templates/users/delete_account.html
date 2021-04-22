@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+{% block bodyblock %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Delete account {{ user.username }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p>Do you really want to delete your account?</p>
+                        <p>This will not remove any teams or image sets associated with those teams.
+                            If you want to remove your images from the platform, delete the corresponding image sets
+                            first. Your annotations and verifications will not be deleted but will be disassociated
+                            from your username.
+                        </p>
+                        <form method="post" action="/users/user/{{ user.id }}/delete/">
+                            {% csrf_token %}
+                            <button class="btn btn-danger" type="submit">Confirm deletion of "{{ user.username }}"</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
