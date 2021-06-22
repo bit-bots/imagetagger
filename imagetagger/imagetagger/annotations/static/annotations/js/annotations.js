@@ -2,19 +2,8 @@ globals = {
   image: {},
   imageScaleWidth: 1,
   imageScaleHeight: 1,
-  editedAnnotationsId: undefined,
-  editActiveContainer: {},
-  restoreSelection: undefined,
-  restoreSelectionVectorType: 1,
-  restoreSelectionNodeCount: 0,
   moveSelectionStepSize: 2,
   drawAnnotations: true,
-  mouseUpX: undefined,
-  mouseUpY: undefined,
-  mouseClickX: undefined,
-  mouseClickY: undefined,
-  mouseDownX: undefined,
-  mouseDownY: undefined,
   currentAnnotationsOfSelectedType: undefined,
   stdColor: '#CC4444',
   mutColor: '#CC0000'
@@ -39,28 +28,20 @@ function calculateImageScale() {
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
 
-  // TODO: Find a solution for url resolvings
-
-  var gCsrfToken;
-  var gHeaders;
-  var gHideFeedbackTimeout;
-  var gImageCache = {};
-  var gImageId;
-  var gImageSetId;
-  var gImageList;
-  var gMousepos;
+  let gCsrfToken;
+  let gHeaders;
+  let gHideFeedbackTimeout;
+  let gImageCache = {};
+  let gImageId;
+  let gImageSetId;
+  let gImageList;
+  let gMousepos;
   let gAnnotationType = -1;
   let gCurrentAnnotations = [];
   let gHighlightedAnnotation;
-
-  var gShiftDown;
-
-  // a threshold for editing an annotation if you select a small rectangle
-  var gSelectionThreshold = 5;
-
-  // save the current annotations of the image, so we can draw and hide the
-
-  var tool;
+  let gShiftDown;
+  let tool;
+  let gEditAnnotationId;  // id of the currently edited annotation, or undefined
 
   function shorten(string, length) {
     let threshold = length || 30;
@@ -69,12 +50,6 @@ function calculateImageScale() {
     } else {
       return string.substr(0, threshold / 2 - 1) + '...' + string.substr(-threshold / 2 + 2, threshold / 2 - 2);
     }
-  }
-
-  function initTool() {
-    setTool();
-    tool.initSelection();
-    loadAnnotateView(gImageId);
   }
 
   function setTool() {
@@ -88,8 +63,6 @@ function calculateImageScale() {
     }
     if (tool) {
       tool.resetSelection();
-      tool.cancelSelection();
-      tool.initSelection();
       tool.reset();
       delete tool;
     }
@@ -120,13 +93,13 @@ function calculateImageScale() {
       default:
         // Dummytool
         tool = {
-          initSelection: function() {},
           resetSelection: function() {},
           restoreSelection: function() {},
           cancelSelection: function() {},
           reset: function() {},
+          clear: function() {},
           drawExistingAnnotations: function() {},
-          handleEscape: function() {},
+          closeDrawing: function() {},
           handleMousemove: function() {},
           handleMouseDown: function() {},
           handleMouseUp: function() {},
@@ -150,25 +123,17 @@ function calculateImageScale() {
   }
 
   /**
-   * Create an annotation using the form data from the current page.
-   * If an annotation is currently edited, an update is triggered instead.
-   *
-   * @param event
-   * @param successCallback a function to be executed on success
-   * @param markForRestore
+   * Check whether the current state allows to create an annotation (i.e. a valid selection was made)
+   * @param markForRestore if the annotation should be saved to be reused for the next image
+   * @return the valid vector or null
    */
-  function createAnnotation(event, successCallback, markForRestore, reload_list) {
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-    }
+  function getValidAnnotation(markForRestore) {
+    let annotationTypeId = parseInt($('#annotation_type_id').val());
+    let vector = null;
 
-    var annotationTypeId = parseInt($('#annotation_type_id').val());
-    var vector = null;
-
-    if (isNaN(annotationTypeId)) {
+    if (annotationTypeId === -1) {
       displayFeedback($('#feedback_annotation_type_missing'));
-      return;
+      throw new Error('annotation type missing');
     }
     let blurred = $('#blurred').is(':checked');
     let concealed = $('#concealed').is(':checked');
@@ -179,7 +144,7 @@ function calculateImageScale() {
         vector["y" + i] = parseInt($('#y' + i + 'Field').val());
       }
       // Swap points if the second one is left of the first one
-      if (Object.keys(vector).length == 4) {
+      if (Object.keys(vector).length === 4) {
         if (vector.x1 > vector.x2 || vector.x1 === vector.x2 && vector.y1 > vector.y2) {
           let tmp_x1 = vector.x2;
           let tmp_y1 = vector.y2;
@@ -196,100 +161,95 @@ function calculateImageScale() {
     let node_count = selected_annotation.nodeCount;
     if (!validate_vector(vector, vector_type, node_count)) {
       displayFeedback($('#feedback_annotation_invalid'));
-      return;
+      throw new Error('annotation is invalid');
     }
 
-    if (markForRestore === true) {
-      globals.restoreSelection = vector;
-      globals.restoreSelectionVectorType = vector_type;
-      globals.restoreSelectionNodeCount = node_count;
-    }
-
-    var action = 'create';
-    var data = {
+    let annotation = {
       annotation_type_id: annotationTypeId,
       image_id: gImageId,
       vector: vector,
       concealed: concealed,
       blurred: blurred
     };
-    var editing = false;
-    if (globals.editedAnnotationsId !== undefined) {
+    if (gEditAnnotationId !== undefined) {
+      annotation.annotation_id = gEditAnnotationId;
+    }
+    return annotation;
+  }
+
+  /**
+   * Create an annotation using the form data from the current page.
+   * If an annotation is currently edited, an update is triggered instead.
+   *
+   * @param annotation the annotation to be created, as returned by getValidAnnotation
+   * @return whether the annotation was successfully created
+   */
+  async function createAnnotation(annotation) {
+
+    let action = 'create';
+    let body = annotation;
+    let editing = false;
+    if (body.annotation_id !== undefined) {
       // edit instead of create
       action = 'update';
-      data.annotation_id = globals.editedAnnotationsId;
       editing = true;
     }
 
+    let success = true;
+
     $('.js_feedback').stop().addClass('hidden');
     $('.annotate_button').prop('disabled', true);
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/' + action + '/', {
-      type: 'POST',
-      headers: gHeaders,
-      dataType: 'json',
-      data: JSON.stringify(data),
-      success: function(data, textStatus, jqXHR) {
-        if (jqXHR.status === 200) {
-          if (editing) {
-            if (data.detail === 'similar annotation exists.') {
-              displayFeedback($('#feedback_annotation_exists_deleted'));
-              $('#annotation_edit_button_' + globals.editedAnnotationsId).parent().parent(
-                ).fadeOut().remove();
-            } else {
-              displayFeedback($('#feedback_annotation_updated'));
-              displayExistingAnnotations(data.annotations);
-              if (reload_list === true) {
-                  loadImageList();
-              }
-              tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
-            }
+    try {
+      let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/' + action + '/', {
+        method: 'POST',
+        headers: gHeaders,
+        body: JSON.stringify(body),
+      });
+
+      let data = await response.json();
+      if (response.status === 200) {
+        if (editing) {
+          if (data.detail === 'similar annotation exists.') {
+            displayFeedback($('#feedback_annotation_exists_deleted'));
+            $('#annotation_edit_button_' + gEditAnnotationId).parent().parent().fadeOut().remove();
+            success = false;
           } else {
-            displayFeedback($('#feedback_annotation_exists'));
+            displayFeedback($('#feedback_annotation_updated'));
           }
-        } else if (jqXHR.status === 201) {
-          displayFeedback($('#feedback_annotation_created'));
-          displayExistingAnnotations(data.annotations);
-          if (reload_list === true) {
-              loadImageList();
-            }
+        } else {
+          displayFeedback($('#feedback_annotation_exists'));
+          success = false;
         }
-        // update current annotations
-        gCurrentAnnotations = data.annotations;
-        globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
-        });
-
-        tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
-
-        globals.editedAnnotationsId = undefined;
-        $('.annotation').removeClass('alert-info');
-        globals.editActiveContainer.addClass('hidden');
-        tool.resetSelection(true);
-
-        if (typeof(successCallback) === "function") {
-          successCallback();
-        }
-        $('.annotate_button').prop('disabled', false);
-      },
-      error: function() {
-        $('.annotate_button').prop('disabled', false);
-        displayFeedback($('#feedback_connection_error'));
+      } else if (response.status === 201) {
+        displayFeedback($('#feedback_annotation_created'));
       }
-    });
+      // update current annotations
+      gCurrentAnnotations = data.annotations;
+      globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function (e) {
+        return e.annotation_type.id === gAnnotationType;
+      });
+
+    } catch (e) {
+      console.log(e);
+      displayFeedback($('#feedback_connection_error'));
+      success = false;
+    } finally {
+      $('.annotate_button').prop('disabled', false);
+    }
+    return success;
   }
 
-  function loadAnnotationTypeList() {
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/loadannotationtypes/', {
-      type: 'GET',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function (data) {
-        displayAnnotationTypeOptions(data.annotation_types);
-      },
-      error: function () {
-        displayFeedback($('#feedback_connection_error'))
-      }
-    })
+  async function loadAnnotationTypeList() {
+    try {
+      let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/loadannotationtypes/', {
+        method: 'GET',
+        headers: gHeaders,
+      });
+      let data = await response.json();
+      displayAnnotationTypeOptions(data.annotation_types);
+    } catch {
+      displayFeedback($('#feedback_connection_error'))
+    }
   }
 
   function displayAnnotationTypeOptions(annotationTypeList) {
@@ -318,49 +278,46 @@ function calculateImageScale() {
   /**
    * Delete an annotation.
    *
-   * @param event
    * @param annotationId
    */
-  function deleteAnnotation(event, annotationId) {
-    if (globals.editedAnnotationsId === annotationId) {
+  async function deleteAnnotation(annotationId) {
+    // TODO: Do not use a primitive js confirm
+    if (!confirm('Do you really want to delete the annotation?')) {
+      return;
+    }
+
+    if (gEditAnnotationId === annotationId) {
       // stop editing
-      tool.resetSelection(true);
+      resetSelection();
       $('#not_in_image').prop('checked', false).change();
     }
 
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-
-      // TODO: Do not use a primitive js confirm
-      if (!confirm('Do you really want to delete the annotation?')) {
-        return;
-      }
-    }
     $('.js_feedback').stop().addClass('hidden');
-    var params = {
+    let params = {
       annotation_id: annotationId
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/delete/?' + $.param(params), {
-      type: 'DELETE',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function(data) {
-        gCurrentAnnotations = data.annotations;
-        globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
-          return e.annotation_type.id === gAnnotationType;
-        });
-        // redraw the annotations
-        tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
-        displayExistingAnnotations(gCurrentAnnotations);
-        displayFeedback($('#feedback_annotation_deleted'));
-        globals.editedAnnotationsId = undefined;
-      },
-      error: function() {
-        $('.annotate_button').prop('disabled', false);
-        displayFeedback($('#feedback_connection_error'));
-      }
-    });
+
+    $('.annotate_button').prop('disabled', true);
+    try {
+      let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/delete/?' + $.param(params), {
+        method: 'DELETE',
+        headers: gHeaders,
+      });
+      let data = await response.json();
+      gCurrentAnnotations = data.annotations;
+      globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function (e) {
+        return e.annotation_type.id === gAnnotationType;
+      });
+      // redraw the annotations
+      tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+      displayExistingAnnotations(gCurrentAnnotations);
+      displayFeedback($('#feedback_annotation_deleted'));
+      gEditAnnotationId = undefined;
+    } catch {
+      displayFeedback($('#feedback_connection_error'));
+    } finally {
+      $('.annotate_button').prop('disabled', false);
+    }
   }
 
   /**
@@ -369,8 +326,8 @@ function calculateImageScale() {
    * @param annotations
    */
   function displayExistingAnnotations(annotations) {
-    var existingAnnotations = $('#existing_annotations');
-    var noAnnotations = $('#no_annotations');
+    let existingAnnotations = $('#existing_annotations');
+    let noAnnotations = $('#no_annotations');
 
     existingAnnotations.addClass('hidden');
 
@@ -383,14 +340,14 @@ function calculateImageScale() {
     existingAnnotations.html('');
 
     // display new annotations
-    for (var i = 0; i < annotations.length; i++) {
-      var annotation = annotations[i];
+    for (let i = 0; i < annotations.length; i++) {
+      let annotation = annotations[i];
 
-      var alertClass = '';
-      if (globals.editedAnnotationsId === annotation.id) {
+      let alertClass = '';
+      if (gEditAnnotationId === annotation.id) {
         alertClass = ' alert-info';
       }
-      var newAnnotation = $(
+      let newAnnotation = $(
         '<div id="annotation_' + annotation.id +
         '" class="annotation' + alertClass + '">');
 
@@ -422,28 +379,29 @@ function calculateImageScale() {
 
       newAnnotation.append(annotation.annotation_type.name + ':');
 
-      var annotationLinks = $('<div style="float: right;">');
-      var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
+      let annotationLinks = $('<div style="float: right;">');
+      let verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
       '<img src="' + STATIC_ROOT + 'symbols/checkmark.png" alt="verify" class="annotation_verify_button">' +
       '</a>');
-      var editButton = $('<a href="#">' +
+      let editButton = $('<a href="#">' +
       '<img src="' + STATIC_ROOT + 'symbols/pencil.png" alt="edit" class="annotation_edit_button">' +
       '</a>');
-      var deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
+      let deleteButton = $('<a href="/annotations/' + annotation.id + '/delete/">' +
       '<img src="' + STATIC_ROOT + 'symbols/bin.png" alt="delete" class="annotation_delete_button">' +
       '</a>');
       const annotationId = annotation.id;
       editButton.attr('id', 'annotation_edit_button_' + annotationId);
       editButton.click(function(event) {
-        editAnnotation(event, this, annotationId);
+        editAnnotation(this, annotationId);
       });
       editButton.data('annotationtypeid', annotation.annotation_type.id);
       editButton.data('annotationid', annotation.id);
       editButton.data('vector', annotation.vector);
       editButton.data('blurred', annotation.blurred);
       editButton.data('concealed', annotation.concealed);
-      deleteButton.click(function(event) {
-        deleteAnnotation(event, annotationId);
+      deleteButton.click(async function(event) {
+        event.preventDefault(); // the button is a link, don't follow it
+        await deleteAnnotation(annotationId);
       });
       annotationLinks.append(verifyButton);
       annotationLinks.append(' ');
@@ -461,18 +419,12 @@ function calculateImageScale() {
     existingAnnotations.removeClass('hidden');
   }
 
-  /**
-   * Highlight one annotation in a different color
-   * @param annotationTypeId
-   * @param annotationId
-   */
-
   function handleMouseClick(e) {
     if (e && (e.target.id === 'image' || e.target.id === 'image_canvas')) {
-      var position = globals.image.offset();
-      globals.mouseClickX = Math.round((e.pageX - position.left));
-      globals.mouseClickY = Math.round((e.pageY - position.top));
-      tool.handleMouseClick(e);
+      let position = globals.image.offset();
+      let x = Math.round((e.pageX - position.left));
+      let y = Math.round((e.pageY - position.top));
+      tool.handleMouseClick(e, x, y);
     }
 
     // remove any existing highlight
@@ -511,35 +463,32 @@ function calculateImageScale() {
    *
    * @param imageId
    */
-  function displayImage(imageId) {
+  async function displayImage(imageId) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
       console.log(
-        'skiping request to load image ' + imageId +
+        'skipping request to display image ' + imageId +
         ' as it is not in current image list.');
       return;
     }
 
     if (gImageCache[imageId] === undefined) {
       // image is not available in cache. Load it.
-      loadImageToCache(imageId);
+      await loadImageToCache(imageId);
     }
 
     // image is in cache.
-    var currentImage = globals.image;
-    var newImage = gImageCache[imageId];
+    let currentImage = globals.image;
+    let newImage = gImageCache[imageId];
 
     currentImage.attr('id', '');
     newImage.attr('id', 'image');
     gImageId = imageId;
-    preloadImages();
 
     currentImage.replaceWith(newImage);
     globals.image = newImage;
     calculateImageScale();
-    tool.initSelection();
-    tool.resetSelection();
 
     if (currentImage.data('imageid') !== undefined) {
       // add previous image to cache
@@ -548,21 +497,33 @@ function calculateImageScale() {
   }
 
   /**
+   * Delete the current selection
+   */
+  function resetSelection() {
+    tool.resetSelection();
+    gEditAnnotationId = undefined;
+    $('.annotation').removeClass('alert-info');
+    $('#edit_active').addClass('hidden');
+    $('#concealed').prop('checked', false);
+    $('#blurred').prop('checked', false);
+  }
+
+  /**
    * Display the images of an image list.
    *
    * @param imageList
    */
-  function displayImageList(imageList) {
-    var oldImageList = $('#image_list');
-    var result = $('<div>');
-    var imageContained = false;
+  async function displayImageList(imageList) {
+    let oldImageList = $('#image_list');
+    let result = $('<div>');
+    let imageContained = false;
 
     oldImageList.html('');
 
-    for (var i = 0; i < imageList.length; i++) {
-      var image = imageList[i];
+    for (let i = 0; i < imageList.length; i++) {
+      let image = imageList[i];
 
-      var link = $('<a>');
+      let link = $('<a>');
       link.attr('id', 'annotate_image_link_' + image.id);
       link.attr('href', ANNOTATE_URL.replace('%s', image.id));
       link.addClass('annotate_image_link');
@@ -572,9 +533,9 @@ function calculateImageScale() {
       }
       link.text(image.name);
       link.data('imageid', image.id);
-      link.click(function(event) {
-        event.preventDefault();
-        loadAnnotateView($(this).data('imageid'));
+      link.click(async function(event) {
+        event.preventDefault(); // do not let the browser follow the link
+        await changeImage($(this).data('imageid'));
       });
 
       result.append(link);
@@ -584,14 +545,7 @@ function calculateImageScale() {
     result.attr('id', 'image_list');
     oldImageList.replaceWith(result);
 
-    gImageList = getImageList();
-
-    // load first image if current image is not within image set
-    if (!imageContained) {
-      loadAnnotateView(imageList[0].id);
-    }
-
-    scrollImageList();
+    gImageList = imageList.map(image => { return image.id });
   }
 
   /**
@@ -614,28 +568,20 @@ function calculateImageScale() {
   /**
    * Edit an annotation.
    *
-   * @param event
    * @param annotationElem the element which stores the edit button of the annotation
    * @param annotationId
    */
-  function editAnnotation(event, annotationElem, annotationId) {
+  function editAnnotation(annotationElem, annotationId) {
     annotationElem = $(annotationElem);
     let annotationTypeId = annotationElem.data('annotationtypeid');
     $('#annotation_type_id').val(annotationTypeId);
     handleAnnotationTypeChange();
-    globals.editedAnnotationsId = annotationId;
-    globals.editActiveContainer.removeClass('hidden');
+    gEditAnnotationId = annotationId;
+    $('#edit_active').removeClass('hidden');
 
-    if (event !== undefined) {
-      // triggered using an event handler
-      event.preventDefault();
-    }
     $('.js_feedback').stop().addClass('hidden');
-    var params = {
-      annotation_id: annotationId
-    };
 
-    var annotationData = annotationElem.data('vector');
+    let annotationData = annotationElem.data('vector');
     if (annotationData === undefined) {
       annotationData = annotationElem.data('escapedvector');
     }
@@ -644,7 +590,7 @@ function calculateImageScale() {
     $('.annotation').removeClass('alert-info');
     annotationElem.parent().parent().addClass('alert-info');
 
-    var notInImage = $('#not_in_image');
+    let notInImage = $('#not_in_image');
     if (annotationData === null) {
       // not in image
       notInImage.prop('checked', true).change();
@@ -655,25 +601,9 @@ function calculateImageScale() {
 
     notInImage.prop('checked', false).change();
 
-
     tool.reloadSelection(annotationId, annotationData);
     $('#concealed').prop('checked', annotationElem.data('concealed')).change();
     $('#blurred').prop('checked', annotationElem.data('blurred')).change();
-  }
-
-  /**
-   * Get the image list from all .annotate_image_link within #image_list.
-   */
-  function getImageList() {
-    var imageList = [];
-    $('#image_list').find('.annotate_image_link').each(function(key, elem) {
-      var imageId = parseInt($(elem).data('imageid'));
-      if (imageList.indexOf(imageId) === -1) {
-        imageList.push(imageId);
-      }
-    });
-
-    return imageList;
   }
 
   /**
@@ -770,7 +700,7 @@ function calculateImageScale() {
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
-      tool.resetSelection(true);
+      resetSelection();
       coordinate_table.hide();
     } else {
       coordinate_table.show();
@@ -799,8 +729,8 @@ function calculateImageScale() {
    */
   function handleSelection(event) {
     calculateImageScale();
-    var cH = $('#crosshair-h'), cV = $('#crosshair-v');
-    var position = globals.image.offset();
+    let cH = $('#crosshair-h'), cV = $('#crosshair-v');
+    let position = globals.image.offset();
     if (event.pageX > position.left &&
           event.pageX < position.left + globals.image.width() &&
           event.pageY > position.top &&
@@ -835,8 +765,6 @@ function calculateImageScale() {
 
   /**
    * Handle a resize event of the window.
-   *
-   * @param event
    */
   function handleResize() {
     tool.cancelSelection();
@@ -848,38 +776,36 @@ function calculateImageScale() {
    * Load the annotation view for another image.
    *
    * @param imageId
-   * @param fromHistory
+   * @param restoreAnnotation an annotation to restore
    */
-  function loadAnnotateView(imageId, fromHistory) {
-    globals.editedAnnotationsId = undefined;
+  async function loadAnnotateView(imageId, restoreAnnotation) {
+    // load first image if current image is not within image set
+    if (!gImageList.includes(imageId)) {
+      console.log('Loading first image because ' + imageId + ' is not contained in the selection');
+      imageId = gImageList[0];
+    }
+    gEditAnnotationId = undefined;
 
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
       console.log(
-        'skiping request to load image ' + imageId +
+        'skipping request to load annotation view for image ' + imageId +
         ' as it is not in current image list.');
       return;
     }
 
-    var noAnnotations = $('#no_annotations');
-    var notInImage = $('#not_in_image');
-    var existingAnnotations = $('#existing_annotations');
-    var loading = $('#annotations_loading');
+    let noAnnotations = $('#no_annotations');
+    let existingAnnotations = $('#existing_annotations');
+    let loading = $('#annotations_loading');
     existingAnnotations.addClass('hidden');
     noAnnotations.addClass('hidden');
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
-    displayImage(imageId);
-    if (!$('#keep_selection').prop('checked')) {
-      $('#concealed').prop('checked', false);
-      $('#blurred').prop('checked', false);
-    }
-    scrollImageList();
 
     $('.annotate_image_link').removeClass('active');
-    var link = $('#annotate_image_link_' + imageId);
+    let link = $('#annotate_image_link_' + imageId);
     link.addClass('active');
     $('#active_image_name').text(link.text().trim());
     let next_image_id = gImageList[gImageList.indexOf(imageId) + 1];
@@ -888,38 +814,50 @@ function calculateImageScale() {
     }
     $('#next-image-id').attr('value', next_image_id || '');
     $('#delete-image-form').attr('action', DELETE_IMAGE_URL.replace('%s', imageId));
-    tool.restoreSelection(false);
 
-    if (fromHistory !== true) {
-      history.pushState({
-        imageId: imageId
-      }, document.title, '/annotations/' + imageId + '/');
+    tool.clear();
+
+    await displayImage(imageId);
+    let loadImages = preloadImages();
+
+    if ($('#keep_selection').prop('checked') && restoreAnnotation) {
+      if (restoreAnnotation.vector === null) {
+        // not in image
+        tool.resetSelection();
+        $('#not_in_image').prop('checked', true);
+        $('#coordinate_table').hide();
+        setupCBCheckboxes();
+      } else {
+        let annotation_type = $('#annotation_type_id').children('[value=' + restoreAnnotation.annotation_type_id + ']').data();
+        let vector_type = annotation_type.vectorType;
+        let node_count = annotation_type.nodeCount;
+        tool.restoreSelection({
+          vector_type: vector_type,
+          node_count: node_count,
+          vector: restoreAnnotation.vector,
+        });
+      }
+    } else {
+      resetSelection();
     }
 
-    let handleNewAnnotations = function() {
-      // image is in cache.
-      globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
-        return e.annotation_type.id === gAnnotationType;
-      });
+    try {
+      // load existing annotations for this image
+      await loadAnnotations(imageId);
+
       loading.addClass('hidden');
       displayExistingAnnotations(gCurrentAnnotations);
       tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
-
-      if (globals.restoreSelection !== undefined) {
-        tool.restoreSelection();
-      } else {
-        tool.resetSelection();
-      }
-    };
-
-    // load existing annotations for this image
-    loadAnnotations(imageId, handleNewAnnotations);
+    } catch {
+      console.log("Unable to load annotations for image" + imageId);
+    }
+    await loadImages;
   }
 
   /**
-   * Load the image list from tye server applying a new filter.
+   * Get the image list from the server applying a new filter.
    */
-  function loadImageList() {
+  async function getImageList() {
     let filterElem = $('#filter_annotation_type');
     let filter = filterElem.val();
     let params = {
@@ -933,24 +871,25 @@ function calculateImageScale() {
       handleAnnotationTypeChange();
     }
 
-    $.ajax(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
-      type: 'GET',
-      headers: gHeaders,
-      dataType: 'json',
-      success: function(data, textStatus, jqXHR) {
-        if (data.image_set.images.length === 0) {
-          // redirect to image set view.
-          displayFeedback($('#feedback_image_set_empty'));
-          filterElem.val('').change();
-          return;
-        }
-        displayImageList(data.image_set.images);
-      },
-      error: function() {
-        $('.annotate_button').prop('disabled', false);
-        displayFeedback($('#feedback_connection_error'));
+    $('.annotate_button').prop('disabled', true);
+    try {
+      let response = await fetch(API_IMAGES_BASE_URL + 'imageset/load/?' + $.param(params), {
+        method: 'GET',
+        headers: gHeaders,
+      });
+      let data = await response.json();
+      if (data.image_set.images.length === 0) {
+        // set is empty, reset filter
+        displayFeedback($('#feedback_image_set_empty'));
+        filterElem.val('').change();
+      } else {
+        return data.image_set.images;
       }
-    });
+    } catch {
+      displayFeedback($('#feedback_connection_error'));
+    } finally {
+      $('.annotate_button').prop('disabled', false);
+    }
   }
 
   /**
@@ -958,13 +897,13 @@ function calculateImageScale() {
    *
    * @param imageId
    */
-  function loadImageToCache(imageId) {
+  async function loadImageToCache(imageId) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
       console.log(
-        'skiping request to load image ' + imageId +
-        ' as it is not in current image list.');
+        'skipping request to load image ' + imageId +
+        ' to cache as it is not in current image list.');
       return;
     }
 
@@ -982,47 +921,42 @@ function calculateImageScale() {
    * Load the annotations of an image to the cache if they are not in it already.
    *
    * @param imageId
-   * @param cb callback for success
    */
-  function loadAnnotations(imageId, cb) {
+  async function loadAnnotations(imageId) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
-      console.log(
-        'skiping request to load annotations of image ' + imageId +
-        ' as it is not in current image list.');
-      return;
+      throw new Error(
+          'skipping request to load annotations of image ' + imageId +
+          ' as it is not in current image list.');
     }
 
-    var params = {
+    let params = {
       image_id: imageId
     };
-    $.ajax(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
-      type: 'GET',
+    let response = await fetch(API_ANNOTATIONS_BASE_URL + 'annotation/load/?' + $.param(params), {
+      method: 'GET',
       headers: gHeaders,
-      dataType: 'json',
-      success: function(data) {
-        // save the current annotations
-        gCurrentAnnotations = data.annotations;
-        console.log("Saving annotations for", imageId);
-        cb();
-      },
-      error: function() {
-        console.log("Unable to load annotations for image" + imageId);
-      }
     });
+    let data = await response.json();
+    // save the current annotations
+    gCurrentAnnotations = data.annotations;
+    globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function (e) {
+      return e.annotation_type.id === gAnnotationType;
+    });
+    console.log("Fetched annotations for", imageId);
   }
 
   /**
    * Load the previous or the next image
    *
    * @param offset integer to add to the current image index
+   * @return id of the requested image
    */
-  function loadAdjacentImage(offset) {
-    var imageIndex = gImageList.indexOf(gImageId);
+  async function loadAdjacentImage(offset) {
+    let imageIndex = gImageList.indexOf(gImageId);
     if (imageIndex < 0) {
-      console.log('current image is not referenced from page!');
-      return;
+      throw new Error('current image is not referenced from page!')
     }
 
     imageIndex += offset;
@@ -1032,21 +966,26 @@ function calculateImageScale() {
     while (imageIndex > imageIndex.length) {
       imageIndex -= imageIndex.length;
     }
-
-    loadAnnotateView(gImageList[imageIndex]);
+    gImageId = gImageList[imageIndex];
+    return gImageList[imageIndex];
   }
 
   /**
    * Preload next and previous images to cache.
    */
-  function preloadImages() {
-    var keepImages = [];
-    for (var imageId = gImageId - PRELOAD_BACKWARD;
-         imageId <= gImageId + PRELOAD_FORWARD;
-         imageId++) {
-      keepImages.push(imageId);
-      loadImageToCache(imageId);
+  async function preloadImages() {
+    let keepImages = [];
+    let cacheLoadings = [];
+    let currentImageIndex = gImageList.indexOf(gImageId);
+    for (let index = currentImageIndex - PRELOAD_BACKWARD;
+         index <= currentImageIndex + PRELOAD_FORWARD;
+         index++) {
+      if (gImageList[index] !== undefined) {
+        keepImages.push(gImageList[index]);
+        cacheLoadings.push(loadImageToCache(gImageList[index]));
+      }
     }
+    await Promise.all(cacheLoadings);
     pruneImageCache(keepImages);
   }
 
@@ -1056,7 +995,7 @@ function calculateImageScale() {
    * @param keep Array of the image ids which should be kept in the cache.
    */
   function pruneImageCache(keep) {
-    for (var imageId in gImageCache) {
+    for (let imageId in gImageCache) {
       imageId = parseInt(imageId);
       if (gImageCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
         delete gImageCache[imageId];
@@ -1066,13 +1005,14 @@ function calculateImageScale() {
 
   /**
    * Scroll image list to make current image visible.
+   * @param imageId id of the image to scroll to
    */
-  function scrollImageList() {
-    var imageLink = $('#annotate_image_link_' + gImageId);
-    var list = $('#image_list');
+  function scrollImageList(imageId) {
+    let imageLink = $('#annotate_image_link_' + imageId);
+    let list = $('#image_list');
 
-    var offset = list.offset().top;
-    var linkTop = imageLink.offset().top;
+    let offset = list.offset().top;
+    let linkTop = imageLink.offset().top;
 
     // link should be (roughly) in the middle of the element
     offset += parseInt(list.height() / 2);
@@ -1097,7 +1037,7 @@ function calculateImageScale() {
     if (!$('#draw_annotations').is(':checked'))
       return;
 
-    var position = globals.image.offset();
+    let position = globals.image.offset();
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
             event.pageY > position.top && event.pageY < position.top + globals.image.height())
     {
@@ -1105,9 +1045,9 @@ function calculateImageScale() {
         displayFeedback($('#feedback_annotation_type_missing'));
         return;
       }
-      globals.mouseDownX = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
-      globals.mouseDownY = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
-      tool.handleMouseDown(event);
+      let x = Math.round((event.pageX - position.left) * globals.imageScaleWidth);
+      let y = Math.round((event.pageY - position.top) * globals.imageScaleHeight);
+      tool.handleMouseDown(event, x, y);
     }
   }
 
@@ -1115,35 +1055,57 @@ function calculateImageScale() {
     if (!$('#draw_annotations').is(':checked'))
       return;
 
-    var position = globals.image.offset();
-    globals.mouseUpX = Math.round((event.pageX - position.left)/* * globals.imageScaleWidth*/);
-    globals.mouseUpY = Math.round((event.pageY - position.top)/* * globals.imageScaleHeight*/);
+    let position = globals.image.offset();
+    let x = Math.round((event.pageX - position.left)/* * globals.imageScaleWidth*/);
+    let y = Math.round((event.pageY - position.top)/* * globals.imageScaleHeight*/);
 
     if (event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
       event.pageY > position.top && event.pageY < position.top + globals.image.height()) {
-      tool.handleMouseUp(event);
+      tool.handleMouseUp(event, x, y);
     }
   }
 
   // handle DEL key press
-  function handleDelete(event) {
-    if (globals.editedAnnotationsId === undefined)
+  async function handleDelete() {
+    if (gEditAnnotationId === undefined)
       return;
 
-    deleteAnnotation(event, globals.editedAnnotationsId);
+    await deleteAnnotation(gEditAnnotationId);
   }
 
   function selectAnnotationType(annotationTypeNumber) {
-    var annotationTypeId = '#annotation_type_' + annotationTypeNumber;
-    var option = $(annotationTypeId);
+    let annotationTypeId = '#annotation_type_' + annotationTypeNumber;
+    let option = $(annotationTypeId);
     if(option.length) {
       $('#annotation_type_id').val(option.val());
     }
     handleAnnotationTypeChange();
   }
 
+  async function updateFilter() {
+      handleAnnotationTypeChange();
+      let imageList = await getImageList();
+      await displayImageList(imageList);
+      if (!gImageList.includes(gImageId)) {
+        gImageId = gImageList[0];
+      }
+      scrollImageList(gImageId);
+      await loadAnnotateView(gImageId);
+  }
 
-  $(function() {
+  /**
+   * Change the image that is currently shown, i.e. update the image list, the displayed image and the annotation view
+   * @param imageId the id of the image to change to
+   * @param annotation the annotation to restore at the next image if the option is selected. undefined for no restoring
+   */
+  async function changeImage(imageId, annotation) {
+    window.history.replaceState(null, document.title, ANNOTATE_URL.replace('%s', imageId));
+    scrollImageList(imageId);
+    await loadAnnotateView(imageId, annotation);
+  }
+
+
+  $(document).ready(function() {
     let get_params = decodeURIComponent(window.location.search.substring(1)).split('&');
     let editAnnotationId = undefined;
     for (let i = 0; i < get_params.length; i++) {
@@ -1153,7 +1115,6 @@ function calculateImageScale() {
         break;
       }
     }
-    globals.editActiveContainer = $('#edit_active');
     globals.image = $('#image');
     globals.drawAnnotations = $('#draw_annotations').is(':checked');
     gMousepos = $('#mousepos');
@@ -1167,15 +1128,17 @@ function calculateImageScale() {
       "Content-Type": 'application/json',
       "X-CSRFTOKEN": gCsrfToken
     };
-    gImageList = getImageList();
-    loadAnnotationTypeList();
-    preloadImages();
-    scrollImageList();
 
     // W3C standards do not define the load event on images, we therefore need to use
     // it from window (this should wait for all external sources including images)
     $(window).on('load', function() {
-      initTool();
+      setTool();
+      getImageList()
+          .then(displayImageList)
+          .then(r => { scrollImageList(gImageId) })
+          .then(r => { loadAnnotateView(gImageId) })
+          .then(r => { preloadImages() });
+      loadAnnotationTypeList();
     }());
 
     $('.annotation_value').on('input', function() {
@@ -1183,8 +1146,8 @@ function calculateImageScale() {
     });
     $('#not_in_image').on('change', handleNotInImageToggle);
     handleNotInImageToggle();
-    $('select#filter_annotation_type').on('change', loadImageList);
-    $('#filter_update_btn').on('click', loadImageList);
+    $('select#filter_annotation_type').on('change', updateFilter);
+    $('#filter_update_btn').on('click', updateFilter);
     $('select').on('change', function() {
       document.activeElement.blur();
     });
@@ -1196,73 +1159,89 @@ function calculateImageScale() {
       handleMouseClick(e);
     });
     $('#cancel_edit_button').click(function() {
-      tool.resetSelection(true);
+      resetSelection();
     });
-    $('#save_button').click(createAnnotation);
+    $('#save_button').click(async function (event) {
+      event.preventDefault();
+      try {
+        let annotation = getValidAnnotation();
+        tool.clear();
+        resetSelection();
+        await createAnnotation(annotation);
+        tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+        displayExistingAnnotations(gCurrentAnnotations);
+      } catch (e) {
+        console.log(e);
+      }
+    });
     $('#reset_button').click(function() {
-      tool.resetSelection(true);
+      resetSelection();
     });
-    $('#last_button').click(function(event) {
-      event.preventDefault();
-      createAnnotation(undefined, function() {
-        loadAdjacentImage(-1);
-      }, true, true);
-      if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
+    $('#last_button').click(async function (event) {
+      try {
+        let annotation = getValidAnnotation(true);
+        if (await createAnnotation(annotation)) {
+          let imageId = await loadAdjacentImage(-1);
+          await changeImage(imageId, annotation);
+        } else {
+          tool.clear();
+          resetSelection();
+          tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+          displayExistingAnnotations(gCurrentAnnotations);
+        }
+      } catch (e) {
+        console.log(e);
       }
     });
-    $('#back_button').click(function(event) {
-      event.preventDefault();
-      if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
-      }
-      loadAdjacentImage(-1);
+    $('#back_button').click(async function (event) {
+      let imageId = await loadAdjacentImage(-1);
+      await changeImage(imageId);
     });
-    $('#skip_button').click(function(event) {
-      event.preventDefault();
-      if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
-      }
-      loadAdjacentImage(1);
+    $('#skip_button').click(async function (event) {
+      let imageId = await loadAdjacentImage(1);
+      await changeImage(imageId);
     });
-    $('#next_button').click(function(event) {
-      event.preventDefault();
-      createAnnotation(undefined, function() {
-        loadAdjacentImage(1);
-      }, true, true);
-      if (tool instanceof BoundingBoxes) {
-          tool.cancelSelection();
+    $('#next_button').click(async function (event) {
+      try {
+        let annotation = getValidAnnotation(true);
+        if (await createAnnotation(annotation)) {
+          let imageId = await loadAdjacentImage(1);
+          await changeImage(imageId, annotation);
+        } else {
+          tool.clear();
+          resetSelection();
+          tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+          displayExistingAnnotations(gCurrentAnnotations);
+        }
+      } catch (e) {
+        console.log(e);
       }
     });
     $('.js_feedback').mouseover(function() {
       $(this).addClass('hidden');
     });
-    $('.annotate_image_link').click(function(event) {
-      event.preventDefault();
-      loadAnnotateView($(this).data('imageid'));
+    $('.annotate_image_link').click(async function(event) {
+      event.preventDefault(); // do not let the browser load the link
+      await changeImage($(this).data('imageid'));
     });
 
     // annotation buttons
     $('.annotation_edit_button').each(function(key, elem) {
       elem = $(elem);
       elem.click(function(event) {
-        editAnnotation(event, this, parseInt(elem.data('annotationid')));
+        editAnnotation(this, parseInt(elem.data('annotationid')));
       });
     });
     $('.annotation_delete_button').each(function(key, elem) {
       elem = $(elem);
-      elem.click(function(event) {
-        deleteAnnotation(event, parseInt(elem.data('annotationid')));
+      elem.click(async function(event) {
+        event.preventDefault();  // the button is a link, don't follow it
+        await deleteAnnotation(parseInt(elem.data('annotationid')));
       });
     });
 
     $(document).on('mousemove touchmove', handleSelection);
     $(window).on('resize', handleResize);
-    window.onpopstate = function(event) {
-      if (event.state !== undefined && event.state !== null && event.state.imageId !== undefined) {
-        loadAnnotateView(event.state.imageId, true);
-      }
-    };
 
     // attach listeners for mouse events
     $(document).on('mousedown.annotation_edit', handleMouseDown);
@@ -1275,7 +1254,13 @@ function calculateImageScale() {
           gShiftDown = true;
           break;
         case 27: // Escape
-          tool.handleEscape();
+          if (gAnnotationType === 4) {
+            // special case multiline: close drawing
+            tool.closeDrawing();
+          } else {
+            // normally, just delete the selection
+            resetSelection();
+          }
           break;
         case 73: //i
           if(gShiftDown) {
@@ -1337,7 +1322,7 @@ function calculateImageScale() {
           break;
       }
     });
-    $(document).keyup(function(event) {
+    $(document).keyup(async function(event) {
       switch (event.keyCode){
         case 16: // Shift
               gShiftDown = false;
@@ -1364,7 +1349,7 @@ function calculateImageScale() {
           $('#save_button').click();
           break;
         case 46: //'DEL'
-          handleDelete(event);
+          await handleDelete();
           break;
         case 66: //b
           $('#blurred').click();
