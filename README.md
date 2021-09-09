@@ -79,7 +79,7 @@ If ImageTagger is running in a development environment, no export is necessary.
     ```shell
     git checkout v…
     cd imagetagger
-    pip3 install -r requirements.txt
+    pipenv sync
     ```
    
 2.  #### Setup a database server

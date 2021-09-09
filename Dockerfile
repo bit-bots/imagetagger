@@ -4,14 +4,14 @@ FROM docker.io/debian:bullseye-slim
 RUN apt-get update && \
 	apt-get install --no-install-recommends -y g++ wget uwsgi-plugin-python3 python3 python3-pip node-uglify make git \
         python3-ldap3 python3-pkg-resources gettext gcc python3-dev python3-setuptools libldap2-dev \
-	    libsasl2-dev nginx
+	    libsasl2-dev nginx pipenv
 
 # add requirements file
 WORKDIR /app/src
-COPY src/requirements.txt /app/src/requirements.txt
+COPY Pipfile Pipfile.lock /app/src/
 
 # install python dependencies
-RUN pip3 install -r /app/src/requirements.txt
+RUN pipenv install --system --ignore-pipfile
 RUN	pip3 install sentry-sdk uwsgi django-ldapdb django-auth-ldap
 
 # clean container
