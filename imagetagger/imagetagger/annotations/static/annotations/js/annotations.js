@@ -15,8 +15,7 @@ globals = {
   mouseClickY: undefined,
   mouseDownX: undefined,
   mouseDownY: undefined,
-  currentAnnotations: undefined,
-  allAnnotations: undefined,
+  currentAnnotationsOfSelectedType: undefined,
   stdColor: '#CC4444',
   mutColor: '#CC0000'
 };
@@ -35,6 +34,7 @@ function calculateImageScale() {
   const FEEDBACK_DISPLAY_TIME = 3000;
   const ANNOTATE_URL = '/annotations/%s/';
   const IMAGE_SET_URL = '/images/imageset/%s/';
+  const DELETE_IMAGE_URL = '/images/image/delete/%s/';
   const PRELOAD_BACKWARD = 2;
   const PRELOAD_FORWARD = 5;
   const STATIC_ROOT = '/static/';
@@ -50,7 +50,7 @@ function calculateImageScale() {
   var gImageList;
   var gMousepos;
   let gAnnotationType = -1;
-  let gAnnotationCache = {};
+  let gCurrentAnnotations = [];
   let gHighlightedAnnotation;
 
   var gShiftDown;
@@ -143,8 +143,8 @@ function calculateImageScale() {
           unsetHighlightColor: function() {}
         };
     }
-    if (globals.currentAnnotations) {
-      tool.drawExistingAnnotations(globals.currentAnnotations);
+    if (globals.currentAnnotationsOfSelectedType) {
+      tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
     }
     console.log("Using tool " + tool.constructor.name);
   }
@@ -241,7 +241,7 @@ function calculateImageScale() {
               if (reload_list === true) {
                   loadImageList();
               }
-              tool.drawExistingAnnotations(globals.currentAnnotations);
+              tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
             }
           } else {
             displayFeedback($('#feedback_annotation_exists'));
@@ -254,13 +254,12 @@ function calculateImageScale() {
             }
         }
         // update current annotations
-        globals.allAnnotations = data.annotations;
-        globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-          return e.annotationType.id === gAnnotationType;
+        gCurrentAnnotations = data.annotations;
+        globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
+          return e.annotation_type.id === gAnnotationType;
         });
-        gAnnotationCache[gImageId] = globals.allAnnotations;
 
-        tool.drawExistingAnnotations(globals.currentAnnotations);
+        tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
 
         globals.editedAnnotationsId = undefined;
         $('.annotation').removeClass('alert-info');
@@ -285,7 +284,7 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function (data) {
-        displayAnnotationTypeOptions(data.annotationTypes);
+        displayAnnotationTypeOptions(data.annotation_types);
       },
       error: function () {
         displayFeedback($('#feedback_connection_error'))
@@ -347,14 +346,13 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
-        globals.allAnnotations = data.annotations;
-        globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-          return e.annotationType.id === gAnnotationType;
+        gCurrentAnnotations = data.annotations;
+        globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
+          return e.annotation_type.id === gAnnotationType;
         });
-        gAnnotationCache[gImageId] = globals.allAnnotations;
         // redraw the annotations
-        tool.drawExistingAnnotations(globals.currentAnnotations);
-        displayExistingAnnotations(globals.allAnnotations);
+        tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
+        displayExistingAnnotations(gCurrentAnnotations);
         displayFeedback($('#feedback_annotation_deleted'));
         globals.editedAnnotationsId = undefined;
       },
@@ -422,7 +420,7 @@ function calculateImageScale() {
         annotation.content += ' <span id="concealed_label" class="label label-warning">Concealed</span>';
       }
 
-      newAnnotation.append(annotation.annotationType.name + ':');
+      newAnnotation.append(annotation.annotation_type.name + ':');
 
       var annotationLinks = $('<div style="float: right;">');
       var verifyButton = $('<a href="/annotations/' + annotation.id + '/verify/">' +
@@ -439,7 +437,7 @@ function calculateImageScale() {
       editButton.click(function(event) {
         editAnnotation(event, this, annotationId);
       });
-      editButton.data('annotationtypeid', annotation.annotationType.id);
+      editButton.data('annotationtypeid', annotation.annotation_type.id);
       editButton.data('annotationid', annotation.id);
       editButton.data('vector', annotation.vector);
       editButton.data('blurred', annotation.blurred);
@@ -481,7 +479,7 @@ function calculateImageScale() {
     if (e.target.className !== 'annotation_edit_button') {
       $('.annotation').removeClass('alert-info');
       if (gHighlightedAnnotation) {
-        tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotations.filter(function(element) {
+        tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotationsOfSelectedType.filter(function(element) {
           return element.id === gHighlightedAnnotation;
         }));
         gHighlightedAnnotation = undefined;
@@ -490,7 +488,7 @@ function calculateImageScale() {
       // when the click was on the annotation edit button corresponding to the
       // currently highlighted annotation, do not remove the blue highlight
       if (gHighlightedAnnotation && gHighlightedAnnotation !== $(e.target).parent().data('annotationid')) {
-        tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotations.filter(function(element) {
+        tool.unsetHighlightColor(gHighlightedAnnotation, globals.currentAnnotationsOfSelectedType.filter(function(element) {
           return element.id === gHighlightedAnnotation;
         }));
         gHighlightedAnnotation = undefined;
@@ -536,7 +534,6 @@ function calculateImageScale() {
     newImage.attr('id', 'image');
     gImageId = imageId;
     preloadImages();
-    preloadAnnotations();
 
     currentImage.replaceWith(newImage);
     globals.image = newImage;
@@ -737,34 +734,30 @@ function calculateImageScale() {
     let concealedP = $('#concealed_p');
     let blurred = $('#blurred');
     let blurredP = $('#blurred_p');
-    let selectedAnnotation = $('#annotation_type_id').find(':selected');
-    if (selectedAnnotation.data('concealed')) {
-      concealedP.show();
-      concealed.prop('disabled', false);
-    } else {
+    if ($('#not_in_image').is(':checked')) {
       concealedP.hide();
+      concealed.prop('checked', false);
       concealed.prop('disabled', true);
-    }
-    if (selectedAnnotation.data('blurred')) {
-      blurredP.show();
-      blurred.prop('disabled', false);
-    } else {
       blurredP.hide();
+      blurred.prop('checked', false);
       blurred.prop('disabled', true);
+    } else {
+      let selectedAnnotation = $('#annotation_type_id').find(':selected');
+      if (selectedAnnotation.data('concealed')) {
+        concealedP.show();
+        concealed.prop('disabled', false);
+      } else {
+        concealedP.hide();
+        concealed.prop('disabled', true);
+      }
+      if (selectedAnnotation.data('blurred')) {
+        blurredP.show();
+        blurred.prop('disabled', false);
+      } else {
+        blurredP.hide();
+        blurred.prop('disabled', true);
+      }
     }
-  }
-
-  function hideCBCheckboxes() {
-    let concealed = $('#concealed');
-    let concealedP = $('#concealed_p');
-    let blurred = $('#blurred');
-    let blurredP = $('#blurred_p');
-    concealedP.hide();
-    concealed.prop('checked', false);
-    concealed.prop('disabled', true);
-    blurredP.hide();
-    blurred.prop('checked', false);
-    blurred.prop('disabled', true);
   }
 
   /**
@@ -777,13 +770,12 @@ function calculateImageScale() {
 
     if ($('#not_in_image').is(':checked')) {
       // hide the coordinate selection.
-      tool.resetSelection();
+      tool.resetSelection(true);
       coordinate_table.hide();
-      hideCBCheckboxes();
     } else {
       coordinate_table.show();
-      setupCBCheckboxes();
     }
+    setupCBCheckboxes();
   }
 
   /**
@@ -794,7 +786,7 @@ function calculateImageScale() {
   function handleShowAnnotationsToggle(event) {
     globals.drawAnnotations = $('#draw_annotations').is(':checked');
     if (globals.drawAnnotations) {
-      tool.drawExistingAnnotations(globals.currentAnnotations);
+      tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
     } else {
       tool.clear();
     }
@@ -849,7 +841,7 @@ function calculateImageScale() {
   function handleResize() {
     tool.cancelSelection();
     calculateImageScale();
-    tool.drawExistingAnnotations(globals.currentAnnotations);
+    tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
   }
 
   /**
@@ -876,7 +868,6 @@ function calculateImageScale() {
     var loading = $('#annotations_loading');
     existingAnnotations.addClass('hidden');
     noAnnotations.addClass('hidden');
-    notInImage.prop('checked', false).change();
     loading.removeClass('hidden');
     $('#annotation_type_id').val(gAnnotationType);
 
@@ -896,6 +887,7 @@ function calculateImageScale() {
       next_image_id = gImageList[0];
     }
     $('#next-image-id').attr('value', next_image_id || '');
+    $('#delete-image-form').attr('action', DELETE_IMAGE_URL.replace('%s', imageId));
     tool.restoreSelection(false);
 
     if (fromHistory !== true) {
@@ -906,13 +898,12 @@ function calculateImageScale() {
 
     let handleNewAnnotations = function() {
       // image is in cache.
-      globals.allAnnotations = gAnnotationCache[imageId];
-      globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-        return e.annotationType.id === gAnnotationType;
+      globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
+        return e.annotation_type.id === gAnnotationType;
       });
       loading.addClass('hidden');
-      displayExistingAnnotations(globals.allAnnotations);
-      tool.drawExistingAnnotations(globals.currentAnnotations);
+      displayExistingAnnotations(gCurrentAnnotations);
+      tool.drawExistingAnnotations(globals.currentAnnotationsOfSelectedType);
 
       if (globals.restoreSelection !== undefined) {
         tool.restoreSelection();
@@ -922,16 +913,7 @@ function calculateImageScale() {
     };
 
     // load existing annotations for this image
-    if (gAnnotationCache[imageId] === undefined) {
-      // image is not available in cache. Load it.
-      loadAnnotationsToCache(imageId);
-      $(document).one("ajaxStop", handleNewAnnotations);
-    } else if ($.isEmptyObject(gAnnotationCache[imageId])) {
-      // we are already loading the annotation, wait for ajax
-      $(document).one("ajaxStop", handleNewAnnotations);
-    } else {
-      handleNewAnnotations();
-    }
+    loadAnnotations(imageId, handleNewAnnotations);
   }
 
   /**
@@ -1000,8 +982,9 @@ function calculateImageScale() {
    * Load the annotations of an image to the cache if they are not in it already.
    *
    * @param imageId
+   * @param cb callback for success
    */
-  function loadAnnotationsToCache(imageId) {
+  function loadAnnotations(imageId, cb) {
     imageId = parseInt(imageId);
 
     if (gImageList.indexOf(imageId) === -1) {
@@ -1011,13 +994,6 @@ function calculateImageScale() {
       return;
     }
 
-    if (gAnnotationCache[imageId] !== undefined) {
-      // already cached
-      return;
-    }
-    // prevent multiple ajax requests for the same image
-    gAnnotationCache[imageId] = {};
-
     var params = {
       image_id: imageId
     };
@@ -1026,9 +1002,10 @@ function calculateImageScale() {
       headers: gHeaders,
       dataType: 'json',
       success: function(data) {
-        // save the current annotations to the cache
-        gAnnotationCache[imageId] = data.annotations;
+        // save the current annotations
+        gCurrentAnnotations = data.annotations;
         console.log("Saving annotations for", imageId);
+        cb();
       },
       error: function() {
         console.log("Unable to load annotations for image" + imageId);
@@ -1087,35 +1064,6 @@ function calculateImageScale() {
     }
   }
 
-
-  /**
-   * Delete all images from cache except for those in Array keep
-   *
-   * @param keep Array of the image ids which should be kept in the cache.
-   */
-  function pruneAnnotationCache(keep) {
-    for (var imageId in gAnnotationCache) {
-      imageId = parseInt(imageId);
-      if (gAnnotationCache[imageId] !== undefined && keep.indexOf(imageId) === -1) {
-        delete gAnnotationCache[imageId];
-      }
-    }
-  }
-
-  /**
-   * Preload next and previous annotations to cache.
-   */
-  function preloadAnnotations() {
-    var keepAnnotations = [];
-    for (var imageId = gImageId - PRELOAD_BACKWARD;
-         imageId <= gImageId + PRELOAD_FORWARD;
-         imageId++) {
-      keepAnnotations.push(imageId);
-      loadAnnotationsToCache(imageId);
-    }
-    pruneAnnotationCache(keepAnnotations);
-  }
-
   /**
    * Scroll image list to make current image visible.
    */
@@ -1138,11 +1086,11 @@ function calculateImageScale() {
 
   function handleAnnotationTypeChange() {
     gAnnotationType = parseInt($('#annotation_type_id').val());
-    globals.currentAnnotations = globals.allAnnotations.filter(function(e) {
-      return e.annotationType.id === gAnnotationType;
+    globals.currentAnnotationsOfSelectedType = gCurrentAnnotations.filter(function(e) {
+      return e.annotation_type.id === gAnnotationType;
     });
-    setupCBCheckboxes();
     setTool();
+    setupCBCheckboxes();
   }
 
   function handleMouseDown(event) {
@@ -1222,7 +1170,6 @@ function calculateImageScale() {
     gImageList = getImageList();
     loadAnnotationTypeList();
     preloadImages();
-    preloadAnnotations();
     scrollImageList();
 
     // W3C standards do not define the load event on images, we therefore need to use

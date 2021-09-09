@@ -427,10 +427,26 @@ class Canvas {
   drawExistingAnnotations(annotations, color) {
     this.clear();
     color = color || globals.stdColor;
+    let colors = [];
+    if (color.constructor === Array) {
+      colors = color;
+      if (color.length != annotations.length) {
+        console.log('wrong number of colors');
+        return;
+      }
+    } else {
+      for (let i = 0; i < annotations.length; i++) {
+        colors.push(color);
+      }
+    }
     if (!globals.drawAnnotations) {
       return;
     }
-    for (let annotation of annotations) {
+    for (let i in annotations) {
+      let annotation = annotations[i];
+      let color = colors[i];
+      console.log(annotation);
+      console.log(color);
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }
@@ -563,6 +579,19 @@ class Canvas {
       if (globals.restoreSelection === null) {
         $('#not_in_image').prop('checked', true);
         $('#coordinate_table').hide();
+        let concealed = $('#concealed');
+        let concealedP = $('#concealed_p');
+        let blurred = $('#blurred');
+        let blurredP = $('#blurred_p');
+        concealedP.hide();
+        concealed.prop('checked', false);
+        concealed.prop('disabled', true);
+        blurredP.hide();
+        blurred.prop('checked', false);
+        blurred.prop('disabled', true);
+      } else if (globals.restoreSelectionVectorType === 4) {
+        // this is not implemented for multilines, so just do nothing
+        this.old = undefined;
       } else {
         let vector = {};
         for (let key in globals.restoreSelection) {

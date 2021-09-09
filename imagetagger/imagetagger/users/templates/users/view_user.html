@@ -19,6 +19,11 @@
                     </ul>
                 </div>
             </div>
+        {% if own_profile %}
+            <a href="/users/user/{{ user.id }}/delete/">
+                <button class="btn btn-danger" type="submit">Delete this account</button>
+            </a>
+        {% endif %}
         </div>
     </div>
 </div>

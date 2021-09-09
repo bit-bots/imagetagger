@@ -18,7 +18,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_2
 from imagetagger.annotations.forms import ExportFormatCreationForm, ExportFormatEditForm
 from imagetagger.annotations.models import Annotation, AnnotationType, Export, \
     Verification, ExportFormat
-from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer
+from imagetagger.annotations.serializers import AnnotationSerializer, AnnotationTypeSerializer, AnnotationListSerializer, ExportFormatInfoSerializer
 from imagetagger.images.models import Image, ImageSet
 from imagetagger.users.models import Team
 
@@ -234,11 +234,11 @@ def export_format(export_format_name, imageset):
 
     placeholders_filename = {
         '%%imageset': imageset.name,
-        '%%team': imageset.team.name,
+        '%%team': imageset.team.name if imageset.team else 'DeletedTeam',
         '%%setlocation': imageset.location,
     }
     for key, value in placeholders_filename.items():
-                        file_name = file_name.replace(key, str(value))
+        file_name = file_name.replace(key, str(value))
 
     min_verifications = export_format.min_verifications
     annotation_counter = 0
@@ -266,6 +266,7 @@ def export_format(export_format_name, imageset):
                             '%%imagewidth': annotation.image.width,
                             '%%imageheight': annotation.image.height,
                             '%%imagename': image.name,
+                            '%%imageid': image.id,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                         }
@@ -295,6 +296,7 @@ def export_format(export_format_name, imageset):
                             '%%imagewidth': image.width,
                             '%%imageheight': image.height,
                             '%%imagename': image.name,
+                            '%%imageid': image.id,
                             '%%type': annotation.annotation_type.name,
                             '%%veriamount': annotation.verification_difference,
                             '%%vector': formatted_vector,
@@ -332,6 +334,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': image.width,
                     '%%imageheight': image.height,
                     '%%imagename': image.name,
+                    '%%imageid': image.id,
                     '%%annotations': annotation_content,
                     '%%annoamount': annotations.count(),
                 }
@@ -358,6 +361,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
                     '%%imagename': annotation.image.name,
+                    '%%imageid': annotation.image.id,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                 }
@@ -387,6 +391,7 @@ def export_format(export_format_name, imageset):
                     '%%imagewidth': annotation.image.width,
                     '%%imageheight': annotation.image.height,
                     '%%imagename': annotation.image.name,
+                    '%%imageid': annotation.image.id,
                     '%%type': annotation.annotation_type.name,
                     '%%veriamount': annotation.verification_difference,
                     '%%vector': formatted_vector,
@@ -422,7 +427,7 @@ def export_format(export_format_name, imageset):
         '%%content': formatted_content,
         '%%imageset': imageset.name,
         '%%setdescription': imageset.description,
-        '%%team': imageset.team.name,
+        '%%team': imageset.team.name if imageset.team else 'DeletedTeam',
         '%%setlocation': imageset.location,
     }
     for key, value in placeholders_base.items():
@@ -722,24 +727,22 @@ def load_filtered_set_annotations(request) -> Response:
         raise ParseError
 
     imageset = get_object_or_404(ImageSet, pk=imageset_id)
-    images = Image.objects.filter(image_set=imageset)
-    annotations = Annotation.objects.filter(image__in=images,
-                                            annotation_type__active=True).select_related()
-    user_verifications = Verification.objects.filter(user=request.user, annotation__in=annotations)
-    if annotation_type_id > -1:
-        annotations = annotations.filter(annotation_type__id=annotation_type_id)
-    if verified:
-        annotations = [annotation for annotation in annotations if not user_verifications.filter(annotation=annotation).exists()]
-
     if not imageset.has_perm('read', request.user):
         return Response({
             'detail': 'permission for reading this image set missing.',
         }, status=HTTP_403_FORBIDDEN)
 
-    serializer = AnnotationSerializer(
-        sorted(list(annotations), key=lambda annotation: annotation.image.id),
+    images = Image.objects.filter(image_set=imageset)
+    annotations = Annotation.objects.filter(image__in=images,
+                                            annotation_type__active=True).order_by('image__name', 'id').select_related()
+    if annotation_type_id > -1:
+        annotations = annotations.filter(annotation_type__id=annotation_type_id)
+    if verified:
+        annotations = annotations.filter(~Q(verified_by=request.user))
+
+    serializer = AnnotationListSerializer(
+        list(annotations),
         many=True,
-        context={'request': request},
     )
     return Response({
         'annotations': serializer.data,
@@ -766,6 +769,32 @@ def load_annotation(request) -> Response:
                                           'request': request,
                                       },
                                       many=False)
+    return Response({
+        'annotation': serializer.data,
+    }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['GET'])
+def load_multiple_annotations(request) -> Response:
+    try:
+        image_id = int(request.query_params['image_id'])
+        annotation_type_id = int(request.query_params['annotation_type_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    annotations = Annotation.objects.filter(image_id=image_id, annotation_type_id=annotation_type_id)
+
+    if not Image.objects.get(id=image_id).image_set.has_perm('read', request.user):
+        return Response({
+            'detail': 'permission for reading this image set missing.',
+        }, status=HTTP_403_FORBIDDEN)
+
+    serializer = AnnotationSerializer(annotations,
+                                      context={
+                                          'request': request,
+                                      },
+                                      many=True)
     return Response({
         'annotation': serializer.data,
     }, status=HTTP_200_OK)
@@ -921,3 +950,60 @@ def api_blurred_concealed_annotation(request) -> Response:
     return Response({
         'detail': 'you updated the last annotation',
     }, status=HTTP_200_OK)
+
+
+@login_required
+@api_view(['POST'])
+def api_create_export(request) -> Response:
+    try:
+        image_set_id = int(request.data['imageset_id'])
+        export_format_id = int(request.data['export_format_id'])
+    except (KeyError, TypeError, ValueError):
+        raise ParseError
+
+    imageset = get_object_or_404(ImageSet, id=image_set_id)
+    if imageset.has_perm('create_export', request.user):
+        user_teams = Team.objects.filter(members=request.user)
+        export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
+        format = get_object_or_404(ExportFormat, id=export_format_id)
+        if format not in export_formats:  # The user wants to use an export format they have no access to
+            return Response({
+                        'detail': 'permission for exporting annotations in this format missing.',
+                    }, status=HTTP_403_FORBIDDEN)
+        export_text, annotation_count, export_filename = export_format(format, imageset)
+
+        export = Export(image_set=imageset,
+                        user=request.user,
+                        annotation_count=annotation_count,
+                        export_text=export_text,
+                        format=format)
+        export.save()
+        export.filename = export_filename.replace('%%exportid', str(export.id))
+        export.save()
+
+        return Response({
+                    'detail': 'export created successfully.',
+                    'export_id': export.id,
+                }, status=HTTP_201_CREATED)
+    return Response({
+                'detail': 'permission for exporting annotations in this image set missing.',
+            }, status=HTTP_403_FORBIDDEN)
+
+
+@login_required
+@api_view(['GET'])
+def api_get_export_formats(request) -> Response:
+    user_teams = Team.objects.filter(members=request.user)
+    export_formats = ExportFormat.objects.filter(Q(public=True) | Q(team__in=user_teams))
+    serializer = ExportFormatInfoSerializer(
+        export_formats,
+        many=True,
+        context={
+            'request': request,
+        }
+    )
+    return Response({
+                'detail': 'your user has access to the following export formats',
+                'export_formats': serializer.data,
+            }, status=HTTP_200_OK)
+

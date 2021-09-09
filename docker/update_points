@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/app/src/imagetagger/manage.py updatepoints
+

@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from imagetagger.annotations.models import ExportFormat
 from imagetagger.annotations.forms import ExportFormatEditForm
 from imagetagger.images.forms import ImageSetCreationForm
@@ -273,7 +273,28 @@ def user(request, user_id):
     return render(request, 'users/view_user.html', {
         'user': user,
         'teams': teams,
+        'own_profile': request.user == user,
     })
+
+
+@login_required
+def delete_account(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    teams = Team.objects.filter(members=user)
+
+    if user != request.user:
+        messages.error(request, 'You have no permission to delete this user.')
+        return redirect(reverse('users:user', args=(user.id,)))
+
+    if request.method == 'GET':
+        return render(request, 'users/delete_account.html', {
+            'user': user,
+            'teams': teams,
+        })
+    elif request.method == 'POST':
+        user.delete()
+        messages.warning(request, 'Your account was successfully deleted')
+        return redirect('/')
 
 
 @login_required

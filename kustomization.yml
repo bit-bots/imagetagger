@@ -1,0 +1,26 @@
+---
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+namespace: imagetagger
+commonLabels:
+  app: imagetagger
+
+resources:
+  - k8s/namespace.yml
+  - k8s/postgres.yml
+  - k8s/web_app.yml
+
+configMapGenerator:
+  - name: imagetagger-web
+    literals:
+      # service hostname
+      - "IT_DB_HOST=imagetagger-postgres"
+      # references to below postgres configMap which is also mounted in the pod
+      - "IT_DB_USER=$(POSTGRES_USER)"
+      - "IT_DB_PASSWORD=$(POSTGRES_PASSWORD)"
+      - "IT_DB_NAME=$(POSTGRES_DB)"
+  - name: imagetagger-postgres
+    literals:
+      - "POSTGRES_PASSWORD=imagetagger"
+      - "POSTGRES_USER=imagetagger"
+      - "POSTGRES_DB=imagetagger"

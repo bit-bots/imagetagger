@@ -1,13 +1,14 @@
 import fasteners
-import os
+from fs import path
+from fs.zipfs import WriteZipFS
 from time import sleep
 
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
-from zipfile import ZipFile
 
 from imagetagger.images.models import ImageSet
+from imagetagger.base.filesystem import root, tmp
 
 
 class Command(BaseCommand):
@@ -17,7 +18,7 @@ class Command(BaseCommand):
         if not settings.ENABLE_ZIP_DOWNLOAD:
             raise CommandError('To enable zip download, set ENABLE_ZIP_DOWNLOAD to True in settings.py')
 
-        lock = fasteners.InterProcessLock(os.path.join(settings.IMAGE_PATH, 'zip.lock'))
+        lock = fasteners.InterProcessLock(path.combine(settings.IMAGE_PATH, 'zip.lock'))
         gotten = lock.acquire(blocking=False)
         if gotten:
             while True:
@@ -37,12 +38,15 @@ class Command(BaseCommand):
             self.stderr.write('skipping regeneration of ready imageset {}'.format(imageset.name))
             return
 
-        with ZipFile(os.path.join(settings.IMAGE_PATH, imageset.tmp_zip_path()), 'w') as f:
-            for image in imageset.images.all():
-                f.write(image.path(), image.name)
-
-        os.rename(os.path.join(settings.IMAGE_PATH, imageset.tmp_zip_path()),
-                  os.path.join(settings.IMAGE_PATH, imageset.zip_path()))
+        tmp_zip_path = imageset.tmp_zip_path()
+        tmp().makedirs(path.dirname(tmp_zip_path), recreate=True)
+        with tmp().open(tmp_zip_path, 'wb') as zip_file:
+            with WriteZipFS(zip_file) as zip_fs:
+                for image in imageset.images.all():
+                    root().download(image.path(), zip_fs.openbin(image.name, 'w'))
+        with tmp().open(tmp_zip_path, 'rb') as zip_file:
+            root().upload(imageset.zip_path(), zip_file)
+        tmp().remove(tmp_zip_path)
 
         # Set state to ready if image set has not been set to invalid during regeneration
         ImageSet.objects.filter(pk=imageset.pk, zip_state=ImageSet.ZipState.PROCESSING) \

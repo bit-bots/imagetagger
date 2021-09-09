@@ -1,0 +1,72 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: imagetagger-web
+  labels:
+    tier: web
+spec:
+  selector:
+    tier: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imagetagger-web
+  labels:
+    tier: web
+spec:
+  selector:
+    matchLabels:
+      tier: web
+  template:
+    metadata:
+      labels:
+        tier: web
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: imagetagger-image-data
+      containers:
+        - name: main
+          image: imagetagger:local
+          ports:
+            - name: uwsgi
+              containerPort: 3008
+            - name: http
+              containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: imagetagger-web
+            - configMapRef:
+                name: imagetagger-postgres
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            tcpSocket:
+              port: uwsgi
+          startupProbe:
+            tcpSocket:
+              port: uwsgi
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: imagetagger-image-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi      # in production we need a lot more but this should be enough for a test or dev instance
+  selector:
+    matchLabels:
+      tier: web

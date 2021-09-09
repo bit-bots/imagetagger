@@ -1,5 +1,6 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% load update_query %}
 {% block navblock %}
 <li><a href='{% url 'images:view_imageset' selected_image_set.id %}'>Imageset</a></li>
 {% endblock %}
@@ -98,8 +99,8 @@
                 <span class="step-links">
                     <div class="btn-group" role="group" aria-label="btn-group">
                         {% if annotations.has_previous %}
-                            <a class="btn btn-default" href="?page=1">&laquo; first</a>
-                            <a class="btn btn-default" href="?page={{ annotations.previous_page_number }}">previous</a>
+                            <a class="btn btn-default" href="?{% update_query page=1 %}">&laquo; first</a>
+                            <a class="btn btn-default" href="?{% update_query page=annotations.previous_page_number %}">previous</a>
                         {% endif %}
                         {% if annotations.has_other_pages %}
                             <span class="current btn btn-default">
@@ -107,8 +108,8 @@
                             </span>
                         {% endif %}
                         {% if annotations.has_next %}
-                            <a class="btn btn-default" href="?page={{ annotations.next_page_number }}">next</a>
-                            <a class="btn btn-default" href="?page={{ annotations.paginator.num_pages }}">last &raquo;</a>
+                            <a class="btn btn-default" href="?{% update_query page=annotations.next_page_number %}">next</a>
+                            <a class="btn btn-default" href="?{% update_query page=annotations.paginator.num_pages %}">last &raquo;</a>
                         {% endif %}
                     </div>
                 </span>
@@ -134,7 +135,7 @@
                     {% if annotation_count == 1 %}
                         Do you really want to delete {{ annotation_count }} annotation?
                     {% else %}
-                        Do you really wnat to delete {{ annotation_count }} annotations?
+                        Do you really want to delete {{ annotation_count }} annotations?
                     {% endif %}
                 </div>
                 <div class="modal-footer">

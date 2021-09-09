@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.db.models.expressions import F
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
@@ -25,23 +25,24 @@ from imagetagger.images.forms import ImageSetCreationForm, ImageSetCreationFormW
 from imagetagger.users.forms import TeamCreationForm
 from imagetagger.users.models import User, Team
 from imagetagger.tagger_messages.forms import TeamMessageCreationForm
+from imagetagger.base.filesystem import root, tmp
 
 from .models import ImageSet, Image, SetTag
 from .forms import LabelUploadForm
 from imagetagger.annotations.models import Annotation, Export, ExportFormat, \
     AnnotationType, Verification
 from imagetagger.tagger_messages.models import Message, TeamMessage, GlobalMessage
-from . import image_file_handler
 
-import os
-import shutil
 import string
 import random
-import zipfile
 import hashlib
 import json
 import imghdr
+from io import BytesIO
 from datetime import date, timedelta
+from fs.zipfs import ReadZipFS
+from fs.errors import ResourceNotFound
+from os.path import splitext
 
 
 @login_required
@@ -174,12 +175,174 @@ def index(request):
 @login_required
 @require_http_methods(["POST", ])
 def upload_image(request, imageset_id):
-    return image_file_handler.handle_upload(imageset_id, request.FILES, request.user)
+    imageset = get_object_or_404(ImageSet, id=imageset_id)
+    imageset_dir = root().makedirs(imageset.root_path(), recreate=True)
+    if request.method == 'POST' \
+            and imageset.has_perm('edit_set', request.user) \
+            and not imageset.image_lock:
+        if request.FILES is None:
+            return HttpResponseBadRequest('Must have files attached!')
+        json_files = []
+        for uploaded_file in request.FILES.getlist('files[]'):
+            error = {
+                'duplicates': 0,
+                'damaged': False,
+                'directories': False,
+                'exists': False,
+                'unsupported': False,
+                'zip': False,
+            }
+            magic_number = uploaded_file.read(4)
+            uploaded_file.seek(0)  # reset file cursor to the beginning of the file
+            if magic_number == b'PK\x03\x04':  # ZIP file magic number
+                error['zip'] = True
+                with ReadZipFS(uploaded_file) as zip_fs:
+                    try:
+                        # Deal with weird structure of zip files created with macOS Finder.
+                        subfolder = zip_fs.listdir("__MACOSX")[0]
+                        zip_fs = zip_fs.opendir(subfolder)
+                    except ResourceNotFound:
+                        pass
+                    filenames = sorted(f for f in zip_fs.walk.files(path="", max_depth=0))
+                    duplicate_count = 0
+                    for filename in filenames:
+                        image_file = zip_fs.open(filename, 'rb')
+                        try:
+                            if imghdr.what(image_file) in settings.IMAGE_EXTENSION:
+                                image_file.seek(0)
+                                # creates a checksum for image
+                                fchecksum = hashlib.sha512()
+                                while True:
+                                    buf = image_file.read(10000)
+                                    if not buf:
+                                        break
+                                    fchecksum.update(buf)
+                                image_file.seek(0)
+                                fchecksum = fchecksum.digest()
+                                # Tests for duplicates in imageset
+                                if Image.objects.filter(checksum=fchecksum,
+                                                        image_set=imageset).count() == 0:
+                                    (shortname, extension) = splitext(filename)
+                                    img_fname = (''.join(shortname) + '_' +
+                                                 ''.join(
+                                                     random.choice(
+                                                         string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                                     for _ in range(6)) + extension)
+                                    try:
+                                        with PIL_Image.open(image_file) as image:
+                                            width, height = image.size
+                                        image_file.seek(0)
+                                        imageset_dir.upload(img_fname, image_file)
+                                        # TODO rfrigg: Check if necessary
+                                        # shutil.chown(file_new_path, group=settings.UPLOAD_FS_GROUP)
+                                        new_image = Image(name=filename,
+                                                          image_set=imageset,
+                                                          filename=img_fname,
+                                                          checksum=fchecksum,
+                                                          width=width,
+                                                          height=height
+                                                          )
+                                        new_image.save()
+                                    except (OSError, IOError):
+                                        error['damaged'] = True
+                                else:
+                                    duplicate_count = duplicate_count + 1
+                            else:
+                                error['unsupported'] = True
+                        except IsADirectoryError:
+                            error['directories'] = True
+                        finally:
+                            image_file.close()
+
+                    if duplicate_count > 0:
+                        error['duplicates'] = duplicate_count
+            else:
+                # creates a checksum for image
+                fchecksum = hashlib.sha512()
+                for chunk in uploaded_file.chunks():
+                    fchecksum.update(chunk)
+                fchecksum = fchecksum.digest()
+                # tests for duplicats in  imageset
+                if Image.objects.filter(checksum=fchecksum, image_set=imageset)\
+                        .count() == 0:
+                    fname = uploaded_file.name.split('.')
+                    fname = ('_'.join(fname[:-1]) + '_' +
+                             ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                                     for _ in range(6)) + '.' + fname[-1])
+                    image = Image(
+                        name=uploaded_file.name,
+                        image_set=imageset,
+                        filename=fname,
+                        checksum=fchecksum)
+                    buffer = BytesIO()
+                    for chunk in uploaded_file.chunks():
+                        buffer.write(chunk)
+                    buffer.seek(0)
+                    # TODO rfrigg: Check if necessary
+                    # shutil.chown(image.path(), group=settings.UPLOAD_FS_GROUP)
+                    if imghdr.what(buffer) in settings.IMAGE_EXTENSION:
+                        try:
+                            buffer.seek(0)
+                            with PIL_Image.open(buffer) as pil_image:
+                                width, height = pil_image.size
+                            image.height = height
+                            image.width = width
+                            image.save()
+                            buffer.seek(0)
+                            imageset_dir.upload(fname, buffer)
+                        except (OSError, IOError):
+                            error['damaged'] = True
+                    else:
+                        error['unsupported'] = True
+                else:
+                    error['exists'] = True
+            errormessage = ''
+            if error['zip']:
+                errors = list()
+                if error['directories']:
+                    errors.append('directories')
+                if error['unsupported']:
+                    errors.append('unsupported files')
+                if error['duplicates'] > 0:
+                    errors.append(str(error['duplicates']) + ' duplicates')
+                if error['damaged']:
+                    errors.append('damaged files')
+                if len(errors) > 0:
+                    # Build beautiful error message
+                    errormessage += ', '.join(errors) + ' in the archive have been skipped!'
+                    p = errormessage.rfind(',')
+                    if p != -1:
+                        errormessage = errormessage[:p].capitalize() + ' and' + errormessage[p + 1:]
+                    else:
+                        errormessage = errormessage.capitalize()
+            else:
+                if error['unsupported']:
+                    errormessage = 'This file type is unsupported!'
+                elif error['damaged']:
+                    errormessage = 'This file seems to be damaged!'
+                elif error['exists']:
+                    errormessage = 'This image already exists in the imageset!'
+            if errormessage == '':
+                json_files.append({'name': uploaded_file.name,
+                                   'size': uploaded_file.size,
+                                   # 'url': reverse('images_imageview', args=(image.id, )),
+                                   # 'thumbnailUrl': reverse('images_imageview', args=(image.id, )),
+                                   # 'deleteUrl': reverse('images_imagedeleteview', args=(image.id, )),
+                                   # 'deleteType': "DELETE",
+                                   })
+            else:
+                json_files.append({'name': uploaded_file.name,
+                                   'size': uploaded_file.size,
+                                   'error': errormessage,
+                                   })
+
+        return JsonResponse({'files': json_files})
+
 
 # @login_required
 # def imageview(request, image_id):
 #     image = get_object_or_404(Image, id=image_id)
-#     with open(os.path.join(settings.IMAGE_PATH, image.path()), "rb") as f:
+#     root().open(image.path(), "rb") as f:
 #         return HttpResponse(f.read(), content_type="image/jpeg")
 
 @login_required
@@ -193,16 +356,20 @@ def view_image(request, image_id):
     if not image.image_set.has_perm('read', request.user):
         return HttpResponseForbidden()
 
-    file_path = os.path.join(settings.IMAGE_PATH, image.path())
-
     if settings.USE_NGINX_IMAGE_PROVISION:
-        response = HttpResponse(content_type='image')
+        response = HttpResponse()
+        # Let nginx determine the Content-Type
+        del response['Content-Type']
         response['X-Accel-Redirect'] = "/ngx_static_dn/{}".format(image.relative_path())
+        response["Content-Length"] = root().getsize(image.path())
     else:
-        response =  FileResponse(open(file_path, 'rb'), content_type="image")
-
-    response["Content-Length"] = os.path.getsize(file_path)
+        bytes_io = BytesIO()
+        root().download(image.path(), bytes_io)
+        bytes_io.seek(0)
+        response = FileResponse(bytes_io, content_type="image")
+        response["Content-Length"] = bytes_io.getbuffer().nbytes
     return response
+
 
 @login_required
 def list_images(request, image_set_id):
@@ -218,7 +385,7 @@ def list_images(request, image_set_id):
 def delete_images(request, image_id):
     image = get_object_or_404(Image, id=image_id)
     if image.image_set.has_perm('delete_images', request.user) and not image.image_set.image_lock:
-        os.remove(os.path.join(settings.IMAGE_PATH, image.path()))
+        root().remove(image.path())
         image.delete()
         next_image = request.POST.get('next-image-id', '')
         if next_image == '':
@@ -248,7 +415,7 @@ def view_imageset(request, image_set_id):
     all_annotation_types = AnnotationType.objects.filter(active=True)
     annotations = Annotation.objects.filter(
         image__in=images,
-        annotation_type__active=True).order_by("id")
+        annotation_type__active=True).order_by('image__name', 'id')
     annotation_types = AnnotationType.objects.filter(annotation__image__image_set=imageset, active=True).distinct()\
         .annotate(count=Count('annotation'),
                   in_image_count=Count('annotation', filter=Q(annotation__vector__isnull=False)),
@@ -303,11 +470,15 @@ def create_imageset(request):
                     form.instance.team = team
                     form.instance.creator = request.user
                     form.instance.save()
+                    form.instance.path = '{}_{}'.format(team.id,
+                                                        form.instance.id)
+                    form.instance.save()
 
                     # create a folder to store the images of the set
                     folder_path = form.instance.root_path()
-                    os.makedirs(folder_path)
-                    shutil.chown(folder_path, group=settings.UPLOAD_FS_GROUP)
+                    root().makedirs(folder_path, recreate=True)
+                    # TODO rfrigg: Check if necessary
+                    # shutil.chown(folder_path, group=settings.UPLOAD_FS_GROUP)
 
                 messages.success(request,
                                  _('The image set was created successfully.'))
@@ -352,7 +523,7 @@ def delete_imageset(request, imageset_id):
         return redirect(reverse('images:imageset', args=(imageset.pk,)))
 
     if request.method == 'POST':
-        shutil.rmtree(imageset.root_path())
+        root().removetree(imageset.root_path())
         imageset.delete()
         return redirect(reverse('users:team', args=(imageset.team.id,)))
 
@@ -537,15 +708,13 @@ def download_imageset_zip(request, image_set_id):
     if image_set.zip_state != ImageSet.ZipState.READY:
         return HttpResponse(content=b'Imageset is currently processed', status=HTTP_202_ACCEPTED)
 
-    file_path = os.path.join(settings.IMAGE_PATH, image_set.zip_path())
-
     if settings.USE_NGINX_IMAGE_PROVISION:
         response = HttpResponse(content_type='application/zip')
-        response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image_set.zip_path())
+        response['X-Accel-Redirect'] = "/ngx_static_dn/{0}".format(image_set.relative_zip_path())
     else:
-        response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
+        response = FileResponse(root().open(image_set.zip_path(), 'rb'), content_type='application/zip')
 
-    response['Content-Length'] = os.path.getsize(file_path)
+    response['Content-Length'] = root().getsize(image_set.zip_path())
     response['Content-Disposition'] = "attachment; filename={}".format(image_set.zip_name())
     return response
 

@@ -1,9 +1,9 @@
 from typing import Set
 
+from fs import path
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-import os
 
 from imagetagger.users.models import Team
 
@@ -19,10 +19,10 @@ class Image(models.Model):
     height = models.IntegerField(default=600)
 
     def path(self):
-        return os.path.join(self.image_set.root_path(), self.filename)
+        return path.combine(self.image_set.root_path(), self.filename)
 
     def relative_path(self):
-        return os.path.join(self.image_set.path, self.filename)
+        return path.combine(self.image_set.path, self.filename)
 
     def delete(self, *args, **kwargs):
         self.image_set.zip_state = ImageSet.ZipState.INVALID
@@ -91,16 +91,22 @@ class ImageSet(models.Model):
     zip_state = models.IntegerField(choices=ZIP_STATES, default=ZipState.INVALID)
 
     def root_path(self):
-        return os.path.join(settings.IMAGE_PATH, self.path)
+        return path.combine(settings.IMAGE_PATH, self.path)
+
+    def tmp_path(self):
+        return path.combine(settings.TMP_IMAGE_PATH, self.path)
+
+    def relative_zip_path(self):
+        return path.combine(self.path, self.zip_name())
 
     def zip_path(self):
-        return os.path.join(self.path, self.zip_name())
+        return path.combine(self.root_path(), self.zip_name())
+
+    def tmp_zip_path(self):
+        return path.combine(self.tmp_path(), self.zip_name())
 
     def zip_name(self):
         return "imageset_{}.zip".format(self.id)
-
-    def tmp_zip_path(self):
-        return os.path.join(self.path, ".tmp." + self.zip_name())
 
     @property
     def path(self):
@@ -192,11 +198,11 @@ class ImageSet(models.Model):
 
     @property
     def prio_symbol(self):
-        if self.priority is -1:
+        if self.priority == -1:
             return '<span class="glyphicon glyphicon-download" data-toggle="tooltip" data-placement="right" title="Low labeling priority"></span>'
-        elif self.priority is 0:
+        elif self.priority == 0:
             return ''
-        elif self.priority is 1:
+        elif self.priority == 1:
             return '<span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="High labeling priority"></span>'
 
 
