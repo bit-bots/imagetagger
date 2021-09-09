@@ -51,4 +51,8 @@ EXPOSE 3008
 EXPOSE 80
 VOLUME /app/config
 VOLUME /app/data
+LABEL org.opencontainers.image.title="Imagetagger" \
+      org.opencontainers.image.description="An open source online platform for collaborative image labeling" \
+      org.opencontainers.image.source="https://github.com/bit-bots/imagetagger" \
+      org.opencontainers.image.licenses="MIT"
 
