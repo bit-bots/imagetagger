@@ -3,7 +3,6 @@ from typing import Set, Union
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import JSONField
 from django.db import models, connection
 from django.db.models import Subquery, F, IntegerField, OuterRef, Count
 from django.db.models.functions import Coalesce
@@ -36,7 +35,7 @@ class AnnotationQuerySet(models.QuerySet):
 class Annotation(models.Model):
 
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='annotations')
-    vector = JSONField(null=True)
+    vector = models.JSONField(null=True)
     _concealed = models.BooleanField(default=False)
     _blurred = models.BooleanField(default=False)
     closed = models.BooleanField(default=False)
