@@ -104,7 +104,7 @@ class Annotation(models.Model):
 
     @cached_property
     def height(self):
-        if len(self.vector) is 4:
+        if len(self.vector) == 4:
             return self.vector['y2'] - self.vector['y1']
         elif len(self.vector) > 4:
             return max(0, self.max_y - self.min_y)
@@ -112,7 +112,7 @@ class Annotation(models.Model):
 
     @cached_property
     def width(self):
-        if len(self.vector) is 4:  # bounding box and line
+        if len(self.vector) == 4:  # bounding box and line
             return self.vector['x2'] - self.vector['x1']
         elif len(self.vector) > 4:
             return max(0, self.max_x - self.min_x)
@@ -464,7 +464,7 @@ class AnnotationType(models.Model):
             vector.get('x1', float('inf')) >= 1) and (
             vector.get('y2', float('-inf')) -
             vector.get('y1', float('inf')) >= 1) and \
-            len(vector.keys()) is 4
+            len(vector.keys()) == 4
 
     def _validate_line(self, vector: dict) -> bool:
         return (
@@ -472,16 +472,16 @@ class AnnotationType(models.Model):
             vector.get('x1', float('inf')) or
             vector.get('y2', float('inf')) is not
             vector.get('y1', float('inf')) and
-            len(vector.keys()) is 4
+            len(vector.keys()) == 4
         )
 
     def _validate_point(self, vector: dict) -> bool:
-        return 'x1' in vector and 'y1' in vector and len(vector.keys()) is 2
+        return 'x1' in vector and 'y1' in vector and len(vector.keys()) == 2
 
     def _validate_polygon(self, vector: dict) -> bool:
         if len(vector) < 6:
             return False  # A polygon vector has to have at least 3 nodes
-        if not (self.node_count is 0 or
+        if not (self.node_count == 0 or
                 self.node_count is int(len(vector) // 2)):
             return False
         for i in range(1, int(len(vector) // 2) + 1):
@@ -495,7 +495,7 @@ class AnnotationType(models.Model):
     def _validate_multi_line(self, vector: dict) -> bool:
         if len(vector) < 4:
             return False  # A multi line vector has to have at least 2 nodes
-        if not (self.node_count is 0 or
+        if not (self.node_count == 0 or
                 self.node_count is int(len(vector) // 2)):
             return False
         for i in range(1, int(len(vector) // 2) + 1):
