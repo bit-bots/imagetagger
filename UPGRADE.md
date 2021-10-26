@@ -1,6 +1,12 @@
 Upgrade instructions
 ====================
 
+Pre-Release Notes
+-----------------
+
+- Since v0.6, the dependency management was changed from plain `requirements.txt` files to be [Pipenv](https://github.com/pypa/pipenv) managed.
+  The old `requirements.txt` based method will be supported until v0.8.
+
 Upgrading 0.5 to 0.6
 --------------------
 
