@@ -73,7 +73,7 @@ If ImageTagger is running in a development environment, no export is necessary.
 
 1.  #### Install the latest release
     
-    You should probably do this in a [virtual environment](https://virtualenv.pypa.io/en/stable/)
+    You need to have [Pipenv](https://github.com/pypa/pipenv) installed on your system.
     
     Replace `v…` with the latest release tag.
     ```shell
