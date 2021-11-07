@@ -33,7 +33,8 @@ RUN sed -i 's/env python/env python3/g' /app/src/imagetagger/manage.py
 ARG UID_WWW_DATA=5008
 ARG GID_WWW_DATA=33
 RUN usermod -u $UID_WWW_DATA -g $GID_WWW_DATA -d /app/data/ www-data
-RUN chown -R www-data /app
+RUN mkdir /var/www/imagetagger
+RUN chown -R www-data /app /var/www/imagetagger
 
 COPY docker/uwsgi_imagetagger.ini /etc/uwsgi/imagetagger.ini
 COPY docker/nginx.conf /etc/nginx/sites-enabled/default
