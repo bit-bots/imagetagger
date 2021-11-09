@@ -1,21 +1,17 @@
 // JS file for bounding box internals
 
 class BoundingBoxes {
-  constructor(annotationTypeId, noSelection) {
-    this.initialized = false;
+  constructor(annotationTypeId) {
     this.selection = undefined;
     this.vector_type = 1;
     if (globals.image === '') {
       globals.image = $('#image');
     }
     this.annotationTypeId = annotationTypeId;
-    if (!noSelection) {
-      this.initSelection();
-    }
+    this.resetSelection();
   }
 
   drawExistingAnnotations(annotations, color) {
-    this.clear();
     calculateImageScale();
     color = color || globals.stdColor;
     let colors = [];
@@ -36,11 +32,11 @@ class BoundingBoxes {
     }
 
     // clear all boxes
-    var boundingBoxes = document.getElementById('boundingBoxes');
+    let boundingBoxes = document.getElementById('boundingBoxes');
 
-    for (var a in annotations) {
+    for (let a in annotations) {
 
-      var annotation = annotations[a];
+      let annotation = annotations[a];
       let color = colors[a];
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
@@ -49,7 +45,7 @@ class BoundingBoxes {
         continue;
       }
 
-      var boundingBox = document.createElement('div');
+      let boundingBox = document.createElement('div');
       boundingBox.setAttribute('class', 'boundingBox');
       boundingBox.setAttribute('id', 'boundingBox' + annotation.id);
       $(boundingBox).data('annotationid', annotation.id);
@@ -80,44 +76,22 @@ class BoundingBoxes {
     }
   }
 
-  unsetHighlightColor(id) {
-    let highlightBox;
+  unsetHighlightColor() {
     for (let box of $('.boundingBox')) {
-      if ($(box).data('annotationid') === id) {
-        highlightBox = box;
-        break;
-      }
-    }
-    if (highlightBox) {
-      $(highlightBox).css({
+      $(box).css({
         'border': '2px solid ' + globals.stdColor
       });
     }
   }
 
   clear() {
-    var boundingBoxes = document.getElementById('boundingBoxes');
+    let boundingBoxes = document.getElementById('boundingBoxes');
 
     while (boundingBoxes.firstChild) {
       boundingBoxes.removeChild(boundingBoxes.firstChild);
     }
-  }
 
-  /**
-   * Initialize the selection.
-   */
-  initSelection() {
-    this.initialized = true;
-
-    this.selection = globals.image.imgAreaSelect({
-      instance: true,
-      show: true,
-      minHeight: 2,
-      minWidth: 2,
-      onSelectChange: this.updateAnnotationFields,
-      resizeMargin: 3
-    });
-    this.selection.cancelSelection();
+    this.cancelSelection();
   }
 
   /**
@@ -127,7 +101,8 @@ class BoundingBoxes {
     this.setHighlightColor(annotationId);
     this.selection = globals.image.imgAreaSelect({
       instance: true,
-      show: true
+      show: true,
+      onSelectChange: this.updateAnnotationFields,
     });
     if (!annotationData) {
       annotationData = {
@@ -156,40 +131,34 @@ class BoundingBoxes {
   /**
    * Delete current selection.
    */
-  resetSelection(abortEdit) {
-    this.unsetHighlightColor(globals.editedAnnotationsId);
+  resetSelection() {
+    this.unsetHighlightColor();
     $('.annotation_value').val(0);
 
-    if (this.selection !== undefined) {
-      this.selection.cancelSelection();
-    }
-
-    globals.editedAnnotationsId = undefined;
-    $('.annotation').removeClass('alert-info');
-    globals.editActiveContainer.addClass('hidden');
+    this.selection = globals.image.imgAreaSelect({
+      instance: true,
+      show: true,
+      minHeight: 2,
+      minWidth: 2,
+      onSelectChange: this.updateAnnotationFields,
+      resizeMargin: 3
+    });
+    this.selection.cancelSelection();
   }
 
   /**
    * Restore the selection.
+   * @param selection the selection to restore, object containing the vector
    */
-  restoreSelection(reset) {
-    if (!$('#keep_selection').prop('checked')) {
-      return;
-    }
-    if (globals.restoreSelection !== undefined) {
-      if (globals.restoreSelection === null) {
-        $('#not_in_image').prop('checked', true);
-        $('#coordinate_table').hide();
-      } else {
-        $('#x1Field').val(globals.restoreSelection.x1);
-        $('#x2Field').val(globals.restoreSelection.x2);
-        $('#y1Field').val(globals.restoreSelection.y1);
-        $('#y2Field').val(globals.restoreSelection.y2);
-        this.reloadSelection(0, globals.restoreSelection);
-      }
-    }
-    if (reset !== false) {
-      globals.restoreSelection = undefined;
+  restoreSelection(selection) {
+    let vector = selection.vector;
+    if (vector === null) {
+    } else {
+      $('#x1Field').val(vector.x1);
+      $('#x2Field').val(vector.x2);
+      $('#y1Field').val(vector.y1);
+      $('#y2Field').val(vector.y2);
+      this.reloadSelection(0, vector);
     }
   }
 
@@ -369,32 +338,32 @@ class BoundingBoxes {
     this.clear();
   }
 
-  handleMouseDown(event) { }
-  handleMouseUp(event) { }
-  handleEscape() { this.resetSelection(true); }
+  handleMouseDown() { }
+  handleMouseUp() { }
+  closeDrawing() { }
 
-  handleMouseClick(event) {
+  handleMouseClick(event, x, y) {
     // get current annotation type id
-    var annotationType = parseInt($('#annotation_type_id').val());
+    let annotationType = parseInt($('#annotation_type_id').val());
 
     // array with all matching annotations
-    var matchingAnnotations = [];
+    let matchingAnnotations = [];
 
-    for (var a in globals.currentAnnotationsOfSelectedType) {
-      var annotation = globals.currentAnnotationsOfSelectedType[a];
+    for (let a in globals.currentAnnotationsOfSelectedType) {
+      let annotation = globals.currentAnnotationsOfSelectedType[a];
       if (annotation.annotation_type.id !== annotationType) {
         continue;
       }
       if (annotation.vector === null)
         continue;
 
-      var left = annotation.vector.x1 / globals.imageScaleWidth;
-      var right = annotation.vector.x2 / globals.imageScaleWidth;
-      var top = annotation.vector.y1 / globals.imageScaleHeight;
-      var bottom = annotation.vector.y2 / globals.imageScaleHeight;
+      let left = annotation.vector.x1 / globals.imageScaleWidth;
+      let right = annotation.vector.x2 / globals.imageScaleWidth;
+      let top = annotation.vector.y1 / globals.imageScaleHeight;
+      let bottom = annotation.vector.y2 / globals.imageScaleHeight;
 
       // check if we clicked inside that annotation
-      if (globals.mouseClickX >= left && globals.mouseClickX <= right && globals.mouseClickY >= top && globals.mouseClickY <= bottom) {
+      if (x >= left && x <= right && y >= top && y <= bottom) {
         matchingAnnotations.push(annotation);
       }
     }
@@ -404,7 +373,7 @@ class BoundingBoxes {
       return;
     }
 
-    annotation = matchingAnnotations[0];
+    let annotation = matchingAnnotations[0];
 
     // a single match
     if (matchingAnnotations.length === 1) {
@@ -419,8 +388,8 @@ class BoundingBoxes {
       // 1. prefer annotation lying inside another one completely
       // 2. prefer annotation, which left border is to the left of another ones
       // 3. prefer annotation, which top border is above another ones
-      for (var a1 in matchingAnnotations) {
-        var annotation1 = matchingAnnotations[a1];
+      for (let a1 in matchingAnnotations) {
+        let annotation1 = matchingAnnotations[a1];
 
         if (annotation.id === annotation1.id)
           continue;

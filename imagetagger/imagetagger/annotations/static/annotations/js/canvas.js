@@ -180,16 +180,10 @@ class Drawing {
   }
 }
 
-class Point {
+class Point extends Drawing {
   constructor(parent, point, id, mutable, color) {
-    /* Set fields */
-    this.pointCounter = 1;      // The number of points that are currently set
-    this.id = id;
-    this.name = "drawing" + id;
-    this.parent = parent;
-    this.mutable = mutable;
-    this.color = color || globals.stdColor;
-
+    super(parent, point, id, mutable, color);
+    this.parent.removeLayer(this.name);
     /* Define layer */
     let l = {
       name: this.name,
@@ -202,23 +196,6 @@ class Point {
     this.parent.inline = false;
     this.parent.locked = false;
     this.parent.updateAnnotationFields(point);
-  }
-  /** Set the cursor to 'drag' or 'crosshair' in mouseover
-   *
-   * @param bool whether the dursor is in 'drag' style
-   */
-  setDragCursor(bool) {}
-  setMutable(mutable) {}
-  getPointTuples() {
-    let l = this.parent.getLayer(this.name);
-    return [[l.x, l.y]];
-  }
-  getPoints() {
-    let l = this.parent.getLayer(this.name);
-    return {x1: l.x, y1: l.y};
-  }
-  remove() {
-    this.parent.removeLayer(this.name);
   }
 }
 
@@ -332,11 +309,11 @@ class Canvas {
     }
   }
 
-  mouseTooClose() {
+  mouseTooClose(x, y) {
     for (let drawing of this.drawings) {
       let points = drawing.getPointTuples();
       for (let point of points) {
-        if (Math.abs(point[0] * globals.imageScaleWidth - globals.mouseDownX) < threshold && Math.abs(point[1] * globals.imageScaleHeight - globals.mouseDownY) < threshold) {
+        if (Math.abs(point[0] * globals.imageScaleWidth - x) < threshold && Math.abs(point[1] * globals.imageScaleHeight - y) < threshold) {
           return true;
         }
       }
@@ -371,6 +348,11 @@ class Canvas {
     for (let d of this.drawings) {
       d.remove();
     }
+    this.unsetAnnotationFields();
+    this.currentDrawing = undefined;
+  }
+
+  unsetAnnotationFields() {
     switch (this.vector_type) {
       case 2: // Point
         this.updateAnnotationFields({x1: 0, y1: 0});
@@ -425,7 +407,8 @@ class Canvas {
   }
 
   drawExistingAnnotations(annotations, color) {
-    this.clear();
+    let currentDrawing = this.currentDrawing;
+    this.currentDrawing = undefined;
     color = color || globals.stdColor;
     let colors = [];
     if (color.constructor === Array) {
@@ -445,8 +428,6 @@ class Canvas {
     for (let i in annotations) {
       let annotation = annotations[i];
       let color = colors[i];
-      console.log(annotation);
-      console.log(color);
       if (annotation.annotation_type.id !== this.annotationTypeId) {
         continue;
       }
@@ -485,7 +466,14 @@ class Canvas {
           console.log("Unknown vector type: " + annotation.annotation_type.vector_type);
       }
     }
-    this.currentDrawing = undefined;
+    // completely restore the drawing from before drawing the existing annotations,
+    // especially the annotation fields are overwritten during the drawing
+    this.currentDrawing = currentDrawing;
+    if (currentDrawing) {
+      this.reloadSelection(currentDrawing.id);
+    } else {
+      this.unsetAnnotationFields();
+    }
   }
 
   updateAnnotationFields(drawing) {
@@ -532,93 +520,69 @@ class Canvas {
     }
   }
 
-  handleEscape() {
+  closeDrawing() {
     if (this.currentDrawing && this.annotationTypeId === 4 && !this.currentDrawing.closed) {
       this.currentDrawing.close();
-    } else {
-      this.resetSelection(true);
     }
   }
 
-  resetSelection(abortEdit) {
+  resetSelection() {
     $('.annotation_value').val(0);
     // Make every drawing immutable
     for (let drawing of this.drawings) {
       drawing.setMutable(false);
     }
-    globals.editedAnnotationsId = undefined;
-    $('.annotation').removeClass('alert-info');
-    globals.editActiveContainer.addClass('hidden');
-    if (abortEdit === true) {
-      if (this.old && this.currentDrawing) {
-        this.currentDrawing.setPoints(this.old);
-        this.old = undefined;
-      } else if (this.currentDrawing) {
-        this.currentDrawing.remove();
-      }
-      this.currentDrawing = undefined;
+    if (this.old && this.currentDrawing) {
+      this.currentDrawing.setPoints(this.old);
+      this.old = undefined;
+    } else if (this.currentDrawing) {
+      this.currentDrawing.remove();
     }
+    this.currentDrawing = undefined;
   }
 
   cancelSelection() {
     this.resetSelection(true)
   }
 
-  initSelection() {
-    this.initialized = true;
-  }
-
   /**
    * Restore the selection.
+   * @param selection the selection to restore, object containing vector, vector_type and node_count
    */
-  restoreSelection(reset) {
-    if (!$('#keep_selection').prop('checked')) {
-      return;
-    }
-    if (globals.restoreSelection !== undefined) {
-      if (globals.restoreSelection === null) {
-        $('#not_in_image').prop('checked', true);
-        $('#coordinate_table').hide();
-        let concealed = $('#concealed');
-        let concealedP = $('#concealed_p');
-        let blurred = $('#blurred');
-        let blurredP = $('#blurred_p');
-        concealedP.hide();
-        concealed.prop('checked', false);
-        concealed.prop('disabled', true);
-        blurredP.hide();
-        blurred.prop('checked', false);
-        blurred.prop('disabled', true);
-      } else if (globals.restoreSelectionVectorType === 4) {
-        // this is not implemented for multilines, so just do nothing
-        this.old = undefined;
-      } else {
-        let vector = {};
-        for (let key in globals.restoreSelection) {
-          if (key[0] === "y") {
-            vector[key] = globals.restoreSelection[key] / globals.imageScaleHeight;
-          } else {
-            vector[key] = globals.restoreSelection[key] / globals.imageScaleWidth;
-          }
+  restoreSelection(selection) {
+    let vector = selection.vector;
+    let vectorType = selection.vector_type;
+    let nodeCount = selection.node_count;
+    if (vector === null) {
+    } else if (vectorType === 4) {
+      // this is not implemented for multilines, so just do nothing
+      this.old = undefined;
+    } else {
+      let scaledVector = {};
+      for (let key in vector) {
+        if (key[0] === "y") {
+          scaledVector[key] = vector[key] / globals.imageScaleHeight;
+        } else {
+          scaledVector[key] = vector[key] / globals.imageScaleWidth;
         }
-        this.updateAnnotationFields(globals.restoreSelection);
-        switch(globals.restoreSelectionVectorType) {
-          case 2: this.drawPoint(vector, 0, true); break;
-          case 3: this.drawLine(vector, 0, true); break;
-          case 5: if (globals.restoreSelectionNodeCount === 0) {
-            this.drawArbitraryPolygon(vector, 0, true, true);
-          } else {
-            this.drawPolygon(vector, 0, true, globals.restoreSelectionNodeCount, true);
-          }
-        }
-        this.reloadSelection(0);
-        this.old = undefined;
       }
-    }
-    if (reset !== false) {
-      globals.restoreSelection = undefined;
-      globals.restoreSelectionNodeCount = 0;
-      globals.restoreSelectionVectorType = 1;
+      this.updateAnnotationFields(vector);
+      switch (vectorType) {
+        case 2:
+          this.drawPoint(scaledVector, 0, true);
+          break;
+        case 3:
+          this.drawLine(scaledVector, 0, true);
+          break;
+        case 5:
+          if (nodeCount === 0) {
+            this.drawArbitraryPolygon(scaledVector, 0, true, true);
+          } else {
+            this.drawPolygon(scaledVector, 0, true, nodeCount, true);
+          }
+      }
+      this.reloadSelection(0);
+      this.old = undefined;
     }
   }
 
@@ -660,7 +624,7 @@ class Canvas {
   increaseSelectionSizeRight() {}
   increaseSelectionSizeUp() {}
 
-  handleMouseClick(event) {
+  handleMouseClick(event, x, y) {
     let position = globals.image.offset();
     if (!(event.pageX > position.left && event.pageX < position.left + globals.image.width() &&
       event.pageY > position.top && event.pageY < position.top + globals.image.height()) &&
@@ -669,20 +633,20 @@ class Canvas {
     }
   }
 
-  handleMouseDown() {
+  handleMouseDown(event, x, y) {
     // Check if we are close enough to move the point, not draw a new drawing
     // we use the variable locked which is checked when we can create a new line
-    if (this.mouseTooClose()) {
+    if (this.mouseTooClose(x, y)) {
       this.locked = true;
     }
   }
 
-  handleMouseUp() {
+  handleMouseUp(event, x, y) {
     if (this.inline && this.currentDrawing) {
       // We are currently drawing a drawing
       // and we clicked inside of the canvas:
       // add a point
-      this.currentDrawing.addPoint(globals.mouseUpX, globals.mouseUpY);
+      this.currentDrawing.addPoint(x, y);
     } else if (this.locked) {
       // we do not create a drawing because we are
       // only moving an existing one
@@ -696,19 +660,19 @@ class Canvas {
       this.inline = true;
       switch (this.vector_type) {
         case 2: // Point
-          this.drawPoint({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          this.drawPoint({x1: x, y1: y}, 0, true);
           break;
         case 3: // Line
-          this.drawLine({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          this.drawLine({x1: x, y1: y}, 0, true);
           break;
         case 4: // Multiline
-          this.drawMultiline({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true);
+          this.drawMultiline({x1: x, y1: y}, 0, true);
           break;
         case 5: // Polygon
           if (this.node_count === 0) {
-            this.drawArbitraryPolygon({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true, false);
+            this.drawArbitraryPolygon({x1: x, y1: y}, 0, true, false);
           } else {
-            this.drawPolygon({x1: globals.mouseUpX, y1: globals.mouseUpY}, 0, true, this.node_count, false);
+            this.drawPolygon({x1: x, y1: y}, 0, true, this.node_count, false);
           }
           break;
         default:
