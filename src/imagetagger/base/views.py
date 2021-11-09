@@ -8,7 +8,7 @@ def index(request):
 
 
 def problem_report(request):
-    if settings.PROBLEMS_TEXT is not '':
+    if settings.PROBLEMS_TEXT != '':
         return render(request, 'base/problem.html', {
             'text': settings.PROBLEMS_TEXT
         })

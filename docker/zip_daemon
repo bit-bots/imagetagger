@@ -1,4 +1,4 @@
 #!/bin/bash
 
-/app/src/imagetagger/manage.py runzipdaemon
+/app/src/manage.py runzipdaemon
 
