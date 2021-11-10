@@ -72,7 +72,7 @@ spec:
                         credentialsId: "github-credentials",
                         description: "Upload the container image",
                         failureDescription: "Could not upload the container image",
-                        successDescription: "Container image was uploaded",
+                        successDescription: "Container upload was successful or skipped",
                         gitHubContext: "upload-container-image"
                     ) {
                         milestone(ordinal: 100)
