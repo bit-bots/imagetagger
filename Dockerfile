@@ -4,7 +4,7 @@ FROM docker.io/debian:bullseye-slim
 RUN apt-get update && \
 	apt-get install --no-install-recommends -y g++ wget uwsgi-plugin-python3 python3 python3-pip node-uglify make git \
         python3-ldap3 python3-six python3-pkg-resources gettext gcc python3-dev python3-setuptools libldap2-dev \
-	    libsasl2-dev nginx pipenv
+	    libsasl2-dev nginx pipenv python3-certifi
 
 # add requirements file
 WORKDIR /app/src
