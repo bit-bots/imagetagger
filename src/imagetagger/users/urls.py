@@ -1,20 +1,20 @@
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
 
 app_name = 'users'
 urlpatterns = [
-    url(r'^api/user/autocomplete/$', views.user_autocomplete, name='user_autocomplete'),
-    url(r'^team/(\d+)/$', views.view_team, name='team'),
-    url(r'^team/create/$', views.create_team, name='create_team'),
-    url(r'^team/explore/$', views.explore_team, name='explore_team'),
-    url(r'^team/(\d+)/add/$', views.add_team_member, name='add_team_member'),
-    url(r'^team/(\d+)/leave/$', views.leave_team, name='leave_team'),
-    url(r'^team/(\d+)/leave/(\d+)/$', views.leave_team, name='leave_team'),
-    url(r'^team/(\d+)/grant_admin/(\d+)/$', views.grant_team_admin, name='grant_team_admin'),
-    url(r'^team/(\d+)/revoke_admin/(\d+)/$', views.revoke_team_admin, name='revoke_team_admin'),
-    url(r'^user/(\d+)/$', views.user, name='user'),
-    url(r'^user/(\d+)/delete/$', views.delete_account, name='delete_account'),
-    url(r'^user/explore/$', views.explore_user, name='explore_user'),
+    path('api/user/autocomplete/', views.user_autocomplete, name='user_autocomplete'),
+    path('team/<int:team_id>/', views.view_team, name='team'),
+    path('team/create/', views.create_team, name='create_team'),
+    path('team/explore/', views.explore_team, name='explore_team'),
+    path('team/<int:team_id>/add/', views.add_team_member, name='add_team_member'),
+    path('team/<int:team_id>/leave/', views.leave_team, name='leave_team'),
+    path('team/<int:team_id>/leave/<int:user_id>/', views.leave_team, name='leave_team'),
+    path('team/<int:team_id>/grant_admin/<int:user_id>/', views.grant_team_admin, name='grant_team_admin'),
+    path('team/<int:team_id>/revoke_admin/<int:user_id>/', views.revoke_team_admin, name='revoke_team_admin'),
+    path('user/<int:user_id>/', views.user, name='user'),
+    path('user/<int:user_id>/delete/', views.delete_account, name='delete_account'),
+    path('user/explore/', views.explore_user, name='explore_user'),
 ]

@@ -23,7 +23,10 @@ class Command(BaseCommand):
         if gotten:
             while True:
                 for imageset in ImageSet.objects.filter(~Q(zip_state=ImageSet.ZipState.READY)):
-                    self._regenerate_zip(imageset)
+                    try:
+                        self._regenerate_zip(imageset)
+                    except Exception as e:
+                        self.stderr.write('Error while regenerating zip for imageset {} ({}): {}'.format(imageset.id, imageset.name, e))
                 sleep(10)
         else:
             raise CommandError('The lockfile is present. There seems to be another instance of the zip daemon running.\n'

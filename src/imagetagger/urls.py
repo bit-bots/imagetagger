@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import path, include
 from django.contrib import admin
 from django.shortcuts import render
 from django_registration.backends.activation.views import RegistrationView
@@ -21,17 +21,17 @@ from django_registration.backends.activation.views import RegistrationView
 from .users.forms import UserRegistrationForm
 
 urlpatterns = [
-    url(r'^user/', include('django.contrib.auth.urls')),
-    url(r'^accounts/register/$', RegistrationView.as_view(form_class=UserRegistrationForm), name='django_registration_register'),
-    url(r'^accounts/', include('django_registration.backends.activation.urls')),
-    url(r'^', include('imagetagger.base.urls')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^administration/', include('imagetagger.administration.urls')),
-    url(r'^annotations/', include('imagetagger.annotations.urls')),
-    url(r'^images/', include('imagetagger.images.urls')),
-    url(r'^users/', include('imagetagger.users.urls')),
-    url(r'^tagger_messages/', include('imagetagger.tagger_messages.urls')),
-    url(r'^tools/', include('imagetagger.tools.urls')),
+    path('user/', include('django.contrib.auth.urls')),
+    path('accounts/register/', RegistrationView.as_view(form_class=UserRegistrationForm), name='django_registration_register'),
+    path('accounts/', include('django_registration.backends.activation.urls')),
+    path('', include('imagetagger.base.urls')),
+    path('admin/', admin.site.urls),
+    path('administration/', include('imagetagger.administration.urls')),
+    path('annotations/', include('imagetagger.annotations.urls')),
+    path('images/', include('imagetagger.images.urls')),
+    path('users/', include('imagetagger.users.urls')),
+    path('tagger_messages/', include('imagetagger.tagger_messages.urls')),
+    path('tools/', include('imagetagger.tools.urls')),
 ]
 
 

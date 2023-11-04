@@ -11,7 +11,7 @@ from django.http import HttpResponseForbidden, HttpResponse, HttpResponseBadRequ
     FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from json import JSONDecodeError
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
