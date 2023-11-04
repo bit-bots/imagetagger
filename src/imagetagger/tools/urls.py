@@ -1,12 +1,12 @@
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
 app_name = 'tools'
 urlpatterns = [
-    url(r'^$', views.overview, name='overview'),
-    url(r'^create/$', views.create_tool, name='create'),
-    url(r'^delete/(\d+)/$', views.delete_tool, name='delete'),
-    url(r'^edit/(\d+)/$', views.edit_tool, name='edit'),
-    url(r'^download/(\d+)/$', views.download_tool, name='download'),
+    path('', views.overview, name='overview'),
+    path('create/', views.create_tool, name='create'),
+    path('delete/<int:tool_id>/', views.delete_tool, name='delete'),
+    path('edit/<int:tool_id>/', views.edit_tool, name='edit'),
+    path('download/<int:tool_id>/', views.download_tool, name='download'),
 ]
